@@ -1,0 +1,87 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true # needs fcitx5/.clang-format
+
+      - name: Install dependencies
+        run: brew install clang-format swift-format
+
+      - name: Lint
+        run: |
+          find macosfrontend src -name '*.cpp' -o -name '*.h' | xargs clang-format -Werror --dry-run -style=file:fcitx5/.clang-format
+          swift-format lint -rs src
+          swiftlint --strict src
+
+  build:
+    needs: lint
+    runs-on: macos-13
+    strategy:
+      matrix:
+        arch: [x86_64]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: SwiftyLab/setup-swift@latest
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          brew install \
+            fmt \
+            extra-cmake-modules \
+            ninja
+          pip install "dmgbuild[badge_icons]"
+
+      - name: Build
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_Swift_COMPILER=`which swiftc` \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+          sudo cmake --install build
+          dmgbuild -s dmg/config.py Fcitx5 Fcitx5-${{ matrix.arch }}.dmg
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            Fcitx5-${{ matrix.arch }}.dmg
+
+  release:
+    needs: build
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Create Nightly release
+        if: ${{ github.ref == 'refs/heads/master' }}
+        uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: latest
+          prerelease: true
+          title: "Nightly Build"
+          files: |
+            Fcitx5-x86_64.dmg

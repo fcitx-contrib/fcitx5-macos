@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleIdentifier</key>
+  <string>org.fcitx.inputmethod.Fcitx5</string>
+  <key>CFBundleIconFile</key>
+  <string>fcitx.icns</string>
+  <key>NSPrincipalClass</key>
+  <string>Fcitx5.NSManualApplication</string>
+  <key>InputMethodConnectionName</key>
+  <string>org.fcitx.inputmethod.Fcitx5_Connection</string>
+  <key>InputMethodServerControllerClass</key>
+  <string>Fcitx5.FcitxInputController</string>
+  <key>LSBackgroundOnly</key>
+  <true/>
+  <key>tsInputMethodCharacterRepertoireKey</key>
+  <array>
+    <string>Latn</string>
+  </array>
+  <key>tsInputMethodIconFileKey</key>
+  <string>fcitx.icns</string>
+  <key>ComponentInputModeDict</key>
+  <dict>
+    <key>tsInputModeListKey</key>
+    <dict>
+      <key>org.fcitx.inputmethod.fcitx5</key>
+      <dict>
+      </dict>
+    </dict>
+  </dict>
+</dict>
+</plist>

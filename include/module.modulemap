@@ -1,0 +1,3 @@
+module Fcitx {
+  header "fcitx.h"
+}

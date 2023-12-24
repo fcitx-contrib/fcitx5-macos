@@ -1,0 +1,7 @@
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/fcitx.icns"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
+)
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/en.lproj"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
+)
