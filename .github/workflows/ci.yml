@@ -75,7 +75,7 @@ jobs:
         run: |
           PKG_CONFIG_PATH=${{ matrix.homebrew_prefix }}/lib/pkgconfig cmake -B build -G Ninja \
             -DCMAKE_Swift_COMPILER=`which swiftc` \
-            -DCMAKE_FIND_ROOT_PATH=${{ matrix.homebrew_prefix }}
+            -DCMAKE_FIND_ROOT_PATH=${{ matrix.homebrew_prefix }} \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_BUILD_TYPE=Release
           cmake --build build || ./fix-cross-build.sh
