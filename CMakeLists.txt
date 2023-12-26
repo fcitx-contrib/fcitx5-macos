@@ -9,6 +9,10 @@ include(AddSwift)
 
 set(CMAKE_CXX_STANDARD 17)
 
+if(CMAKE_OSX_ARCHITECTURES STREQUAL arm64)
+    add_definitions(-target "arm64-apple-macos11")
+endif()
+
 option(ENABLE_TEST "" OFF)
 option(ENABLE_COVERAGE "" OFF)
 option(ENABLE_ENCHANT "" OFF)

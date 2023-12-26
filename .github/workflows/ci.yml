@@ -28,7 +28,10 @@ jobs:
     runs-on: macos-13
     strategy:
       matrix:
-        arch: [x86_64]
+        arch: [x86_64, arm64]
+        include:
+          - { arch: x86_64, homebrew_prefix: /usr/local }
+          - { arch: arm64, homebrew_prefix: /opt/homebrew }
 
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +44,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies
+      - name: Install dependencies (x86)
+        if: ${{ matrix.arch == 'x86_64' }}
         run: |
           brew install \
             fmt \
@@ -49,19 +53,39 @@ jobs:
             ninja
           pip install "dmgbuild[badge_icons]"
 
+      - name: Setup arm homebrew
+        if: ${{ matrix.arch == 'arm64' }}
+        uses: fcitx-contrib/macos-cross@master
+
+      - name: Install dependencies (arm)
+        if: ${{ matrix.arch == 'arm64' }}
+        run: |
+          brew install \
+            extra-cmake-modules \
+            ninja
+          pip install "dmgbuild[badge_icons]"
+          arm-brew-install \
+            fmt \
+            gettext \
+            openssl@3 \
+            libevent
+          cp -f /usr/local/bin/msgfmt /opt/homebrew/bin
+
       - name: Build
         run: |
-          cmake -B build -G Ninja \
+          PKG_CONFIG_PATH=${{ matrix.homebrew_prefix }}/lib/pkgconfig cmake -B build -G Ninja \
             -DCMAKE_Swift_COMPILER=`which swiftc` \
+            -DCMAKE_FIND_ROOT_PATH=${{ matrix.homebrew_prefix }} \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_BUILD_TYPE=Release
-          cmake --build build
+          cmake --build build || ./fix-cross-build.sh
           sudo cmake --install build
           dmgbuild -s dmg/config.py Fcitx5 Fcitx5-${{ matrix.arch }}.dmg
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
+          name: Fcitx5-${{ matrix.arch }}.dmg
           path: |
             Fcitx5-${{ matrix.arch }}.dmg
 
@@ -76,7 +100,6 @@ jobs:
           merge-multiple: true
 
       - name: Create Nightly release
-        if: ${{ github.ref == 'refs/heads/master' }}
         uses: 'marvinpinto/action-automatic-releases@latest'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -85,3 +108,4 @@ jobs:
           title: "Nightly Build"
           files: |
             Fcitx5-x86_64.dmg
+            Fcitx5-arm64.dmg
