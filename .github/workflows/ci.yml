@@ -85,6 +85,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
+          name: Fcitx5-${{ matrix.arch }}.dmg
           path: |
             Fcitx5-${{ matrix.arch }}.dmg
 
