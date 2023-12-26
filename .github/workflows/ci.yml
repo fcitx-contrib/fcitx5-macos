@@ -55,7 +55,7 @@ jobs:
 
       - name: Setup arm homebrew
         if: ${{ matrix.arch == 'arm64' }}
-        uses: fcitx-contrib/mac-cross@master
+        uses: fcitx-contrib/macos-cross@master
 
       - name: Install dependencies (arm)
         if: ${{ matrix.arch == 'arm64' }}
