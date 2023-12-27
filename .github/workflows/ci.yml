@@ -52,6 +52,7 @@ jobs:
             fmt \
             extra-cmake-modules \
             libxkbcommon \
+            iso-codes \
             ninja
           pip install "dmgbuild[badge_icons]"
 
@@ -70,6 +71,7 @@ jobs:
             fmt \
             gettext \
             libxkbcommon \
+            iso-codes \
             openssl@3 \
             libevent
           cp -f /usr/local/bin/msgfmt /opt/homebrew/bin

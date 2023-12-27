@@ -10,7 +10,7 @@ Cross build from Intel to Apple Silicon is performed in [CI](.github/workflows/c
 
 ### Install dependencies
 ```sh
-brew install cmake ninja extra-cmake-modules gettext fmt libevent
+brew install cmake ninja extra-cmake-modules gettext fmt libevent libxkbcommon iso-codes
 ```
 
 ### Build with CMake
