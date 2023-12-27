@@ -27,6 +27,7 @@ jobs:
     needs: lint
     runs-on: macos-13
     strategy:
+      fail-fast: false # hdiutil: create failed - Resource busy
       matrix:
         arch: [x86_64, arm64]
         include:

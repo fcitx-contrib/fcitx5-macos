@@ -1,17 +1,4 @@
 _swift_generate_cxx_header_target(
-    nativelog_swift_h
-    SwiftNativeLog
-    "${CMAKE_CURRENT_BINARY_DIR}/include/nativelog-swift.h"
-    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/nativelog.swift"
-)
-
-add_library(SwiftNativeLog STATIC nativelog.swift)
-add_dependencies(SwiftNativeLog nativelog_swift_h)
-set_target_properties(SwiftNativeLog PROPERTIES Swift_MODULE_NAME SwiftNativeLog)
-target_compile_options(SwiftNativeLog PUBLIC
-  "$<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default>")
-
-_swift_generate_cxx_header_target(
     fcitx_swift_h
     SwiftFcitx
     "${CMAKE_CURRENT_BINARY_DIR}/include/fcitx-swift.h"
@@ -37,7 +24,6 @@ target_include_directories(Fcitx5 PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
 
 target_link_libraries(Fcitx5
     "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
-    SwiftNativeLog
     SwiftFcitx
     Fcitx5::Core
     macosfrontend
