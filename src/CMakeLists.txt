@@ -21,11 +21,17 @@ add_executable(Fcitx5
 add_dependencies(Fcitx5 macosfrontend)
 
 target_include_directories(Fcitx5 PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
+target_include_directories(Fcitx5 PRIVATE
+    "${PROJECT_SOURCE_DIR}/fcitx5/src/im/keyboard"
+    "${PROJECT_SOURCE_DIR}/fcitx5/src/modules/quickphrase/"
+    "${CMAKE_CURRENT_BINARY_DIR}/../fcitx5"
+)
 
 target_link_libraries(Fcitx5
     "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
     SwiftFcitx
     Fcitx5::Core
+    keyboard
     macosfrontend
 )
 
