@@ -2,8 +2,8 @@
 #include <fcitx-utils/eventdispatcher.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
-#include "keyboard.h"
 #include "../macosfrontend/macosfrontend.h"
+#include "keyboard.h"
 #include "nativestreambuf.h"
 
 #define APP_CONTENTS_PATH "/Library/Input Methods/Fcitx5.app/Contents"
@@ -16,7 +16,8 @@ fcitx::ICUUID ic_uuid;
 fcitx::KeyboardEngineFactory keyboardFactory;
 fcitx::MacosFrontendFactory macosFrontendFactory;
 fcitx::StaticAddonRegistry staticAddon = {
-    std::make_pair<std::string, fcitx::AddonFactory *>("keyboard", &keyboardFactory),
+    std::make_pair<std::string, fcitx::AddonFactory *>("keyboard",
+                                                       &keyboardFactory),
     std::make_pair<std::string, fcitx::AddonFactory *>("macosfrontend",
                                                        &macosFrontendFactory)};
 
