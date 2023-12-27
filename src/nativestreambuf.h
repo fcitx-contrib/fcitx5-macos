@@ -10,17 +10,19 @@
 
 #include <array>
 #include <streambuf>
+#include <os/log.h>
 
-#include "nativelog-swift.h"
-
-template <std::size_t SIZE = 128>
+// Dynamic content is limited to 256B, see log.h
+template <std::size_t SIZE = 256>
 class native_streambuf : public std::streambuf {
 public:
     using Base = std::streambuf;
     using char_type = typename Base::char_type;
     using int_type = typename Base::int_type;
 
-    native_streambuf() : _buffer{} {
+    native_streambuf()
+        : _buffer{},
+          logger(os_log_create("org.fcitx.inputmethod.Fcitx5", "FcitxLog")) {
         Base::setp(_buffer.begin(), _buffer.end() - 1);
     }
 
@@ -73,6 +75,8 @@ public:
 
 private:
     std::array<char_type, SIZE> _buffer;
+    os_log_t logger;
+    os_log_type_t prio;
     /**
      * whether the first character in buffer represents log level or not
      */
@@ -81,14 +85,17 @@ private:
     void update_log_priority(const char_type first) {
         switch (first) {
         case 'D':
+            prio = OS_LOG_TYPE_DEBUG;
             break;
         case 'I':
+            prio = OS_LOG_TYPE_INFO;
             break;
         case 'W':
+            prio = OS_LOG_TYPE_ERROR;
             break;
         case 'E':
-            break;
         case 'F':
+            prio = OS_LOG_TYPE_FAULT;
             break;
         default:
             break;
@@ -96,7 +103,8 @@ private:
     }
 
     void write_log(const char_type *text) const {
-        SwiftNativeLog::log(text + (should_offset ? 1 : 0));
+        os_log_with_type(logger, prio, "%{public}s",
+                         text + (should_offset ? 1 : 0));
     }
 };
 
