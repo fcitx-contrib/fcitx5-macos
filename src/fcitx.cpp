@@ -2,6 +2,7 @@
 #include <fcitx-utils/eventdispatcher.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
+#include "keyboard.h"
 #include "../macosfrontend/macosfrontend.h"
 #include "nativestreambuf.h"
 
@@ -12,8 +13,10 @@ std::unique_ptr<fcitx::EventDispatcher> p_dispatcher;
 fcitx::MacosFrontend *p_frontend = nullptr;
 fcitx::ICUUID ic_uuid;
 
+fcitx::KeyboardEngineFactory keyboardFactory;
 fcitx::MacosFrontendFactory macosFrontendFactory;
 fcitx::StaticAddonRegistry staticAddon = {
+    std::make_pair<std::string, fcitx::AddonFactory *>("keyboard", &keyboardFactory),
     std::make_pair<std::string, fcitx::AddonFactory *>("macosfrontend",
                                                        &macosFrontendFactory)};
 
