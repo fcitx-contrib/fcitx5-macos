@@ -1,11 +1,16 @@
 import InputMethodKit
 
 var globalClient: Any?
+var serverInstance: IMKServer?
 var candidateList: [String] = []
 var imkc = IMKCandidates()
 
 public func setClient(_ client: Any) {
   globalClient = client
+}
+
+public func setServer(_ server: IMKServer) {
+  serverInstance = server
 }
 
 public func setImkc(_ candidates: Any) {
@@ -17,6 +22,8 @@ public func commit(_ string: String) {
     return
   }
   client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+  serverInstance!.commitComposition(client)
+  NSLog("commit: \(string) count=\(string.count)")
 }
 
 public func clearCandidateList() {

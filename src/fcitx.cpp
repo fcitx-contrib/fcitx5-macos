@@ -5,6 +5,7 @@
 #include "../macosfrontend/macosfrontend.h"
 #include "keyboard.h"
 #include "nativestreambuf.h"
+#include "keycode.h"
 
 #define APP_CONTENTS_PATH "/Library/Input Methods/Fcitx5.app/Contents"
 
@@ -58,7 +59,11 @@ void start_fcitx() {
     ic_uuid = p_frontend->createInputContext();
 }
 
-bool process_key(std::string key) {
-    const fcitx::Key parsedKey{fcitx::Key::keySymFromString(key)};
+bool process_key(uint16_t osxKeycode, uint32_t osxKeychar, uint64_t osxModifiers) {
+    const fcitx::Key parsedKey {
+        osx_keycode_to_fcitx_keysym(osxKeycode, osxKeychar),
+        osx_modifiers_to_fcitx_keystates(osxModifiers)
+    };
+    FCITX_DEBUG() << "Keydown: parsed key " << parsedKey.toString();
     return p_frontend->keyEvent(ic_uuid, parsedKey);
 }
