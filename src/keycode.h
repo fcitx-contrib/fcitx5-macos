@@ -1,10 +1,11 @@
 #ifndef FCITX5_MACOS_KEYCODE_H
 #define FCITX5_MACOS_KEYCODE_H
 
-#include <fcitx-utils/key.h>
 #include <cstdint>
+#include <fcitx-utils/key.h>
 
 // masks
+// clang-format off
 
 #define OSX_CAPITAL_MASK      1 << 16
 #define OSX_SHIFT_MASK        1 << 17
@@ -242,8 +243,10 @@
 #define OSX_MODIFIER_NUMERICPAD (1 << 21)
 #define OSX_MODIFIER_HELP       (1 << 22)
 #define OSX_MODIFIER_FUNCTION   (1 << 23)
+// clang-format on
 
-fcitx::KeySym osx_keycode_to_fcitx_keysym(uint16_t osxKeycode, uint32_t osxKeychar);
+fcitx::KeySym osx_keycode_to_fcitx_keysym(uint16_t osxKeycode,
+                                          uint32_t osxKeychar);
 fcitx::KeyStates osx_modifiers_to_fcitx_keystates(unsigned int osxModifiers);
 
-#endif  /* FCITX5_MACOS_KEYCODE_H */
+#endif /* FCITX5_MACOS_KEYCODE_H */
