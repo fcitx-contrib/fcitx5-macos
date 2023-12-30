@@ -17,10 +17,14 @@ class FcitxInputController: IMKInputController {
     setClient(client)
     switch event.type {
     case .keyDown:
+      var unicode: UInt32 = 0
+      if let characters = event.characters {
+        let usv = characters.unicodeScalars
+        unicode = usv[usv.startIndex].value
+      }
       let code = event.keyCode
-      let char = event.charactersIgnoringModifiers!.unicodeScalars.first ?? UnicodeScalar(0)
-      let modifiers = event.modifierFlags
-      let handled = process_key(code, char!.value, UInt64(modifiers.rawValue))
+      let modifiers = UInt32(event.modifierFlags.rawValue)
+      let handled = process_key(unicode, modifiers, code)
       return handled
     default:
       NSLog("Unhandled event: \(String(describing: event.type))")
@@ -31,21 +35,4 @@ class FcitxInputController: IMKInputController {
   override func candidates(_ sender: Any!) -> [Any]! {
     return getCandidateList()
   }
-
-  override func activateServer(_ sender: Any!) {}
-
-  override func deactivateServer(_ sender: Any!) {}
-}
-
-func modifierFlagsToString(modifiers: NSEvent.ModifierFlags) -> String {
-  var ret = ""
-  if modifiers.contains(.capsLock) { ret += "c" }
-  if modifiers.contains(.shift) { ret += "S" }
-  if modifiers.contains(.control) { ret += "C" }
-  if modifiers.contains(.option) { ret += "O" }
-  if modifiers.contains(.command) { ret += "M" }
-  if modifiers.contains(.numericPad) { ret += "n" }
-  if modifiers.contains(.help) { ret += "h" }
-  if modifiers.contains(.function) { ret += "f" }
-  return ret
 }

@@ -59,11 +59,11 @@ void start_fcitx() {
     ic_uuid = p_frontend->createInputContext();
 }
 
-bool process_key(uint16_t osxKeycode, uint32_t osxKeychar,
-                 uint64_t osxModifiers) {
+bool process_key(uint32_t unicode, uint32_t osxModifiers, uint16_t osxKeycode) {
     const fcitx::Key parsedKey{
-        osx_keycode_to_fcitx_keysym(osxKeycode, osxKeychar),
-        osx_modifiers_to_fcitx_keystates(osxModifiers)};
-    FCITX_DEBUG() << "Keydown: parsed key " << parsedKey.toString();
+        fcitx::Key::keySymFromUnicode(unicode),
+        osx_modifiers_to_fcitx_keystates(osxModifiers),
+        osx_keycode_to_fcitx_keycode(osxKeycode),
+    };
     return p_frontend->keyEvent(ic_uuid, parsedKey);
 }

@@ -1,3 +1,11 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-only
+ * SPDX-FileCopyrightText: Copyright 2012-2021 Rime Contributors
+
+ * SPDX-License-Identifier: GPL-3.0-only
+ * SPDX-FileCopyrightText: Copyright 2023 Fcitx5 for macOS Contributors
+ */
+
 #ifndef FCITX5_MACOS_KEYCODE_H
 #define FCITX5_MACOS_KEYCODE_H
 
@@ -245,8 +253,7 @@
 #define OSX_MODIFIER_FUNCTION   (1 << 23)
 // clang-format on
 
-fcitx::KeySym osx_keycode_to_fcitx_keysym(uint16_t osxKeycode,
-                                          uint32_t osxKeychar);
-fcitx::KeyStates osx_modifiers_to_fcitx_keystates(unsigned int osxModifiers);
+uint16_t osx_keycode_to_fcitx_keycode(uint16_t osxKeycode);
+fcitx::KeyStates osx_modifiers_to_fcitx_keystates(uint32_t osxModifiers);
 
 #endif /* FCITX5_MACOS_KEYCODE_H */

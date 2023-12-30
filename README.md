@@ -22,4 +22,5 @@ sudo cmake --install build
 
 ## Credits
 * [fcitx5-android](https://github.com/fcitx5-android/fcitx5-android): LGPL-2.1-or-later
+* [squirrel](https://github.com/rime/squirrel): GPL-3.0-only
 * [swift-cmake-examples](https://github.com/apple/swift-cmake-examples): Apache-2.0

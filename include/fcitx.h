@@ -5,6 +5,7 @@
 #include "fcitx-swift.h"
 
 void start_fcitx();
-bool process_key(uint16_t osxKeycode, uint32_t osxKeychar, uint64_t osxModifiers);
+// Though being UInt, 32b is enough for modifiers
+bool process_key(uint32_t unicode, uint32_t osxModifiers, uint16_t osxKeycode);
 
 #endif
