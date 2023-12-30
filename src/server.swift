@@ -31,7 +31,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // But setting 10 virtual keyCodes doesn't work, so just disable it.
     candidates.setSelectionKeys([])
     setImkc(candidates)
-    setServer(AppDelegate.server)
     start_fcitx()
   }
 

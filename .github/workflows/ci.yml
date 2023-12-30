@@ -51,7 +51,6 @@ jobs:
           brew install \
             fmt \
             extra-cmake-modules \
-            libuv \
             libxkbcommon \
             iso-codes \
             json-c \
