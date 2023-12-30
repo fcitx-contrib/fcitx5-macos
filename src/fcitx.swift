@@ -39,6 +39,10 @@ public func getCandidateList() -> [String] {
 }
 
 public func showCandidatePanel() {
-  imkc.update()
-  imkc.show()
+  if candidateList.isEmpty {
+    imkc.hide()
+  } else {
+    imkc.update()
+    imkc.show()
+  }
 }
