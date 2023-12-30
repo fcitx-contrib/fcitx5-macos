@@ -16,6 +16,7 @@ add_executable(Fcitx5
     server.swift
     controller.swift
     fcitx.cpp
+    keycode.cpp
 )
 
 add_dependencies(Fcitx5 macosfrontend)

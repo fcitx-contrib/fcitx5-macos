@@ -15,17 +15,21 @@ class FcitxInputController: IMKInputController {
       return false
     }
     setClient(client)
-    var keySym = ""
     switch event.type {
     case .keyDown:
+      var unicode: UInt32 = 0
       if let characters = event.characters {
-        keySym = characters
+        let usv = characters.unicodeScalars
+        unicode = usv[usv.startIndex].value
       }
+      let code = event.keyCode
+      let modifiers = UInt32(event.modifierFlags.rawValue)
+      let handled = process_key(unicode, modifiers, code)
+      return handled
     default:
-      NSLog("\(event.type)")
+      NSLog("Unhandled event: \(String(describing: event.type))")
+      return false
     }
-    let accepted = process_key(std.string(keySym))
-    return accepted
   }
 
   override func candidates(_ sender: Any!) -> [Any]! {
