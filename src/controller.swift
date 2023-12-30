@@ -21,7 +21,6 @@ class FcitxInputController: IMKInputController {
       let char = event.charactersIgnoringModifiers!.unicodeScalars.first ?? UnicodeScalar(0)
       let modifiers = event.modifierFlags
       let handled = process_key(code, char!.value, UInt64(modifiers.rawValue))
-      NSLog("Keydown: keyCode=\(code) char=\(char!) modifiers=\(modifierFlagsToString(modifiers: modifiers)) handled?=\(handled)")
       return handled
     default:
       NSLog("Unhandled event: \(String(describing: event.type))")

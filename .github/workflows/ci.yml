@@ -51,6 +51,7 @@ jobs:
           brew install \
             fmt \
             extra-cmake-modules \
+            libuv \
             libxkbcommon \
             iso-codes \
             json-c \
@@ -75,7 +76,7 @@ jobs:
             iso-codes \
             json-c \
             openssl@3 \
-            libevent
+            libuv
           cp -f /usr/local/bin/msgfmt /opt/homebrew/bin
 
       - name: Build
