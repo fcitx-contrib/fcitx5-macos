@@ -56,8 +56,9 @@ void start_fcitx() {
         });
     p_frontend->setCommitStringCallback(
         [](const std::string &s) { SwiftFcitx::commit(s.c_str()); });
-    p_frontend->setShowPreeditCallback(
-        [](const std::string &s, int caretPos) { SwiftFcitx::showPreedit(s.c_str(), caretPos); });
+    p_frontend->setShowPreeditCallback([](const std::string &s, int caretPos) {
+        SwiftFcitx::showPreedit(s.c_str(), caretPos);
+    });
     ic_uuid = p_frontend->createInputContext();
 }
 

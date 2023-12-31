@@ -124,7 +124,7 @@ void MacosFrontend::setCommitStringCallback(
 }
 
 void MacosFrontend::setShowPreeditCallback(
-    const ShowPreeditCallback& callback) {
+    const ShowPreeditCallback &callback) {
     showPreeditCallback = callback;
 }
 
@@ -137,8 +137,7 @@ void MacosFrontend::updateCandidateList(
     candidateListCallback(candidates, size);
 }
 
-void MacosFrontend::showPreedit(
-    const std::string &preedit, int caretPos) {
+void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {
     showPreeditCallback(preedit, caretPos);
 }
 
