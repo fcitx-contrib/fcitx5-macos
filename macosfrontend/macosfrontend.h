@@ -16,6 +16,7 @@
 typedef std::function<void(const std::vector<std::string> &, const int)>
     CandidateListCallback;
 typedef std::function<void(const std::string &)> CommitStringCallback;
+typedef std::function<void(const std::string &, int)> ShowPreeditCallback;
 
 namespace fcitx {
 
@@ -31,9 +32,11 @@ public:
                              const int size);
     bool keyEvent(fcitx::ICUUID, const Key &key);
     void commitString(const std::string &text);
+    void showPreedit(const std::string &, int);
     ICUUID createInputContext();
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
+    void setShowPreeditCallback(const ShowPreeditCallback &callback);
 
 private:
     Instance *instance_;
@@ -44,6 +47,7 @@ private:
     CandidateListCallback candidateListCallback =
         [](const std::vector<std::string> &, const int) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
+    ShowPreeditCallback showPreeditCallback = [](const std::string &, int) {};
 };
 
 class MacosFrontendFactory : public AddonFactory {
