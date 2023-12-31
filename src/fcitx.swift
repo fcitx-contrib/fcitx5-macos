@@ -39,3 +39,14 @@ public func showCandidatePanel() {
     imkc.show()
   }
 }
+
+public func showPreedit(_ preedit: String, caretPos: Int) {
+  guard let client = globalClient as? IMKTextInput else {
+    return
+  }
+  client.setMarkedText(
+    preedit,
+    selectionRange: NSMakeRange(caretPos, 0),
+    replacementRange: NSMakeRange(NSNotFound, 0)
+  )
+}

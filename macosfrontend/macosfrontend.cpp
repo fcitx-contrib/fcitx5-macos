@@ -18,6 +18,8 @@ public:
                       InputContextManager &inputContextManager,
                       const std::string &program)
         : InputContext(inputContextManager, program), frontend_(frontend) {
+        CapabilityFlags flags = CapabilityFlag::Preedit;
+        setCapabilityFlags(flags);
         created();
     }
 
@@ -31,7 +33,12 @@ public:
 
     void forwardKeyImpl(const ForwardKeyEvent &key) override {}
 
-    void updatePreeditImpl() override {}
+    void updatePreeditImpl() override {
+        auto text = frontend_->instance()->outputFilter(
+            this, inputPanel().clientPreedit());
+        auto strPreedit = text.toString();
+        frontend_->showPreedit(strPreedit, text.cursor());
+    }
 
     void updateInputPanel() {
         const InputPanel &ip = inputPanel();
@@ -116,6 +123,11 @@ void MacosFrontend::setCommitStringCallback(
     commitStringCallback = callback;
 }
 
+void MacosFrontend::setShowPreeditCallback(
+    const ShowPreeditCallback& callback) {
+    showPreeditCallback = callback;
+}
+
 void MacosFrontend::commitString(const std::string &text) {
     commitStringCallback(text);
 }
@@ -123,6 +135,11 @@ void MacosFrontend::commitString(const std::string &text) {
 void MacosFrontend::updateCandidateList(
     const std::vector<std::string> &candidates, const int size) {
     candidateListCallback(candidates, size);
+}
+
+void MacosFrontend::showPreedit(
+    const std::string &preedit, int caretPos) {
+    showPreeditCallback(preedit, caretPos);
 }
 
 bool MacosFrontend::keyEvent(fcitx::ICUUID uuid, const Key &key) {
