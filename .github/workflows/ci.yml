@@ -77,7 +77,6 @@ jobs:
             libxkbcommon \
             iso-codes \
             json-c \
-            openssl@3 \
             libuv
           cp -f /usr/local/bin/msgfmt /opt/homebrew/bin
 
