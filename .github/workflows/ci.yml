@@ -73,6 +73,7 @@ jobs:
             expat \
             fmt \
             gettext \
+            xkeyboardconfig \
             libxkbcommon \
             iso-codes \
             json-c \
