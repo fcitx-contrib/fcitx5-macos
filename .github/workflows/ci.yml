@@ -49,6 +49,7 @@ jobs:
         if: ${{ matrix.arch == 'x86_64' }}
         run: |
           brew install \
+            expat \
             fmt \
             extra-cmake-modules \
             libxkbcommon \
@@ -69,6 +70,7 @@ jobs:
             ninja
           pip install "dmgbuild[badge_icons]"
           arm-brew-install \
+            expat \
             fmt \
             gettext \
             libxkbcommon \
@@ -80,7 +82,7 @@ jobs:
 
       - name: Build
         run: |
-          PKG_CONFIG_PATH=${{ matrix.homebrew_prefix }}/lib/pkgconfig cmake -B build -G Ninja \
+          cmake -B build -G Ninja \
             -DCMAKE_Swift_COMPILER=`which swiftc` \
             -DCMAKE_FIND_ROOT_PATH=${{ matrix.homebrew_prefix }} \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
