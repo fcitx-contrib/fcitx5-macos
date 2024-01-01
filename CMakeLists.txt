@@ -20,7 +20,7 @@ else()
     set(HOMEBREW_PATH "/usr/local")
 endif()
 
-set(ENV{PKG_CONFIG_PATH} "${HOMEBREW_PATH}/lib/pkgconfig:${HOMEBREW_PATH}/opt/expat/lib/pkgconfig")
+set(ENV{PKG_CONFIG_PATH} "${HOMEBREW_PATH}/lib/pkgconfig:${HOMEBREW_PATH}/share/pkgconfig:${HOMEBREW_PATH}/opt/expat/lib/pkgconfig")
 
 option(ENABLE_TEST "" OFF)
 option(ENABLE_COVERAGE "" OFF)
