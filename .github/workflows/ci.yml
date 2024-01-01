@@ -99,6 +99,10 @@ jobs:
           path: |
             Fcitx5-${{ matrix.arch }}.dmg
 
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+
   release:
     needs: build
     if: ${{ github.ref == 'refs/heads/master' }}
