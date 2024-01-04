@@ -23,6 +23,8 @@ public:
         created();
     }
 
+    ~MacosInputContext() { destroy(); }
+
     const char *frontend() const override { return "macos"; }
 
     void commitStringImpl(const std::string &text) override {
@@ -179,8 +181,8 @@ Cookie MacosFrontend::createInputContext() {
 void MacosFrontend::destroyInputContext(Cookie cookie) {
     auto *ic = this->findICByCookie(cookie);
     if (ic) {
-        delete ic;
         icTable_.erase(cookie);
+        delete ic;
     }
 }
 
