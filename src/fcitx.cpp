@@ -64,7 +64,7 @@ void start_fcitx() {
 
 bool process_key(uint32_t unicode, uint32_t osxModifiers, uint16_t osxKeycode) {
     const fcitx::Key parsedKey{
-        fcitx::Key::keySymFromUnicode(unicode),
+        osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
         osx_modifiers_to_fcitx_keystates(osxModifiers),
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };
