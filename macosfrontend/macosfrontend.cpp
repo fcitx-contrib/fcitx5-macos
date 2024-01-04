@@ -141,7 +141,7 @@ void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {
     showPreeditCallback(preedit, caretPos);
 }
 
-bool MacosFrontend::keyEvent(uint64_t cookie, const Key &key) {
+bool MacosFrontend::keyEvent(Cookie cookie, const Key &key) {
     auto *ic = this->findICByCookie(cookie);
     activeIC_ = ic;
     if (!ic) {
@@ -152,7 +152,7 @@ bool MacosFrontend::keyEvent(uint64_t cookie, const Key &key) {
     return keyEvent.accepted();
 }
 
-MacosInputContext *MacosFrontend::findICByCookie(uint64_t cookie) {
+MacosInputContext *MacosFrontend::findICByCookie(Cookie cookie) {
     auto it = icTable_.find(cookie);
     if (it != icTable_.end()) {
         return it->second;
@@ -160,7 +160,7 @@ MacosInputContext *MacosFrontend::findICByCookie(uint64_t cookie) {
     return nullptr;
 }
 
-uint64_t MacosFrontend::createInputContext() {
+Cookie MacosFrontend::createInputContext() {
     auto *ic =
         new MacosInputContext(this, instance_->inputContextManager(), "");
     auto cookie = nextCookie_;
@@ -184,14 +184,14 @@ void MacosFrontend::destroyInputContext(Cookie cookie) {
     }
 }
 
-void MacosFrontend::focusIn(uint64_t cookie) {
+void MacosFrontend::focusIn(Cookie cookie) {
     auto *ic = this->findICByCookie(cookie);
     if (!ic)
         return;
     ic->focusIn();
 }
 
-void MacosFrontend::focusOut(uint64_t cookie) {
+void MacosFrontend::focusOut(Cookie cookie) {
     auto *ic = this->findICByCookie(cookie);
     if (!ic)
         return;
