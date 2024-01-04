@@ -4,6 +4,19 @@ import InputMethodKit
 import SwiftFcitx
 
 class FcitxInputController: IMKInputController {
+  var cookie: UInt64
+
+  // A new InputController is created for each server-client
+  // connection.
+  override init(server: IMKServer!, delegate: Any!, client: Any!) {
+    cookie = create_input_context()
+    super.init(server: server, delegate: delegate, client: client)
+  }
+
+  deinit {
+    destroy_input_context(cookie)
+  }
+
   // Default behavior is to recognize keyDown only
   override func recognizedEvents(_ sender: Any!) -> Int {
     let events: NSEvent.EventTypeMask = [.keyDown, .flagsChanged]
@@ -24,7 +37,7 @@ class FcitxInputController: IMKInputController {
       }
       let code = event.keyCode
       let modifiers = UInt32(event.modifierFlags.rawValue)
-      let handled = process_key(unicode, modifiers, code)
+      let handled = process_key(cookie, unicode, modifiers, code)
       return handled
     default:
       NSLog("Unhandled event: \(String(describing: event.type))")
@@ -34,5 +47,13 @@ class FcitxInputController: IMKInputController {
 
   override func candidates(_ sender: Any!) -> [Any]! {
     return getCandidateList()
+  }
+
+  override func activateServer(_ client: Any!) {
+    focus_in(cookie)
+  }
+
+  override func deactivateServer(_ client: Any!) {
+    focus_out(cookie)
   }
 }

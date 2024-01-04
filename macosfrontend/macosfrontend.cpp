@@ -141,9 +141,9 @@ void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {
     showPreeditCallback(preedit, caretPos);
 }
 
-bool MacosFrontend::keyEvent(fcitx::ICUUID uuid, const Key &key) {
-    auto *ic = instance_->inputContextManager().findByUUID(uuid);
-    activeIC_ = dynamic_cast<MacosInputContext *>(ic);
+bool MacosFrontend::keyEvent(uint64_t cookie, const Key &key) {
+    auto *ic = this->findICByCookie(cookie);
+    activeIC_ = ic;
     if (!ic) {
         return false;
     }
@@ -152,11 +152,50 @@ bool MacosFrontend::keyEvent(fcitx::ICUUID uuid, const Key &key) {
     return keyEvent.accepted();
 }
 
-ICUUID MacosFrontend::createInputContext() {
+MacosInputContext *MacosFrontend::findICByCookie(uint64_t cookie) {
+    auto it = icTable_.find(cookie);
+    if (it != icTable_.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+
+uint64_t MacosFrontend::createInputContext() {
     auto *ic =
         new MacosInputContext(this, instance_->inputContextManager(), "");
+    auto cookie = nextCookie_;
+    nextCookie_ += 1;
+    icTable_[cookie] = ic;
+
+    // Make sure nextCookie_ is empty.
+    while (findICByCookie(nextCookie_)) {
+        // SAFETY: wrapping addition.
+        nextCookie_ += 1;
+    }
+
+    return cookie;
+}
+
+void MacosFrontend::destroyInputContext(Cookie cookie) {
+    auto *ic = this->findICByCookie(cookie);
+    if (ic) {
+        delete ic;
+        icTable_.erase(cookie);
+    }
+}
+
+void MacosFrontend::focusIn(uint64_t cookie) {
+    auto *ic = this->findICByCookie(cookie);
+    if (!ic)
+        return;
     ic->focusIn();
-    return ic->uuid();
+}
+
+void MacosFrontend::focusOut(uint64_t cookie) {
+    auto *ic = this->findICByCookie(cookie);
+    if (!ic)
+        return;
+    ic->focusOut();
 }
 
 } // namespace fcitx
