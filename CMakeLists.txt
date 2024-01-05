@@ -34,6 +34,12 @@ option(USE_SYSTEMD "" OFF)
 option(ENABLE_XDGAUTOSTART "" OFF)
 option(ENABLE_EMOJI "" OFF)
 option(ENABLE_LIBUUID "" OFF)
+option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
+
+if(ENABLE_ASAN)
+  message(STATUS "ASan is enabled!")
+  include(AddressSanitizer)
+endif()
 
 set(APP_INSTALL_PATH "/Library/Input Methods")
 set(CMAKE_INSTALL_PREFIX "${APP_INSTALL_PATH}/Fcitx5.app/Contents")

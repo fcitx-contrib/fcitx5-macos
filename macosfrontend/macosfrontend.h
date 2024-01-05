@@ -39,6 +39,8 @@ public:
     void setNotificationCallback(const NotificationCallback &callback);
 
 private:
+    FCITX_ADDON_EXPORT_FUNCTION(MacosFrontend, sendNotification);
+
     Instance *instance_;
     MacosInputContext *activeIC_;
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>>

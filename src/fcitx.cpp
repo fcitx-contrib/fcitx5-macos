@@ -27,7 +27,7 @@ fcitx::StaticAddonRegistry staticAddon = {
     std::make_pair<std::string, fcitx::AddonFactory *>(
         "notifications", &macosNotificationsFactory)};
 
-void setupLog(bool verbose) {
+void setupLog(bool verbose) noexcept {
     static native_streambuf log_streambuf;
     static std::ostream stream(&log_streambuf);
     fcitx::Log::setLogStream(stream);
@@ -38,7 +38,7 @@ void setupLog(bool verbose) {
     }
 }
 
-void start_fcitx() {
+void start_fcitx() noexcept {
     setupLog(true);
 
     // ~/Library/fcitx5
@@ -82,11 +82,21 @@ void start_fcitx() {
     ic_uuid = p_frontend->createInputContext();
 }
 
-bool process_key(uint32_t unicode, uint32_t osxModifiers, uint16_t osxKeycode) {
-    const fcitx::Key parsedKey{
-        osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
-        osx_modifiers_to_fcitx_keystates(osxModifiers),
-        osx_keycode_to_fcitx_keycode(osxKeycode),
-    };
-    return p_frontend->keyEvent(ic_uuid, parsedKey);
+bool process_key(uint32_t unicode, uint32_t osxModifiers,
+                 uint16_t osxKeycode) noexcept {
+    try {
+        const fcitx::Key parsedKey{
+            osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
+            osx_modifiers_to_fcitx_keystates(osxModifiers),
+            osx_keycode_to_fcitx_keycode(osxKeycode),
+        };
+        return p_frontend->keyEvent(ic_uuid, parsedKey);
+    } catch (const std::exception &ex) {
+        FCITX_ERROR() << "Exception during process_key: " << ex.what();
+        return false;
+    } catch (...) {
+        FCITX_ERROR() << "Exception during process_key, but it is unknown "
+                         "exception type.";
+        return false;
+    }
 }

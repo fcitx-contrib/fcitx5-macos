@@ -51,9 +51,7 @@ install(TARGETS Fcitx5
     BUNDLE DESTINATION "${APP_INSTALL_PATH}"
 )
 
-set(CODE_SIGN_IDENTITY "gdbcert")
-
 add_custom_command(TARGET Fcitx5 POST_BUILD
-  COMMAND /usr/bin/codesign --force --sign "gdbcert" --timestamp --options runtime $<TARGET_FILE:Fcitx5>
+  COMMAND /usr/bin/codesign --force --sign codesign --timestamp --options runtime $<TARGET_FILE:Fcitx5>
   COMMENT "Signing the executable..."
 )
