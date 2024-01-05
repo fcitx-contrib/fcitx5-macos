@@ -12,7 +12,7 @@ class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         return
       }
       if granted {
-        NSLog("Notification: granted!")
+        NSLog("swift-Notification: granted!")
       }
     }
   }
