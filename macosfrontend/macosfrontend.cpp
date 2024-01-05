@@ -157,17 +157,16 @@ bool MacosFrontend::keyEvent(Cookie cookie, const Key &key) {
 MacosInputContext *MacosFrontend::findICByCookie(Cookie cookie) {
     auto it = icTable_.find(cookie);
     if (it != icTable_.end()) {
-        return it->second;
+        return it->second.get();
     }
     return nullptr;
 }
 
 Cookie MacosFrontend::createInputContext() {
-    auto *ic =
-        new MacosInputContext(this, instance_->inputContextManager(), "");
+    auto ic = std::make_unique<MacosInputContext>(this, instance_->inputContextManager(), "");
     auto cookie = nextCookie_;
     nextCookie_ += 1;
-    icTable_[cookie] = ic;
+    icTable_[cookie] = std::move(ic);
 
     // Make sure nextCookie_ is empty.
     while (findICByCookie(nextCookie_)) {
@@ -182,7 +181,6 @@ void MacosFrontend::destroyInputContext(Cookie cookie) {
     auto *ic = this->findICByCookie(cookie);
     if (ic) {
         icTable_.erase(cookie);
-        delete ic;
     }
 }
 
