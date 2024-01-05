@@ -31,15 +31,15 @@ public:
     void commitString(const std::string &text);
     void showPreedit(const std::string &, int);
     ICUUID createInputContext();
-    void sendNotification(const std::string &, const std::string &);
+    void notify(const std::string &, const std::string &);
 
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setShowPreeditCallback(const ShowPreeditCallback &callback);
-    void setNotificationCallback(const NotificationCallback &callback);
+    void setNotifyCallback(const NotifyCallback &callback);
 
 private:
-    FCITX_ADDON_EXPORT_FUNCTION(MacosFrontend, sendNotification);
+    FCITX_ADDON_EXPORT_FUNCTION(MacosFrontend, notify);
 
     Instance *instance_;
     MacosInputContext *activeIC_;
@@ -50,8 +50,8 @@ private:
         [](const std::vector<std::string> &, const int) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
     ShowPreeditCallback showPreeditCallback = [](const std::string &, int) {};
-    NotificationCallback notificationCallback = [](const std::string &,
-                                                   const std::string &) {};
+    NotifyCallback notifyCallback = [](const std::string &,
+                                       const std::string &) {};
 };
 
 class MacosFrontendFactory : public AddonFactory {

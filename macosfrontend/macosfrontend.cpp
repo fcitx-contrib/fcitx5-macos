@@ -128,9 +128,8 @@ void MacosFrontend::setShowPreeditCallback(
     showPreeditCallback = callback;
 }
 
-void MacosFrontend::setNotificationCallback(
-    const NotificationCallback &callback) {
-    notificationCallback = callback;
+void MacosFrontend::setNotifyCallback(const NotifyCallback &callback) {
+    notifyCallback = callback;
 }
 
 void MacosFrontend::commitString(const std::string &text) {
@@ -164,11 +163,11 @@ ICUUID MacosFrontend::createInputContext() {
     return ic->uuid();
 }
 
-void MacosFrontend::sendNotification(const std::string &summary,
-                                     const std::string &body) {
+void MacosFrontend::notify(const std::string &summary,
+                           const std::string &body) {
     FCITX_DEBUG() << "macosfrontend: Get notification request " << summary
                   << ": " << body;
-    notificationCallback(summary, body);
+    notifyCallback(summary, body);
 }
 
 } // namespace fcitx
