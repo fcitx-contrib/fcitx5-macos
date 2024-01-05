@@ -20,6 +20,22 @@ cmake --build build
 sudo cmake --install build
 ```
 
+## Debug
+### Console.app
+* Check `Include Info Messages` and `Include Debug Messages` in `Action` menu.
+* Put `FcitxLog` in `Search`.
+
+### lldb
+SSH into the mac from another device, then
+```sh
+$ /usr/bin/lldb
+(lldb) process attach --name Fcitx5
+```
+
+## Plugins
+Fcitx5 only packges keyboard engine.
+To install other engines, see [fcitx5-macos-plugins](https://github.com/fcitx-contrib/fcitx5-macos-plugins).
+
 ## Credits
 * [fcitx5-android](https://github.com/fcitx5-android/fcitx5-android): LGPL-2.1-or-later
 * [squirrel](https://github.com/rime/squirrel): GPL-3.0-only
