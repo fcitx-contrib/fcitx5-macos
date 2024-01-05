@@ -178,10 +178,7 @@ Cookie MacosFrontend::createInputContext() {
 }
 
 void MacosFrontend::destroyInputContext(Cookie cookie) {
-    auto *ic = this->findICByCookie(cookie);
-    if (ic) {
-        icTable_.erase(cookie);
-    }
+    icTable_.erase(cookie);
 }
 
 void MacosFrontend::focusIn(Cookie cookie) {
