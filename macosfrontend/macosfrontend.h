@@ -13,10 +13,7 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
 
-typedef std::function<void(const std::vector<std::string> &, const int)>
-    CandidateListCallback;
-typedef std::function<void(const std::string &)> CommitStringCallback;
-typedef std::function<void(const std::string &, int)> ShowPreeditCallback;
+#include "macosfrontend-public.h"
 
 namespace fcitx {
 
@@ -34,9 +31,12 @@ public:
     void commitString(const std::string &text);
     void showPreedit(const std::string &, int);
     ICUUID createInputContext();
+    void sendNotification(const std::string &, const std::string &);
+
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setShowPreeditCallback(const ShowPreeditCallback &callback);
+    void setNotificationCallback(const NotificationCallback &callback);
 
 private:
     Instance *instance_;
@@ -48,6 +48,7 @@ private:
         [](const std::vector<std::string> &, const int) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
     ShowPreeditCallback showPreeditCallback = [](const std::string &, int) {};
+    NotificationCallback notificationCallback = [](const std::string &, const std::string &) {};
 };
 
 class MacosFrontendFactory : public AddonFactory {

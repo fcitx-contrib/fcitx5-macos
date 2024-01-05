@@ -19,6 +19,7 @@ class NSManualApplication: NSApplication {
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
   static var server = IMKServer()
+  static var notificationDelegate: NotificationDelegate? = nil
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     AppDelegate.server = IMKServer(
@@ -32,6 +33,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     candidates.setSelectionKeys([])
     setImkc(candidates)
     start_fcitx()
+
+    // Initialize notifications
+    AppDelegate.notificationDelegate = NotificationDelegate()
   }
 
   func applicationWillTerminate(_ notification: Notification) {

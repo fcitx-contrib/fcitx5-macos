@@ -15,11 +15,12 @@ add_executable(Fcitx5
     MACOSX_BUNDLE
     server.swift
     controller.swift
+    notification.swift
     fcitx.cpp
     keycode.cpp
 )
 
-add_dependencies(Fcitx5 macosfrontend)
+add_dependencies(Fcitx5 macosfrontend macosnotifications)
 
 target_include_directories(Fcitx5 PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
 target_include_directories(Fcitx5 PRIVATE
@@ -34,6 +35,7 @@ target_link_libraries(Fcitx5
     Fcitx5::Core
     keyboard
     macosfrontend
+    macosnotifications
 )
 
 set(APP_PATH "${CMAKE_CURRENT_BINARY_DIR}/Fcitx5.app/Contents")
@@ -47,4 +49,11 @@ add_custom_command(TARGET Fcitx5 POST_BUILD
 
 install(TARGETS Fcitx5
     BUNDLE DESTINATION "${APP_INSTALL_PATH}"
+)
+
+set(CODE_SIGN_IDENTITY "gdbcert")
+
+add_custom_command(TARGET Fcitx5 POST_BUILD
+  COMMAND /usr/bin/codesign --force --sign "gdbcert" --timestamp --options runtime $<TARGET_FILE:Fcitx5>
+  COMMENT "Signing the executable..."
 )

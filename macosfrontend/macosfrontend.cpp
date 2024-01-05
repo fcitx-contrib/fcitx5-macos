@@ -128,6 +128,11 @@ void MacosFrontend::setShowPreeditCallback(
     showPreeditCallback = callback;
 }
 
+void MacosFrontend::setNotificationCallback(
+    const NotificationCallback &callback) {
+    notificationCallback = callback;
+}
+
 void MacosFrontend::commitString(const std::string &text) {
     commitStringCallback(text);
 }
@@ -157,6 +162,11 @@ ICUUID MacosFrontend::createInputContext() {
         new MacosInputContext(this, instance_->inputContextManager(), "");
     ic->focusIn();
     return ic->uuid();
+}
+
+void MacosFrontend::sendNotification(const std::string &summary, 
+                                     const std::string &body) {
+    FCITX_ERROR() << "notification: send " << summary << ": " << body;
 }
 
 } // namespace fcitx

@@ -42,6 +42,7 @@ set(CMAKE_INSTALL_LIBDATADIR "${CMAKE_INSTALL_PREFIX}/lib")
 add_subdirectory(fcitx5)
 
 add_subdirectory(macosfrontend)
+add_subdirectory(macosnotifications)
 
 include_directories(include)
 add_subdirectory(src)

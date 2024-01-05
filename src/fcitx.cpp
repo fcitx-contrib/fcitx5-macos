@@ -3,6 +3,7 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
 #include "../macosfrontend/macosfrontend.h"
+#include "../macosnotifications/macosnotifications.h"
 #include "keyboard.h"
 #include "keycode.h"
 #include "nativestreambuf.h"
@@ -16,11 +17,15 @@ fcitx::ICUUID ic_uuid;
 
 fcitx::KeyboardEngineFactory keyboardFactory;
 fcitx::MacosFrontendFactory macosFrontendFactory;
+fcitx::MacosNotificationsFactory macosNotificationsFactory;
+
 fcitx::StaticAddonRegistry staticAddon = {
     std::make_pair<std::string, fcitx::AddonFactory *>("keyboard",
                                                        &keyboardFactory),
     std::make_pair<std::string, fcitx::AddonFactory *>("macosfrontend",
-                                                       &macosFrontendFactory)};
+                                                       &macosFrontendFactory),
+    std::make_pair<std::string, fcitx::AddonFactory *>("notifications",
+                                                       &macosNotificationsFactory)};
 
 void setupLog(bool verbose) {
     static native_streambuf log_streambuf;

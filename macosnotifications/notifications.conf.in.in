@@ -1,0 +1,6 @@
+[Addon]
+Name=macOS Notification
+Type=StaticLibrary
+Library=libmacosnotifications
+Category=Module
+Version=@PROJECT_VERSION@
