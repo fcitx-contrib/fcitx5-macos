@@ -166,7 +166,9 @@ ICUUID MacosFrontend::createInputContext() {
 
 void MacosFrontend::sendNotification(const std::string &summary,
                                      const std::string &body) {
-  FCITX_ERROR() << "macosfrontend: SEND NOTIFICATION " << summary << ": " << body;
+    FCITX_DEBUG() << "macosfrontend: Get notification request " << summary
+                  << ": " << body;
+    notificationCallback(summary, body);
 }
 
 } // namespace fcitx

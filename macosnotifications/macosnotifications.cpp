@@ -33,6 +33,7 @@ uint32_t Notifications::sendNotification(
     const std::vector<std::string> &actions, int32_t timeout,
     NotificationActionCallback actionCallback,
     NotificationClosedCallback closedCallback) {
+
     // TODO Implement
     FCITX_UNUSED(appName);
     FCITX_UNUSED(replaceId);
@@ -54,15 +55,7 @@ void Notifications::showTip(const std::string &tipId,
                             const std::string &appIcon,
                             const std::string &summary, const std::string &body,
                             int32_t timeout) {
-    // TODO Implement
-    FCITX_UNUSED(tipId);
-    FCITX_UNUSED(appName);
-    FCITX_UNUSED(appIcon);
-    FCITX_UNUSED(timeout);
-
-    FCITX_DEBUG() << "macosnotifications: send tip " << summary << ": " << body;
     macosfrontend()->call<IMacosFrontend::sendNotification>(summary, body);
-
     return;
 }
 

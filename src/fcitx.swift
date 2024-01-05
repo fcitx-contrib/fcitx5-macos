@@ -1,4 +1,5 @@
 import InputMethodKit
+import UserNotifications
 
 var globalClient: Any?
 var candidateList: [String] = []
@@ -49,4 +50,19 @@ public func showPreedit(_ preedit: String, caretPos: Int) {
     selectionRange: NSRange(location: caretPos, length: 0),
     replacementRange: NSRange(location: NSNotFound, length: 0)
   )
+}
+
+public func displayNotification(_ summary: String, _ body: String) {
+  let notification = UNMutableNotificationContent()
+  notification.title = summary
+  notification.body = body
+
+  let notificationRequest = UNNotificationRequest(
+    identifier: UUID().uuidString, content: notification, trigger: nil)
+
+  UNUserNotificationCenter.current().add(notificationRequest) { error in
+    if let error = error {
+      NSLog("Cannot send notification: \(error.localizedDescription)")
+    }
+  }
 }
