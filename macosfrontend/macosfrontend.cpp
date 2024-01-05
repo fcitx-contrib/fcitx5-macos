@@ -163,7 +163,8 @@ MacosInputContext *MacosFrontend::findICByCookie(Cookie cookie) {
 }
 
 Cookie MacosFrontend::createInputContext() {
-    auto ic = std::make_unique<MacosInputContext>(this, instance_->inputContextManager(), "");
+    auto ic = std::make_unique<MacosInputContext>(
+        this, instance_->inputContextManager(), "");
     auto cookie = nextCookie_;
     nextCookie_ += 1;
     icTable_[cookie] = std::move(ic);
