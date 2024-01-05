@@ -3,7 +3,8 @@
 
 #include <fcitx/inputcontext.h>
 
-typedef std::function<void(const std::string &, const std::string&)> NotificationCallback;
+typedef std::function<void(const std::string &, const std::string &)>
+    NotificationCallback;
 typedef std::function<void(const std::vector<std::string> &, const int)>
     CandidateListCallback;
 typedef std::function<void(const std::string &)> CommitStringCallback;

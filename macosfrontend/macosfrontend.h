@@ -48,7 +48,8 @@ private:
         [](const std::vector<std::string> &, const int) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
     ShowPreeditCallback showPreeditCallback = [](const std::string &, int) {};
-    NotificationCallback notificationCallback = [](const std::string &, const std::string &) {};
+    NotificationCallback notificationCallback = [](const std::string &,
+                                                   const std::string &) {};
 };
 
 class MacosFrontendFactory : public AddonFactory {

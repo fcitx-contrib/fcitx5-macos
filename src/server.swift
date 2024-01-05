@@ -19,7 +19,7 @@ class NSManualApplication: NSApplication {
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
   static var server = IMKServer()
-  static var notificationDelegate: NotificationDelegate? = nil
+  static var notificationDelegate: NotificationDelegate?
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     AppDelegate.server = IMKServer(

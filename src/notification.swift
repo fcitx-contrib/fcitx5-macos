@@ -1,7 +1,7 @@
-import UserNotifications
 import SwiftFcitx
+import UserNotifications
 
-class NotificationDelegate : NSObject, UNUserNotificationCenterDelegate {
+class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
   override init() {
     super.init()
     let center = UNUserNotificationCenter.current()
@@ -17,7 +17,11 @@ class NotificationDelegate : NSObject, UNUserNotificationCenterDelegate {
     }
   }
 
-  func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+  func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    didReceive response: UNNotificationResponse,
+    withCompletionHandler completionHandler: @escaping () -> Void
+  ) {
     let externalIdent = response.notification.request.identifier
     let actionIdent = response.actionIdentifier
     NSLog("notifications: for \(externalIdent) there is action \(actionIdent)")

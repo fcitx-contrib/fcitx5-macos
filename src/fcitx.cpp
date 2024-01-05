@@ -24,8 +24,8 @@ fcitx::StaticAddonRegistry staticAddon = {
                                                        &keyboardFactory),
     std::make_pair<std::string, fcitx::AddonFactory *>("macosfrontend",
                                                        &macosFrontendFactory),
-    std::make_pair<std::string, fcitx::AddonFactory *>("notifications",
-                                                       &macosNotificationsFactory)};
+    std::make_pair<std::string, fcitx::AddonFactory *>(
+        "notifications", &macosNotificationsFactory)};
 
 void setupLog(bool verbose) {
     static native_streambuf log_streambuf;
