@@ -20,7 +20,7 @@ class FcitxInputController: IMKInputController {
     switch event.type {
     case .keyDown:
       var unicode: UInt32 = 0
-      if let characters = event.characters {
+      if let characters = event.charactersIgnoringModifiers {
         let usv = characters.unicodeScalars
         unicode = usv[usv.startIndex].value
       }
