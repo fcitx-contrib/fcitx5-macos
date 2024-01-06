@@ -34,9 +34,24 @@ void setupLog(bool verbose) {
 
 void start_fcitx() {
     setupLog(true);
+
+    // ~/Library/fcitx5
+    std::string fcitx5_prefix = std::string(getenv("HOME")) + "/Library/fcitx5";
+
+    // /Library/Input\ Methods/Fcitx5.app/Contents/lib/fcitx5:~/Library/fcitx5/lib/fcitx5
     // Separate plugins so that dmg replacement won't remove them
-    setenv("FCITX_ADDON_DIRS",
-           APP_CONTENTS_PATH "/lib/fcitx5:/usr/local/lib/fcitx5", 1);
+    std::string fcitx_addon_dirs =
+        APP_CONTENTS_PATH "/lib/fcitx5:" + fcitx5_prefix + "/lib/fcitx5";
+    setenv("FCITX_ADDON_DIRS", fcitx_addon_dirs.c_str(), 1);
+
+    // ~/Library/fcitx5/share
+    std::string xdg_data_dirs = fcitx5_prefix + "/share";
+    setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
+
+    // ~/Library/fcitx5/lib/libime
+    std::string libime_model_dirs = fcitx5_prefix + "/lib/libime";
+    setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
+
     p_instance = std::make_unique<fcitx::Instance>(0, nullptr);
     auto &addonMgr = p_instance->addonManager();
     addonMgr.registerDefaultLoader(&staticAddon);
@@ -63,7 +78,7 @@ void start_fcitx() {
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
                  uint16_t osxKeycode) {
     const fcitx::Key parsedKey{
-        fcitx::Key::keySymFromUnicode(unicode),
+        osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
         osx_modifiers_to_fcitx_keystates(osxModifiers),
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };

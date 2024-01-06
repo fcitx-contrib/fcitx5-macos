@@ -2,9 +2,34 @@
 #include <cstring>
 
 static struct {
+    uint32_t osxKeycode;
+    fcitx::KeySym sym;
+} sym_mappings[] = {
+    // arrow keys
+    {OSX_VK_CURSOR_UP, FcitxKey_Up},
+    {OSX_VK_CURSOR_DOWN, FcitxKey_Down},
+    {OSX_VK_CURSOR_LEFT, FcitxKey_Left},
+    {OSX_VK_CURSOR_RIGHT, FcitxKey_Right},
+
+    // function keys
+    {OSX_VK_F1, FcitxKey_F1},
+    {OSX_VK_F2, FcitxKey_F2},
+    {OSX_VK_F3, FcitxKey_F3},
+    {OSX_VK_F4, FcitxKey_F4},
+    {OSX_VK_F5, FcitxKey_F5},
+    {OSX_VK_F6, FcitxKey_F6},
+    {OSX_VK_F7, FcitxKey_F7},
+    {OSX_VK_F8, FcitxKey_F8},
+    {OSX_VK_F9, FcitxKey_F9},
+    {OSX_VK_F10, FcitxKey_F10},
+    {OSX_VK_F11, FcitxKey_F11},
+    {OSX_VK_F12, FcitxKey_F22},
+};
+
+static struct {
     uint16_t osxKeycode;
     uint16_t linuxKeycode;
-} mappings[] = {
+} code_mappings[] = {
     // alphabet
     {OSX_VK_A, 30},
     {OSX_VK_B, 48},
@@ -127,8 +152,18 @@ static struct {
     {OSX_VK_SHIFT_R, 54},
 };
 
+fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode,
+                                          uint16_t osxKeycode) {
+    for (const auto &pair : sym_mappings) {
+        if (pair.osxKeycode == osxKeycode) {
+            return pair.sym;
+        }
+    }
+    return fcitx::Key::keySymFromUnicode(unicode);
+}
+
 uint16_t osx_keycode_to_fcitx_keycode(uint16_t osxKeycode) {
-    for (const auto &pair : mappings) {
+    for (const auto &pair : code_mappings) {
         if (pair.osxKeycode == osxKeycode) {
             return pair.linuxKeycode + 8 /* evdev offset */;
         }
