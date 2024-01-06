@@ -41,7 +41,7 @@ public:
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setShowPreeditCallback(const ShowPreeditCallback &callback);
 
-    Cookie createInputContext();
+    Cookie createInputContext(const std::string &appId);
     void destroyInputContext(Cookie);
     bool keyEvent(Cookie, const Key &key);
     void focusIn(Cookie);

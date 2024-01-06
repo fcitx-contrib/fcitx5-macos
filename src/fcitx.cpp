@@ -70,7 +70,9 @@ bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
     return p_frontend->keyEvent(cookie, parsedKey);
 }
 
-uint64_t create_input_context() { return p_frontend->createInputContext(); }
+uint64_t create_input_context(const char *appId) {
+    return p_frontend->createInputContext(appId);
+}
 
 void destroy_input_context(uint64_t cookie) {
     return p_frontend->destroyInputContext(cookie);

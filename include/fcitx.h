@@ -11,7 +11,7 @@ void start_fcitx();
 // Though being UInt, 32b is enough for modifiers
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers, uint16_t osxKeycode);
 
-Cookie create_input_context();
+Cookie create_input_context(const char *appId);
 void destroy_input_context(Cookie);
 void focus_in(Cookie);
 void focus_out(Cookie);

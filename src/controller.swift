@@ -5,11 +5,19 @@ import SwiftFcitx
 
 class FcitxInputController: IMKInputController {
   var cookie: UInt64
+  var appId: String
 
   // A new InputController is created for each server-client
-  // connection.
+  // connection. We use the finest granularity here (one InputContext
+  // for one IMKTextInput), and pass the bundle identifier to let
+  // libfcitx handle the heavylifting.
   override init(server: IMKServer!, delegate: Any!, client: Any!) {
-    cookie = create_input_context()
+    if let client = client as? IMKTextInput {
+      appId = client.bundleIdentifier() ?? "unknown"
+    } else {
+      appId = "unknown"
+    }
+    cookie = create_input_context(appId)
     super.init(server: server, delegate: delegate, client: client)
   }
 
