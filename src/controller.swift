@@ -4,7 +4,27 @@ import InputMethodKit
 import SwiftFcitx
 
 class FcitxInputController: IMKInputController {
+  var cookie: UInt64
+  var appId: String
   var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
+
+  // A new InputController is created for each server-client
+  // connection. We use the finest granularity here (one InputContext
+  // for one IMKTextInput), and pass the bundle identifier to let
+  // libfcitx handle the heavylifting.
+  override init(server: IMKServer!, delegate: Any!, client: Any!) {
+    if let client = client as? IMKTextInput {
+      appId = client.bundleIdentifier() ?? ""
+    } else {
+      appId = ""
+    }
+    cookie = create_input_context(appId)
+    super.init(server: server, delegate: delegate, client: client)
+  }
+
+  deinit {
+    destroy_input_context(cookie)
+  }
 
   // Default behavior is to recognize keyDown only
   override func recognizedEvents(_ sender: Any!) -> Int {
@@ -28,7 +48,7 @@ class FcitxInputController: IMKInputController {
       }
       let code = event.keyCode
       let modifiers = UInt32(event.modifierFlags.rawValue)
-      let handled = process_key(unicode, modifiers, code, false)
+      let handled = process_key(cookie, unicode, modifiers, code, false)
       return handled
     case .flagsChanged:
       let code = event.keyCode
@@ -38,15 +58,15 @@ class FcitxInputController: IMKInputController {
       let isRelease: Bool = (lastModifiers.rawValue & change.rawValue) != 0
       var handled = false
       if change.contains(.shift) {
-        handled = process_key(0, modsVal, code, isRelease)
+        handled = process_key(cookie, 0, modsVal, code, isRelease)
       } else if change.contains(.control) {
-        handled = process_key(0, modsVal, code, isRelease)
+        handled = process_key(cookie, 0, modsVal, code, isRelease)
       } else if change.contains(.command) {
-        handled = process_key(0, modsVal, code, isRelease)
+        handled = process_key(cookie, 0, modsVal, code, isRelease)
       } else if change.contains(.option) {
-        handled = process_key(0, modsVal, code, isRelease)
+        handled = process_key(cookie, 0, modsVal, code, isRelease)
       } else if change.contains(.capsLock) {
-        handled = process_key(0, modsVal, code, isRelease)
+        handled = process_key(cookie, 0, modsVal, code, isRelease)
       }
       lastModifiers = mods
       return handled
@@ -58,6 +78,14 @@ class FcitxInputController: IMKInputController {
 
   override func candidates(_ sender: Any!) -> [Any]! {
     return getCandidateList()
+  }
+
+  override func activateServer(_ client: Any!) {
+    focus_in(cookie)
+  }
+
+  override func deactivateServer(_ client: Any!) {
+    focus_out(cookie)
   }
 }
 
