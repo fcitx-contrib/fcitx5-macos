@@ -77,11 +77,12 @@ void start_fcitx() {
     ic_uuid = p_frontend->createInputContext();
 }
 
-bool process_key(uint32_t unicode, uint32_t osxModifiers, uint16_t osxKeycode) {
+bool process_key(uint32_t unicode, uint32_t osxModifiers, uint16_t osxKeycode,
+                 bool isRelease) {
     const fcitx::Key parsedKey{
         osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
         osx_modifiers_to_fcitx_keystates(osxModifiers),
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };
-    return p_frontend->keyEvent(ic_uuid, parsedKey);
+    return p_frontend->keyEvent(ic_uuid, parsedKey, isRelease);
 }

@@ -30,7 +30,7 @@ public:
 
     void updateCandidateList(const std::vector<std::string> &candidates,
                              const int size);
-    bool keyEvent(fcitx::ICUUID, const Key &key);
+    bool keyEvent(fcitx::ICUUID, const Key &key, bool isRelease);
     void commitString(const std::string &text);
     void showPreedit(const std::string &, int);
     ICUUID createInputContext();

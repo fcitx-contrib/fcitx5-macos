@@ -4,6 +4,8 @@ import InputMethodKit
 import SwiftFcitx
 
 class FcitxInputController: IMKInputController {
+  var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
+
   // Default behavior is to recognize keyDown only
   override func recognizedEvents(_ sender: Any!) -> Int {
     let events: NSEvent.EventTypeMask = [.keyDown, .flagsChanged]
@@ -24,7 +26,27 @@ class FcitxInputController: IMKInputController {
       }
       let code = event.keyCode
       let modifiers = UInt32(event.modifierFlags.rawValue)
-      let handled = process_key(unicode, modifiers, code)
+      let handled = process_key(unicode, modifiers, code, false)
+      return handled
+    case .flagsChanged:
+      let code = event.keyCode
+      let mods = event.modifierFlags
+      let modsVal = UInt32(mods.rawValue)
+      let change = NSEvent.ModifierFlags(rawValue: mods.rawValue ^ lastModifiers.rawValue)
+      let isRelease: Bool = (lastModifiers.rawValue & change.rawValue) != 0
+      var handled = false
+      if change.contains(.shift) {
+        handled = process_key(0, modsVal, code, isRelease)
+      } else if change.contains(.control) {
+        handled = process_key(0, modsVal, code, isRelease)
+      } else if change.contains(.command) {
+        handled = process_key(0, modsVal, code, isRelease)
+      } else if change.contains(.option) {
+        handled = process_key(0, modsVal, code, isRelease)
+      } else if change.contains(.capsLock) {
+        handled = process_key(0, modsVal, code, isRelease)
+      }
+      lastModifiers = mods
       return handled
     default:
       NSLog("Unhandled event: \(String(describing: event.type))")

@@ -141,13 +141,14 @@ void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {
     showPreeditCallback(preedit, caretPos);
 }
 
-bool MacosFrontend::keyEvent(fcitx::ICUUID uuid, const Key &key) {
+bool MacosFrontend::keyEvent(fcitx::ICUUID uuid, const Key &key,
+                             bool isRelease) {
     auto *ic = instance_->inputContextManager().findByUUID(uuid);
     activeIC_ = dynamic_cast<MacosInputContext *>(ic);
     if (!ic) {
         return false;
     }
-    KeyEvent keyEvent(ic, key, false);
+    KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
     return keyEvent.accepted();
 }

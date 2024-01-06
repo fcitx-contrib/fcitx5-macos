@@ -5,6 +5,17 @@ static struct {
     uint32_t osxKeycode;
     fcitx::KeySym sym;
 } sym_mappings[] = {
+    // modifiers
+    {OSX_VK_CONTROL_L, FcitxKey_Control_L},
+    {OSX_VK_CONTROL_R, FcitxKey_Control_R},
+    {OSX_VK_SHIFT_L, FcitxKey_Shift_L},
+    {OSX_VK_SHIFT_R, FcitxKey_Shift_R},
+    {OSX_VK_CAPSLOCK, FcitxKey_Caps_Lock},
+    {OSX_VK_OPTION_L, FcitxKey_Alt_L},
+    {OSX_VK_OPTION_R, FcitxKey_Alt_R},
+    {OSX_VK_COMMAND_L, FcitxKey_Super_L},
+    {OSX_VK_COMMAND_R, FcitxKey_Super_R},
+
     // arrow keys
     {OSX_VK_CURSOR_UP, FcitxKey_Up},
     {OSX_VK_CURSOR_DOWN, FcitxKey_Down},
