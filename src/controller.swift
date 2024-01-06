@@ -13,9 +13,9 @@ class FcitxInputController: IMKInputController {
   // libfcitx handle the heavylifting.
   override init(server: IMKServer!, delegate: Any!, client: Any!) {
     if let client = client as? IMKTextInput {
-      appId = client.bundleIdentifier() ?? "unknown"
+      appId = client.bundleIdentifier() ?? ""
     } else {
-      appId = "unknown"
+      appId = ""
     }
     cookie = create_input_context(appId)
     super.init(server: server, delegate: delegate, client: client)
