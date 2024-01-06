@@ -166,14 +166,11 @@ Cookie MacosFrontend::createInputContext(const std::string &appId) {
     auto ic = std::make_unique<MacosInputContext>(
         this, instance_->inputContextManager(), appId);
     auto cookie = nextCookie_;
-    nextCookie_ += 1;
     icTable_[cookie] = std::move(ic);
 
     // Make sure nextCookie_ is empty.
-    while (findICByCookie(nextCookie_)) {
-        // SAFETY: wrapping addition.
-        nextCookie_ += 1;
-    }
+    while (++nextCookie_, findICByCookie(nextCookie_))
+        ;
 
     return cookie;
 }

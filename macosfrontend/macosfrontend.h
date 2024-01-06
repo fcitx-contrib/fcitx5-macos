@@ -14,7 +14,7 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
 
-/// A short integer to disambiguate different input sessions.
+// A short integer to disambiguate different input sessions.
 using Cookie = uint64_t;
 
 typedef std::function<void(const std::vector<std::string> &, const int)>
