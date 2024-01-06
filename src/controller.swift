@@ -23,6 +23,7 @@ class FcitxInputController: IMKInputController {
       if let characters = event.characters {
         let usv = characters.unicodeScalars
         unicode = usv[usv.startIndex].value
+        // Send x[state:ctrl] instead of ^\X[state:ctrl] to fcitx.
         unicode = removeCtrl(char: unicode)
       }
       let code = event.keyCode
