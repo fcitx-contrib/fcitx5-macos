@@ -20,9 +20,10 @@ class FcitxInputController: IMKInputController {
     switch event.type {
     case .keyDown:
       var unicode: UInt32 = 0
-      if let characters = event.charactersIgnoringModifiers {
+      if let characters = event.characters {
         let usv = characters.unicodeScalars
         unicode = usv[usv.startIndex].value
+        unicode = removeCtrl(char: unicode)
       }
       let code = event.keyCode
       let modifiers = UInt32(event.modifierFlags.rawValue)
@@ -56,5 +57,14 @@ class FcitxInputController: IMKInputController {
 
   override func candidates(_ sender: Any!) -> [Any]! {
     return getCandidateList()
+  }
+}
+
+/// Convert a character like ^X to the corresponding lowercase letter x.
+private func removeCtrl(char: UInt32) -> UInt32 {
+  if char >= 0x00 && char <= 0x1F {
+    return char + 0x60
+  } else {
+    return char
   }
 }
