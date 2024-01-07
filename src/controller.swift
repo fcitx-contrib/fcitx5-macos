@@ -6,6 +6,7 @@ import SwiftFcitx
 class FcitxInputController: IMKInputController {
   var cookie: UInt64
   var appId: String
+  var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
 
   // A new InputController is created for each server-client
   // connection. We use the finest granularity here (one InputContext
@@ -36,16 +37,32 @@ class FcitxInputController: IMKInputController {
       return false
     }
     setClient(client)
+
+    let code = event.keyCode
+    let mods = event.modifierFlags
+    let modsVal = UInt32(mods.rawValue)
+
     switch event.type {
     case .keyDown:
       var unicode: UInt32 = 0
       if let characters = event.characters {
         let usv = characters.unicodeScalars
         unicode = usv[usv.startIndex].value
+        // Send x[state:ctrl] instead of ^X[state:ctrl] to fcitx.
+        unicode = removeCtrl(char: unicode)
       }
-      let code = event.keyCode
-      let modifiers = UInt32(event.modifierFlags.rawValue)
-      let handled = process_key(cookie, unicode, modifiers, code)
+      let handled = process_key(cookie, unicode, modsVal, code, false)
+      return handled
+    case .flagsChanged:
+      let change = NSEvent.ModifierFlags(rawValue: mods.rawValue ^ lastModifiers.rawValue)
+      let isRelease: Bool = (lastModifiers.rawValue & change.rawValue) != 0
+      var handled = false
+      if change.contains(.shift) || change.contains(.control) || change.contains(.command)
+        || change.contains(.option) || change.contains(.capsLock)
+      {
+        handled = process_key(cookie, 0, modsVal, code, isRelease)
+      }
+      lastModifiers = mods
       return handled
     default:
       NSLog("Unhandled event: \(String(describing: event.type))")
@@ -63,5 +80,14 @@ class FcitxInputController: IMKInputController {
 
   override func deactivateServer(_ client: Any!) {
     focus_out(cookie)
+  }
+}
+
+/// Convert a character like ^X to the corresponding lowercase letter x.
+private func removeCtrl(char: UInt32) -> UInt32 {
+  if char >= 0x00 && char <= 0x1F {
+    return char + 0x60
+  } else {
+    return char
   }
 }

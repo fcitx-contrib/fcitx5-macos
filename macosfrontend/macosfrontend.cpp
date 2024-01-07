@@ -143,13 +143,13 @@ void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {
     showPreeditCallback(preedit, caretPos);
 }
 
-bool MacosFrontend::keyEvent(Cookie cookie, const Key &key) {
+bool MacosFrontend::keyEvent(Cookie cookie, const Key &key, bool isRelease) {
     auto *ic = this->findICByCookie(cookie);
     activeIC_ = ic;
     if (!ic) {
         return false;
     }
-    KeyEvent keyEvent(ic, key, false);
+    KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
     return keyEvent.accepted();
 }

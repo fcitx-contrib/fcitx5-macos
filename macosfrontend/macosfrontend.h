@@ -43,7 +43,7 @@ public:
 
     Cookie createInputContext(const std::string &appId);
     void destroyInputContext(Cookie);
-    bool keyEvent(Cookie, const Key &key);
+    bool keyEvent(Cookie, const Key &key, bool isRelease);
     void focusIn(Cookie);
     void focusOut(Cookie);
 

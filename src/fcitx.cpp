@@ -76,13 +76,13 @@ void start_fcitx() {
 }
 
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
-                 uint16_t osxKeycode) {
+                 uint16_t osxKeycode, bool isRelease) {
     const fcitx::Key parsedKey{
         osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
         osx_modifiers_to_fcitx_keystates(osxModifiers),
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };
-    return p_frontend->keyEvent(cookie, parsedKey);
+    return p_frontend->keyEvent(cookie, parsedKey, isRelease);
 }
 
 uint64_t create_input_context(const char *appId) {
