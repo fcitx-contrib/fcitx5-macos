@@ -29,9 +29,6 @@ jobs:
       fail-fast: false # hdiutil: create failed - Resource busy
       matrix:
         arch: [x86_64, arm64]
-        include:
-          - { arch: x86_64, homebrew_prefix: /usr/local }
-          - { arch: arm64, homebrew_prefix: /opt/homebrew }
 
     steps:
       - uses: actions/checkout@v4
@@ -64,13 +61,12 @@ jobs:
           arm-brew-install \
             xkeyboardconfig \
             iso-codes
-          cp -f /usr/local/bin/msgfmt /opt/homebrew/bin
+          cp -f /usr/local/bin/msgfmt /tmp/fcitx5/bin
 
       - name: Build
         run: |
           cmake -B build -G Ninja \
             -DCMAKE_Swift_COMPILER=`which swiftc` \
-            -DCMAKE_FIND_ROOT_PATH=${{ matrix.homebrew_prefix }} \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_BUILD_TYPE=Release
           cmake --build build || ./fix-cross-build.sh
