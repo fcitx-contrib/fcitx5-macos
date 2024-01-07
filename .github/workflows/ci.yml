@@ -51,7 +51,7 @@ jobs:
             xkeyboardconfig \
             iso-codes \
             ninja
-          ./install-deps.sh
+          ./install-deps.sh ${{ matrix.arch }}
           pip install "dmgbuild[badge_icons]"
 
       - name: Setup arm homebrew
