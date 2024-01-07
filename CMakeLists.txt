@@ -13,6 +13,7 @@ if(NOT CMAKE_OSX_ARCHITECTURES)
     set(CMAKE_OSX_ARCHITECTURES "${CMAKE_HOST_SYSTEM_PROCESSOR}")
 endif()
 
+# Need HOMEBREW_PATH for iso-codes and xkeyboardconfig
 if(CMAKE_OSX_ARCHITECTURES STREQUAL arm64)
     add_definitions(-target "arm64-apple-macos11")
     set(HOMEBREW_PATH "/opt/homebrew")
@@ -21,7 +22,14 @@ else()
 endif()
 
 set(PREBUILT_INSTALL_PATH "/tmp/fcitx5")
+
 set(ENV{PKG_CONFIG_PATH} "${PREBUILT_INSTALL_PATH}/lib/pkgconfig:${HOMEBREW_PATH}/share/pkgconfig")
+
+# For dependencies not to be find via pkg-config
+set(LibIntl_DIR "${PREBUILT_INSTALL_PATH}/lib/cmake")
+find_package(LibIntl)
+set(fmt_DIR "${PREBUILT_INSTALL_PATH}/lib/cmake/fmt")
+find_package(fmt)
 
 option(ENABLE_TEST "" OFF)
 option(ENABLE_COVERAGE "" OFF)
@@ -35,9 +43,6 @@ option(USE_SYSTEMD "" OFF)
 option(ENABLE_XDGAUTOSTART "" OFF)
 option(ENABLE_EMOJI "" OFF)
 option(ENABLE_LIBUUID "" OFF)
-
-set(LibIntl_DIR "${PREBUILT_INSTALL_PATH}/lib/cmake")
-find_package(LibIntl)
 
 set(APP_INSTALL_PATH "/Library/Input Methods")
 set(CMAKE_INSTALL_PREFIX "${APP_INSTALL_PATH}/Fcitx5.app/Contents")
