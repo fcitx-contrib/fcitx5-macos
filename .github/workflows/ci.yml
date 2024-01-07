@@ -44,17 +44,14 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies (x86)
-        if: ${{ matrix.arch == 'x86_64' }}
+      - name: Install dependencies
         run: |
           brew install \
-            expat \
-            fmt \
             extra-cmake-modules \
-            libxkbcommon \
+            xkeyboardconfig \
             iso-codes \
-            json-c \
             ninja
+          ./install-deps.sh
           pip install "dmgbuild[badge_icons]"
 
       - name: Setup arm homebrew
@@ -64,19 +61,9 @@ jobs:
       - name: Install dependencies (arm)
         if: ${{ matrix.arch == 'arm64' }}
         run: |
-          brew install \
-            extra-cmake-modules \
-            ninja
-          pip install "dmgbuild[badge_icons]"
           arm-brew-install \
-            expat \
-            fmt \
-            gettext \
             xkeyboardconfig \
-            libxkbcommon \
-            iso-codes \
-            json-c \
-            libuv
+            iso-codes
           cp -f /usr/local/bin/msgfmt /opt/homebrew/bin
 
       - name: Build
@@ -96,6 +83,10 @@ jobs:
           name: Fcitx5-${{ matrix.arch }}.dmg
           path: |
             Fcitx5-${{ matrix.arch }}.dmg
+
+      - name: Check validity
+        if: ${{ matrix.arch == 'x86_64' }}
+        run: ./check-validity.sh
 
       - name: Setup tmate session
         if: ${{ failure() }}

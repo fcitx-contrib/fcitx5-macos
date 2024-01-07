@@ -20,7 +20,8 @@ else()
     set(HOMEBREW_PATH "/usr/local")
 endif()
 
-set(ENV{PKG_CONFIG_PATH} "${HOMEBREW_PATH}/lib/pkgconfig:${HOMEBREW_PATH}/share/pkgconfig:${HOMEBREW_PATH}/opt/expat/lib/pkgconfig")
+set(PREBUILT_INSTALL_PATH "/tmp/fcitx5")
+set(ENV{PKG_CONFIG_PATH} "${PREBUILT_INSTALL_PATH}/lib/pkgconfig:${HOMEBREW_PATH}/share/pkgconfig")
 
 option(ENABLE_TEST "" OFF)
 option(ENABLE_COVERAGE "" OFF)
@@ -34,6 +35,9 @@ option(USE_SYSTEMD "" OFF)
 option(ENABLE_XDGAUTOSTART "" OFF)
 option(ENABLE_EMOJI "" OFF)
 option(ENABLE_LIBUUID "" OFF)
+
+set(LibIntl_DIR "${PREBUILT_INSTALL_PATH}/lib/cmake")
+find_package(LibIntl)
 
 set(APP_INSTALL_PATH "/Library/Input Methods")
 set(CMAKE_INSTALL_PREFIX "${APP_INSTALL_PATH}/Fcitx5.app/Contents")
