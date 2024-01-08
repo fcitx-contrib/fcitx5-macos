@@ -35,6 +35,9 @@ void setupLog(bool verbose) {
 void start_fcitx() {
     setupLog(true);
 
+    // Needed by libintl-lite
+    setenv("LANGUAGE", "en", 1);
+
     // ~/Library/fcitx5
     std::string fcitx5_prefix = std::string(getenv("HOME")) + "/Library/fcitx5";
 
