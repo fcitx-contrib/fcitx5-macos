@@ -23,6 +23,8 @@ public:
         created();
     }
 
+    ~MacosInputContext() { destroy(); }
+
     const char *frontend() const override { return "macos"; }
 
     void commitStringImpl(const std::string &text) override {
@@ -145,22 +147,54 @@ void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {
     showPreeditCallback(preedit, caretPos);
 }
 
-bool MacosFrontend::keyEvent(fcitx::ICUUID uuid, const Key &key) {
-    auto *ic = instance_->inputContextManager().findByUUID(uuid);
-    activeIC_ = dynamic_cast<MacosInputContext *>(ic);
+bool MacosFrontend::keyEvent(Cookie cookie, const Key &key, bool isRelease) {
+    auto *ic = this->findICByCookie(cookie);
+    activeIC_ = ic;
     if (!ic) {
         return false;
     }
-    KeyEvent keyEvent(ic, key, false);
+    KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
     return keyEvent.accepted();
 }
 
-ICUUID MacosFrontend::createInputContext() {
-    auto *ic =
-        new MacosInputContext(this, instance_->inputContextManager(), "");
+MacosInputContext *MacosFrontend::findICByCookie(Cookie cookie) {
+    auto it = icTable_.find(cookie);
+    if (it != icTable_.end()) {
+        return it->second.get();
+    }
+    return nullptr;
+}
+
+Cookie MacosFrontend::createInputContext(const std::string &appId) {
+    auto ic = std::make_unique<MacosInputContext>(
+        this, instance_->inputContextManager(), appId);
+    auto cookie = nextCookie_;
+    icTable_[cookie] = std::move(ic);
+
+    // Make sure nextCookie_ is empty.
+    while (++nextCookie_, findICByCookie(nextCookie_))
+        ;
+
+    return cookie;
+}
+
+void MacosFrontend::destroyInputContext(Cookie cookie) {
+    icTable_.erase(cookie);
+}
+
+void MacosFrontend::focusIn(Cookie cookie) {
+    auto *ic = this->findICByCookie(cookie);
+    if (!ic)
+        return;
     ic->focusIn();
-    return ic->uuid();
+}
+
+void MacosFrontend::focusOut(Cookie cookie) {
+    auto *ic = this->findICByCookie(cookie);
+    if (!ic)
+        return;
+    ic->focusOut();
 }
 
 void MacosFrontend::notify(const std::string &summary,

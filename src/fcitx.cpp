@@ -13,7 +13,6 @@
 std::unique_ptr<fcitx::Instance> p_instance;
 std::unique_ptr<fcitx::EventDispatcher> p_dispatcher;
 fcitx::MacosFrontend *p_frontend = nullptr;
-fcitx::ICUUID ic_uuid;
 
 fcitx::KeyboardEngineFactory keyboardFactory;
 fcitx::MacosFrontendFactory macosFrontendFactory;
@@ -40,6 +39,9 @@ void setupLog(bool verbose) noexcept {
 
 void start_fcitx() noexcept {
     setupLog(true);
+
+    // Needed by libintl-lite
+    setenv("LANGUAGE", "en", 1);
 
     // ~/Library/fcitx5
     std::string fcitx5_prefix = std::string(getenv("HOME")) + "/Library/fcitx5";
@@ -83,24 +85,26 @@ void start_fcitx() noexcept {
         [](const std::string &summary, const std::string &body) {
             SwiftFcitx::displayNotification(summary.c_str(), body.c_str());
         });
-    ic_uuid = p_frontend->createInputContext();
 }
 
-bool process_key(uint32_t unicode, uint32_t osxModifiers,
-                 uint16_t osxKeycode) noexcept {
-    try {
-        const fcitx::Key parsedKey{
-            osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
-            osx_modifiers_to_fcitx_keystates(osxModifiers),
-            osx_keycode_to_fcitx_keycode(osxKeycode),
-        };
-        return p_frontend->keyEvent(ic_uuid, parsedKey);
-    } catch (const std::exception &ex) {
-        FCITX_ERROR() << "Exception during process_key: " << ex.what();
-        return false;
-    } catch (...) {
-        FCITX_ERROR() << "Exception during process_key, but it is unknown "
-                         "exception type.";
-        return false;
-    }
+bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
+                 uint16_t osxKeycode, bool isRelease) noexcept {
+    const fcitx::Key parsedKey{
+        osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
+        osx_modifiers_to_fcitx_keystates(osxModifiers),
+        osx_keycode_to_fcitx_keycode(osxKeycode),
+    };
+    return p_frontend->keyEvent(cookie, parsedKey, isRelease);
 }
+
+uint64_t create_input_context(const char *appId) noexcept {
+    return p_frontend->createInputContext(appId);
+}
+
+void destroy_input_context(uint64_t cookie) noexcept {
+    return p_frontend->destroyInputContext(cookie);
+}
+
+void focus_in(uint64_t cookie) noexcept { p_frontend->focusIn(cookie); }
+
+void focus_out(uint64_t cookie) noexcept { p_frontend->focusOut(cookie); }

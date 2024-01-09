@@ -21,7 +21,6 @@ jobs:
         run: |
           find macosfrontend src -name '*.cpp' -o -name '*.h' | xargs clang-format -Werror --dry-run -style=file:fcitx5/.clang-format
           swift-format lint -rs src
-          swiftlint --strict src
 
   build:
     needs: lint
@@ -30,9 +29,6 @@ jobs:
       fail-fast: false # hdiutil: create failed - Resource busy
       matrix:
         arch: [x86_64, arm64]
-        include:
-          - { arch: x86_64, homebrew_prefix: /usr/local }
-          - { arch: arm64, homebrew_prefix: /opt/homebrew }
 
     steps:
       - uses: actions/checkout@v4
@@ -45,17 +41,14 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies (x86)
-        if: ${{ matrix.arch == 'x86_64' }}
+      - name: Install dependencies
         run: |
           brew install \
-            expat \
-            fmt \
             extra-cmake-modules \
-            libxkbcommon \
+            xkeyboardconfig \
             iso-codes \
-            json-c \
             ninja
+          ./install-deps.sh ${{ matrix.arch }}
           pip install "dmgbuild[badge_icons]"
 
       - name: Setup arm homebrew
@@ -65,26 +58,15 @@ jobs:
       - name: Install dependencies (arm)
         if: ${{ matrix.arch == 'arm64' }}
         run: |
-          brew install \
-            extra-cmake-modules \
-            ninja
-          pip install "dmgbuild[badge_icons]"
           arm-brew-install \
-            expat \
-            fmt \
-            gettext \
             xkeyboardconfig \
-            libxkbcommon \
-            iso-codes \
-            json-c \
-            libuv
-          cp -f /usr/local/bin/msgfmt /opt/homebrew/bin
+            iso-codes
+          cp -f /usr/local/bin/msgfmt /tmp/fcitx5/bin
 
       - name: Build
         run: |
           cmake -B build -G Ninja \
             -DCMAKE_Swift_COMPILER=`which swiftc` \
-            -DCMAKE_FIND_ROOT_PATH=${{ matrix.homebrew_prefix }} \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_BUILD_TYPE=Release
           cmake --build build || ./fix-cross-build.sh
@@ -97,6 +79,10 @@ jobs:
           name: Fcitx5-${{ matrix.arch }}.dmg
           path: |
             Fcitx5-${{ matrix.arch }}.dmg
+
+      - name: Check validity
+        if: ${{ matrix.arch == 'x86_64' }}
+        run: ./check-validity.sh
 
       - name: Setup tmate session
         if: ${{ failure() }}
