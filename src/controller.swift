@@ -81,6 +81,10 @@ class FcitxInputController: IMKInputController {
   override func deactivateServer(_ client: Any!) {
     focus_out(cookie)
   }
+
+  override func menu() -> NSMenu! {
+    return NSMenu(title: "")
+  }
 }
 
 /// Convert a character like ^X to the corresponding lowercase letter x.
