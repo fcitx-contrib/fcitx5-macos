@@ -29,7 +29,13 @@ public class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
   ) {
     let externalIdent = response.notification.request.identifier
     let actionIdent = response.actionIdentifier
-    fcitx.handleActionResult(externalIdent, actionIdent)
+    if actionIdent == "com.apple.UNNotificationDefaultActionIdentifier" {
+      // This notification is dismissed. No need to close it manually.
+      fcitx.destroyNotificationItem(externalIdent, NOTIFICATION_CLOSED_REASON_DISMISSED.rawValue)
+    } else {
+      // The user has initiated an action.
+      fcitx.handleActionResult(externalIdent, actionIdent)
+    }
     completionHandler()
   }
 }

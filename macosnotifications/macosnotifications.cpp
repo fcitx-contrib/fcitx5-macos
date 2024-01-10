@@ -108,23 +108,26 @@ void Notifications::closeNotification(uint64_t internalId) {
 /// is an action result.  This function is merely a bridge to call the
 /// global MacosNotifications instance, because it is impossible to
 /// call C++ code directly from Swift code.
-void handleActionResult(const char *externalId, const char *actionId) {
+void handleActionResult(const char *externalId, const char *actionId) noexcept {
     if (!notificationsInstance)
         return;
 
     if (auto item = notificationsInstance->itemTable_.find(externalId)) {
-        item->actionCallback(actionId);
+        if (item->actionCallback) {
+            item->actionCallback(actionId);
+        }
     }
 }
 
 /// Called by NotificationDelegate.closeNotification to release the
 /// notification item.
-void destroyNotificationItem(const char *externalId, uint32_t closedReason) {
+void destroyNotificationItem(const char *externalId,
+                             uint32_t closedReason) noexcept {
     if (!notificationsInstance)
         return;
 
     auto item = notificationsInstance->itemTable_.remove(externalId);
-    if (item) {
+    if (item && item->closedCallback) {
         item->closedCallback(closedReason);
     }
 }

@@ -73,9 +73,9 @@ private:
 
 class Notifications final : public AddonInstance {
     friend void handleActionResult(const char *notificationId,
-                                   const char *actionId);
+                                   const char *actionId) noexcept;
     friend void destroyNotificationItem(const char *externalId,
-                                        uint32_t closedReason);
+                                        uint32_t closedReason) noexcept;
 
 public:
     Notifications(Instance *instance);

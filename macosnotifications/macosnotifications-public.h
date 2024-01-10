@@ -19,8 +19,8 @@ enum NotificationClosedReason {
 
 namespace fcitx {
 
-void handleActionResult(const char *notificationId, const char *actionId);
+void handleActionResult(const char *notificationId, const char *actionId) noexcept;
 
-void destroyNotificationItem(const char *notificationId, uint32_t closed_reason);
+void destroyNotificationItem(const char *notificationId, uint32_t closed_reason) noexcept;
 
 }
