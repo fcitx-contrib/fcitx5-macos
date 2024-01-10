@@ -1,7 +1,6 @@
 #include <fcitx/addonfactory.h>
 #include <fcitx/addonmanager.h>
 
-#include "../macosfrontend/macosfrontend-public.h"
 #include "macosnotifications.h"
 #include "notify-swift.h"
 

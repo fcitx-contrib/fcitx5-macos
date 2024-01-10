@@ -14,8 +14,6 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
 
-#include "macosfrontend-public.h"
-
 // A short integer to disambiguate different input sessions.
 using Cookie = uint64_t;
 
