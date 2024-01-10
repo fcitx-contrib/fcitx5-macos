@@ -83,7 +83,9 @@ class FcitxInputController: IMKInputController {
   }
 
   override func menu() -> NSMenu! {
-    return NSMenu(title: "")
+    let menu = NSMenu(title: "")
+    menu.addItem(withTitle: "About Fcitx5 macOS", action: #selector(about(_:)), keyEquivalent: "")
+    return menu
   }
 }
 
