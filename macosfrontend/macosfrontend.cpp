@@ -130,10 +130,6 @@ void MacosFrontend::setShowPreeditCallback(
     showPreeditCallback = callback;
 }
 
-void MacosFrontend::setNotifyCallback(const NotifyCallback &callback) {
-    notifyCallback = callback;
-}
-
 void MacosFrontend::commitString(const std::string &text) {
     commitStringCallback(text);
 }
@@ -195,13 +191,6 @@ void MacosFrontend::focusOut(Cookie cookie) {
     if (!ic)
         return;
     ic->focusOut();
-}
-
-void MacosFrontend::notify(const std::string &summary,
-                           const std::string &body) {
-    FCITX_DEBUG() << "macosfrontend: Get notification request " << summary
-                  << ": " << body;
-    notifyCallback(summary, body);
 }
 
 } // namespace fcitx

@@ -81,10 +81,6 @@ void start_fcitx() noexcept {
     p_frontend->setShowPreeditCallback([](const std::string &s, int caretPos) {
         SwiftFcitx::showPreedit(s.c_str(), caretPos);
     });
-    p_frontend->setNotifyCallback(
-        [](const std::string &summary, const std::string &body) {
-            SwiftFcitx::displayNotification(summary.c_str(), body.c_str());
-        });
 }
 
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,

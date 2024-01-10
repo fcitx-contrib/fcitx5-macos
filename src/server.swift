@@ -2,6 +2,7 @@ import Cocoa
 import Fcitx
 import InputMethodKit
 import SwiftFcitx
+import SwiftNotify
 
 class NSManualApplication: NSApplication {
   private let appDelegate = AppDelegate()
@@ -19,7 +20,7 @@ class NSManualApplication: NSApplication {
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
   static var server = IMKServer()
-  static var notificationDelegate: NotificationDelegate?
+  static var notificationDelegate = NotificationDelegate()
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     AppDelegate.server = IMKServer(
@@ -28,14 +29,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let candidates = IMKCandidates(
       server: AppDelegate.server,
       panelType: kIMKSingleColumnScrollingCandidatePanel)!
+
+    // Initialize notifications.
+    AppDelegate.notificationDelegate.requestAuthorization()
+
     // The default behavior is wrong: scrolling will assign 1-9 to 2nd-10th candidates.
     // But setting 10 virtual keyCodes doesn't work, so just disable it.
     candidates.setSelectionKeys([])
     setImkc(candidates)
     start_fcitx()
-
-    // Initialize notifications
-    AppDelegate.notificationDelegate = NotificationDelegate()
   }
 
   func applicationWillTerminate(_ notification: Notification) {

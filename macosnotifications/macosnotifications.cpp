@@ -3,6 +3,7 @@
 
 #include "../macosfrontend/macosfrontend-public.h"
 #include "macosnotifications.h"
+#include "notify-swift.h"
 
 namespace fcitx {
 
@@ -28,26 +29,37 @@ void Notifications::save() {
 }
 
 uint32_t Notifications::sendNotification(
-    const std::string &appName, uint32_t replaceId, const std::string &appIcon,
-    const std::string &summary, const std::string &body,
-    const std::vector<std::string> &actions, int32_t timeout,
+    const std::string &appName, // XXX
+    uint32_t replaceId, // DONE
+    const std::string &appIcon, // XXX
+    const std::string &summary, // DONE
+    const std::string &body,// DONE
+    const std::vector<std::string> &actions, // TODO
+    int32_t timeout, // DONE
     NotificationActionCallback actionCallback,
     NotificationClosedCallback closedCallback) {
-
-    // TODO Implement
-    FCITX_UNUSED(appName);
-    FCITX_UNUSED(replaceId);
+    
     FCITX_UNUSED(appIcon);
-    FCITX_UNUSED(actions);
-    FCITX_UNUSED(timeout);
     FCITX_UNUSED(actionCallback);
     FCITX_UNUSED(closedCallback);
 
-    FCITX_DEBUG() << "macosnotifications: send notification " << summary << ": "
-                  << body;
-    macosfrontend()->call<IMacosFrontend::notify>(summary, body);
+    if (internalToExternal_.count(replaceId)) {
+        closeNotification(replaceId);
+    }
+    
+    // We cannot directly pass vector<string> to Swift.
+    std::vector<const char *> actions_cstr{};
+    for (const auto &action : actions) {
+        actions_cstr.push_back(action.c_str());
+    }
 
-    return 0;
+    internalId_++;
+    std::string externalId = appName + std::to_string(internalId_);
+    internalToExternal_[internalId_] = externalId;
+    
+    SwiftNotify::sendSimpleNotification(externalId.c_str(), summary.c_str(), body.c_str(), timeout);
+    
+    return internalId_;
 }
 
 void Notifications::showTip(const std::string &tipId,
@@ -55,12 +67,31 @@ void Notifications::showTip(const std::string &tipId,
                             const std::string &appIcon,
                             const std::string &summary, const std::string &body,
                             int32_t timeout) {
-    macosfrontend()->call<IMacosFrontend::notify>(summary, body);
-    return;
+    if (hiddenNotifications_.count(tipId)) {
+        return;
+    }
+    // Cannot reuse sendNotification because closeNotification is not
+    // reliable.
+    SwiftNotify::showTip(tipId, appName, appIcon, summary, body, double(timeout) / 1000);
 }
 
 void Notifications::closeNotification(uint64_t internalId) {
-    FCITX_UNUSED(internalId);
+    if (!internalToExternal_.count(internalId)) {
+        return;
+    }
+    auto externalId = internalToExternal_[internalId];
+    SwiftNotify::closeNotification(externalId);
+    internalToExternal_.erase(internalId);
+}
+    
+/// Called by NotificationDelegate.userNotificationCenter when there
+/// is an action result.  This function is merely a bridge to call the
+/// global MacosNotifications instance, because it is impossible to
+/// call C++ code directly from Swift code.
+void handleActionResult(const char *externalId, const char *actionId)
+{
+    // TODO
+    FCITX_ERROR() << "Action Result: " << externalId << " " << actionId;
 }
 
 } // namespace fcitx

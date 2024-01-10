@@ -33,8 +33,6 @@ public:
     updateConfig();
   }
 
-  FCITX_ADDON_DEPENDENCY_LOADER(macosfrontend, instance_->addonManager());
-
   uint32_t sendNotification(const std::string &appName, uint32_t replaceId,
                             const std::string &appIcon,
                             const std::string &summary,
@@ -60,7 +58,12 @@ private:
   NotificationsConfig config_;
   Instance *instance_;
 
+  Flags<NotificationsCapability> capabilities_;
   std::unordered_set<std::string> hiddenNotifications_;
+
+  int lastTipId_ = 0;
+  uint32_t internalId_ = 0;
+    std::unordered_map<uint32_t, std::string> internalToExternal_;
 }; // class Notifications
 
 class MacosNotificationsFactory : public AddonFactory {

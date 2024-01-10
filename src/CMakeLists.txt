@@ -10,12 +10,12 @@ add_dependencies(SwiftFcitx fcitx_swift_h)
 set_target_properties(SwiftFcitx PROPERTIES Swift_MODULE_NAME SwiftFcitx)
 target_compile_options(SwiftFcitx PUBLIC
   "$<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default>")
+target_link_libraries(SwiftFcitx PUBLIC SwiftNotify)
 
 add_executable(Fcitx5
     MACOSX_BUNDLE
     server.swift
     controller.swift
-    notification.swift
     fcitx.cpp
     keycode.cpp
 )
