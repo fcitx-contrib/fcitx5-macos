@@ -17,7 +17,7 @@ public class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         return
       }
       if granted {
-        NSLog("Notification permitted")
+        NSLog("Notification permission is granted")
       }
     }
   }
@@ -29,7 +29,6 @@ public class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
   ) {
     let externalIdent = response.notification.request.identifier
     let actionIdent = response.actionIdentifier
-    NSLog("notifications: for \(externalIdent) there is action \(actionIdent)")
     fcitx.handleActionResult(externalIdent, actionIdent)
     completionHandler()
   }
@@ -94,56 +93,20 @@ public func sendNotification(
 
   let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
 
-  NSLog("send notif: \(request.content.title) \(request)")
-
   center.add(request) { error in
     if let error = error {
       NSLog("Cannot send notification: \(error.localizedDescription)")
     }
     DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
-      closeNotification(identifier)
-    }
-  }
-}
-
-public func showTip(
-  _ tipId: String, _ appName: String, _ appIcon: String, _ summary: String, _ body: String, _ timeout: Double
-) {
-  let categoryIdent = "ACTION_CATEGORY_\(tipId)"
-  let actions = [UNNotificationAction(
-                   identifier: "dont-show",
-                   title: "Don't show again",
-                   options: .foreground
-                 )]
-  let category = UNNotificationCategory(
-    identifier: categoryIdent,
-    actions: actions,
-    intentIdentifiers: [],
-    hiddenPreviewsBodyPlaceholder: "",
-    options: .customDismissAction
-  )
-  center.setNotificationCategories([category])
-
-  let content = UNMutableNotificationContent()
-  content.title = summary
-  content.body = body
-  content.userInfo = ["appIcon": appIcon]
-  content.categoryIdentifier = categoryIdent
-
-  let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(timeout), repeats: false)
-
-  let request = UNNotificationRequest(identifier: tipId, content: content, trigger: trigger)
-  
-  center.add(request) { (error) in
-    if let error = error {
-      NSLog("notify: failed to showTip: \(error.localizedDescription)")
+      closeNotification(identifier, NOTIFICATION_CLOSED_REASON_EXPIRY.rawValue)
     }
   }
 }
 
 public func closeNotification(
-  _ identifier: String
+  _ identifier: String,
+  _ reason: UInt32
 ) {
   center.removeDeliveredNotifications(withIdentifiers: [identifier])
-  fcitx.destroyNotificationItem(identifier)
+  fcitx.destroyNotificationItem(identifier, reason)
 }

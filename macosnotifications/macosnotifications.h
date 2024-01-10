@@ -8,6 +8,7 @@
 #include <fcitx/instance.h>
 #include <notifications_public.h>
 
+#include "macosnotifications-public.h"
 #include "notify-swift.h"
 
 namespace fcitx {
@@ -73,7 +74,8 @@ private:
 class Notifications final : public AddonInstance {
     friend void handleActionResult(const char *notificationId,
                                    const char *actionId);
-    friend void destroyNotificationItem(const char *externalId);
+    friend void destroyNotificationItem(const char *externalId,
+                                        uint32_t closedReason);
 
 public:
     Notifications(Instance *instance);

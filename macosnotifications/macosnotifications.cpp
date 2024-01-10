@@ -97,7 +97,8 @@ void Notifications::showTip(const std::string &tipId,
 
 void Notifications::closeNotification(uint64_t internalId) {
     if (auto item = itemTable_.remove(internalId)) {
-        SwiftNotify::closeNotification(item->externalId);
+        SwiftNotify::closeNotification(item->externalId,
+                                       NOTIFICATION_CLOSED_REASON_CLOSED);
         // This function will call back to destroyNotificationItem, so
         // closedCallback will be called.
     }
@@ -118,13 +119,13 @@ void handleActionResult(const char *externalId, const char *actionId) {
 
 /// Called by NotificationDelegate.closeNotification to release the
 /// notification item.
-void destroyNotificationItem(const char *externalId) {
+void destroyNotificationItem(const char *externalId, uint32_t closedReason) {
     if (!notificationsInstance)
         return;
 
     auto item = notificationsInstance->itemTable_.remove(externalId);
     if (item) {
-        item->closedCallback(0); // FIXME: Whats the appropriate value?
+        item->closedCallback(closedReason);
     }
 }
 
