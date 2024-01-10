@@ -35,69 +35,73 @@ public class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
   }
 }
 
-public func sendSimpleNotification(
-  _ identifier: String, _ title: String, _ body: String,
-  _ timeout: Int32
+
+// This is a bridge function. Please convert all Swift types to C types. For example, convert String to accept const char *.
+@_cdecl("sendNotificationProxy")
+public func sendNotificationProxy(
+  _ identifier: UnsafePointer<CChar>,
+  _ title: UnsafePointer<CChar>,
+  _ body: UnsafePointer<CChar>,
+  _ cActionStrings: UnsafePointer<UnsafePointer<CChar>>?,
+  _ cActionStringCount: Int,
+  _ timeout: Double
 ) {
-  let notif = UNMutableNotificationContent()
-  notif.title = title
-  notif.body = body
-
-  let timeInterval = TimeInterval(Double(timeout) / 1000)
-  let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
-  
-  let req = UNNotificationRequest(
-    identifier: identifier, content: notif, trigger: trigger
-  )
-
-  // complete this function by implementing timeout
-
-  center.add(req) { error in
-    if let error = error {
-      NSLog("Cannot send notification: \(error.localizedDescription)")
+  var actionStrings: [String] = []
+  if let cActionStrings = cActionStrings {
+    for i in 0..<cActionStringCount {
+      actionStrings.append(String.init(cString: cActionStrings[i]))
     }
   }
+  sendNotification(
+    String.init(cString: identifier),
+    String.init(cString: title),
+    String.init(cString: body),
+    actionStrings,
+    timeout
+  )
 }
 
 public func sendNotification(
-  identifier: String,
+  _ identifier: String,
   _ title: String, _ body: String,
-  actions: [String]
+  _ actionStrings: [String],
+  _ timeout: Double
 ) {
-  let notif = UNMutableNotificationContent()
-  notif.title = title
-  notif.body = body
+  let categoryIdent = "ACTION_CATEGORY_\(identifier)"
+  var actions: [UNNotificationAction] = []
+  for i in stride(from: 0, to: actionStrings.count, by: 2) {
+    let action = UNNotificationAction(
+      identifier: actionStrings[i],
+      title: actionStrings[i+1],
+      options: .foreground
+    )
+    actions.append(action)
+  }
 
-  // let categoryIdent = "ACTION_CATEGORY_\(identifier)"
-  // notif.categoryIdentifier = categoryIdent
-
-  // var notificationActions: [UNNotificationAction] = []
-  // for i in stride(from: 0, to: actions.count, by: 2) {
-  //   let action = UNNotificationAction(
-  //     identifier: actions[i+1],
-  //     title: actions[i],
-  //     options: .foreground
-  //   )
-  //   notificationActions.append(action)
-  // }
-
-  // let category = UNNotificationCategory(
-  //   identifier: categoryIdent,
-  //   actions: notificationActions,
-  //   intentIdentifiers: [],
-  //   hiddenPreviewsBodyPlaceholder: "",
-  //   options: .customDismissAction
-  // )
-
-  // center.setNotificationCategories([category])
-  
-  let req = UNNotificationRequest(
-    identifier: identifier, content: notif, trigger: nil
+  let category = UNNotificationCategory(
+    identifier: categoryIdent,
+    actions: actions,
+    intentIdentifiers: [],
+    hiddenPreviewsBodyPlaceholder: "",
+    options: .customDismissAction
   )
+  center.setNotificationCategories([category])
 
-  center.add(req) { error in
+  let content = UNMutableNotificationContent()
+  content.title = title
+  content.body = body
+  content.categoryIdentifier = categoryIdent
+
+  let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
+
+  NSLog("send notif: \(request.content.title) \(request)")
+
+  center.add(request) { error in
     if let error = error {
       NSLog("Cannot send notification: \(error.localizedDescription)")
+    }
+    DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
+      closeNotification(identifier)
     }
   }
 }
@@ -140,7 +144,6 @@ public func showTip(
 public func closeNotification(
   _ identifier: String
 ) {
-  let center = UNUserNotificationCenter.current()
   center.removeDeliveredNotifications(withIdentifiers: [identifier])
+  fcitx.destroyNotificationItem(identifier)
 }
-

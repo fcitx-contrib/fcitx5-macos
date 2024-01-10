@@ -5,7 +5,16 @@
 #include "macosnotifications.h"
 #include "notify-swift.h"
 
+// FIXME: This is a HACK to expose the only Notifications instance to
+// global functions, e.g. handleActionResult.
+static fcitx::Notifications *notificationsInstance = nullptr;
+
 namespace fcitx {
+
+Notifications::Notifications(Instance *instance) : instance_(instance) {
+    FCITX_ASSERT(notificationsInstance == nullptr);
+    notificationsInstance = this;
+}
 
 void Notifications::updateConfig() {
     hiddenNotifications_.clear();
@@ -29,36 +38,38 @@ void Notifications::save() {
 }
 
 uint32_t Notifications::sendNotification(
-    const std::string &appName, // XXX
-    uint32_t replaceId, // DONE
-    const std::string &appIcon, // XXX
-    const std::string &summary, // DONE
-    const std::string &body,// DONE
-    const std::vector<std::string> &actions, // TODO
-    int32_t timeout, // DONE
+    const std::string &appName, uint32_t replaceId, const std::string &appIcon,
+    const std::string &summary, const std::string &body,
+    const std::vector<std::string> &actions, int32_t timeout,
     NotificationActionCallback actionCallback,
     NotificationClosedCallback closedCallback) {
-    
-    FCITX_UNUSED(appIcon);
-    FCITX_UNUSED(actionCallback);
-    FCITX_UNUSED(closedCallback);
 
-    if (internalToExternal_.count(replaceId)) {
+    FCITX_UNUSED(appIcon);
+
+    if (itemTable_.find(replaceId)) {
         closeNotification(replaceId);
     }
-    
-    // We cannot directly pass vector<string> to Swift.
-    std::vector<const char *> actions_cstr{};
-    for (const auto &action : actions) {
-        actions_cstr.push_back(action.c_str());
+
+    if (timeout < 0) {
+        timeout = 60 * 1000;  // 1 minute
     }
 
-    internalId_++;
-    std::string externalId = appName + std::to_string(internalId_);
-    internalToExternal_[internalId_] = externalId;
-    
-    SwiftNotify::sendSimpleNotification(externalId.c_str(), summary.c_str(), body.c_str(), timeout);
-    
+    // Record a notification item to store callbacks.
+    auto internalId = ++internalId_;
+    std::string externalId = appName + "-" + std::to_string(internalId_);
+    NotificationItem item{externalId, internalId, actionCallback,
+                          closedCallback};
+    itemTable_.insert(item);
+
+    // Send the notification.
+    std::vector<const char *> cActionStrings;
+    for (const auto &action : actions) {
+        cActionStrings.push_back(action.c_str());
+    }
+    SwiftNotify::sendNotificationProxy(externalId.c_str(), summary.c_str(),
+                                       body.c_str(), cActionStrings.data(),
+                                       cActionStrings.size(), timeout);
+
     return internalId_;
 }
 
@@ -70,28 +81,44 @@ void Notifications::showTip(const std::string &tipId,
     if (hiddenNotifications_.count(tipId)) {
         return;
     }
-    // Cannot reuse sendNotification because closeNotification is not
-    // reliable.
-    SwiftNotify::showTip(tipId, appName, appIcon, summary, body, double(timeout) / 1000);
+    std::vector<std::string> actions = {"dont-show", "Do not show again"};
+    lastTipId_ = sendNotification(
+        appName, lastTipId_, appIcon, summary, body, actions, timeout,
+        [this, tipId](const std::string &action) {
+            if (action == "dont-show") {
+                FCITX_DEBUG() << "Dont show clicked: " << tipId;
+                if (hiddenNotifications_.insert(tipId).second) {
+                    save();
+                }
+            }
+        },
+        {});
 }
 
 void Notifications::closeNotification(uint64_t internalId) {
-    if (!internalToExternal_.count(internalId)) {
-        return;
+    if (auto item = itemTable_.remove(internalId)) {
+        SwiftNotify::closeNotification(item->externalId);
     }
-    auto externalId = internalToExternal_[internalId];
-    SwiftNotify::closeNotification(externalId);
-    internalToExternal_.erase(internalId);
 }
-    
+
 /// Called by NotificationDelegate.userNotificationCenter when there
 /// is an action result.  This function is merely a bridge to call the
 /// global MacosNotifications instance, because it is impossible to
 /// call C++ code directly from Swift code.
-void handleActionResult(const char *externalId, const char *actionId)
-{
-    // TODO
-    FCITX_ERROR() << "Action Result: " << externalId << " " << actionId;
+void handleActionResult(const char *externalId, const char *actionId) {
+    if (notificationsInstance) {
+        if (auto item = notificationsInstance->itemTable_.find(externalId)) {
+            item->actionCallback(actionId);
+        }
+    }
+}
+
+/// Called by NotificationDelegate.closeNotification to release the
+/// notification item.
+void destroyNotificationItem(const char *externalId) {
+    if (notificationsInstance) {
+        notificationsInstance->itemTable_.remove(externalId);
+    }
 }
 
 } // namespace fcitx

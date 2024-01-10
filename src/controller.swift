@@ -58,7 +58,8 @@ class FcitxInputController: IMKInputController {
       let isRelease: Bool = (lastModifiers.rawValue & change.rawValue) != 0
       var handled = false
       if change.contains(.shift) || change.contains(.control) || change.contains(.command)
-           || change.contains(.option) || change.contains(.capsLock) {
+        || change.contains(.option) || change.contains(.capsLock)
+      {
         handled = process_key(cookie, 0, modsVal, code, isRelease)
       }
       lastModifiers = mods
