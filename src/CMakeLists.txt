@@ -10,7 +10,6 @@ add_dependencies(SwiftFcitx fcitx_swift_h)
 set_target_properties(SwiftFcitx PROPERTIES Swift_MODULE_NAME SwiftFcitx)
 target_compile_options(SwiftFcitx PUBLIC
   "$<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default>")
-target_link_libraries(SwiftFcitx PUBLIC SwiftNotify)
 
 add_executable(Fcitx5
     MACOSX_BUNDLE
@@ -32,6 +31,7 @@ target_include_directories(Fcitx5 PRIVATE
 target_link_libraries(Fcitx5
     "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
     SwiftFcitx
+    SwiftNotify
     Fcitx5::Core
     keyboard
     macosfrontend

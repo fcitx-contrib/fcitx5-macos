@@ -40,8 +40,6 @@ public class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
   }
 }
 
-
-// This is a bridge function. Please convert all Swift types to C types. For example, convert String to accept const char *.
 @_cdecl("sendNotificationProxy")
 public func sendNotificationProxy(
   _ identifier: UnsafePointer<CChar>,

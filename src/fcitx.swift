@@ -1,5 +1,4 @@
 import InputMethodKit
-import UserNotifications
 
 var globalClient: Any?
 var candidateList: [String] = []
