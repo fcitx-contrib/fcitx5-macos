@@ -51,7 +51,7 @@ uint32_t Notifications::sendNotification(
     }
 
     if (timeout < 0) {
-        timeout = 60 * 1000;  // 1 minute
+        timeout = 60 * 1000; // 1 minute
     }
 
     // Record a notification item to store callbacks.
@@ -98,6 +98,8 @@ void Notifications::showTip(const std::string &tipId,
 void Notifications::closeNotification(uint64_t internalId) {
     if (auto item = itemTable_.remove(internalId)) {
         SwiftNotify::closeNotification(item->externalId);
+        // This function will call back to destroyNotificationItem, so
+        // closedCallback will be called.
     }
 }
 
@@ -106,18 +108,23 @@ void Notifications::closeNotification(uint64_t internalId) {
 /// global MacosNotifications instance, because it is impossible to
 /// call C++ code directly from Swift code.
 void handleActionResult(const char *externalId, const char *actionId) {
-    if (notificationsInstance) {
-        if (auto item = notificationsInstance->itemTable_.find(externalId)) {
-            item->actionCallback(actionId);
-        }
+    if (!notificationsInstance)
+        return;
+
+    if (auto item = notificationsInstance->itemTable_.find(externalId)) {
+        item->actionCallback(actionId);
     }
 }
 
 /// Called by NotificationDelegate.closeNotification to release the
 /// notification item.
 void destroyNotificationItem(const char *externalId) {
-    if (notificationsInstance) {
-        notificationsInstance->itemTable_.remove(externalId);
+    if (!notificationsInstance)
+        return;
+
+    auto item = notificationsInstance->itemTable_.remove(externalId);
+    if (item) {
+        item->closedCallback(0); // FIXME: Whats the appropriate value?
     }
 }
 
