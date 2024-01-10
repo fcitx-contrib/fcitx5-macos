@@ -12,6 +12,7 @@ namespace fcitx {
 
 Notifications::Notifications(Instance *instance) : instance_(instance) {
     FCITX_ASSERT(notificationsInstance == nullptr);
+    reloadConfig();
     notificationsInstance = this;
 }
 
