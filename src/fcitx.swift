@@ -16,9 +16,7 @@ public func commit(_ string: String) {
   guard let client = globalClient as? IMKTextInput else {
     return
   }
-  DispatchQueue.main.async {
-    client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
-  }
+  client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
 }
 
 public func clearCandidateList() {
@@ -48,11 +46,9 @@ public func showPreedit(_ preedit: String, caretPos: Int) {
   guard let client = globalClient as? IMKTextInput else {
     return
   }
-  DispatchQueue.main.async {
-    client.setMarkedText(
-      preedit,
-      selectionRange: NSRange(location: caretPos, length: 0),
-      replacementRange: NSRange(location: NSNotFound, length: 0)
-    )
-  }
+  client.setMarkedText(
+    preedit,
+    selectionRange: NSRange(location: caretPos, length: 0),
+    replacementRange: NSRange(location: NSNotFound, length: 0)
+  )
 }
