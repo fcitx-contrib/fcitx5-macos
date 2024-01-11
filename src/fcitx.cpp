@@ -1,27 +1,49 @@
+#include <filesystem>
+#include <mutex>
+
+#include <keyboard.h>
+
 #include "fcitx.h"
-#include <fcitx-utils/eventdispatcher.h>
-#include <fcitx/addonmanager.h>
-#include <fcitx/instance.h>
-#include "../macosfrontend/macosfrontend.h"
-#include "keyboard.h"
 #include "keycode.h"
 #include "nativestreambuf.h"
 
-#define APP_CONTENTS_PATH "/Library/Input Methods/Fcitx5.app/Contents"
+namespace fs = std::filesystem;
 
-std::unique_ptr<fcitx::Instance> p_instance;
-std::unique_ptr<fcitx::EventDispatcher> p_dispatcher;
-fcitx::MacosFrontend *p_frontend = nullptr;
+#define APP_CONTENTS_PATH "/Library/Input Methods/Fcitx5.app/Contents"
 
 fcitx::KeyboardEngineFactory keyboardFactory;
 fcitx::MacosFrontendFactory macosFrontendFactory;
-fcitx::StaticAddonRegistry staticAddon = {
+fcitx::StaticAddonRegistry staticAddons = {
     std::make_pair<std::string, fcitx::AddonFactory *>("keyboard",
                                                        &keyboardFactory),
     std::make_pair<std::string, fcitx::AddonFactory *>("macosfrontend",
                                                        &macosFrontendFactory)};
 
-void setupLog(bool verbose) {
+static std::string join_paths(const std::vector<fs::path> &paths,
+                              char sep = ':');
+
+Fcitx &Fcitx::shared() {
+    static Fcitx *p_fcitx = nullptr;
+    static std::mutex init_once;
+    if (p_fcitx) {
+        return *p_fcitx;
+    } else {
+        std::lock_guard<std::mutex> guard(init_once);
+        if (p_fcitx)
+            return *p_fcitx;
+        p_fcitx = new Fcitx;
+        return *p_fcitx;
+    }
+}
+
+Fcitx::Fcitx() {
+    setupLog(true);
+    setupEnv();
+    setupInstance();
+    setupFrontend();
+}
+
+void Fcitx::setupLog(bool verbose) {
     static native_streambuf log_streambuf;
     static std::ostream stream(&log_streambuf);
     fcitx::Log::setLogStream(stream);
@@ -32,37 +54,31 @@ void setupLog(bool verbose) {
     }
 }
 
-void start_fcitx() {
-    setupLog(true);
-
-    // Needed by libintl-lite
-    setenv("LANGUAGE", "en", 1);
-
-    // ~/Library/fcitx5
-    std::string fcitx5_prefix = std::string(getenv("HOME")) + "/Library/fcitx5";
-
-    // /Library/Input\ Methods/Fcitx5.app/Contents/lib/fcitx5:~/Library/fcitx5/lib/fcitx5
-    // Separate plugins so that dmg replacement won't remove them
-    std::string fcitx_addon_dirs =
-        APP_CONTENTS_PATH "/lib/fcitx5:" + fcitx5_prefix + "/lib/fcitx5";
+void Fcitx::setupEnv() {
+    fs::path home{getenv("HOME")};
+    fs::path app_contents_path{APP_CONTENTS_PATH};
+    fs::path user_prefix = home / "Library" / "fcitx5";
+    std::string fcitx_addon_dirs = join_paths(
+        {app_contents_path / "lib" / "fcitx5", user_prefix / "lib" / "fcitx5"});
+    std::string xdg_data_dirs = join_paths({user_prefix / "share"});
+    std::string libime_model_dirs =
+        join_paths({user_prefix / "lib" / "libime"});
+    setenv("LANGUAGE", "en", 1); // Needed by libintl-lite
     setenv("FCITX_ADDON_DIRS", fcitx_addon_dirs.c_str(), 1);
-
-    // ~/Library/fcitx5/share
-    std::string xdg_data_dirs = fcitx5_prefix + "/share";
     setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
-
-    // ~/Library/fcitx5/lib/libime
-    std::string libime_model_dirs = fcitx5_prefix + "/lib/libime";
     setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
+}
 
-    p_instance = std::make_unique<fcitx::Instance>(0, nullptr);
-    auto &addonMgr = p_instance->addonManager();
-    addonMgr.registerDefaultLoader(&staticAddon);
-    p_dispatcher = std::make_unique<fcitx::EventDispatcher>();
-    p_dispatcher->attach(&p_instance->eventLoop());
-    p_instance->initialize();
-    p_frontend =
-        dynamic_cast<fcitx::MacosFrontend *>(addonMgr.addon("macosfrontend"));
+void Fcitx::setupInstance() {
+    instance_ = std::make_unique<fcitx::Instance>(0, nullptr);
+    dispatcher_ = std::make_unique<fcitx::EventDispatcher>();
+    auto &addonMgr = instance_->addonManager();
+    addonMgr.registerDefaultLoader(&staticAddons);
+    instance_->initialize();
+}
+
+void Fcitx::setupFrontend() {
+    auto p_frontend = macosfrontend();
     p_frontend->setCandidateListCallback(
         [](const std::vector<std::string> &candidateList, const int) {
             SwiftFcitx::clearCandidateList();
@@ -78,6 +94,31 @@ void start_fcitx() {
     });
 }
 
+fcitx::AddonManager &Fcitx::addonMgr() { return instance_->addonManager(); }
+
+fcitx::AddonInstance *Fcitx::addon(const std::string &name) {
+    return addonMgr().addon(name);
+}
+
+fcitx::MacosFrontend *Fcitx::macosfrontend() {
+    return dynamic_cast<fcitx::MacosFrontend *>(addon("macosfrontend"));
+}
+
+/// A helper function to convert a vector of std::filesystem::path
+/// into a colon-separated string.
+static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
+    std::string result;
+    for (const auto &path : paths) {
+        if (!result.empty()) {
+            result += sep;
+        }
+        result += path;
+    }
+    return result;
+}
+
+void start_fcitx() { Fcitx &fcitx = Fcitx::shared(); }
+
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
                  uint16_t osxKeycode, bool isRelease) {
     const fcitx::Key parsedKey{
@@ -85,17 +126,22 @@ bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
         osx_modifiers_to_fcitx_keystates(osxModifiers),
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };
-    return p_frontend->keyEvent(cookie, parsedKey, isRelease);
+    return Fcitx::shared().macosfrontend()->keyEvent(cookie, parsedKey,
+                                                     isRelease);
 }
 
 uint64_t create_input_context(const char *appId) {
-    return p_frontend->createInputContext(appId);
+    return Fcitx::shared().macosfrontend()->createInputContext(appId);
 }
 
 void destroy_input_context(uint64_t cookie) {
-    return p_frontend->destroyInputContext(cookie);
+    Fcitx::shared().macosfrontend()->destroyInputContext(cookie);
 }
 
-void focus_in(uint64_t cookie) { p_frontend->focusIn(cookie); }
+void focus_in(uint64_t cookie) {
+    Fcitx::shared().macosfrontend()->focusIn(cookie);
+}
 
-void focus_out(uint64_t cookie) { p_frontend->focusOut(cookie); }
+void focus_out(uint64_t cookie) {
+    Fcitx::shared().macosfrontend()->focusOut(cookie);
+}
