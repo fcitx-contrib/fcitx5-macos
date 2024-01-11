@@ -24,7 +24,7 @@ static std::string join_paths(const std::vector<fs::path> &paths,
                               char sep = ':');
 
 static std::thread fcitx_thread;
-static std::atomic<bool> fcitx_thread_running;
+static std::atomic<bool> fcitx_thread_started;
 
 Fcitx &Fcitx::shared() {
     static Fcitx fcitx;
@@ -119,7 +119,7 @@ static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
 void start_fcitx_thread() {
     auto &fcitx = Fcitx::shared();
     bool expected = false;
-    if (!fcitx_thread_running.compare_exchange_strong(expected, true)) {
+    if (!fcitx_thread_started.compare_exchange_strong(expected, true)) {
         FCITX_FATAL()
             << "Trying to start multiple fcitx threads, which is forbidden";
         std::terminate();
