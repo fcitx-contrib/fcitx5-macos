@@ -1,5 +1,4 @@
 #include <filesystem>
-#include <mutex>
 #include <thread>
 
 #include <keyboard.h>
@@ -24,17 +23,10 @@ static std::string join_paths(const std::vector<fs::path> &paths,
                               char sep = ':');
 
 Fcitx &Fcitx::shared() {
+    static std::once_flag init_once_flag;
     static Fcitx *p_fcitx = nullptr;
-    static std::mutex init_once;
-    if (p_fcitx) {
-        return *p_fcitx;
-    } else {
-        std::lock_guard<std::mutex> guard(init_once);
-        if (p_fcitx)
-            return *p_fcitx;
-        p_fcitx = new Fcitx;
-        return *p_fcitx;
-    }
+    std::call_once(init_once_flag, []() { p_fcitx = new Fcitx; });
+    return *p_fcitx;
 }
 
 Fcitx::Fcitx() {
