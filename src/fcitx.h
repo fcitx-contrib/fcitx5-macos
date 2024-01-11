@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <fcitx-utils/eventdispatcher.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
@@ -32,5 +31,4 @@ private:
 
     std::unique_ptr<fcitx::Instance> instance_;
     std::unique_ptr<fcitx::EventDispatcher> dispatcher_;
-    std::atomic<bool> executing;
 };

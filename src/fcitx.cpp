@@ -1,3 +1,4 @@
+#include <atomic>
 #include <filesystem>
 #include <thread>
 
@@ -112,8 +113,9 @@ static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
 
 void start_fcitx_thread() {
     auto &fcitx = Fcitx::shared();
+    static std::atomic<bool> running{false};
     bool expected = false;
-    if (!fcitx.executing.compare_exchange_strong(expected, true)) {
+    if (!running.compare_exchange_strong(expected, true)) {
         FCITX_FATAL()
             << "Trying to start multiple fcitx threads, which is forbidden";
         std::terminate();
