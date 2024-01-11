@@ -1,5 +1,6 @@
 #pragma once
 
+#include <future>
 #include <fcitx-utils/eventdispatcher.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
@@ -18,6 +19,7 @@ public:
 
     void exec();
     void exit();
+    void schedule(std::function<void()>);
 
     fcitx::AddonManager &addonMgr();
     fcitx::AddonInstance *addon(const std::string &name);
@@ -34,3 +36,31 @@ private:
     std::unique_ptr<fcitx::Instance> instance_;
     std::unique_ptr<fcitx::EventDispatcher> dispatcher_;
 };
+
+/// Run a function in the fcitx thread and obtain its return value
+/// synchronously.
+template <class T>
+T with_fcitx(std::function<T(Fcitx &)> func) {
+    auto &fcitx = Fcitx::shared();
+    std::promise<T> prom;
+    std::future<T> fut = prom.get_future();
+    fcitx.schedule([&prom, func = std::move(func), &fcitx]() {
+        try {
+            T result = func(fcitx);
+            prom.set_value(result);
+        } catch (...) {
+            prom.set_exception(std::current_exception());
+        }
+    });
+    fut.wait();
+    return fut.get();
+}
+
+/// Run a function in the fcitx thread synchronously.
+template <>
+void with_fcitx(std::function<void(Fcitx &)> func) {
+    with_fcitx<int>([&](Fcitx &fcitx) {
+        func(fcitx);
+        return 0; // dummy
+    });
+}

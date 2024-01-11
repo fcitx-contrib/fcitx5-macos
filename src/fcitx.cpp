@@ -89,9 +89,16 @@ void Fcitx::setupFrontend() {
     });
 }
 
-void Fcitx::exec() { instance_->exec(); }
+void Fcitx::exec() {
+    dispatcher_->attach(&instance_->eventLoop());
+    instance_->exec();
+}
 
 void Fcitx::exit() { instance_->exit(); }
+
+void Fcitx::schedule(std::function<void()> func) {
+    dispatcher_->schedule(func);
+}
 
 fcitx::AddonManager &Fcitx::addonMgr() { return instance_->addonManager(); }
 
@@ -143,22 +150,29 @@ bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
         osx_modifiers_to_fcitx_keystates(osxModifiers),
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };
-    return Fcitx::shared().macosfrontend()->keyEvent(cookie, parsedKey,
-                                                     isRelease);
+    return with_fcitx<bool>([=](Fcitx &fcitx) {
+        return fcitx.macosfrontend()->keyEvent(cookie, parsedKey, isRelease);
+    });
 }
 
 uint64_t create_input_context(const char *appId) {
-    return Fcitx::shared().macosfrontend()->createInputContext(appId);
+    return with_fcitx<uint64_t>([=](Fcitx &fcitx) {
+        return fcitx.macosfrontend()->createInputContext(appId);
+    });
 }
 
 void destroy_input_context(uint64_t cookie) {
-    Fcitx::shared().macosfrontend()->destroyInputContext(cookie);
+    with_fcitx<void>([=](Fcitx &fcitx) {
+        fcitx.macosfrontend()->destroyInputContext(cookie);
+    });
 }
 
 void focus_in(uint64_t cookie) {
-    Fcitx::shared().macosfrontend()->focusIn(cookie);
+    with_fcitx<void>(
+        [=](Fcitx &fcitx) { fcitx.macosfrontend()->focusIn(cookie); });
 }
 
 void focus_out(uint64_t cookie) {
-    Fcitx::shared().macosfrontend()->focusOut(cookie);
+    with_fcitx<void>(
+        [=](Fcitx &fcitx) { fcitx.macosfrontend()->focusOut(cookie); });
 }
