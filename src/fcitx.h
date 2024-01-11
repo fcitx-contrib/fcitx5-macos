@@ -12,6 +12,7 @@ class Fcitx final {
 public:
     Fcitx();
     ~Fcitx() = default;
+    Fcitx(Fcitx &) = delete;
 
     static Fcitx &shared();
 
