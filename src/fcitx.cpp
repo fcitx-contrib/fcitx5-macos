@@ -23,10 +23,8 @@ static std::string join_paths(const std::vector<fs::path> &paths,
                               char sep = ':');
 
 Fcitx &Fcitx::shared() {
-    static std::once_flag init_once_flag;
-    static Fcitx *p_fcitx = nullptr;
-    std::call_once(init_once_flag, []() { p_fcitx = new Fcitx; });
-    return *p_fcitx;
+    static Fcitx fcitx;
+    return fcitx;
 }
 
 Fcitx::Fcitx() {
