@@ -1,8 +1,8 @@
 #pragma once
 
-#include <fcitx/instance.h>
-#include <fcitx/addonmanager.h>
 #include <fcitx-utils/eventdispatcher.h>
+#include <fcitx/addonmanager.h>
+#include <fcitx/instance.h>
 
 #include "fcitx-public.h"
 #include "../macosfrontend/macosfrontend.h"

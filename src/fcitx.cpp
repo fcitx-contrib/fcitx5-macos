@@ -95,9 +95,7 @@ void Fcitx::setupFrontend() {
     });
 }
 
-void Fcitx::exec() {
-    instance_->exec();
-}
+void Fcitx::exec() { instance_->exec(); }
 
 fcitx::AddonManager &Fcitx::addonMgr() { return instance_->addonManager(); }
 
@@ -125,9 +123,7 @@ static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
 void start_fcitx_thread() {
     auto &fcitx = Fcitx::shared();
     // Start the event loop in another thread.
-    static std::thread fcitx_thread {[&fcitx]{
-        fcitx.exec();
-    }};
+    static std::thread fcitx_thread{[&fcitx] { fcitx.exec(); }};
 }
 
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
