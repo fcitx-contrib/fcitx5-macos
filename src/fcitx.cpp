@@ -112,6 +112,12 @@ static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
 
 void start_fcitx_thread() {
     auto &fcitx = Fcitx::shared();
+    bool expected = false;
+    if (!fcitx.executing.compare_exchange_strong(expected, true)) {
+        FCITX_FATAL()
+            << "Trying to start multiple fcitx threads, which is forbidden";
+        std::terminate();
+    }
     // Start the event loop in another thread.
     static std::thread fcitx_thread{[&fcitx] { fcitx.exec(); }};
 }

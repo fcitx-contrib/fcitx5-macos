@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <fcitx-utils/eventdispatcher.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
@@ -22,12 +23,14 @@ public:
     fcitx::MacosFrontend *macosfrontend();
 
 private:
+    friend void start_fcitx_thread();
+
     void setupLog(bool verbose);
     void setupEnv();
     void setupInstance();
     void setupFrontend();
 
-private:
     std::unique_ptr<fcitx::Instance> instance_;
     std::unique_ptr<fcitx::EventDispatcher> dispatcher_;
+    std::atomic<bool> executing;
 };
