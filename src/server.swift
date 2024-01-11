@@ -35,5 +35,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func applicationWillTerminate(_ notification: Notification) {
+    stop_fcitx_thread()
   }
 }

@@ -17,6 +17,7 @@ public:
     static Fcitx &shared();
 
     void exec();
+    void exit();
 
     fcitx::AddonManager &addonMgr();
     fcitx::AddonInstance *addon(const std::string &name);

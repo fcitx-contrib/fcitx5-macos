@@ -7,6 +7,7 @@
 typedef uint64_t Cookie;
 
 void start_fcitx_thread();
+void stop_fcitx_thread();
 
 // Though being UInt, 32b is enough for modifiers
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers, uint16_t osxKeycode, bool isRelease);

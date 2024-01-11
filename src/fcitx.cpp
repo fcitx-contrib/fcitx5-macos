@@ -23,6 +23,9 @@ fcitx::StaticAddonRegistry staticAddons = {
 static std::string join_paths(const std::vector<fs::path> &paths,
                               char sep = ':');
 
+static std::thread fcitx_thread;
+static std::atomic<bool> fcitx_thread_running;
+
 Fcitx &Fcitx::shared() {
     static Fcitx fcitx;
     return fcitx;
@@ -88,6 +91,8 @@ void Fcitx::setupFrontend() {
 
 void Fcitx::exec() { instance_->exec(); }
 
+void Fcitx::exit() { instance_->exit(); }
+
 fcitx::AddonManager &Fcitx::addonMgr() { return instance_->addonManager(); }
 
 fcitx::AddonInstance *Fcitx::addon(const std::string &name) {
@@ -113,15 +118,22 @@ static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
 
 void start_fcitx_thread() {
     auto &fcitx = Fcitx::shared();
-    static std::atomic<bool> running{false};
     bool expected = false;
-    if (!running.compare_exchange_strong(expected, true)) {
+    if (!fcitx_thread_running.compare_exchange_strong(expected, true)) {
         FCITX_FATAL()
             << "Trying to start multiple fcitx threads, which is forbidden";
         std::terminate();
     }
     // Start the event loop in another thread.
-    static std::thread fcitx_thread{[&fcitx] { fcitx.exec(); }};
+    fcitx_thread = std::thread([&fcitx] { fcitx.exec(); });
+}
+
+void stop_fcitx_thread() {
+    auto &fcitx = Fcitx::shared();
+    fcitx.exit();
+    if (fcitx_thread.joinable()) {
+        fcitx_thread.join();
+    }
 }
 
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
