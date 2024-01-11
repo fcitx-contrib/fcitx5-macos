@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <mutex>
+#include <thread>
 
 #include <keyboard.h>
 
@@ -94,6 +95,10 @@ void Fcitx::setupFrontend() {
     });
 }
 
+void Fcitx::exec() {
+    instance_->exec();
+}
+
 fcitx::AddonManager &Fcitx::addonMgr() { return instance_->addonManager(); }
 
 fcitx::AddonInstance *Fcitx::addon(const std::string &name) {
@@ -117,7 +122,13 @@ static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
     return result;
 }
 
-void start_fcitx() { Fcitx &fcitx = Fcitx::shared(); }
+void start_fcitx_thread() {
+    auto &fcitx = Fcitx::shared();
+    // Start the event loop in another thread.
+    static std::thread fcitx_thread {[&fcitx]{
+        fcitx.exec();
+    }};
+}
 
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
                  uint16_t osxKeycode, bool isRelease) {
