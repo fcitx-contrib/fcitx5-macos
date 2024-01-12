@@ -2,7 +2,6 @@
 #define FCITX5_MACOS_FCITX_H
 
 #include <cstdint>
-#include "fcitx-swift.h"
 
 typedef uint64_t Cookie;
 

@@ -39,7 +39,7 @@ private:
 /// Run a function in the fcitx thread and obtain its return value
 /// synchronously.
 template <class T>
-T with_fcitx(std::function<T(Fcitx &)> func) {
+inline T with_fcitx(std::function<T(Fcitx &)> func) {
     auto &fcitx = Fcitx::shared();
     std::promise<T> prom;
     std::future<T> fut = prom.get_future();
@@ -57,7 +57,7 @@ T with_fcitx(std::function<T(Fcitx &)> func) {
 
 /// Run a function in the fcitx thread synchronously.
 template <>
-void with_fcitx(std::function<void(Fcitx &)> func) {
+inline void with_fcitx(std::function<void(Fcitx &)> func) {
     with_fcitx<int>([&](Fcitx &fcitx) {
         func(fcitx);
         return 0; // dummy

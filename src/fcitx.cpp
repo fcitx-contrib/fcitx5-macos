@@ -5,8 +5,10 @@
 #include <keyboard.h>
 
 #include "fcitx.h"
+#include "fcitx-swift.h"
 #include "keycode.h"
 #include "nativestreambuf.h"
+#include "../macosnotifications/macosnotifications.h"
 
 namespace fs = std::filesystem;
 
@@ -134,7 +136,7 @@ static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
     return result;
 }
 
-void start_fcitx_thread() {
+void start_fcitx_thread() noexcept {
     auto &fcitx = Fcitx::shared();
     bool expected = false;
     if (!fcitx_thread_started.compare_exchange_strong(expected, true)) {
@@ -146,7 +148,7 @@ void start_fcitx_thread() {
     fcitx_thread = std::thread([&fcitx] { fcitx.exec(); });
 }
 
-void stop_fcitx_thread() {
+void stop_fcitx_thread() noexcept {
     auto &fcitx = Fcitx::shared();
     fcitx.exit();
     if (fcitx_thread.joinable()) {

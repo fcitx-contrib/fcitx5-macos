@@ -16,7 +16,11 @@ target_include_directories(SwiftNotify PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_library(macosnotifications STATIC macosnotifications.cpp)
 target_link_libraries(macosnotifications SwiftNotify Fcitx5::Core Fcitx5::Module::Notifications)
-target_include_directories(macosnotifications PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
+target_include_directories(macosnotifications PUBLIC
+  "${CMAKE_CURRENT_BINARY_DIR}/include"
+  "${CMAKE_SOURCE_DIR}/src"
+  "${CMAKE_SOURCE_DIR}/include"
+)
 
 configure_file(notifications.conf.in.in notifications.conf.in @ONLY)
 fcitx5_translate_desktop_file(${CMAKE_CURRENT_BINARY_DIR}/notifications.conf.in notifications.conf)

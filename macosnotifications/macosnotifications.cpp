@@ -3,17 +3,12 @@
 
 #include "macosnotifications.h"
 #include "notify-swift.h"
-
-// FIXME: This is a HACK to expose the only Notifications instance to
-// global functions, e.g. handleActionResult.
-static fcitx::Notifications *notificationsInstance = nullptr;
+#include "fcitx.h"
 
 namespace fcitx {
 
 Notifications::Notifications(Instance *instance) : instance_(instance) {
-    FCITX_ASSERT(notificationsInstance == nullptr);
     reloadConfig();
-    notificationsInstance = this;
 }
 
 void Notifications::updateConfig() {
@@ -109,27 +104,27 @@ void Notifications::closeNotification(uint64_t internalId) {
 /// global MacosNotifications instance, because it is impossible to
 /// call C++ code directly from Swift code.
 void handleActionResult(const char *externalId, const char *actionId) noexcept {
-    if (!notificationsInstance)
-        return;
-
-    if (auto item = notificationsInstance->itemTable_.find(externalId)) {
-        if (item->actionCallback) {
-            item->actionCallback(actionId);
+    with_fcitx<void>([=](Fcitx &fcitx) {
+        auto that = dynamic_cast<Notifications *>(fcitx.addon("notifications"));
+        if (auto item = that->itemTable_.find(externalId)) {
+            if (item->actionCallback) {
+                item->actionCallback(actionId);
+            }
         }
-    }
+    });
 }
 
 /// Called by NotificationDelegate.closeNotification to release the
 /// notification item.
 void destroyNotificationItem(const char *externalId,
                              uint32_t closedReason) noexcept {
-    if (!notificationsInstance)
-        return;
-
-    auto item = notificationsInstance->itemTable_.remove(externalId);
-    if (item && item->closedCallback) {
-        item->closedCallback(closedReason);
-    }
+    with_fcitx<void>([=](Fcitx &fcitx) {
+        auto that = dynamic_cast<Notifications *>(fcitx.addon("notifications"));
+        auto item = that->itemTable_.remove(externalId);
+        if (item && item->closedCallback) {
+            item->closedCallback(closedReason);
+        }
+    });
 }
 
 } // namespace fcitx
