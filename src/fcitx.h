@@ -58,7 +58,7 @@ inline T with_fcitx(std::function<T(Fcitx &)> func) {
 /// Run a function in the fcitx thread synchronously.
 template <>
 inline void with_fcitx(std::function<void(Fcitx &)> func) {
-    with_fcitx<int>([&](Fcitx &fcitx) {
+    with_fcitx<int>([func = std::move(func)](Fcitx &fcitx) {
         func(fcitx);
         return 0; // dummy
     });

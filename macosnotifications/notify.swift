@@ -70,39 +70,41 @@ public func sendNotification(
   _ actionStrings: [String],
   _ timeout: Double
 ) {
-  let categoryIdent = "ACTION_CATEGORY_\(identifier)"
-  var actions: [UNNotificationAction] = []
-  for i in stride(from: 0, to: actionStrings.count, by: 2) {
-    let action = UNNotificationAction(
-      identifier: actionStrings[i],
-      title: actionStrings[i+1],
-      options: .foreground
-    )
-    actions.append(action)
-  }
-
-  let category = UNNotificationCategory(
-    identifier: categoryIdent,
-    actions: actions,
-    intentIdentifiers: [],
-    hiddenPreviewsBodyPlaceholder: "",
-    options: .customDismissAction
-  )
-  center.setNotificationCategories([category])
-
-  let content = UNMutableNotificationContent()
-  content.title = title
-  content.body = body
-  content.categoryIdentifier = categoryIdent
-
-  let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
-
-  center.add(request) { error in
-    if let error = error {
-      NSLog("Cannot send notification: \(error.localizedDescription)")
+  DispatchQueue.main.async {
+    let categoryIdent = "ACTION_CATEGORY_\(identifier)"
+    var actions: [UNNotificationAction] = []
+    for i in stride(from: 0, to: actionStrings.count, by: 2) {
+      let action = UNNotificationAction(
+        identifier: actionStrings[i],
+        title: actionStrings[i+1],
+        options: .foreground
+      )
+      actions.append(action)
     }
-    DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
-      closeNotification(identifier, NOTIFICATION_CLOSED_REASON_EXPIRY.rawValue)
+
+    let category = UNNotificationCategory(
+      identifier: categoryIdent,
+      actions: actions,
+      intentIdentifiers: [],
+      hiddenPreviewsBodyPlaceholder: "",
+      options: .customDismissAction
+    )
+    center.setNotificationCategories([category])
+
+    let content = UNMutableNotificationContent()
+    content.title = title
+    content.body = body
+    content.categoryIdentifier = categoryIdent
+
+    let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
+
+    center.add(request) { error in
+      if let error = error {
+        NSLog("Cannot send notification: \(error.localizedDescription)")
+      }
+      DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
+        closeNotification(identifier, NOTIFICATION_CLOSED_REASON_EXPIRY.rawValue)
+      }
     }
   }
 }
@@ -111,6 +113,8 @@ public func closeNotification(
   _ identifier: String,
   _ reason: UInt32
 ) {
-  center.removeDeliveredNotifications(withIdentifiers: [identifier])
-  fcitx.destroyNotificationItem(identifier, reason)
+  DispatchQueue.main.async {
+    center.removeDeliveredNotifications(withIdentifiers: [identifier])
+    fcitx.destroyNotificationItem(identifier, reason)
+  }
 }
