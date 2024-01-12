@@ -4,11 +4,11 @@
 
 #include <keyboard.h>
 
-#include "fcitx.h"
 #include "fcitx-swift.h"
+#include "fcitx.h"
+#include "../macosnotifications/macosnotifications.h"
 #include "keycode.h"
 #include "nativestreambuf.h"
-#include "../macosnotifications/macosnotifications.h"
 
 namespace fs = std::filesystem;
 
