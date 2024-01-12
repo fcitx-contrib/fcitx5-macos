@@ -47,7 +47,7 @@ public func showPreedit(_ preedit: String, caretPos: Int) {
     return
   }
   client.setMarkedText(
-    preedit,
+    NSMutableAttributedString(string: preedit),
     selectionRange: NSRange(location: caretPos, length: 0),
     replacementRange: NSRange(location: NSNotFound, length: 0)
   )
