@@ -57,6 +57,8 @@ void Fcitx::setupEnv() {
         join_paths({// /Library/Input Methods/Fcitx5.app/Contents/lib/fcitx5/
                     app_contents_path / "lib" / "fcitx5",
                     // ~/Library/fcitx5/lib/fcitx5/
+                    // Install into user_prefix to keep user-installed
+                    // plugins when fcitx.app is reinstalled
                     user_prefix / "lib" / "fcitx5"});
     std::string xdg_data_dirs = join_paths({
         user_prefix / "share" // ~/Library/fcitx5/share/
