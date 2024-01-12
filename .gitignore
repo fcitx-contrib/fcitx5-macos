@@ -2,3 +2,4 @@
 build
 *.dmg
 *.tar.bz2
+.cache
