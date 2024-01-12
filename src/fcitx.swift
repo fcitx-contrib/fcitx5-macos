@@ -32,11 +32,13 @@ public func getCandidateList() -> [String] {
 }
 
 public func showCandidatePanel() {
-  if candidateList.isEmpty {
-    imkc.hide()
-  } else {
-    imkc.update()
-    imkc.show()
+  DispatchQueue.main.async {
+    if candidateList.isEmpty {
+      imkc.hide()
+    } else {
+      imkc.update()
+      imkc.show()
+    }
   }
 }
 

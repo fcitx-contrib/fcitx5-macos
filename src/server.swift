@@ -37,9 +37,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // But setting 10 virtual keyCodes doesn't work, so just disable it.
     candidates.setSelectionKeys([])
     setImkc(candidates)
-    start_fcitx()
+    start_fcitx_thread()
   }
 
   func applicationWillTerminate(_ notification: Notification) {
+    stop_fcitx_thread()
   }
 }

@@ -15,6 +15,8 @@ add_executable(Fcitx5
     MACOSX_BUNDLE
     server.swift
     controller.swift
+    config/menu.swift
+    config/about.swift
     fcitx.cpp
     keycode.cpp
 )
