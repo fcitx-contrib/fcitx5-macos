@@ -36,10 +36,9 @@ public:
     void forwardKeyImpl(const ForwardKeyEvent &key) override {}
 
     void updatePreeditImpl() override {
-        auto text = frontend_->instance()->outputFilter(
+        auto preedit = frontend_->instance()->outputFilter(
             this, inputPanel().clientPreedit());
-        auto strPreedit = text.toString();
-        frontend_->showPreedit(strPreedit, text.cursor());
+        frontend_->showPreedit(preedit.toString(), preedit.cursor());
     }
 
     void updateInputPanel() {
