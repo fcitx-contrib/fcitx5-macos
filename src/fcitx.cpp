@@ -54,17 +54,17 @@ void Fcitx::setupEnv() {
     fs::path app_contents_path{APP_CONTENTS_PATH};
     fs::path user_prefix = home / "Library" / "fcitx5"; // ~/Library/fcitx5
     std::string fcitx_addon_dirs =
-        join_paths({// /Library/Input Methods/Fcitx5.app/Contents/lib/fcitx5/
+        join_paths({// /Library/Input Methods/Fcitx5.app/Contents/lib/fcitx5
                     app_contents_path / "lib" / "fcitx5",
-                    // ~/Library/fcitx5/lib/fcitx5/
+                    // ~/Library/fcitx5/lib/fcitx5
                     // Install into user_prefix to keep user-installed
-                    // plugins when fcitx.app is reinstalled
+                    // plugins when Fcitx.app is reinstalled
                     user_prefix / "lib" / "fcitx5"});
     std::string xdg_data_dirs = join_paths({
-        user_prefix / "share" // ~/Library/fcitx5/share/
+        user_prefix / "share" // ~/Library/fcitx5/share
     });
     std::string libime_model_dirs = join_paths({
-        user_prefix / "lib" / "libime" // ~/Library/fcitx5/lib/libime/
+        user_prefix / "lib" / "libime" // ~/Library/fcitx5/lib/libime
     });
     setenv("LANGUAGE", "en", 1); // Needed by libintl-lite
     setenv("FCITX_ADDON_DIRS", fcitx_addon_dirs.c_str(), 1);
