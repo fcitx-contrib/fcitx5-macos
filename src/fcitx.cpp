@@ -52,12 +52,18 @@ void Fcitx::setupLog(bool verbose) {
 void Fcitx::setupEnv() {
     fs::path home{getenv("HOME")};
     fs::path app_contents_path{APP_CONTENTS_PATH};
-    fs::path user_prefix = home / "Library" / "fcitx5";
-    std::string fcitx_addon_dirs = join_paths(
-        {app_contents_path / "lib" / "fcitx5", user_prefix / "lib" / "fcitx5"});
-    std::string xdg_data_dirs = join_paths({user_prefix / "share"});
-    std::string libime_model_dirs =
-        join_paths({user_prefix / "lib" / "libime"});
+    fs::path user_prefix = home / "Library" / "fcitx5"; // ~/Library/fcitx5
+    std::string fcitx_addon_dirs =
+        join_paths({// /Library/Input Methods/Fcitx5.app/Contents/lib/fcitx5/
+                    app_contents_path / "lib" / "fcitx5",
+                    // ~/Library/fcitx5/lib/fcitx5/
+                    user_prefix / "lib" / "fcitx5"});
+    std::string xdg_data_dirs = join_paths({
+        user_prefix / "share" // ~/Library/fcitx5/share/
+    });
+    std::string libime_model_dirs = join_paths({
+        user_prefix / "lib" / "libime" // ~/Library/fcitx5/lib/libime/
+    });
     setenv("LANGUAGE", "en", 1); // Needed by libintl-lite
     setenv("FCITX_ADDON_DIRS", fcitx_addon_dirs.c_str(), 1);
     setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
@@ -73,8 +79,9 @@ void Fcitx::setupInstance() {
 }
 
 void Fcitx::setupFrontend() {
-    auto p_frontend = macosfrontend();
-    p_frontend->setCandidateListCallback(
+    macosfrontend_ =
+        dynamic_cast<fcitx::MacosFrontend *>(addonMgr().addon("macosfrontend"));
+    macosfrontend_->setCandidateListCallback(
         [](const std::vector<std::string> &candidateList, const int) {
             SwiftFcitx::clearCandidateList();
             for (const auto &candidate : candidateList) {
@@ -82,11 +89,12 @@ void Fcitx::setupFrontend() {
             }
             SwiftFcitx::showCandidatePanel();
         });
-    p_frontend->setCommitStringCallback(
+    macosfrontend_->setCommitStringCallback(
         [](const std::string &s) { SwiftFcitx::commit(s.c_str()); });
-    p_frontend->setShowPreeditCallback([](const std::string &s, int caretPos) {
-        SwiftFcitx::showPreedit(s.c_str(), caretPos);
-    });
+    macosfrontend_->setShowPreeditCallback(
+        [](const std::string &s, int caretPos) {
+            SwiftFcitx::showPreedit(s.c_str(), caretPos);
+        });
 }
 
 void Fcitx::exec() {
@@ -106,9 +114,7 @@ fcitx::AddonInstance *Fcitx::addon(const std::string &name) {
     return addonMgr().addon(name);
 }
 
-fcitx::MacosFrontend *Fcitx::macosfrontend() {
-    return dynamic_cast<fcitx::MacosFrontend *>(addon("macosfrontend"));
-}
+fcitx::MacosFrontend *Fcitx::macosfrontend() { return macosfrontend_; }
 
 /// A helper function to convert a vector of std::filesystem::path
 /// into a colon-separated string.

@@ -26,8 +26,6 @@ public:
     fcitx::MacosFrontend *macosfrontend();
 
 private:
-    friend void start_fcitx_thread();
-
     void setupLog(bool verbose);
     void setupEnv();
     void setupInstance();
@@ -35,6 +33,7 @@ private:
 
     std::unique_ptr<fcitx::Instance> instance_;
     std::unique_ptr<fcitx::EventDispatcher> dispatcher_;
+    fcitx::MacosFrontend *macosfrontend_;
 };
 
 /// Run a function in the fcitx thread and obtain its return value

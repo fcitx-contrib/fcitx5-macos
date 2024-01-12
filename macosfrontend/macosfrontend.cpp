@@ -178,12 +178,13 @@ Cookie MacosFrontend::createInputContext(const std::string &appId) {
 void MacosFrontend::destroyInputContext(Cookie cookie) {
     // Defend against the case where the IC is destroyed before
     // focus-out.
-    if (icTable_.count(cookie)) {
-        if (activeIC_ == icTable_[cookie].get()) {
+    auto it = icTable_.find(cookie);
+    if (it != icTable_.end()) {
+        if (activeIC_ == it->second.get()) {
             activeIC_ = nullptr;
         }
+        icTable_.erase(it);
     }
-    icTable_.erase(cookie);
 }
 
 void MacosFrontend::focusIn(Cookie cookie) {
