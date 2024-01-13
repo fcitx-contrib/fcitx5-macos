@@ -1,5 +1,6 @@
 #include <atomic>
 #include <filesystem>
+#include <sstream>
 #include <thread>
 
 #include <keyboard.h>
@@ -78,6 +79,7 @@ void Fcitx::setupInstance() {
     auto &addonMgr = instance_->addonManager();
     addonMgr.registerDefaultLoader(&staticAddons);
     instance_->initialize();
+    instance_->enumerate(true);
 }
 
 void Fcitx::setupFrontend() {
@@ -109,6 +111,8 @@ void Fcitx::exit() { instance_->exit(); }
 void Fcitx::schedule(std::function<void()> func) {
     dispatcher_->schedule(func);
 }
+
+fcitx::Instance *Fcitx::instance() { return instance_.get(); }
 
 fcitx::AddonManager &Fcitx::addonMgr() { return instance_->addonManager(); }
 
@@ -183,4 +187,48 @@ void focus_in(uint64_t cookie) {
 void focus_out(uint64_t cookie) {
     with_fcitx<void>(
         [=](Fcitx &fcitx) { fcitx.macosfrontend()->focusOut(cookie); });
+}
+
+std::string input_method_groups() noexcept {
+    return with_fcitx<std::string>([](Fcitx &fcitx) {
+        std::stringstream ss;
+        auto groups = fcitx.instance()->inputMethodManager().groups();
+        for (const auto &g : groups) {
+            ss << g + "\n";
+        }
+        return ss.str();
+    });
+}
+
+std::string input_method_list() noexcept {
+    return with_fcitx<std::string>([](Fcitx &fcitx) noexcept {
+        std::stringstream ss;
+        auto group = fcitx.instance()->inputMethodManager().currentGroup();
+        for (const auto &im : group.inputMethodList()) {
+            ss << im.name() + "\n";
+        }
+        return std::move(ss).str();
+    });
+}
+
+void set_current_input_method_group(const char *groupName) noexcept {
+    return with_fcitx<void>([=](Fcitx &fcitx) {
+        fcitx.instance()->inputMethodManager().setCurrentGroup(groupName);
+    });
+}
+
+std::string get_current_input_method_group() noexcept {
+    return with_fcitx<std::string>([=](Fcitx &fcitx) {
+        return fcitx.instance()->inputMethodManager().currentGroup().name();
+    });
+}
+
+void set_current_input_method(const char *imName) noexcept {
+    return with_fcitx<void>(
+        [=](Fcitx &fcitx) { fcitx.instance()->setCurrentInputMethod(imName); });
+}
+
+std::string get_current_input_method() noexcept {
+    return with_fcitx<std::string>(
+        [=](Fcitx &fcitx) { return fcitx.instance()->currentInputMethod(); });
 }

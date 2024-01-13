@@ -83,9 +83,64 @@ class FcitxInputController: IMKInputController {
   }
 
   override func menu() -> NSMenu! {
-    let menu = NSMenu(title: "")
+    let menu = NSMenu()
+
+    // Group switcher
+    let groupNames = String(input_method_groups()).split(separator: "\n")
+    let currentGroup = String(get_current_input_method_group())
+    if groupNames.count > 1 {
+      for groupName in groupNames {
+        let groupName = String(groupName)
+        let item = NSMenuItem(title: groupName, action: #selector(switchGroup), keyEquivalent: "")
+        item.representedObject = groupName
+        if groupName == currentGroup {
+          item.state = .on
+        }
+        menu.addItem(item)
+      }
+      menu.addItem(NSMenuItem.separator())
+    }
+
+    // Input method switcher
+    let inputMethods = String(input_method_list()).split(separator: "\n")
+    let currentIM = String(get_current_input_method())
+    for inputMethod in inputMethods {
+      let imName = String(inputMethod)
+      let item = NSMenuItem(title: imName, action: #selector(switchInputMethod), keyEquivalent: "")
+      item.representedObject = imName
+      if inputMethod == currentIM {
+        item.state = .on
+      }
+      menu.addItem(item)
+    }
+    menu.addItem(NSMenuItem.separator())
+
     menu.addItem(withTitle: "About Fcitx5 macOS", action: #selector(about(_:)), keyEquivalent: "")
     return menu
+  }
+
+  @objc func switchGroup(sender: Any) {
+    // Curiously, the sender is a NSMutableDictionary, and looks like this:
+    // {
+    //     IMKCommandClient = "<IPMDServerClientWrapper: 0x6000002a41e0>";
+    //     IMKCommandMenuItem = "<NSMenuItem: 0x6000018818f0 Other>";
+    //     IMKMenuTitle = Other;
+    // }
+    if let sender = sender as? NSMutableDictionary {
+      if let menuItem = sender["IMKCommandMenuItem"] as? NSMenuItem {
+        let groupName = menuItem.representedObject as! String
+        set_current_input_method_group(groupName)
+      }
+    }
+  }
+
+  @objc func switchInputMethod(sender: Any?) {
+    if let sender = sender as? NSMutableDictionary {
+      if let menuItem = sender["IMKCommandMenuItem"] as? NSMenuItem {
+        let imName = menuItem.representedObject as! String
+        set_current_input_method(imName)
+      }
+    }
   }
 }
 

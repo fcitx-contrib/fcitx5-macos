@@ -21,6 +21,7 @@ public:
     void exit();
     void schedule(std::function<void()>);
 
+    fcitx::Instance *instance();
     fcitx::AddonManager &addonMgr();
     fcitx::AddonInstance *addon(const std::string &name);
     fcitx::MacosFrontend *macosfrontend();
