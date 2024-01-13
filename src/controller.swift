@@ -102,13 +102,19 @@ class FcitxInputController: IMKInputController {
     }
 
     // Input method switcher
-    let inputMethods = String(input_method_list()).split(separator: "\n")
+    let inputMethodPairs = String(input_method_list()).split(separator: "\n")
     let currentIM = String(get_current_input_method())
-    for inputMethod in inputMethods {
-      let imName = String(inputMethod)
-      let item = NSMenuItem(title: imName, action: #selector(switchInputMethod), keyEquivalent: "")
+    for inputMethodPair in inputMethodPairs {
+      let parts = inputMethodPair.split(separator: ":", maxSplits: 1)
+      let imName = String(parts[0])
+      let nativeName = String(parts[1])
+      let item = NSMenuItem(
+        title: nativeName,
+        action: #selector(switchInputMethod),
+        keyEquivalent: ""
+      )
       item.representedObject = imName
-      if inputMethod == currentIM {
+      if imName == currentIM {
         item.state = .on
       }
       menu.addItem(item)

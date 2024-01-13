@@ -203,9 +203,18 @@ std::string input_method_groups() noexcept {
 std::string input_method_list() noexcept {
     return with_fcitx<std::string>([](Fcitx &fcitx) noexcept {
         std::stringstream ss;
-        auto group = fcitx.instance()->inputMethodManager().currentGroup();
+        auto &imMgr = fcitx.instance()->inputMethodManager();
+        auto group = imMgr.currentGroup();
         for (const auto &im : group.inputMethodList()) {
-            ss << im.name() + "\n";
+            auto entry = imMgr.entry(im.name());
+            if (!entry)
+                continue;
+            std::string displayName = entry->nativeName();
+            if (displayName == "")
+                displayName = entry->name();
+            if (displayName == "")
+                displayName = entry->uniqueName();
+            ss << im.name() << ":" << displayName + "\n";
         }
         return std::move(ss).str();
     });
