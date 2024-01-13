@@ -196,7 +196,7 @@ std::string input_method_groups() noexcept {
         for (const auto &g : groups) {
             ss << g + "\n";
         }
-        return ss.str();
+        return std::move(ss).str();
     });
 }
 

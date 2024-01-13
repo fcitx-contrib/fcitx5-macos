@@ -119,7 +119,7 @@ class FcitxInputController: IMKInputController {
     return menu
   }
 
-  @objc func switchGroup(sender: Any) {
+  @objc func switchGroup(sender: Any?) {
     // Curiously, the sender is a NSMutableDictionary, and looks like this:
     // {
     //     IMKCommandClient = "<IPMDServerClientWrapper: 0x6000002a41e0>";
