@@ -209,11 +209,11 @@ std::string input_method_list() noexcept {
             auto entry = imMgr.entry(im.name());
             if (!entry)
                 continue;
-            std::string displayName = entry->nativeName();
-            if (displayName == "")
-                displayName = entry->name();
-            if (displayName == "")
-                displayName = entry->uniqueName();
+            std::string displayName =
+                entry->nativeName() != ""   ? entry->nativeName()
+                : entry->name() != ""       ? entry->name()
+                : entry->uniqueName() != "" ? entry->uniqueName()
+                                            : im.name();
             ss << im.name() << ":" << displayName + "\n";
         }
         return std::move(ss).str();
