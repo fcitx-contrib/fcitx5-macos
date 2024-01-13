@@ -44,7 +44,6 @@ option(ENABLE_XDGAUTOSTART "" OFF)
 option(ENABLE_EMOJI "" OFF)
 option(ENABLE_LIBUUID "" OFF)
 option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
-option(ENABLE_CODESIGN "Sign the executable file" OFF)
 
 if(ENABLE_ASAN)
   include(AddressSanitizer)

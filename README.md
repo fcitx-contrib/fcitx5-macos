@@ -22,9 +22,7 @@ sudo cmake --install build
 ```
 
 ### Code sign
-Some features can require the binary to be code-signed.  Configure with `-DENABLE_CODESIGN=ON` to enable ad-hoc signing for development.
-
-The app bundle need to be code-signed separately after installation:
+Some features require the app bundle be code-signed after installation:
 ```
 sudo /usr/bin/codesign --force --sign $KEY --timestamp --options runtime --deep /Library/Input\ Methods/Fcitx5.app/
 ```
