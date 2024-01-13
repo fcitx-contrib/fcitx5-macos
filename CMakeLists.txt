@@ -45,7 +45,6 @@ option(ENABLE_EMOJI "" OFF)
 option(ENABLE_LIBUUID "" OFF)
 option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
 option(ENABLE_CODESIGN "Sign the executable file" OFF)
-set(CODESIGN_KEY "" CACHE STRING "The key used for code signing")
 
 if(ENABLE_ASAN)
   include(AddressSanitizer)

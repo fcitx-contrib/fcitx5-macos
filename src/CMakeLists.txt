@@ -54,11 +54,8 @@ install(TARGETS Fcitx5
 )
 
 if(ENABLE_CODESIGN)
-  if(CODESIGN_KEY STREQUAL "")
-    message(FATAL_ERROR "You must define CODESIGN_KEY if you enable codesign.")
-  endif()
   add_custom_command(TARGET Fcitx5 POST_BUILD
-    COMMAND /usr/bin/codesign --force --sign ${CODESIGN_KEY} --timestamp --options runtime $<TARGET_FILE:Fcitx5>
+    COMMAND /usr/bin/codesign --force --sign - --timestamp --options runtime $<TARGET_FILE:Fcitx5>
     COMMENT "Signing the executable..."
   )
 endif()
