@@ -42,13 +42,24 @@ public func showCandidatePanel() {
   }
 }
 
-public func showPreedit(_ preedit: String, caretPos: Int) {
+public func showPreedit(_ preedit: String, _ caretPosUtf8: Int) {
   guard let client = globalClient as? IMKTextInput else {
     return
   }
+  // The caretPos argument is specified in UTF-8 bytes.
+  // Convert it to UTF-16.
+  var u8pos = 0
+  var u16pos = 0
+  for ch in preedit {
+    if u8pos == caretPosUtf8 {
+      break
+    }
+    u8pos += ch.utf8.count
+    u16pos += 1
+  }
   client.setMarkedText(
-    preedit,
-    selectionRange: NSRange(location: caretPos, length: 0),
+    NSMutableAttributedString(string: preedit),
+    selectionRange: NSRange(location: u16pos, length: 0),
     replacementRange: NSRange(location: NSNotFound, length: 0)
   )
 }
