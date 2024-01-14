@@ -22,11 +22,10 @@ sudo cmake --install build
 ```
 
 ### Code sign
-Some features require the app bundle be code-signed after installation:
+Some features (e.g. notifications) require the app bundle be code-signed after installation:
 ```
-sudo /usr/bin/codesign --force --sign $KEY --timestamp --options runtime --deep /Library/Input\ Methods/Fcitx5.app/
+sudo /usr/bin/codesign --force --sign - --deep /Library/Input\ Methods/Fcitx5.app
 ```
-where `$KEY` can be `-` for ad-hoc signing.
 
 ## Debug
 ### Console.app

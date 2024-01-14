@@ -39,7 +39,7 @@ uint32_t Notifications::sendNotification(
     NotificationActionCallback actionCallback,
     NotificationClosedCallback closedCallback) {
 
-    FCITX_UNUSED(appIcon);
+    FCITX_UNUSED(appIcon); // No way to customize icon
 
     if (itemTable_.find(replaceId)) {
         closeNotification(replaceId);
