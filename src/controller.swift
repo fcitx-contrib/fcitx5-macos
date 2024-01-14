@@ -126,26 +126,14 @@ class FcitxInputController: IMKInputController {
   }
 
   @objc func switchGroup(sender: Any?) {
-    // Curiously, the sender is a NSMutableDictionary, and looks like this:
-    // {
-    //     IMKCommandClient = "<IPMDServerClientWrapper: 0x6000002a41e0>";
-    //     IMKCommandMenuItem = "<NSMenuItem: 0x6000018818f0 Other>";
-    //     IMKMenuTitle = Other;
-    // }
-    if let sender = sender as? NSMutableDictionary {
-      if let menuItem = sender["IMKCommandMenuItem"] as? NSMenuItem {
-        let groupName = menuItem.representedObject as! String
-        set_current_input_method_group(groupName)
-      }
+    if let groupName = repObjectIMK(sender) as? String {
+      set_current_input_method_group(groupName)
     }
   }
 
   @objc func switchInputMethod(sender: Any?) {
-    if let sender = sender as? NSMutableDictionary {
-      if let menuItem = sender["IMKCommandMenuItem"] as? NSMenuItem {
-        let imName = menuItem.representedObject as! String
-        set_current_input_method(imName)
-      }
+    if let imName = repObjectIMK(sender) as? String {
+      set_current_input_method(imName)
     }
   }
 }
@@ -157,4 +145,21 @@ private func removeCtrl(char: UInt32) -> UInt32 {
   } else {
     return char
   }
+}
+
+/// Extract the representedObject of the sender of an IMK menu action.
+///
+/// The sender of an IMK menu action is a NSMutableDictionary:
+/// {
+///     IMKCommandClient = "<IPMDServerClientWrapper: 0x6000002a41e0>";
+///     IMKCommandMenuItem = "<NSMenuItem: 0x6000018818f0 Other>";
+///     IMKMenuTitle = Other;
+/// }
+private func repObjectIMK(_ sender: Any?) -> Any? {
+  if let sender = sender as? NSMutableDictionary {
+    if let menuItem = sender["IMKCommandMenuItem"] as? NSMenuItem {
+      return menuItem.representedObject
+    }
+  }
+  return nil
 }

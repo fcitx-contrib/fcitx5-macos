@@ -79,7 +79,6 @@ void Fcitx::setupInstance() {
     auto &addonMgr = instance_->addonManager();
     addonMgr.registerDefaultLoader(&staticAddons);
     instance_->initialize();
-    instance_->enumerate(true);
 }
 
 void Fcitx::setupFrontend() {
