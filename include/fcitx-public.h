@@ -16,4 +16,13 @@ void destroy_input_context(Cookie) noexcept;
 void focus_in(Cookie) noexcept;
 void focus_out(Cookie) noexcept;
 
+// NOTE: It's impossible to use std::vector<std::string> directly
+// until Swift fixes C++ interop.
+std::string input_method_groups() noexcept;
+std::string input_method_list() noexcept;
+void set_current_input_method_group(const char *) noexcept;
+std::string get_current_input_method_group() noexcept;
+void set_current_input_method(const char *) noexcept;
+std::string get_current_input_method() noexcept;
+
 #endif

@@ -83,9 +83,58 @@ class FcitxInputController: IMKInputController {
   }
 
   override func menu() -> NSMenu! {
-    let menu = NSMenu(title: "")
+    let menu = NSMenu()
+
+    // Group switcher
+    let groupNames = String(input_method_groups()).split(separator: "\n")
+    let currentGroup = String(get_current_input_method_group())
+    if groupNames.count > 1 {
+      for groupName in groupNames {
+        let groupName = String(groupName)
+        let item = NSMenuItem(title: groupName, action: #selector(switchGroup), keyEquivalent: "")
+        item.representedObject = groupName
+        if groupName == currentGroup {
+          item.state = .on
+        }
+        menu.addItem(item)
+      }
+      menu.addItem(NSMenuItem.separator())
+    }
+
+    // Input method switcher
+    let inputMethodPairs = String(input_method_list()).split(separator: "\n")
+    let currentIM = String(get_current_input_method())
+    for inputMethodPair in inputMethodPairs {
+      let parts = inputMethodPair.split(separator: ":", maxSplits: 1)
+      let imName = String(parts[0])
+      let nativeName = String(parts[1])
+      let item = NSMenuItem(
+        title: nativeName,
+        action: #selector(switchInputMethod),
+        keyEquivalent: ""
+      )
+      item.representedObject = imName
+      if imName == currentIM {
+        item.state = .on
+      }
+      menu.addItem(item)
+    }
+    menu.addItem(NSMenuItem.separator())
+
     menu.addItem(withTitle: "About Fcitx5 macOS", action: #selector(about(_:)), keyEquivalent: "")
     return menu
+  }
+
+  @objc func switchGroup(sender: Any?) {
+    if let groupName = repObjectIMK(sender) as? String {
+      set_current_input_method_group(groupName)
+    }
+  }
+
+  @objc func switchInputMethod(sender: Any?) {
+    if let imName = repObjectIMK(sender) as? String {
+      set_current_input_method(imName)
+    }
   }
 }
 
@@ -96,4 +145,21 @@ private func removeCtrl(char: UInt32) -> UInt32 {
   } else {
     return char
   }
+}
+
+/// Extract the representedObject of the sender of an IMK menu action.
+///
+/// The sender of an IMK menu action is a NSMutableDictionary:
+/// {
+///     IMKCommandClient = "<IPMDServerClientWrapper: 0x6000002a41e0>";
+///     IMKCommandMenuItem = "<NSMenuItem: 0x6000018818f0 Other>";
+///     IMKMenuTitle = Other;
+/// }
+private func repObjectIMK(_ sender: Any?) -> Any? {
+  if let sender = sender as? NSMutableDictionary {
+    if let menuItem = sender["IMKCommandMenuItem"] as? NSMenuItem {
+      return menuItem.representedObject
+    }
+  }
+  return nil
 }
