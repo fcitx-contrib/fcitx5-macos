@@ -52,8 +52,3 @@ add_custom_command(TARGET Fcitx5 POST_BUILD
 install(TARGETS Fcitx5
     BUNDLE DESTINATION "${APP_INSTALL_PATH}"
 )
-
-add_custom_command(TARGET Fcitx5 POST_BUILD
-  COMMAND /usr/bin/codesign --force --sign - --timestamp --options runtime $<TARGET_FILE:Fcitx5>
-  COMMENT "Signing the executable..."
-)
