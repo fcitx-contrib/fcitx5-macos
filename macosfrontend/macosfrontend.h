@@ -34,9 +34,9 @@ public:
 
     void updateCandidateList(const std::vector<std::string> &candidates,
                              const int size);
-
     void commitString(const std::string &text);
     void showPreedit(const std::string &, int);
+
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setShowPreeditCallback(const ShowPreeditCallback &callback);

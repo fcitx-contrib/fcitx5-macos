@@ -5,7 +5,9 @@
 
 #include <keyboard.h>
 
+#include "fcitx-swift.h"
 #include "fcitx.h"
+#include "../macosnotifications/macosnotifications.h"
 #include "keycode.h"
 #include "nativestreambuf.h"
 
@@ -15,11 +17,14 @@ namespace fs = std::filesystem;
 
 fcitx::KeyboardEngineFactory keyboardFactory;
 fcitx::MacosFrontendFactory macosFrontendFactory;
+fcitx::MacosNotificationsFactory macosNotificationsFactory;
 fcitx::StaticAddonRegistry staticAddons = {
     std::make_pair<std::string, fcitx::AddonFactory *>("keyboard",
                                                        &keyboardFactory),
     std::make_pair<std::string, fcitx::AddonFactory *>("macosfrontend",
-                                                       &macosFrontendFactory)};
+                                                       &macosFrontendFactory),
+    std::make_pair<std::string, fcitx::AddonFactory *>(
+        "notifications", &macosNotificationsFactory)};
 
 static std::string join_paths(const std::vector<fs::path> &paths,
                               char sep = ':');
@@ -134,7 +139,7 @@ static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
     return result;
 }
 
-void start_fcitx_thread() {
+void start_fcitx_thread() noexcept {
     auto &fcitx = Fcitx::shared();
     bool expected = false;
     if (!fcitx_thread_started.compare_exchange_strong(expected, true)) {
@@ -146,7 +151,7 @@ void start_fcitx_thread() {
     fcitx_thread = std::thread([&fcitx] { fcitx.exec(); });
 }
 
-void stop_fcitx_thread() {
+void stop_fcitx_thread() noexcept {
     auto &fcitx = Fcitx::shared();
     fcitx.exit();
     if (fcitx_thread.joinable()) {
@@ -155,7 +160,7 @@ void stop_fcitx_thread() {
 }
 
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
-                 uint16_t osxKeycode, bool isRelease) {
+                 uint16_t osxKeycode, bool isRelease) noexcept {
     const fcitx::Key parsedKey{
         osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
         osx_modifiers_to_fcitx_keystates(osxModifiers),
@@ -166,24 +171,24 @@ bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
     });
 }
 
-uint64_t create_input_context(const char *appId) {
+uint64_t create_input_context(const char *appId) noexcept {
     return with_fcitx<uint64_t>([=](Fcitx &fcitx) {
         return fcitx.macosfrontend()->createInputContext(appId);
     });
 }
 
-void destroy_input_context(uint64_t cookie) {
+void destroy_input_context(uint64_t cookie) noexcept {
     with_fcitx<void>([=](Fcitx &fcitx) {
         fcitx.macosfrontend()->destroyInputContext(cookie);
     });
 }
 
-void focus_in(uint64_t cookie) {
+void focus_in(uint64_t cookie) noexcept {
     with_fcitx<void>(
         [=](Fcitx &fcitx) { fcitx.macosfrontend()->focusIn(cookie); });
 }
 
-void focus_out(uint64_t cookie) {
+void focus_out(uint64_t cookie) noexcept {
     with_fcitx<void>(
         [=](Fcitx &fcitx) { fcitx.macosfrontend()->focusOut(cookie); });
 }

@@ -2,20 +2,20 @@
 #define FCITX5_MACOS_FCITX_H
 
 #include <cstdint>
-#include "fcitx-swift.h"
+#include <string>
 
 typedef uint64_t Cookie;
 
-void start_fcitx_thread();
-void stop_fcitx_thread();
+void start_fcitx_thread() noexcept;
+void stop_fcitx_thread() noexcept;
 
 // Though being UInt, 32b is enough for modifiers
-bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers, uint16_t osxKeycode, bool isRelease);
+bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers, uint16_t osxKeycode, bool isRelease) noexcept;
 
-Cookie create_input_context(const char *appId);
-void destroy_input_context(Cookie);
-void focus_in(Cookie);
-void focus_out(Cookie);
+Cookie create_input_context(const char *appId) noexcept;
+void destroy_input_context(Cookie) noexcept;
+void focus_in(Cookie) noexcept;
+void focus_out(Cookie) noexcept;
 
 // NOTE: It's impossible to use std::vector<std::string> directly
 // until Swift fixes C++ interop.

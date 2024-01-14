@@ -3,3 +3,4 @@ Name=macOS Frontend
 Type=StaticLibrary
 Library=libmacosfrontend
 Category=Frontend
+Version=@PROJECT_VERSION@

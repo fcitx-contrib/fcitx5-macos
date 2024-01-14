@@ -21,7 +21,7 @@ add_executable(Fcitx5
     keycode.cpp
 )
 
-add_dependencies(Fcitx5 macosfrontend)
+add_dependencies(Fcitx5 macosfrontend macosnotifications)
 
 target_include_directories(Fcitx5 PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
 target_include_directories(Fcitx5 PRIVATE
@@ -33,9 +33,11 @@ target_include_directories(Fcitx5 PRIVATE
 target_link_libraries(Fcitx5
     "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
     SwiftFcitx
+    SwiftNotify
     Fcitx5::Core
     keyboard
     macosfrontend
+    macosnotifications
 )
 
 set(APP_PATH "${CMAKE_CURRENT_BINARY_DIR}/Fcitx5.app/Contents")

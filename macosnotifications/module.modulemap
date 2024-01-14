@@ -1,0 +1,4 @@
+module CxxNotify {
+  header "macosnotifications-public.h"
+  export *
+}

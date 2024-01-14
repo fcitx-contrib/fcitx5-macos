@@ -21,6 +21,12 @@ cmake --build build
 sudo cmake --install build
 ```
 
+### Code sign
+Some features (e.g. notifications) require the app bundle be code-signed after installation:
+```
+sudo /usr/bin/codesign --force --sign - --deep /Library/Input\ Methods/Fcitx5.app
+```
+
 ## Debug
 ### Console.app
 * Check `Include Info Messages` and `Include Debug Messages` in `Action` menu.

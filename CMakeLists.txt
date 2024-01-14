@@ -43,6 +43,11 @@ option(USE_SYSTEMD "" OFF)
 option(ENABLE_XDGAUTOSTART "" OFF)
 option(ENABLE_EMOJI "" OFF)
 option(ENABLE_LIBUUID "" OFF)
+option(ENABLE_ASAN "Enable Address Sanitizer" OFF)
+
+if(ENABLE_ASAN)
+  include(AddressSanitizer)
+endif()
 
 set(APP_INSTALL_PATH "/Library/Input Methods")
 set(CMAKE_INSTALL_PREFIX "${APP_INSTALL_PATH}/Fcitx5.app/Contents")
@@ -51,6 +56,7 @@ set(CMAKE_INSTALL_LIBDATADIR "${CMAKE_INSTALL_PREFIX}/lib")
 add_subdirectory(fcitx5)
 
 add_subdirectory(macosfrontend)
+add_subdirectory(macosnotifications)
 
 include_directories(include)
 add_subdirectory(src)
