@@ -10,6 +10,7 @@
 #include "../macosnotifications/macosnotifications.h"
 #include "keycode.h"
 #include "nativestreambuf.h"
+#include "webview_candidate_window.hpp"
 
 namespace fs = std::filesystem;
 
@@ -37,11 +38,13 @@ Fcitx &Fcitx::shared() {
     return fcitx;
 }
 
-Fcitx::Fcitx() {
+Fcitx::Fcitx()
+    : window_(std::make_unique<candidate_window::WebviewCandidateWindow>()) {
     setupLog(true);
     setupEnv();
     setupInstance();
     setupFrontend();
+    window_->show(); // XXX: shouldn't call here
 }
 
 void Fcitx::setupLog(bool verbose) {
@@ -90,12 +93,14 @@ void Fcitx::setupFrontend() {
     macosfrontend_ =
         dynamic_cast<fcitx::MacosFrontend *>(addonMgr().addon("macosfrontend"));
     macosfrontend_->setCandidateListCallback(
-        [](const std::vector<std::string> &candidateList, const int) {
+        [this](const std::vector<std::string> &candidateList, const int) {
             SwiftFcitx::clearCandidateList();
             for (const auto &candidate : candidateList) {
                 SwiftFcitx::appendCandidate(candidate.c_str());
             }
             SwiftFcitx::showCandidatePanel();
+            window_->set_candidates(
+                candidateList); // XXX: this works but show() doesn't
         });
     macosfrontend_->setCommitStringCallback(
         [](const std::string &s) { SwiftFcitx::commit(s.c_str()); });

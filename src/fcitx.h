@@ -7,6 +7,7 @@
 
 #include "fcitx-public.h"
 #include "../macosfrontend/macosfrontend.h"
+#include "webview_candidate_window.hpp"
 
 /// 'Fcitx' manages the lifecycle of the global Fcitx instance.
 class Fcitx final {
@@ -35,6 +36,7 @@ private:
     std::unique_ptr<fcitx::Instance> instance_;
     std::unique_ptr<fcitx::EventDispatcher> dispatcher_;
     fcitx::MacosFrontend *macosfrontend_;
+    std::unique_ptr<candidate_window::CandidateWindow> window_;
 };
 
 /// Run a function in the fcitx thread and obtain its return value

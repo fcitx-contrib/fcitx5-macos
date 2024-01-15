@@ -1,3 +1,6 @@
 [submodule "fcitx5"]
 	path = fcitx5
 	url = https://github.com/fcitx/fcitx5
+[submodule "fcitx5-webview"]
+	path = fcitx5-webview
+	url = https://github.com/fcitx-contrib/fcitx5-webview

@@ -56,9 +56,16 @@ set(CMAKE_INSTALL_PREFIX "${APP_INSTALL_PATH}/Fcitx5.app/Contents")
 set(CMAKE_INSTALL_LIBDATADIR "${CMAKE_INSTALL_PREFIX}/lib")
 add_subdirectory(fcitx5)
 
+include_directories(
+    include
+    fcitx5-webview/include
+    fcitx5-webview/webview
+)
 add_subdirectory(macosfrontend)
 add_subdirectory(macosnotifications)
 
-include_directories(include)
 add_subdirectory(src)
 add_subdirectory(dmg)
+
+option(BUILD_PREVIEW "" OFF)
+add_subdirectory(fcitx5-webview)
