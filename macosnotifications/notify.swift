@@ -1,5 +1,5 @@
-import UserNotifications
 import CxxNotify
+import UserNotifications
 
 /// The notification center of the current app.
 let center = UNUserNotificationCenter.current()
@@ -76,7 +76,7 @@ public func sendNotification(
     for i in stride(from: 0, to: actionStrings.count, by: 2) {
       let action = UNNotificationAction(
         identifier: actionStrings[i],
-        title: actionStrings[i+1],
+        title: actionStrings[i + 1],
         options: .foreground
       )
       actions.append(action)
