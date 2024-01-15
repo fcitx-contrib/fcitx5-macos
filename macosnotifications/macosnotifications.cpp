@@ -1,9 +1,8 @@
 #include <fcitx/addonfactory.h>
 #include <fcitx/addonmanager.h>
 
-#include "macosnotifications.h"
-#include "notify-swift.h"
 #include "fcitx.h"
+#include "macosnotifications.h"
 
 namespace fcitx {
 
