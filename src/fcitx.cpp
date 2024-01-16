@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <atomic>
 #include <filesystem>
 #include <sstream>
@@ -110,7 +111,10 @@ void Fcitx::exec() {
     instance_->exec();
 }
 
-void Fcitx::exit() { instance_->exit(); }
+void Fcitx::exit() {
+    dispatcher_->detach();
+    instance_->exit();
+}
 
 void Fcitx::schedule(std::function<void()> func) {
     dispatcher_->schedule(func);
@@ -153,10 +157,18 @@ void start_fcitx_thread() noexcept {
 
 void stop_fcitx_thread() noexcept {
     auto &fcitx = Fcitx::shared();
-    fcitx.exit();
+    with_fcitx<void>([=](Fcitx &fcitx) { fcitx.exit(); });
     if (fcitx_thread.joinable()) {
         fcitx_thread.join();
     }
+    fcitx_thread_started = false;
+}
+
+void restart_fcitx_process() {
+    // No PID change, but key events on current program won't be sent to
+    // fcitx any more, although switching to another program then switching
+    // back will resume.
+    execl(APP_CONTENTS_PATH "/MacOS/Fcitx5", "Fcitx5", NULL);
 }
 
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
