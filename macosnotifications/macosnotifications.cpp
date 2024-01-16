@@ -103,7 +103,7 @@ void Notifications::closeNotification(uint64_t internalId) {
 /// global MacosNotifications instance, because it is impossible to
 /// call C++ code directly from Swift code.
 void handleActionResult(const char *externalId, const char *actionId) noexcept {
-    with_fcitx<void>([=](Fcitx &fcitx) {
+    with_fcitx([=](Fcitx &fcitx) {
         auto that = dynamic_cast<Notifications *>(fcitx.addon("notifications"));
         if (auto item = that->itemTable_.find(externalId)) {
             if (item->actionCallback) {
@@ -117,7 +117,7 @@ void handleActionResult(const char *externalId, const char *actionId) noexcept {
 /// notification item.
 void destroyNotificationItem(const char *externalId,
                              uint32_t closedReason) noexcept {
-    with_fcitx<void>([=](Fcitx &fcitx) {
+    with_fcitx([=](Fcitx &fcitx) {
         auto that = dynamic_cast<Notifications *>(fcitx.addon("notifications"));
         auto item = that->itemTable_.remove(externalId);
         if (item && item->closedCallback) {
