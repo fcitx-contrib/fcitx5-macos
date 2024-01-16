@@ -44,7 +44,6 @@ Fcitx::Fcitx()
     setupEnv();
     setupInstance();
     setupFrontend();
-    window_->show(); // XXX: shouldn't call here
 }
 
 void Fcitx::setupLog(bool verbose) {
@@ -99,11 +98,21 @@ void Fcitx::setupFrontend() {
                 SwiftFcitx::appendCandidate(candidate.c_str());
             }
             SwiftFcitx::showCandidatePanel();
-            window_->set_candidates(
-                candidateList); // XXX: this works but show() doesn't
+            window_->set_candidates(candidateList);
+
+            // XXX Just for testing
+            float x = 0.f, y = 0.f;
+            if (SwiftFcitx::getCursorCoordinates(&x, &y)) {
+                FCITX_DEBUG()
+                    << "Got client coordinates (" << x << ", " << y << ")";
+            }
+            if (candidateList.empty())
+                window_->hide();
+            else
+                window_->show(x, y);
         });
     macosfrontend_->setCommitStringCallback(
-        [](const std::string &s) { SwiftFcitx::commit(s.c_str()); });
+        [this](const std::string &s) { SwiftFcitx::commit(s.c_str()); });
     macosfrontend_->setShowPreeditCallback(
         [](const std::string &s, int caretPos) {
             SwiftFcitx::showPreedit(s.c_str(), caretPos);

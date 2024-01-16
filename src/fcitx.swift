@@ -63,3 +63,17 @@ public func showPreedit(_ preedit: String, _ caretPosUtf8: Int) {
     replacementRange: NSRange(location: NSNotFound, length: 0)
   )
 }
+
+public func getCursorCoordinates(
+  _ x: UnsafeMutablePointer<Float>,
+  _ y: UnsafeMutablePointer<Float>
+) -> Bool {
+  if let client = globalClient as? IMKTextInput {
+    var rect = NSRect(x: 0, y: 0, width: 0, height: 0)
+    client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+    x.pointee = Float(NSMinX(rect))
+    y.pointee = Float(NSMinY(rect))
+    return true
+  }
+  return false
+}
