@@ -121,7 +121,7 @@ class FcitxInputController: IMKInputController {
     }
     menu.addItem(NSMenuItem.separator())
 
-    menu.addItem(withTitle: "Force Restart", action: #selector(restart(_:)), keyEquivalent: "")
+    menu.addItem(withTitle: "Restart", action: #selector(restart(_:)), keyEquivalent: "")
     menu.addItem(withTitle: "About Fcitx5 macOS", action: #selector(about(_:)), keyEquivalent: "")
     return menu
   }

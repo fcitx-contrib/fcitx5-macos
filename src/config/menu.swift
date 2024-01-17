@@ -5,7 +5,7 @@ extension FcitxInputController {
   static var fcitxAbout: NSWindowController?
 
   @objc func restart(_: Any? = nil) {
-    restart_fcitx_process()
+    restart_fcitx_thread()
   }
 
   @objc func about(_: Any? = nil) {

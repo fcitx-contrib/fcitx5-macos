@@ -41,8 +41,16 @@ Fcitx &Fcitx::shared() {
 Fcitx::Fcitx() {
     setupLog(true);
     setupEnv();
+}
+
+void Fcitx::setup() {
     setupInstance();
     setupFrontend();
+}
+
+void Fcitx::teardown() {
+    macosfrontend_ = nullptr;
+    instance_.reset();
 }
 
 void Fcitx::setupLog(bool verbose) {
@@ -144,13 +152,14 @@ static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
 }
 
 void start_fcitx_thread() noexcept {
-    auto &fcitx = Fcitx::shared();
     bool expected = false;
     if (!fcitx_thread_started.compare_exchange_strong(expected, true)) {
         FCITX_FATAL()
             << "Trying to start multiple fcitx threads, which is forbidden";
         std::terminate();
     }
+    auto &fcitx = Fcitx::shared();
+    fcitx.setup();
     // Start the event loop in another thread.
     fcitx_thread = std::thread([&fcitx] { fcitx.exec(); });
 }
@@ -161,14 +170,13 @@ void stop_fcitx_thread() noexcept {
     if (fcitx_thread.joinable()) {
         fcitx_thread.join();
     }
+    fcitx.teardown();
     fcitx_thread_started = false;
 }
 
-void restart_fcitx_process() {
-    // No PID change, but key events on current program won't be sent to
-    // fcitx any more, although switching to another program then switching
-    // back will resume.
-    execl(APP_CONTENTS_PATH "/MacOS/Fcitx5", "Fcitx5", NULL);
+void restart_fcitx_thread() noexcept {
+    stop_fcitx_thread();
+    start_fcitx_thread();
 }
 
 bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
