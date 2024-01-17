@@ -157,7 +157,7 @@ void start_fcitx_thread() noexcept {
 
 void stop_fcitx_thread() noexcept {
     auto &fcitx = Fcitx::shared();
-    with_fcitx<void>([=](Fcitx &fcitx) { fcitx.exit(); });
+    with_fcitx([=](Fcitx &fcitx) { fcitx.exit(); });
     if (fcitx_thread.joinable()) {
         fcitx_thread.join();
     }
@@ -178,35 +178,33 @@ bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
         osx_modifiers_to_fcitx_keystates(osxModifiers),
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };
-    return with_fcitx<bool>([=](Fcitx &fcitx) {
+    return with_fcitx([=](Fcitx &fcitx) {
         return fcitx.macosfrontend()->keyEvent(cookie, parsedKey, isRelease);
     });
 }
 
 uint64_t create_input_context(const char *appId) noexcept {
-    return with_fcitx<uint64_t>([=](Fcitx &fcitx) {
+    return with_fcitx([=](Fcitx &fcitx) {
         return fcitx.macosfrontend()->createInputContext(appId);
     });
 }
 
 void destroy_input_context(uint64_t cookie) noexcept {
-    with_fcitx<void>([=](Fcitx &fcitx) {
+    with_fcitx([=](Fcitx &fcitx) {
         fcitx.macosfrontend()->destroyInputContext(cookie);
     });
 }
 
 void focus_in(uint64_t cookie) noexcept {
-    with_fcitx<void>(
-        [=](Fcitx &fcitx) { fcitx.macosfrontend()->focusIn(cookie); });
+    with_fcitx([=](Fcitx &fcitx) { fcitx.macosfrontend()->focusIn(cookie); });
 }
 
 void focus_out(uint64_t cookie) noexcept {
-    with_fcitx<void>(
-        [=](Fcitx &fcitx) { fcitx.macosfrontend()->focusOut(cookie); });
+    with_fcitx([=](Fcitx &fcitx) { fcitx.macosfrontend()->focusOut(cookie); });
 }
 
 std::string input_method_groups() noexcept {
-    return with_fcitx<std::string>([](Fcitx &fcitx) {
+    return with_fcitx([](Fcitx &fcitx) {
         std::stringstream ss;
         auto groups = fcitx.instance()->inputMethodManager().groups();
         for (const auto &g : groups) {
@@ -217,7 +215,7 @@ std::string input_method_groups() noexcept {
 }
 
 std::string input_method_list() noexcept {
-    return with_fcitx<std::string>([](Fcitx &fcitx) noexcept {
+    return with_fcitx([](Fcitx &fcitx) noexcept {
         std::stringstream ss;
         auto &imMgr = fcitx.instance()->inputMethodManager();
         auto group = imMgr.currentGroup();
@@ -237,23 +235,23 @@ std::string input_method_list() noexcept {
 }
 
 void set_current_input_method_group(const char *groupName) noexcept {
-    return with_fcitx<void>([=](Fcitx &fcitx) {
+    return with_fcitx([=](Fcitx &fcitx) {
         fcitx.instance()->inputMethodManager().setCurrentGroup(groupName);
     });
 }
 
 std::string get_current_input_method_group() noexcept {
-    return with_fcitx<std::string>([=](Fcitx &fcitx) {
+    return with_fcitx([=](Fcitx &fcitx) {
         return fcitx.instance()->inputMethodManager().currentGroup().name();
     });
 }
 
 void set_current_input_method(const char *imName) noexcept {
-    return with_fcitx<void>(
+    return with_fcitx(
         [=](Fcitx &fcitx) { fcitx.instance()->setCurrentInputMethod(imName); });
 }
 
 std::string get_current_input_method() noexcept {
-    return with_fcitx<std::string>(
+    return with_fcitx(
         [=](Fcitx &fcitx) { return fcitx.instance()->currentInputMethod(); });
 }
