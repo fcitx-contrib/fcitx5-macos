@@ -57,7 +57,7 @@ private:
 
     // Cookie management.
     // Invariant: icTable_[nextCookie_] does not exist.
-    std::unordered_map<Cookie, std::unique_ptr<MacosInputContext>> icTable_;
+    std::unordered_map<Cookie, MacosInputContext *> icTable_;
     Cookie nextCookie_ = 0;
 
     CandidateListCallback candidateListCallback =
