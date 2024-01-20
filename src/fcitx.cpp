@@ -99,23 +99,27 @@ void Fcitx::setupFrontend() {
             }
             SwiftFcitx::showCandidatePanel();
             window_->set_candidates(candidateList);
-
-            // XXX Just for testing
-            float x = 0.f, y = 0.f;
-            if (SwiftFcitx::getCursorCoordinates(&x, &y)) {
-                FCITX_DEBUG()
-                    << "Got client coordinates (" << x << ", " << y << ")";
-            }
-            if (candidateList.empty())
-                window_->hide();
-            else
-                window_->show(x, y);
+            // Don't read candidateList from callback function as it's
+            // transient.
+            auto empty = candidateList.empty();
+            dispatch_async(dispatch_get_main_queue(), ^void() {
+              float x = 0.f, y = 0.f;
+              // showPreeditCallback is executed before candidateListCallback,
+              // so in main thread preedit UI update happens before here.
+              if (!SwiftFcitx::getCursorCoordinates(&x, &y)) {
+                  FCITX_WARN() << "Fail to get preedit coordinates";
+              }
+              if (empty)
+                  window_->hide();
+              else
+                  window_->show(x, y);
+            });
         });
     macosfrontend_->setCommitStringCallback(
         [this](const std::string &s) { SwiftFcitx::commit(s.c_str()); });
     macosfrontend_->setShowPreeditCallback(
         [](const std::string &s, int caretPos) {
-            SwiftFcitx::showPreedit(s.c_str(), caretPos);
+            SwiftFcitx::setPreedit(s.c_str(), caretPos);
         });
 }
 

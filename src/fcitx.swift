@@ -42,7 +42,9 @@ public func showCandidatePanel() {
   }
 }
 
-public func showPreedit(_ preedit: String, _ caretPosUtf8: Int) {
+// Executed in fcitx thread, so before process_key returns, no UI update
+// will happen. That means we can't get coordinates in this function.
+public func setPreedit(_ preedit: String, _ caretPosUtf8: Int) {
   guard let client = globalClient as? IMKTextInput else {
     return
   }
@@ -64,6 +66,7 @@ public func showPreedit(_ preedit: String, _ caretPosUtf8: Int) {
   )
 }
 
+// Must be executed after actual preedit UI update, i.e. not simply setPreedit.
 public func getCursorCoordinates(
   _ x: UnsafeMutablePointer<Float>,
   _ y: UnsafeMutablePointer<Float>
