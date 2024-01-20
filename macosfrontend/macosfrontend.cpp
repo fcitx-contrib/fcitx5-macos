@@ -168,7 +168,11 @@ void MacosFrontend::destroyInputContext(ICUUID uuid) {
     // InputContext is not owned by InputContextManager.
     // The only exception is when Instance is destroyed,
     // InputContextManager deletes all InputContexts.
-    delete findIC(uuid);
+    auto ic = findIC(uuid);
+    if (activeIC_ == ic) {
+        activeIC_ = nullptr;
+    }
+    delete ic;
 }
 
 void MacosFrontend::focusIn(ICUUID uuid) {
