@@ -1,10 +1,9 @@
-import CxxStdlib
 import Fcitx
 import InputMethodKit
 import SwiftFcitx
 
 class FcitxInputController: IMKInputController {
-  var cookie: UInt64
+  var cookie: (UInt64, UInt64) = (0, 0)
   var appId: String
   var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
 
@@ -18,12 +17,14 @@ class FcitxInputController: IMKInputController {
     } else {
       appId = ""
     }
-    cookie = create_input_context(appId)
+    let first = withUnsafeMutablePointer(to: &cookie.0) { $0 }
+    let second = withUnsafeMutablePointer(to: &cookie.1) { $0 }
+    create_input_context(appId, first, second)
     super.init(server: server, delegate: delegate, client: client)
   }
 
   deinit {
-    destroy_input_context(cookie)
+    destroy_input_context(cookie.0, cookie.1)
   }
 
   // Default behavior is to recognize keyDown only
@@ -51,7 +52,7 @@ class FcitxInputController: IMKInputController {
         // Send x[state:ctrl] instead of ^X[state:ctrl] to fcitx.
         unicode = removeCtrl(char: unicode)
       }
-      let handled = process_key(cookie, unicode, modsVal, code, false)
+      let handled = process_key(cookie.0, cookie.1, unicode, modsVal, code, false)
       return handled
     case .flagsChanged:
       let change = NSEvent.ModifierFlags(rawValue: mods.rawValue ^ lastModifiers.rawValue)
@@ -60,7 +61,7 @@ class FcitxInputController: IMKInputController {
       if change.contains(.shift) || change.contains(.control) || change.contains(.command)
         || change.contains(.option) || change.contains(.capsLock)
       {
-        handled = process_key(cookie, 0, modsVal, code, isRelease)
+        handled = process_key(cookie.0, cookie.1, 0, modsVal, code, isRelease)
       }
       lastModifiers = mods
       return handled
@@ -75,11 +76,11 @@ class FcitxInputController: IMKInputController {
   }
 
   override func activateServer(_ client: Any!) {
-    focus_in(cookie)
+    focus_in(cookie.0, cookie.1)
   }
 
   override func deactivateServer(_ client: Any!) {
-    focus_out(cookie)
+    focus_out(cookie.0, cookie.1)
   }
 
   override func menu() -> NSMenu! {
