@@ -17,6 +17,8 @@ public:
     Fcitx(Fcitx &) = delete;
 
     static Fcitx &shared();
+    void setup();
+    void teardown();
 
     void exec();
     void exit();
@@ -41,28 +43,24 @@ private:
 
 /// Run a function in the fcitx thread and obtain its return value
 /// synchronously.
-template <class T>
-inline T with_fcitx(std::function<T(Fcitx &)> func) {
+template <class F, class T = std::invoke_result_t<F, Fcitx &>>
+inline T with_fcitx(F func) {
     auto &fcitx = Fcitx::shared();
     std::promise<T> prom;
     std::future<T> fut = prom.get_future();
     fcitx.schedule([&prom, func = std::move(func), &fcitx]() {
         try {
-            T result = func(fcitx);
-            prom.set_value(result);
+            if constexpr (std::is_void_v<T>) {
+                func(fcitx);
+                prom.set_value();
+            } else {
+                T result = func(fcitx);
+                prom.set_value(std::move(result));
+            }
         } catch (...) {
             prom.set_exception(std::current_exception());
         }
     });
     fut.wait();
     return fut.get();
-}
-
-/// Run a function in the fcitx thread synchronously.
-template <>
-inline void with_fcitx(std::function<void(Fcitx &)> func) {
-    with_fcitx<int>([func = std::move(func)](Fcitx &fcitx) {
-        func(fcitx);
-        return 0; // dummy
-    });
 }

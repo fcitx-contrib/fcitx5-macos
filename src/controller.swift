@@ -1,10 +1,9 @@
-import CxxStdlib
 import Fcitx
 import InputMethodKit
 import SwiftFcitx
 
 class FcitxInputController: IMKInputController {
-  var cookie: UInt64
+  var uuid: ICUUID
   var appId: String
   var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
 
@@ -18,12 +17,12 @@ class FcitxInputController: IMKInputController {
     } else {
       appId = ""
     }
-    cookie = create_input_context(appId)
+    uuid = create_input_context(appId)
     super.init(server: server, delegate: delegate, client: client)
   }
 
   deinit {
-    destroy_input_context(cookie)
+    destroy_input_context(uuid)
   }
 
   // Default behavior is to recognize keyDown only
@@ -51,7 +50,7 @@ class FcitxInputController: IMKInputController {
         // Send x[state:ctrl] instead of ^X[state:ctrl] to fcitx.
         unicode = removeCtrl(char: unicode)
       }
-      let handled = process_key(cookie, unicode, modsVal, code, false)
+      let handled = process_key(uuid, unicode, modsVal, code, false)
       return handled
     case .flagsChanged:
       let change = NSEvent.ModifierFlags(rawValue: mods.rawValue ^ lastModifiers.rawValue)
@@ -60,7 +59,7 @@ class FcitxInputController: IMKInputController {
       if change.contains(.shift) || change.contains(.control) || change.contains(.command)
         || change.contains(.option) || change.contains(.capsLock)
       {
-        handled = process_key(cookie, 0, modsVal, code, isRelease)
+        handled = process_key(uuid, 0, modsVal, code, isRelease)
       }
       lastModifiers = mods
       return handled
@@ -75,11 +74,11 @@ class FcitxInputController: IMKInputController {
   }
 
   override func activateServer(_ client: Any!) {
-    focus_in(cookie)
+    focus_in(uuid)
   }
 
   override func deactivateServer(_ client: Any!) {
-    focus_out(cookie)
+    focus_out(uuid)
   }
 
   override func menu() -> NSMenu! {
@@ -121,6 +120,7 @@ class FcitxInputController: IMKInputController {
     }
     menu.addItem(NSMenuItem.separator())
 
+    menu.addItem(withTitle: "Restart", action: #selector(restart(_:)), keyEquivalent: "")
     menu.addItem(withTitle: "About Fcitx5 macOS", action: #selector(about(_:)), keyEquivalent: "")
     return menu
   }

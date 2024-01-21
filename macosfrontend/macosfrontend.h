@@ -3,19 +3,15 @@
  * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
 
  * SPDX-License-Identifier: GPL-3.0-only
- * SPDX-FileCopyrightText: Copyright 2023 Qijia Liu
+ * SPDX-FileCopyrightText: Copyright 2023-2024 Fcitx5 macOS contributors
  */
 #ifndef _FCITX5_MACOS_MACOSFRONTEND_H_
 #define _FCITX5_MACOS_MACOSFRONTEND_H_
 
-#include <cstdint>
 #include <fcitx/addonfactory.h>
 #include <fcitx/addoninstance.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
-
-// A short integer to disambiguate different input sessions.
-using Cookie = uint64_t;
 
 typedef std::function<void(const std::vector<std::string> &, int, int)>
     CandidateListCallback;
@@ -41,13 +37,11 @@ public:
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setShowPreeditCallback(const ShowPreeditCallback &callback);
 
-    Cookie createInputContext(const std::string &appId);
-    void destroyInputContext(Cookie);
-    bool keyEvent(Cookie, const Key &key, bool isRelease);
-    void focusIn(Cookie);
-    void focusOut(Cookie);
-
-    MacosInputContext *findICByCookie(Cookie cookie);
+    ICUUID createInputContext(const std::string &appId);
+    void destroyInputContext(ICUUID);
+    bool keyEvent(ICUUID, const Key &key, bool isRelease);
+    void focusIn(ICUUID);
+    void focusOut(ICUUID);
 
 private:
     Instance *instance_;
@@ -55,11 +49,7 @@ private:
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>>
         eventHandlers_;
 
-    // Cookie management.
-    // Invariant: icTable_[nextCookie_] does not exist.
-    std::unordered_map<Cookie, std::unique_ptr<MacosInputContext>> icTable_;
-    Cookie nextCookie_ = 0;
-
+    inline MacosInputContext *findIC(ICUUID);
     CandidateListCallback candidateListCallback =
         [](const std::vector<std::string> &, int, int) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
