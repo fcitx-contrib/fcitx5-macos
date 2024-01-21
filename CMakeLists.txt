@@ -60,6 +60,7 @@ include_directories(
     include
     fcitx5-webview/include
     fcitx5-webview/webview
+    "${HOMEBREW_PATH}/include" # nlohmann-json
 )
 add_subdirectory(macosfrontend)
 add_subdirectory(macosnotifications)

@@ -11,7 +11,6 @@
 #include "../macosnotifications/macosnotifications.h"
 #include "keycode.h"
 #include "nativestreambuf.h"
-#include "webview_candidate_window.hpp"
 
 namespace fs = std::filesystem;
 
