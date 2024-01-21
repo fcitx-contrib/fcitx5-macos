@@ -120,7 +120,7 @@ void Fcitx::setupFrontend() {
             });
         });
     macosfrontend_->setCommitStringCallback(
-        [this](const std::string &s) { SwiftFcitx::commit(s.c_str()); });
+        [](const std::string &s) { SwiftFcitx::commit(s.c_str()); });
     macosfrontend_->setShowPreeditCallback(
         [](const std::string &s, int caretPos) {
             SwiftFcitx::setPreedit(s.c_str(), caretPos);
