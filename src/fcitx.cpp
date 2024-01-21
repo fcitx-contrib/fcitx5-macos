@@ -92,13 +92,14 @@ void Fcitx::setupFrontend() {
     macosfrontend_ =
         dynamic_cast<fcitx::MacosFrontend *>(addonMgr().addon("macosfrontend"));
     macosfrontend_->setCandidateListCallback(
-        [this](const std::vector<std::string> &candidateList, const int) {
+        [this](const std::vector<std::string> &candidateList, int,
+               int highlighted) {
             SwiftFcitx::clearCandidateList();
             for (const auto &candidate : candidateList) {
                 SwiftFcitx::appendCandidate(candidate.c_str());
             }
             SwiftFcitx::showCandidatePanel();
-            window_->set_candidates(candidateList);
+            window_->set_candidates(candidateList, highlighted);
             // Don't read candidateList from callback function as it's
             // transient.
             auto empty = candidateList.empty();
