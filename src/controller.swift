@@ -69,10 +69,6 @@ class FcitxInputController: IMKInputController {
     }
   }
 
-  override func candidates(_ sender: Any!) -> [Any]! {
-    return getCandidateList()
-  }
-
   override func activateServer(_ client: Any!) {
     focus_in(uuid)
   }

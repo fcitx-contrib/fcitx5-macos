@@ -38,6 +38,7 @@ target_link_libraries(Fcitx5
     keyboard
     macosfrontend
     macosnotifications
+    WebviewCandidateWindow
 )
 
 set(APP_PATH "${CMAKE_CURRENT_BINARY_DIR}/Fcitx5.app/Contents")

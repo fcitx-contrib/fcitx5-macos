@@ -42,6 +42,7 @@ public:
     }
 
     void updateInputPanel() {
+        int highlighted = -1;
         const InputPanel &ip = inputPanel();
         // frontend_->updateInputPanel(
         //         filterText(ip.preedit()),
@@ -77,9 +78,10 @@ public:
                 candidates.emplace_back(
                     filterString(list->candidate(i).text()));
             }
+            highlighted = list->cursorIndex();
             // }
         }
-        frontend_->updateCandidateList(candidates, size);
+        frontend_->updateCandidateList(candidates, size, highlighted);
     }
 
 private:
@@ -134,8 +136,8 @@ void MacosFrontend::commitString(const std::string &text) {
 }
 
 void MacosFrontend::updateCandidateList(
-    const std::vector<std::string> &candidates, const int size) {
-    candidateListCallback(candidates, size);
+    const std::vector<std::string> &candidates, int size, int highlighted) {
+    candidateListCallback(candidates, size, highlighted);
 }
 
 void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {

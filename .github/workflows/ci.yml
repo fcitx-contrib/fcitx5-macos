@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
 
       - uses: SwiftyLab/setup-swift@latest
 
@@ -45,11 +45,17 @@ jobs:
         run: |
           brew install \
             extra-cmake-modules \
-            xkeyboardconfig \
-            iso-codes \
             ninja
           ./install-deps.sh ${{ matrix.arch }}
           pip install "dmgbuild[badge_icons]"
+
+      - name: Install dependencies (x64)
+        if: ${{ matrix.arch == 'x86_64' }}
+        run: |
+          brew install \
+            nlohmann-json \
+            xkeyboardconfig \
+            iso-codes
 
       - name: Setup arm homebrew
         if: ${{ matrix.arch == 'arm64' }}
@@ -59,6 +65,7 @@ jobs:
         if: ${{ matrix.arch == 'arm64' }}
         run: |
           arm-brew-install \
+            nlohmann-json \
             xkeyboardconfig \
             iso-codes
           cp -f /usr/local/bin/msgfmt /tmp/fcitx5/bin

@@ -1,15 +1,9 @@
 import InputMethodKit
 
 var globalClient: Any?
-var candidateList: [String] = []
-var imkc = IMKCandidates()
 
 public func setClient(_ client: Any) {
   globalClient = client
-}
-
-public func setImkc(_ candidates: Any) {
-  imkc = candidates as! IMKCandidates  // swiftlint:disable:this force_cast
 }
 
 public func commit(_ string: String) {
@@ -19,30 +13,9 @@ public func commit(_ string: String) {
   client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
 }
 
-public func clearCandidateList() {
-  candidateList.removeAll()
-}
-
-public func appendCandidate(_ candidate: String) {
-  candidateList.append(candidate)
-}
-
-public func getCandidateList() -> [String] {
-  return candidateList
-}
-
-public func showCandidatePanel() {
-  DispatchQueue.main.async {
-    if candidateList.isEmpty {
-      imkc.hide()
-    } else {
-      imkc.update()
-      imkc.show()
-    }
-  }
-}
-
-public func showPreedit(_ preedit: String, _ caretPosUtf8: Int) {
+// Executed in fcitx thread, so before process_key returns, no UI update
+// will happen. That means we can't get coordinates in this function.
+public func setPreedit(_ preedit: String, _ caretPosUtf8: Int) {
   guard let client = globalClient as? IMKTextInput else {
     return
   }
@@ -62,4 +35,19 @@ public func showPreedit(_ preedit: String, _ caretPosUtf8: Int) {
     selectionRange: NSRange(location: u16pos, length: 0),
     replacementRange: NSRange(location: NSNotFound, length: 0)
   )
+}
+
+// Must be executed after actual preedit UI update, i.e. not simply setPreedit.
+public func getCursorCoordinates(
+  _ x: UnsafeMutablePointer<Float>,
+  _ y: UnsafeMutablePointer<Float>
+) -> Bool {
+  if let client = globalClient as? IMKTextInput {
+    var rect = NSRect(x: 0, y: 0, width: 0, height: 0)
+    client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+    x.pointee = Float(NSMinX(rect))
+    y.pointee = Float(NSMinY(rect))
+    return true
+  }
+  return false
 }

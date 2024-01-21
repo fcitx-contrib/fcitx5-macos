@@ -13,7 +13,7 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
 
-typedef std::function<void(const std::vector<std::string> &, const int)>
+typedef std::function<void(const std::vector<std::string> &, int, int)>
     CandidateListCallback;
 typedef std::function<void(const std::string &)> CommitStringCallback;
 typedef std::function<void(const std::string &, int)> ShowPreeditCallback;
@@ -29,7 +29,7 @@ public:
     Instance *instance() { return instance_; }
 
     void updateCandidateList(const std::vector<std::string> &candidates,
-                             const int size);
+                             int size, int highlight);
     void commitString(const std::string &text);
     void showPreedit(const std::string &, int);
 
@@ -51,7 +51,7 @@ private:
 
     inline MacosInputContext *findIC(ICUUID);
     CandidateListCallback candidateListCallback =
-        [](const std::vector<std::string> &, const int) {};
+        [](const std::vector<std::string> &, int, int) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
     ShowPreeditCallback showPreeditCallback = [](const std::string &, int) {};
 };
