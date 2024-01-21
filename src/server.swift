@@ -26,17 +26,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     AppDelegate.server = IMKServer(
       name: Bundle.main.infoDictionary?["InputMethodConnectionName"] as? String,
       bundleIdentifier: Bundle.main.bundleIdentifier)
-    let candidates = IMKCandidates(
-      server: AppDelegate.server,
-      panelType: kIMKSingleColumnScrollingCandidatePanel)!
 
     // Initialize notifications.
     AppDelegate.notificationDelegate.requestAuthorization()
 
-    // The default behavior is wrong: scrolling will assign 1-9 to 2nd-10th candidates.
-    // But setting 10 virtual keyCodes doesn't work, so just disable it.
-    candidates.setSelectionKeys([])
-    setImkc(candidates)
     start_fcitx_thread()
   }
 
