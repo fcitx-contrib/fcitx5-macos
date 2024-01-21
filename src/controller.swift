@@ -3,7 +3,7 @@ import InputMethodKit
 import SwiftFcitx
 
 class FcitxInputController: IMKInputController {
-  var cookie: (UInt64, UInt64) = (0, 0)
+  var uuid: ICUUID
   var appId: String
   var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
 
@@ -17,14 +17,12 @@ class FcitxInputController: IMKInputController {
     } else {
       appId = ""
     }
-    let first = withUnsafeMutablePointer(to: &cookie.0) { $0 }
-    let second = withUnsafeMutablePointer(to: &cookie.1) { $0 }
-    create_input_context(appId, first, second)
+    uuid = create_input_context(appId)
     super.init(server: server, delegate: delegate, client: client)
   }
 
   deinit {
-    destroy_input_context(cookie.0, cookie.1)
+    destroy_input_context(uuid)
   }
 
   // Default behavior is to recognize keyDown only
@@ -52,7 +50,7 @@ class FcitxInputController: IMKInputController {
         // Send x[state:ctrl] instead of ^X[state:ctrl] to fcitx.
         unicode = removeCtrl(char: unicode)
       }
-      let handled = process_key(cookie.0, cookie.1, unicode, modsVal, code, false)
+      let handled = process_key(uuid, unicode, modsVal, code, false)
       return handled
     case .flagsChanged:
       let change = NSEvent.ModifierFlags(rawValue: mods.rawValue ^ lastModifiers.rawValue)
@@ -61,7 +59,7 @@ class FcitxInputController: IMKInputController {
       if change.contains(.shift) || change.contains(.control) || change.contains(.command)
         || change.contains(.option) || change.contains(.capsLock)
       {
-        handled = process_key(cookie.0, cookie.1, 0, modsVal, code, isRelease)
+        handled = process_key(uuid, 0, modsVal, code, isRelease)
       }
       lastModifiers = mods
       return handled
@@ -76,11 +74,11 @@ class FcitxInputController: IMKInputController {
   }
 
   override func activateServer(_ client: Any!) {
-    focus_in(cookie.0, cookie.1)
+    focus_in(uuid)
   }
 
   override func deactivateServer(_ client: Any!) {
-    focus_out(cookie.0, cookie.1)
+    focus_out(uuid)
   }
 
   override func menu() -> NSMenu! {

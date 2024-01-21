@@ -179,56 +179,36 @@ void restart_fcitx_thread() noexcept {
     start_fcitx_thread();
 }
 
-fcitx::ICUUID cookie2uuid(uint64_t first, uint64_t second) {
-    fcitx::ICUUID uuid;
-    std::memcpy(&uuid, &first, 8);
-    std::memcpy(&uuid[8], &second, 8);
-    return uuid;
-}
-
-void uuid2cookie(fcitx::ICUUID uuid, uint64_t *first, uint64_t *second) {
-    std::memcpy(first, &uuid, 8);
-    std::memcpy(second, &uuid[8], 8);
-}
-
-bool process_key(uint64_t first, uint64_t second, uint32_t unicode,
-                 uint32_t osxModifiers, uint16_t osxKeycode,
-                 bool isRelease) noexcept {
+bool process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
+                 uint16_t osxKeycode, bool isRelease) noexcept {
     const fcitx::Key parsedKey{
         osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
         osx_modifiers_to_fcitx_keystates(osxModifiers),
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };
     return with_fcitx([=](Fcitx &fcitx) {
-        return fcitx.macosfrontend()->keyEvent(cookie2uuid(first, second),
-                                               parsedKey, isRelease);
+        return fcitx.macosfrontend()->keyEvent(uuid, parsedKey, isRelease);
     });
 }
 
-void create_input_context(const char *appId, uint64_t *first,
-                          uint64_t *second) noexcept {
-    auto uuid = with_fcitx([=](Fcitx &fcitx) {
+ICUUID create_input_context(const char *appId) noexcept {
+    return with_fcitx([=](Fcitx &fcitx) {
         return fcitx.macosfrontend()->createInputContext(appId);
     });
-    uuid2cookie(uuid, first, second);
 }
 
-void destroy_input_context(uint64_t first, uint64_t second) noexcept {
+void destroy_input_context(ICUUID uuid) noexcept {
     with_fcitx([=](Fcitx &fcitx) {
-        fcitx.macosfrontend()->destroyInputContext(cookie2uuid(first, second));
+        fcitx.macosfrontend()->destroyInputContext(uuid);
     });
 }
 
-void focus_in(uint64_t first, uint64_t second) noexcept {
-    with_fcitx([=](Fcitx &fcitx) {
-        fcitx.macosfrontend()->focusIn(cookie2uuid(first, second));
-    });
+void focus_in(ICUUID uuid) noexcept {
+    with_fcitx([=](Fcitx &fcitx) { fcitx.macosfrontend()->focusIn(uuid); });
 }
 
-void focus_out(uint64_t first, uint64_t second) noexcept {
-    with_fcitx([=](Fcitx &fcitx) {
-        fcitx.macosfrontend()->focusOut(cookie2uuid(first, second));
-    });
+void focus_out(ICUUID uuid) noexcept {
+    with_fcitx([=](Fcitx &fcitx) { fcitx.macosfrontend()->focusOut(uuid); });
 }
 
 std::string input_method_groups() noexcept {
