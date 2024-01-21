@@ -16,6 +16,8 @@ public:
     Fcitx(Fcitx &) = delete;
 
     static Fcitx &shared();
+    void setup();
+    void teardown();
 
     void exec();
     void exit();

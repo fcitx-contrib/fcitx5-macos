@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <atomic>
 #include <filesystem>
 #include <sstream>
@@ -40,8 +41,16 @@ Fcitx &Fcitx::shared() {
 Fcitx::Fcitx() {
     setupLog(true);
     setupEnv();
+}
+
+void Fcitx::setup() {
     setupInstance();
     setupFrontend();
+}
+
+void Fcitx::teardown() {
+    macosfrontend_ = nullptr;
+    instance_.reset();
 }
 
 void Fcitx::setupLog(bool verbose) {
@@ -110,7 +119,10 @@ void Fcitx::exec() {
     instance_->exec();
 }
 
-void Fcitx::exit() { instance_->exit(); }
+void Fcitx::exit() {
+    dispatcher_->detach();
+    instance_->exit();
+}
 
 void Fcitx::schedule(std::function<void()> func) {
     dispatcher_->schedule(func);
@@ -140,13 +152,14 @@ static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
 }
 
 void start_fcitx_thread() noexcept {
-    auto &fcitx = Fcitx::shared();
     bool expected = false;
     if (!fcitx_thread_started.compare_exchange_strong(expected, true)) {
         FCITX_FATAL()
             << "Trying to start multiple fcitx threads, which is forbidden";
         std::terminate();
     }
+    auto &fcitx = Fcitx::shared();
+    fcitx.setup();
     // Start the event loop in another thread.
     fcitx_thread = std::thread([&fcitx] { fcitx.exec(); });
 }
@@ -157,9 +170,16 @@ void stop_fcitx_thread() noexcept {
     if (fcitx_thread.joinable()) {
         fcitx_thread.join();
     }
+    fcitx.teardown();
+    fcitx_thread_started = false;
 }
 
-bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
+void restart_fcitx_thread() noexcept {
+    stop_fcitx_thread();
+    start_fcitx_thread();
+}
+
+bool process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
                  uint16_t osxKeycode, bool isRelease) noexcept {
     const fcitx::Key parsedKey{
         osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
@@ -167,28 +187,28 @@ bool process_key(Cookie cookie, uint32_t unicode, uint32_t osxModifiers,
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };
     return with_fcitx([=](Fcitx &fcitx) {
-        return fcitx.macosfrontend()->keyEvent(cookie, parsedKey, isRelease);
+        return fcitx.macosfrontend()->keyEvent(uuid, parsedKey, isRelease);
     });
 }
 
-uint64_t create_input_context(const char *appId) noexcept {
+ICUUID create_input_context(const char *appId) noexcept {
     return with_fcitx([=](Fcitx &fcitx) {
         return fcitx.macosfrontend()->createInputContext(appId);
     });
 }
 
-void destroy_input_context(uint64_t cookie) noexcept {
+void destroy_input_context(ICUUID uuid) noexcept {
     with_fcitx([=](Fcitx &fcitx) {
-        fcitx.macosfrontend()->destroyInputContext(cookie);
+        fcitx.macosfrontend()->destroyInputContext(uuid);
     });
 }
 
-void focus_in(uint64_t cookie) noexcept {
-    with_fcitx([=](Fcitx &fcitx) { fcitx.macosfrontend()->focusIn(cookie); });
+void focus_in(ICUUID uuid) noexcept {
+    with_fcitx([=](Fcitx &fcitx) { fcitx.macosfrontend()->focusIn(uuid); });
 }
 
-void focus_out(uint64_t cookie) noexcept {
-    with_fcitx([=](Fcitx &fcitx) { fcitx.macosfrontend()->focusOut(cookie); });
+void focus_out(ICUUID uuid) noexcept {
+    with_fcitx([=](Fcitx &fcitx) { fcitx.macosfrontend()->focusOut(uuid); });
 }
 
 std::string input_method_groups() noexcept {

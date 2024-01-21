@@ -3,7 +3,7 @@
  * SPDX-FileCopyrightText: Copyright 2021-2023 Fcitx5 for Android Contributors
 
  * SPDX-License-Identifier: GPL-3.0-only
- * SPDX-FileCopyrightText: Copyright 2023 Qijia Liu
+ * SPDX-FileCopyrightText: Copyright 2023-2024 Fcitx5 macOS contributors
  */
 #include "macosfrontend.h"
 #include <fcitx/addonmanager.h>
@@ -142,8 +142,8 @@ void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {
     showPreeditCallback(preedit, caretPos);
 }
 
-bool MacosFrontend::keyEvent(Cookie cookie, const Key &key, bool isRelease) {
-    auto *ic = this->findICByCookie(cookie);
+bool MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
+    auto *ic = this->findIC(uuid);
     activeIC_ = ic;
     if (!ic) {
         return false;
@@ -153,48 +153,37 @@ bool MacosFrontend::keyEvent(Cookie cookie, const Key &key, bool isRelease) {
     return keyEvent.accepted();
 }
 
-MacosInputContext *MacosFrontend::findICByCookie(Cookie cookie) {
-    auto it = icTable_.find(cookie);
-    if (it != icTable_.end()) {
-        return it->second.get();
+MacosInputContext *MacosFrontend::findIC(ICUUID uuid) {
+    return dynamic_cast<MacosInputContext *>(
+        instance_->inputContextManager().findByUUID(uuid));
+}
+
+ICUUID MacosFrontend::createInputContext(const std::string &appId) {
+    auto ic =
+        new MacosInputContext(this, instance_->inputContextManager(), appId);
+    return ic->uuid();
+}
+
+void MacosFrontend::destroyInputContext(ICUUID uuid) {
+    // InputContext is not owned by InputContextManager.
+    // The only exception is when Instance is destroyed,
+    // InputContextManager deletes all InputContexts.
+    auto ic = findIC(uuid);
+    if (activeIC_ == ic) {
+        activeIC_ = nullptr;
     }
-    return nullptr;
+    delete ic;
 }
 
-Cookie MacosFrontend::createInputContext(const std::string &appId) {
-    auto ic = std::make_unique<MacosInputContext>(
-        this, instance_->inputContextManager(), appId);
-    auto cookie = nextCookie_;
-    icTable_[cookie] = std::move(ic);
-
-    // Make sure nextCookie_ is empty.
-    while (++nextCookie_, findICByCookie(nextCookie_))
-        ;
-
-    return cookie;
-}
-
-void MacosFrontend::destroyInputContext(Cookie cookie) {
-    // Defend against the case where the IC is destroyed before
-    // focus-out.
-    auto it = icTable_.find(cookie);
-    if (it != icTable_.end()) {
-        if (activeIC_ == it->second.get()) {
-            activeIC_ = nullptr;
-        }
-        icTable_.erase(it);
-    }
-}
-
-void MacosFrontend::focusIn(Cookie cookie) {
-    auto *ic = this->findICByCookie(cookie);
+void MacosFrontend::focusIn(ICUUID uuid) {
+    auto *ic = findIC(uuid);
     if (!ic)
         return;
     ic->focusIn();
 }
 
-void MacosFrontend::focusOut(Cookie cookie) {
-    auto *ic = this->findICByCookie(cookie);
+void MacosFrontend::focusOut(ICUUID uuid) {
+    auto *ic = findIC(uuid);
     if (!ic)
         return;
     ic->focusOut();
