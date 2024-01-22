@@ -36,6 +36,8 @@ private:
     void setupInstance();
     void setupFrontend();
 
+    void showInputPanelAsync(bool show);
+
     std::unique_ptr<fcitx::Instance> instance_;
     std::unique_ptr<fcitx::EventDispatcher> dispatcher_;
     fcitx::MacosFrontend *macosfrontend_;
