@@ -108,7 +108,8 @@ void Fcitx::setupFrontend() {
     macosfrontend_->setCandidateListCallback(
         [this](const std::vector<std::string> &candidateList, int highlighted) {
             window_->set_candidates(candidateList, highlighted);
-            showInputPanelAsync(!candidateList.empty());
+            updatePanelShowFlags(!candidateList.empty(), PanelShowFlag::HasCandidates);
+            showInputPanelAsync(panelShow_);
         });
     macosfrontend_->setCommitStringCallback(
         [](const std::string &s) { SwiftFcitx::commit(s.c_str()); });
@@ -120,12 +121,10 @@ void Fcitx::setupFrontend() {
         [this](const fcitx::Text &preedit, const fcitx::Text &auxUp,
                const fcitx::Text &auxDown) {
             window_->update_input_panel(preedit, auxUp, auxDown);
-            // This callback is called excessively with empty
-            // inputs, so debounce with lastEmpty.
-            static bool lastEmpty = false;
-            bool empty = preedit.empty() && auxUp.empty() && auxDown.empty();
-            showInputPanelAsync(!empty || lastEmpty);
-            lastEmpty = empty;
+            updatePanelShowFlags(!preedit.empty(), PanelShowFlag::HasPreedit);
+            updatePanelShowFlags(!auxUp.empty(), PanelShowFlag::HasAuxUp);
+            updatePanelShowFlags(!auxDown.empty(), PanelShowFlag::HasAuxDown);
+            showInputPanelAsync(panelShow_);
         });
 }
 
