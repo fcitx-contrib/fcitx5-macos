@@ -121,7 +121,16 @@ void Fcitx::setupFrontend() {
     macosfrontend_->setUpdateInputPanelCallback(
         [this](const fcitx::Text &preedit, const fcitx::Text &auxUp,
                const fcitx::Text &auxDown) {
-            window_->update_input_panel(preedit, auxUp, auxDown);
+            auto convert = [](const fcitx::Text &text) {
+                std::vector<std::pair<std::string, int>> res;
+                for (int i = 0; i < text.size(); i++) {
+                    res.emplace_back(make_pair(text.stringAt(i),
+                                               text.formatAt(i).toInteger()));
+                }
+                return res;
+            };
+            window_->update_input_panel(convert(preedit), preedit.cursor(),
+                                        convert(auxUp), convert(auxDown));
             updatePanelShowFlags(!preedit.empty(), PanelShowFlag::HasPreedit);
             updatePanelShowFlags(!auxUp.empty(), PanelShowFlag::HasAuxUp);
             updatePanelShowFlags(!auxDown.empty(), PanelShowFlag::HasAuxDown);
