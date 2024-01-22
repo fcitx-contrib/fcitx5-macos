@@ -133,17 +133,7 @@ void Fcitx::setupFrontend() {
     macosfrontend_->setUpdateInputPanelCallback(
         [this](const fcitx::Text &preedit, const fcitx::Text &auxUp,
                const fcitx::Text &auxDown) {
-            // FIXME pass fcitx::Text because we also need 'cursor'.
-            auto convert = [](const fcitx::Text &text) {
-                std::vector<std::pair<std::string, int>> res;
-                for (int i = 0; i < text.size(); i++) {
-                    res.emplace_back(make_pair(text.stringAt(i),
-                                               text.formatAt(i).toInteger()));
-                }
-                return res;
-            };
-            window_->update_input_panel(convert(preedit), convert(auxUp),
-                                        convert(auxDown));
+            window_->update_input_panel(preedit, auxUp, auxDown);
             // FIXME abstract this
             static bool lastIsEmpty = false;
             bool empty = preedit.empty() && auxUp.empty() && auxDown.empty();
