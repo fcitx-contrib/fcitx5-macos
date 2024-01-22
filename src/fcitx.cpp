@@ -106,8 +106,7 @@ void Fcitx::setupFrontend() {
     macosfrontend_ =
         dynamic_cast<fcitx::MacosFrontend *>(addonMgr().addon("macosfrontend"));
     macosfrontend_->setCandidateListCallback(
-        [this](const std::vector<std::string> &candidateList, int,
-               int highlighted) {
+        [this](const std::vector<std::string> &candidateList, int highlighted) {
             window_->set_candidates(candidateList, highlighted);
             // Don't read candidateList from callback function as it's
             // transient.
@@ -130,6 +129,35 @@ void Fcitx::setupFrontend() {
     macosfrontend_->setShowPreeditCallback(
         [](const std::string &s, int caretPos) {
             SwiftFcitx::setPreedit(s.c_str(), caretPos);
+        });
+    macosfrontend_->setUpdateInputPanelCallback(
+        [this](const fcitx::Text &preedit, const fcitx::Text &auxUp,
+               const fcitx::Text &auxDown) {
+            // FIXME pass fcitx::Text because we also need 'cursor'.
+            auto convert = [](const fcitx::Text &text) {
+                std::vector<std::pair<std::string, int>> res;
+                for (int i = 0; i < text.size(); i++) {
+                    res.emplace_back(make_pair(text.stringAt(i),
+                                               text.formatAt(i).toInteger()));
+                }
+                return res;
+            };
+            window_->update_input_panel(convert(preedit), convert(auxUp),
+                                        convert(auxDown));
+            // FIXME abstract this
+            static bool lastIsEmpty = false;
+            bool empty = preedit.empty() && auxUp.empty() && auxDown.empty();
+            dispatch_async(dispatch_get_main_queue(), ^void() {
+              float x = 0.f, y = 0.f;
+              if (!SwiftFcitx::getCursorCoordinates(&x, &y)) {
+                  FCITX_WARN() << "Fail to get preedit coordinates";
+              }
+              if (empty && !lastIsEmpty)
+                  window_->hide();
+              else
+                  window_->show(x, y);
+            });
+            lastIsEmpty = empty;
         });
 }
 

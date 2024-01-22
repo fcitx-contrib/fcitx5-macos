@@ -13,10 +13,13 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
 
-typedef std::function<void(const std::vector<std::string> &, int, int)>
+typedef std::function<void(const std::vector<std::string> &, int)>
     CandidateListCallback;
 typedef std::function<void(const std::string &)> CommitStringCallback;
 typedef std::function<void(const std::string &, int)> ShowPreeditCallback;
+typedef std::function<void(const fcitx::Text &, const fcitx::Text &,
+                           const fcitx::Text &)>
+    UpdateInputPanelCallback;
 
 namespace fcitx {
 
@@ -29,14 +32,17 @@ public:
     Instance *instance() { return instance_; }
 
     void updateCandidateList(const std::vector<std::string> &candidates,
-                             int size, int highlight);
+                             int highlight);
     void selectCandidate(size_t index);
     void commitString(const std::string &text);
     void showPreedit(const std::string &, int);
+    void updateInputPanel(const fcitx::Text &preedit, const fcitx::Text &auxUp,
+                          const fcitx::Text &auxDown);
 
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setShowPreeditCallback(const ShowPreeditCallback &callback);
+    void setUpdateInputPanelCallback(const UpdateInputPanelCallback &callback);
 
     ICUUID createInputContext(const std::string &appId);
     void destroyInputContext(ICUUID);
@@ -52,9 +58,11 @@ private:
 
     inline MacosInputContext *findIC(ICUUID);
     CandidateListCallback candidateListCallback =
-        [](const std::vector<std::string> &, int, int) {};
+        [](const std::vector<std::string> &, int) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
     ShowPreeditCallback showPreeditCallback = [](const std::string &, int) {};
+    UpdateInputPanelCallback updateInputPanelCallback =
+        [](const fcitx::Text &, const fcitx::Text &, const fcitx::Text &) {};
 };
 
 class MacosFrontendFactory : public AddonFactory {

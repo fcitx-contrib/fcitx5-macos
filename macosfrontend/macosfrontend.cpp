@@ -44,44 +44,18 @@ public:
     void updateInputPanel() {
         int highlighted = -1;
         const InputPanel &ip = inputPanel();
-        // frontend_->updateInputPanel(
-        //         filterText(ip.preedit()),
-        //         filterText(ip.auxUp()),
-        //         filterText(ip.auxDown())
-        // );
+        frontend_->updateInputPanel(filterText(ip.preedit()),
+                                    filterText(ip.auxUp()),
+                                    filterText(ip.auxDown()));
         std::vector<std::string> candidates;
-        int size = 0;
-        const auto &list = ip.candidateList();
-        if (list) {
-            /*
-            const auto &bulk = list->toBulk();
-            if (bulk) {
-                size = bulk->totalSize();
-                // limit candidate count to 16 (for paging)
-                const int limit = size < 0 ? 16 : std::min(size, 16);
-                for (int i = 0; i < limit; i++) {
-                    try {
-                        auto &candidate = bulk->candidateFromAll(i);
-                        // maybe unnecessary; I don't see anywhere using
-            `CandidateWord::setPlaceHolder`
-                        // if (candidate.isPlaceHolder()) continue;
-                        candidates.emplace_back(filterString(candidate.text()));
-                    } catch (const std::invalid_argument &e) {
-                        size = static_cast<int>(candidates.size());
-                        break;
-                    }
-                }
-            } else {
-            */
-            size = list->size();
-            for (int i = 0; i < size; i++) {
+        if (const auto &list = ip.candidateList()) {
+            for (int i = 0; i < list->size(); i++) {
                 candidates.emplace_back(
                     filterString(list->candidate(i).text()));
             }
             highlighted = list->cursorIndex();
-            // }
         }
-        frontend_->updateCandidateList(candidates, size, highlighted);
+        frontend_->updateCandidateList(candidates, highlighted);
     }
 
     void selectCandidate(size_t index) {
@@ -144,19 +118,30 @@ void MacosFrontend::setShowPreeditCallback(
     showPreeditCallback = callback;
 }
 
+void MacosFrontend::setUpdateInputPanelCallback(
+    const UpdateInputPanelCallback &callback) {
+    updateInputPanelCallback = callback;
+}
+
 void MacosFrontend::commitString(const std::string &text) {
     commitStringCallback(text);
 }
 
 void MacosFrontend::updateCandidateList(
-    const std::vector<std::string> &candidates, int size, int highlighted) {
-    candidateListCallback(candidates, size, highlighted);
+    const std::vector<std::string> &candidates, int highlighted) {
+    candidateListCallback(candidates, highlighted);
 }
 
 void MacosFrontend::selectCandidate(size_t index) {
     if (activeIC_) {
         activeIC_->selectCandidate(index);
     }
+}
+
+void MacosFrontend::updateInputPanel(const fcitx::Text &preedit,
+                                     const fcitx::Text &auxUp,
+                                     const fcitx::Text &auxDown) {
+    updateInputPanelCallback(preedit, auxUp, auxDown);
 }
 
 void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {
