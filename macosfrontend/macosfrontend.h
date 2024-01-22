@@ -30,6 +30,7 @@ public:
 
     void updateCandidateList(const std::vector<std::string> &candidates,
                              int size, int highlight);
+    void selectCandidate(size_t index);
     void commitString(const std::string &text);
     void showPreedit(const std::string &, int);
 

@@ -32,6 +32,7 @@ public:
 private:
     void setupLog(bool verbose);
     void setupEnv();
+    void setupCandidateWindow();
     void setupInstance();
     void setupFrontend();
 
