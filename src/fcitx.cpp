@@ -108,7 +108,8 @@ void Fcitx::setupFrontend() {
     macosfrontend_->setCandidateListCallback(
         [this](const std::vector<std::string> &candidateList, int highlighted) {
             window_->set_candidates(candidateList, highlighted);
-            updatePanelShowFlags(!candidateList.empty(), PanelShowFlag::HasCandidates);
+            updatePanelShowFlags(!candidateList.empty(),
+                                 PanelShowFlag::HasCandidates);
             showInputPanelAsync(panelShow_);
         });
     macosfrontend_->setCommitStringCallback(
