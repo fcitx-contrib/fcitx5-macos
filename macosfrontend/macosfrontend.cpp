@@ -84,6 +84,19 @@ public:
         frontend_->updateCandidateList(candidates, size, highlighted);
     }
 
+    void selectCandidate(size_t index) {
+        const auto &list = inputPanel().candidateList();
+        if (!list) {
+            return;
+        }
+        try {
+            list->candidate(index).select(this);
+        } catch (const std::invalid_argument &e) {
+            FCITX_ERROR() << "selectCandidate index out of range";
+        }
+        return;
+    }
+
 private:
     MacosFrontend *frontend_;
 
@@ -138,6 +151,12 @@ void MacosFrontend::commitString(const std::string &text) {
 void MacosFrontend::updateCandidateList(
     const std::vector<std::string> &candidates, int size, int highlighted) {
     candidateListCallback(candidates, size, highlighted);
+}
+
+void MacosFrontend::selectCandidate(size_t index) {
+    if (activeIC_) {
+        activeIC_->selectCandidate(index);
+    }
 }
 
 void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {

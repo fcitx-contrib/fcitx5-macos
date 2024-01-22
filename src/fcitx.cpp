@@ -42,6 +42,7 @@ Fcitx::Fcitx()
     : window_(std::make_unique<candidate_window::WebviewCandidateWindow>()) {
     setupLog(true);
     setupEnv();
+    setupCandidateWindow();
 }
 
 void Fcitx::setup() {
@@ -86,6 +87,11 @@ void Fcitx::setupEnv() {
     setenv("FCITX_ADDON_DIRS", fcitx_addon_dirs.c_str(), 1);
     setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
     setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
+}
+
+void Fcitx::setupCandidateWindow() {
+    window_->set_select_callback(
+        [this](size_t index) { macosfrontend_->selectCandidate(index); });
 }
 
 void Fcitx::setupInstance() {
