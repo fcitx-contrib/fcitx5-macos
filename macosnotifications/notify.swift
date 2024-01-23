@@ -100,7 +100,9 @@ public func sendNotification(
     content.categoryIdentifier = categoryIdent
 
     if let iconPath = iconPath {
-      if let attachment = try? UNNotificationAttachment(identifier: "image", url: URL(fileURLWithPath: iconPath), options: nil) {
+      if let attachment = try? UNNotificationAttachment(
+        identifier: "image", url: URL(fileURLWithPath: iconPath), options: nil)
+      {
         // Add the attachment to the notification content
         content.attachments = [attachment]
       }
