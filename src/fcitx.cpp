@@ -293,13 +293,7 @@ static nlohmann::json actionToJson(fcitx::Action *action,
     nlohmann::json j;
     j["id"] = action->id();
     j["name"] = action->name();
-    if (action->shortText(ic) != "") {
-        j["desc"] = action->shortText(ic);
-    } else if (action->longText(ic) != "") {
-        j["desc"] = action->longText(ic);
-    } else {
-        j["desc"] = "";
-    }
+    j["desc"] = action->shortText(ic);
     if (action->isSeparator()) {
         j["separator"] = true;
     }
