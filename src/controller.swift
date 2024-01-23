@@ -116,6 +116,20 @@ class FcitxInputController: IMKInputController {
     }
     menu.addItem(NSMenuItem.separator())
 
+    // Additional actions for the current IC
+    let actionJson = String(current_actions())
+    if let data = actionJson.data(using: .utf8) {
+      do {
+        let actions = try JSONDecoder().decode(Array<FcitxAction>.self, from: data)
+        for action in actions {
+          menu.addItem(action.toMenuItem(target: self))
+        }
+        menu.addItem(NSMenuItem.separator())
+      } catch {
+        NSLog("Error decoding actions: \(error)")
+      }
+    }
+
     menu.addItem(withTitle: "Restart", action: #selector(restart(_:)), keyEquivalent: "")
     menu.addItem(withTitle: "About Fcitx5 macOS", action: #selector(about(_:)), keyEquivalent: "")
     return menu
@@ -130,6 +144,12 @@ class FcitxInputController: IMKInputController {
   @objc func switchInputMethod(sender: Any?) {
     if let imName = repObjectIMK(sender) as? String {
       set_current_input_method(imName)
+    }
+  }
+
+  @objc func activateFcitxAction(sender: Any?) {
+    if let action = repObjectIMK(sender) as? FcitxAction {
+      activate_action_by_id(Int32(action.id))
     }
   }
 }
@@ -153,9 +173,65 @@ private func removeCtrl(char: UInt32) -> UInt32 {
 /// }
 private func repObjectIMK(_ sender: Any?) -> Any? {
   if let sender = sender as? NSMutableDictionary {
-    if let menuItem = sender["IMKCommandMenuItem"] as? NSMenuItem {
+    if let menuItem = sender[kIMKCommandMenuItemName] as? NSMenuItem {
       return menuItem.representedObject
     }
   }
   return nil
+}
+
+struct FcitxAction: Codable {
+  let id: Int
+  let name: String
+  let desc: String
+  let checked: Bool?
+  let children: [FcitxAction]?
+  let separator: Bool?
+
+  func toMenuItem(target: AnyObject) -> NSMenuItem {
+    if separator ?? false {
+      return NSMenuItem.separator()
+    }
+    let item = NSMenuItem(
+      title: desc, action: #selector(FcitxInputController.activateFcitxAction), keyEquivalent: "")
+    item.target = target
+    item.representedObject = self
+    if let checked = checked {
+      item.state = checked ? .on : .off
+    }
+
+    // FIXME Unfortunately, the second-level submenu doesn't work for
+    // unknown reasons:
+    //
+    // Parent Menu
+    // +-- Sub Item1
+    // +-- Sub Item2
+    // +-- Sub Item3
+    //
+    // Strangely, no matter which item you click, the sender is always
+    // Sub Item1.  However, if you wrap Sub Items in one more level,
+    // it will work:
+    //
+    // Parent Menu
+    // +-- Sub Item1 Wrapper
+    // |   +-- Sub Item1
+    // +-- Sub Item2 Wrapper
+    //     +-- Sub Item2
+    //
+    // This workaround is too ugly.  It's really unfortuate that we
+    // have to disable submenus for now.
+    //
+    // Code:
+    //
+    //    if let children = children {
+    //      let submenu = NSMenu(title: name)
+    //      for child in children {
+    //        submenu.addItem(child.toMenuItem(target: target))
+    //      }
+    //      item.submenu = submenu
+    //
+    //    }
+
+    return item
+  }
 }

@@ -4,7 +4,12 @@
 #include <sstream>
 #include <thread>
 
+#include <fcitx/action.h>
+#include <fcitx/menu.h>
+#include <fcitx/statusarea.h>
+#include <fcitx/userinterfacemanager.h>
 #include <keyboard.h>
+#include <nlohmann/json.hpp>
 
 #include "fcitx-swift.h"
 #include "fcitx.h"
@@ -281,4 +286,63 @@ void set_current_input_method(const char *imName) noexcept {
 std::string get_current_input_method() noexcept {
     return with_fcitx(
         [=](Fcitx &fcitx) { return fcitx.instance()->currentInputMethod(); });
+}
+
+static nlohmann::json actionToJson(fcitx::Action *action,
+                                   fcitx::InputContext *ic) {
+    nlohmann::json j;
+    j["id"] = action->id();
+    j["name"] = action->name();
+    if (action->shortText(ic) != "") {
+        j["desc"] = action->shortText(ic);
+    } else if (action->longText(ic) != "") {
+        j["desc"] = action->longText(ic);
+    } else {
+        j["desc"] = "";
+    }
+    if (action->isSeparator()) {
+        j["separator"] = true;
+    }
+    if (action->isCheckable()) {
+        bool checked = action->isChecked(ic);
+        j["checked"] = checked;
+    }
+    if (auto *menu = action->menu()) {
+        for (auto *subaction : menu->actions()) {
+            j["children"].emplace_back(actionToJson(subaction, ic));
+        }
+    }
+    return j;
+}
+
+/// Return a json array that describes the menu structure, if the most
+/// recent IC has some actions.
+///
+/// Each array element has a structure like:
+/// type Item = { name: str, desc: str, checked?: bool, children: Array<Item>? }
+std::string current_actions() noexcept {
+    return with_fcitx([](Fcitx &fcitx) {
+        nlohmann::json j = nlohmann::json::array();
+        if (auto *ic = fcitx.instance()->mostRecentInputContext()) {
+            auto &statusArea = ic->statusArea();
+            for (auto *action : statusArea.allActions()) {
+                if (!action->id()) {
+                    // Not registered with UI manager.
+                    continue;
+                }
+                j.emplace_back(actionToJson(action, ic));
+            }
+        }
+        return j.dump();
+    });
+}
+
+void activate_action_by_id(int id) noexcept {
+    with_fcitx([=](Fcitx &fcitx) {
+        auto *action =
+            fcitx.instance()->userInterfaceManager().lookupActionById(id);
+        if (auto *ic = fcitx.instance()->mostRecentInputContext()) {
+            action->activate(ic);
+        }
+    });
 }
