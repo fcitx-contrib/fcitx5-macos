@@ -6,7 +6,6 @@
 
 #include <keyboard.h>
 
-#include "fcitx-swift.h"
 #include "fcitx.h"
 #include "../macosnotifications/macosnotifications.h"
 #include "nativestreambuf.h"
