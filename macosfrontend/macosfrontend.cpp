@@ -42,18 +42,38 @@ public:
     }
 
     void updateInputPanel() {
-        int highlighted = -1;
         const InputPanel &ip = inputPanel();
         frontend_->updateInputPanel(filterText(ip.preedit()),
                                     filterText(ip.auxUp()),
                                     filterText(ip.auxDown()));
         std::vector<std::string> candidates;
+        int highlighted = -1;
         if (const auto &list = ip.candidateList()) {
             for (int i = 0; i < list->size(); i++) {
                 candidates.emplace_back(
                     filterString(list->candidate(i).text()));
             }
             highlighted = list->cursorIndex();
+            /*  Do not delete; kept for scroll mode.
+            const auto &bulk = list->toBulk();
+            if (bulk) {
+                size = bulk->totalSize();
+                // limit candidate count to 16 (for paging)
+                const int limit = size < 0 ? 16 : std::min(size, 16);
+                for (int i = 0; i < limit; i++) {
+                    try {
+                        auto &candidate = bulk->candidateFromAll(i);
+                        // maybe unnecessary; I don't see anywhere using
+            `CandidateWord::setPlaceHolder`
+                        // if (candidate.isPlaceHolder()) continue;
+                        candidates.emplace_back(filterString(candidate.text()));
+                    } catch (const std::invalid_argument &e) {
+                        size = static_cast<int>(candidates.size());
+                        break;
+                    }
+                }
+            }
+            */
         }
         frontend_->updateCandidateList(candidates, highlighted);
     }
