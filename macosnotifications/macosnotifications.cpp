@@ -143,13 +143,14 @@ static std::optional<std::string> locateIconPath(const std::string &appIcon) {
         return cache[appIcon];
     }
     auto &stdPath = fcitx::StandardPath::global();
-    static const std::vector<std::string> sizes { "64x64", "48x48" };
+    static const std::vector<std::string> sizes{"64x64", "48x48"};
     std::optional<std::string> retPath;
     stdPath.scanDirectories(
         fcitx::StandardPath::Type::Data,
         [&retPath, &appIcon](const std::string &base, bool user) {
             for (const auto &size : sizes) {
-                auto path = base + "/icons/hicolor/" + size + "/apps/" + appIcon + ".png";
+                auto path = base + "/icons/hicolor/" + size + "/apps/" +
+                            appIcon + ".png";
                 if (std::filesystem::exists(path)) {
                     retPath = path;
                     cache[appIcon] = path;
