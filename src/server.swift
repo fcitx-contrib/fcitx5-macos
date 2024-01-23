@@ -1,7 +1,6 @@
 import Cocoa
 import Fcitx
 import InputMethodKit
-import SwiftFcitx
 import SwiftNotify
 
 class NSManualApplication: NSApplication {

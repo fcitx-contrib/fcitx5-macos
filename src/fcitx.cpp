@@ -42,9 +42,16 @@ Fcitx::Fcitx() {
     setupEnv();
 }
 
-void Fcitx::setup() { setupInstance(); }
+void Fcitx::setup() {
+    setupInstance();
+    frontend_ =
+        dynamic_cast<fcitx::MacosFrontend *>(addonMgr().addon("macosfrontend"));
+}
 
-void Fcitx::teardown() { instance_.reset(); }
+void Fcitx::teardown() {
+    frontend_ = nullptr;
+    instance_.reset();
+}
 
 void Fcitx::setupLog(bool verbose) {
     static native_streambuf log_streambuf;
@@ -79,6 +86,7 @@ void Fcitx::setupEnv() {
     setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
     setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
 }
+
 void Fcitx::setupInstance() {
     instance_ = std::make_unique<fcitx::Instance>(0, nullptr);
     dispatcher_ = std::make_unique<fcitx::EventDispatcher>();
@@ -108,6 +116,8 @@ fcitx::AddonManager &Fcitx::addonMgr() { return instance_->addonManager(); }
 fcitx::AddonInstance *Fcitx::addon(const std::string &name) {
     return addonMgr().addon(name);
 }
+
+fcitx::MacosFrontend *Fcitx::frontend() { return frontend_; }
 
 /// A helper function to convert a vector of std::filesystem::path
 /// into a colon-separated string.

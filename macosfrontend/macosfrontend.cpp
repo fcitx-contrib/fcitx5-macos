@@ -238,32 +238,20 @@ bool process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
 
 ICUUID create_input_context(const char *appId, id client) noexcept {
     return with_fcitx([=](Fcitx &fcitx) {
-        auto that =
-            dynamic_cast<fcitx::MacosFrontend *>(fcitx.addon("macosfrontend"));
-        return that->createInputContext(appId, client);
+        return fcitx.frontend()->createInputContext(appId, client);
     });
 }
 
 void destroy_input_context(ICUUID uuid) noexcept {
     with_fcitx([=](Fcitx &fcitx) {
-        auto that =
-            dynamic_cast<fcitx::MacosFrontend *>(fcitx.addon("macosfrontend"));
-        that->destroyInputContext(uuid);
+        return fcitx.frontend()->destroyInputContext(uuid);
     });
 }
 
 void focus_in(ICUUID uuid) noexcept {
-    with_fcitx([=](Fcitx &fcitx) {
-        auto that =
-            dynamic_cast<fcitx::MacosFrontend *>(fcitx.addon("macosfrontend"));
-        that->focusIn(uuid);
-    });
+    with_fcitx([=](Fcitx &fcitx) { return fcitx.frontend()->focusIn(uuid); });
 }
 
 void focus_out(ICUUID uuid) noexcept {
-    with_fcitx([=](Fcitx &fcitx) {
-        auto that =
-            dynamic_cast<fcitx::MacosFrontend *>(fcitx.addon("macosfrontend"));
-        that->focusOut(uuid);
-    });
+    with_fcitx([=](Fcitx &fcitx) { return fcitx.frontend()->focusOut(uuid); });
 }
