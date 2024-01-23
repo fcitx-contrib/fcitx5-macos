@@ -122,7 +122,9 @@ class FcitxInputController: IMKInputController {
       do {
         let actions = try JSONDecoder().decode(Array<FcitxAction>.self, from: data)
         for action in actions {
-          menu.addItem(action.toMenuItem(target: self))
+          for item in action.toMenuItems(target: self) {
+            menu.addItem(item)
+          }
         }
         menu.addItem(NSMenuItem.separator())
       } catch {
@@ -188,50 +190,28 @@ struct FcitxAction: Codable {
   let children: [FcitxAction]?
   let separator: Bool?
 
-  func toMenuItem(target: AnyObject) -> NSMenuItem {
+  // Returns a flattened array of the menu item and all of its children.
+  // Cannot use submenus directly because IMK submenus do not work as expected.
+  func toMenuItems(target: AnyObject, _ depth: Int = 0) -> [NSMenuItem] {
     if separator ?? false {
-      return NSMenuItem.separator()
+      return [NSMenuItem.separator()]
     }
+
     let item = NSMenuItem(
-      title: desc, action: #selector(FcitxInputController.activateFcitxAction), keyEquivalent: "")
+      title: String(repeating: "　", count: depth) + (depth > 0 ? "　▶" : "") + desc,
+      action: #selector(FcitxInputController.activateFcitxAction), keyEquivalent: "")
     item.target = target
     item.representedObject = self
     if let checked = checked {
       item.state = checked ? .on : .off
     }
 
-    // FIXME Unfortunately, the second-level submenu doesn't work for
-    // unknown reasons:
-    //
-    // Parent Menu
-    // +-- Sub Item1
-    // +-- Sub Item2
-    // +-- Sub Item3
-    //
-    // Strangely, no matter which item you click, the sender is always
-    // Sub Item1.  However, if you wrap Sub Items in one more level,
-    // it will work:
-    //
-    // Parent Menu
-    // +-- Sub Item1 Wrapper
-    // |   +-- Sub Item1
-    // +-- Sub Item2 Wrapper
-    //     +-- Sub Item2
-    //
-    // This workaround is too ugly.  It's really unfortuate that we
-    // have to disable submenus for now.
-    //
-    // Code:
-    //
-    //    if let children = children {
-    //      let submenu = NSMenu(title: name)
-    //      for child in children {
-    //        submenu.addItem(child.toMenuItem(target: target))
-    //      }
-    //      item.submenu = submenu
-    //
-    //    }
+    var items = [item]
 
-    return item
+    for child in children ?? [] {
+      items += child.toMenuItems(target: target, depth + 1)
+    }
+
+    return items
   }
 }
