@@ -20,7 +20,6 @@ target_link_libraries(macosnotifications Fcitx5::Core Fcitx5::Module::Notificati
 target_include_directories(macosnotifications PUBLIC
   "${CMAKE_CURRENT_BINARY_DIR}/include"
   "${CMAKE_SOURCE_DIR}/src"
-  "${CMAKE_SOURCE_DIR}/include"
 )
 
 configure_file(notifications.conf.in.in notifications.conf.in @ONLY)

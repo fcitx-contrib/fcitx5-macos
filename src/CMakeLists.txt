@@ -18,7 +18,6 @@ add_executable(Fcitx5
     config/menu.swift
     config/about.swift
     fcitx.cpp
-    keycode.cpp
 )
 
 add_dependencies(Fcitx5 macosfrontend macosnotifications)
@@ -33,6 +32,7 @@ target_include_directories(Fcitx5 PRIVATE
 target_link_libraries(Fcitx5
     "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
     SwiftFcitx
+    SwiftFrontend
     SwiftNotify
     Fcitx5::Core
     keyboard

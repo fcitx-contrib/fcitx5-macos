@@ -57,7 +57,6 @@ set(CMAKE_INSTALL_LIBDATADIR "${CMAKE_INSTALL_PREFIX}/lib")
 add_subdirectory(fcitx5)
 
 include_directories(
-    include
     fcitx5-webview/include
     fcitx5-webview/webview
     "${HOMEBREW_PATH}/include" # nlohmann-json

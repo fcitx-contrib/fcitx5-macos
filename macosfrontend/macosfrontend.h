@@ -13,10 +13,8 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
 
-typedef std::function<void(const std::vector<std::string> &, int, int)>
-    CandidateListCallback;
-typedef std::function<void(const std::string &)> CommitStringCallback;
-typedef std::function<void(const std::string &, int)> ShowPreeditCallback;
+#include "macosfrontend-public.h"
+#include "webview_candidate_window.hpp"
 
 namespace fcitx {
 
@@ -31,14 +29,8 @@ public:
     void updateCandidateList(const std::vector<std::string> &candidates,
                              int size, int highlight);
     void selectCandidate(size_t index);
-    void commitString(const std::string &text);
-    void showPreedit(const std::string &, int);
 
-    void setCandidateListCallback(const CandidateListCallback &callback);
-    void setCommitStringCallback(const CommitStringCallback &callback);
-    void setShowPreeditCallback(const ShowPreeditCallback &callback);
-
-    ICUUID createInputContext(const std::string &appId);
+    ICUUID createInputContext(const std::string &appId, id client);
     void destroyInputContext(ICUUID);
     bool keyEvent(ICUUID, const Key &key, bool isRelease);
     void focusIn(ICUUID);
@@ -46,15 +38,13 @@ public:
 
 private:
     Instance *instance_;
+    std::unique_ptr<candidate_window::CandidateWindow> window_;
+
     MacosInputContext *activeIC_;
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>>
         eventHandlers_;
 
     inline MacosInputContext *findIC(ICUUID);
-    CandidateListCallback candidateListCallback =
-        [](const std::vector<std::string> &, int, int) {};
-    CommitStringCallback commitStringCallback = [](const std::string &) {};
-    ShowPreeditCallback showPreeditCallback = [](const std::string &, int) {};
 };
 
 class MacosFrontendFactory : public AddonFactory {

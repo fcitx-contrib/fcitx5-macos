@@ -6,6 +6,11 @@
  * SPDX-FileCopyrightText: Copyright 2023-2024 Fcitx5 macOS contributors
  */
 #include "macosfrontend.h"
+#include "fcitx.h"
+#include "keycode.h"
+#include "macosfrontend-swift.h"
+
+#include <CoreFoundation/CoreFoundation.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputcontext.h>
 #include <fcitx/inputpanel.h>
@@ -16,19 +21,24 @@ class MacosInputContext : public InputContext {
 public:
     MacosInputContext(MacosFrontend *frontend,
                       InputContextManager &inputContextManager,
-                      const std::string &program)
-        : InputContext(inputContextManager, program), frontend_(frontend) {
+                      const std::string &program, id client)
+        : InputContext(inputContextManager, program), frontend_(frontend),
+          client_(client) {
+        CFRetain(client_);
         CapabilityFlags flags = CapabilityFlag::Preedit;
         setCapabilityFlags(flags);
         created();
     }
 
-    ~MacosInputContext() { destroy(); }
+    ~MacosInputContext() {
+        CFRelease(client_);
+        destroy();
+    }
 
     const char *frontend() const override { return "macos"; }
 
     void commitStringImpl(const std::string &text) override {
-        frontend_->commitString(text);
+        SwiftFrontend::commit(client_, text);
     }
 
     void deleteSurroundingTextImpl(int offset, unsigned int size) override {}
@@ -38,7 +48,8 @@ public:
     void updatePreeditImpl() override {
         auto preedit = frontend_->instance()->outputFilter(
             this, inputPanel().clientPreedit());
-        frontend_->showPreedit(preedit.toString(), preedit.cursor());
+        SwiftFrontend::setPreedit(client_, preedit.toString(),
+                                  preedit.cursor());
     }
 
     void updateInputPanel() {
@@ -97,8 +108,11 @@ public:
         return;
     }
 
+    id client() { return client_; }
+
 private:
     MacosFrontend *frontend_;
+    id client_;
 
     inline Text filterText(const Text &orig) {
         return frontend_->instance()->outputFilter(this, orig);
@@ -110,7 +124,8 @@ private:
 };
 
 MacosFrontend::MacosFrontend(Instance *instance)
-    : instance_(instance), activeIC_(nullptr) {
+    : instance_(instance), activeIC_(nullptr),
+      window_(std::make_unique<candidate_window::WebviewCandidateWindow>()) {
     eventHandlers_.emplace_back(instance_->watchEvent(
         EventType::InputContextFlushUI, EventWatcherPhase::Default,
         [this](Event &event) {
@@ -127,40 +142,35 @@ MacosFrontend::MacosFrontend(Instance *instance)
             }
             }
         }));
-}
-
-void MacosFrontend::setCandidateListCallback(
-    const CandidateListCallback &callback) {
-    candidateListCallback = callback;
-}
-
-void MacosFrontend::setCommitStringCallback(
-    const CommitStringCallback &callback) {
-    commitStringCallback = callback;
-}
-
-void MacosFrontend::setShowPreeditCallback(
-    const ShowPreeditCallback &callback) {
-    showPreeditCallback = callback;
-}
-
-void MacosFrontend::commitString(const std::string &text) {
-    commitStringCallback(text);
+    window_->set_select_callback(
+        [this](size_t index) { selectCandidate(index); });
 }
 
 void MacosFrontend::updateCandidateList(
-    const std::vector<std::string> &candidates, int size, int highlighted) {
-    candidateListCallback(candidates, size, highlighted);
+    const std::vector<std::string> &candidateList, int size, int highlight) {
+    window_->set_candidates(candidateList, highlight);
+    // Don't read candidateList from callback function as it's
+    // transient.
+    auto empty = candidateList.empty();
+    dispatch_async(dispatch_get_main_queue(), ^void() {
+      // showPreeditCallback is executed before candidateListCallback,
+      // so in main thread preedit UI update happens before here.
+      float x = 0.f, y = 0.f;
+      if (!activeIC_ ||
+          !SwiftFrontend::getCursorCoordinates(activeIC_->client(), &x, &y)) {
+          FCITX_WARN() << "Fail to get preedit coordinates";
+      }
+      if (empty)
+          window_->hide();
+      else
+          window_->show(x, y);
+    });
 }
 
 void MacosFrontend::selectCandidate(size_t index) {
     if (activeIC_) {
         activeIC_->selectCandidate(index);
     }
-}
-
-void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {
-    showPreeditCallback(preedit, caretPos);
 }
 
 bool MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
@@ -179,9 +189,9 @@ MacosInputContext *MacosFrontend::findIC(ICUUID uuid) {
         instance_->inputContextManager().findByUUID(uuid));
 }
 
-ICUUID MacosFrontend::createInputContext(const std::string &appId) {
-    auto ic =
-        new MacosInputContext(this, instance_->inputContextManager(), appId);
+ICUUID MacosFrontend::createInputContext(const std::string &appId, id client) {
+    auto ic = new MacosInputContext(this, instance_->inputContextManager(),
+                                    appId, client);
     return ic->uuid();
 }
 
@@ -211,3 +221,49 @@ void MacosFrontend::focusOut(ICUUID uuid) {
 }
 
 } // namespace fcitx
+
+bool process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
+                 uint16_t osxKeycode, bool isRelease) noexcept {
+    const fcitx::Key parsedKey{
+        osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
+        osx_modifiers_to_fcitx_keystates(osxModifiers),
+        osx_keycode_to_fcitx_keycode(osxKeycode),
+    };
+    return with_fcitx([=](Fcitx &fcitx) {
+        auto that =
+            dynamic_cast<fcitx::MacosFrontend *>(fcitx.addon("macosfrontend"));
+        return that->keyEvent(uuid, parsedKey, isRelease);
+    });
+}
+
+ICUUID create_input_context(const char *appId, id client) noexcept {
+    return with_fcitx([=](Fcitx &fcitx) {
+        auto that =
+            dynamic_cast<fcitx::MacosFrontend *>(fcitx.addon("macosfrontend"));
+        return that->createInputContext(appId, client);
+    });
+}
+
+void destroy_input_context(ICUUID uuid) noexcept {
+    with_fcitx([=](Fcitx &fcitx) {
+        auto that =
+            dynamic_cast<fcitx::MacosFrontend *>(fcitx.addon("macosfrontend"));
+        that->destroyInputContext(uuid);
+    });
+}
+
+void focus_in(ICUUID uuid) noexcept {
+    with_fcitx([=](Fcitx &fcitx) {
+        auto that =
+            dynamic_cast<fcitx::MacosFrontend *>(fcitx.addon("macosfrontend"));
+        that->focusIn(uuid);
+    });
+}
+
+void focus_out(ICUUID uuid) noexcept {
+    with_fcitx([=](Fcitx &fcitx) {
+        auto that =
+            dynamic_cast<fcitx::MacosFrontend *>(fcitx.addon("macosfrontend"));
+        that->focusOut(uuid);
+    });
+}

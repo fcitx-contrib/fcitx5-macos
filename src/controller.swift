@@ -1,6 +1,6 @@
+import CxxFrontend
 import Fcitx
 import InputMethodKit
-import SwiftFcitx
 
 class FcitxInputController: IMKInputController {
   var uuid: ICUUID
@@ -17,7 +17,7 @@ class FcitxInputController: IMKInputController {
     } else {
       appId = ""
     }
-    uuid = create_input_context(appId)
+    uuid = create_input_context(appId, client)
     super.init(server: server, delegate: delegate, client: client)
   }
 
@@ -32,10 +32,9 @@ class FcitxInputController: IMKInputController {
   }
 
   override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
-    guard let event = event, let client = sender as? IMKTextInput else {
+    guard let event = event, let _ = sender as? IMKTextInput else {
       return false
     }
-    setClient(client)
 
     let code = event.keyCode
     let mods = event.modifierFlags
