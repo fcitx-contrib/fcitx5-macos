@@ -194,7 +194,8 @@ struct FcitxAction: Codable {
   // Cannot use submenus directly because IMK submenus do not work as expected.
   func toMenuItems(target: AnyObject, _ depth: Int = 0) -> [NSMenuItem] {
     if separator ?? false {
-      return [NSMenuItem.separator()]
+      // Separators should be skipped in a flattened view.
+      return []
     }
 
     let item = NSMenuItem(
