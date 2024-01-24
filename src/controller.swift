@@ -199,7 +199,7 @@ struct FcitxAction: Codable {
     }
 
     let item = NSMenuItem(
-      title: String(repeating: "　", count: depth) + (depth > 0 ? "　▶" : "") + desc,
+      title: String(repeating: "　　", count: depth) + desc,
       action: #selector(FcitxInputController.activateFcitxAction), keyEquivalent: "")
     item.target = target
     item.representedObject = self
