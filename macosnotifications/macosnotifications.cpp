@@ -1,5 +1,3 @@
-#include <filesystem>
-#include <fcitx-utils/standardpath.h>
 #include <fcitx/addonfactory.h>
 #include <fcitx/addonmanager.h>
 
