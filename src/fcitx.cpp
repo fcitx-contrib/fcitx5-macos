@@ -169,6 +169,8 @@ void Fcitx::showInputPanelAsync(bool show) {
     dispatch_async(dispatch_get_main_queue(), ^void() {
       if (show) {
           double x = 0, y = 0;
+          // showPreeditCallback is executed before candidateListCallback,
+          // so in main thread preedit UI update happens before here.
           if (!SwiftFcitx::getCursorCoordinates(&x, &y)) {
               FCITX_WARN() << "Fail to get preedit coordinates";
           }
