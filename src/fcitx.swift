@@ -39,14 +39,14 @@ public func setPreedit(_ preedit: String, _ caretPosUtf8: Int) {
 
 // Must be executed after actual preedit UI update, i.e. not simply setPreedit.
 public func getCursorCoordinates(
-  _ x: UnsafeMutablePointer<Float>,
-  _ y: UnsafeMutablePointer<Float>
+  _ x: UnsafeMutablePointer<Double>,
+  _ y: UnsafeMutablePointer<Double>
 ) -> Bool {
   if let client = globalClient as? IMKTextInput {
     var rect = NSRect(x: 0, y: 0, width: 0, height: 0)
     client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-    x.pointee = Float(NSMinX(rect))
-    y.pointee = Float(NSMinY(rect))
+    x.pointee = Double(NSMinX(rect))
+    y.pointee = Double(NSMinY(rect))
     return true
   }
   return false

@@ -9,6 +9,15 @@
 #include "../macosfrontend/macosfrontend.h"
 #include "webview_candidate_window.hpp"
 
+enum class PanelShowFlag : int {
+    HasAuxUp,
+    HasAuxDown,
+    HasPreedit,
+    HasCandidates
+};
+
+using PanelShowFlags = fcitx::Flags<PanelShowFlag>;
+
 /// 'Fcitx' manages the lifecycle of the global Fcitx instance.
 class Fcitx final {
 public:
@@ -35,6 +44,15 @@ private:
     void setupCandidateWindow();
     void setupInstance();
     void setupFrontend();
+
+    void showInputPanelAsync(bool show);
+    PanelShowFlags panelShow_;
+    inline void updatePanelShowFlags(bool condition, PanelShowFlag flag) {
+        if (condition)
+            panelShow_ |= flag;
+        else
+            panelShow_.unset(flag);
+    }
 
     std::unique_ptr<fcitx::Instance> instance_;
     std::unique_ptr<fcitx::EventDispatcher> dispatcher_;
