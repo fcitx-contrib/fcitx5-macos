@@ -43,7 +43,7 @@ public class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
 @_cdecl("sendNotificationProxy")
 public func sendNotificationProxy(
   _ identifier: UnsafePointer<CChar>,
-  _ iconPath: UnsafePointer<CChar>?,
+  _ iconPath: UnsafePointer<CChar>,
   _ title: UnsafePointer<CChar>,
   _ body: UnsafePointer<CChar>,
   _ cActionStrings: UnsafePointer<UnsafePointer<CChar>>?,
@@ -58,7 +58,7 @@ public func sendNotificationProxy(
   }
   sendNotification(
     String.init(cString: identifier),
-    iconPath.flatMap { path in String(cString: path) },
+    String.init(cString: iconPath),
     String.init(cString: title),
     String.init(cString: body),
     actionStrings,
@@ -68,7 +68,7 @@ public func sendNotificationProxy(
 
 public func sendNotification(
   _ identifier: String,
-  _ iconPath: String?,
+  _ iconPath: String,
   _ title: String, _ body: String,
   _ actionStrings: [String],
   _ timeout: Double
@@ -99,7 +99,7 @@ public func sendNotification(
     content.body = body
     content.categoryIdentifier = categoryIdent
 
-    if let iconPath = iconPath {
+    if iconPath != "" {
       if let attachment = try? UNNotificationAttachment(
         identifier: "image", url: URL(fileURLWithPath: iconPath), options: nil)
       {

@@ -10,7 +10,9 @@ static std::optional<std::string> locateIconPath(const std::string &appIcon);
 
 namespace fcitx {
 
-Notifications::Notifications(Instance *instance) : instance_(instance) {
+Notifications::Notifications(Instance *instance)
+    : instance_(instance),
+      iconTheme_(std::make_unique<fcitx::IconTheme>("hicolor")) {
     reloadConfig();
 }
 
@@ -58,8 +60,8 @@ uint32_t Notifications::sendNotification(
     itemTable_.insert(item);
 
     // Find appIcon file.
-    auto iconPath = locateIconPath(appIcon);
-    FCITX_DEBUG() << "appicon=" << appIcon << ", iconpath = " << iconPath;
+    static const std::vector<std::string> iconExtensions{".png"};
+    auto iconPath = iconTheme_->findIcon(appIcon, 48, 1, iconExtensions);
 
     // Send the notification.
     std::vector<const char *> cActionStrings;
@@ -67,9 +69,8 @@ uint32_t Notifications::sendNotification(
         cActionStrings.push_back(action.c_str());
     }
     SwiftNotify::sendNotificationProxy(
-        externalId.c_str(), iconPath ? iconPath->c_str() : nullptr,
-        summary.c_str(), body.c_str(), cActionStrings.data(),
-        cActionStrings.size(), timeout);
+        externalId.c_str(), iconPath.c_str(), summary.c_str(), body.c_str(),
+        cActionStrings.data(), cActionStrings.size(), timeout);
 
     return internalId_;
 }
@@ -134,32 +135,5 @@ void destroyNotificationItem(const char *externalId,
 }
 
 } // namespace fcitx
-
-static std::optional<std::string> locateIconPath(const std::string &appIcon) {
-    // https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
-    // macOS doesn't support SVG, so no need to scan the 'scalable' folder.
-    static std::unordered_map<std::string, std::string> cache;
-    if (cache.count(appIcon)) {
-        return cache[appIcon];
-    }
-    auto &stdPath = fcitx::StandardPath::global();
-    static const std::vector<std::string> sizes{"64x64", "48x48"};
-    std::optional<std::string> retPath;
-    stdPath.scanDirectories(
-        fcitx::StandardPath::Type::Data,
-        [&retPath, &appIcon](const std::string &base, bool user) {
-            for (const auto &size : sizes) {
-                auto path = base + "/icons/hicolor/" + size + "/apps/" +
-                            appIcon + ".png";
-                if (std::filesystem::exists(path)) {
-                    retPath = path;
-                    cache[appIcon] = path;
-                    return false;
-                }
-            }
-            return true;
-        });
-    return retPath;
-}
 
 FCITX_ADDON_FACTORY(fcitx::MacosNotificationsFactory)
