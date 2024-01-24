@@ -168,7 +168,7 @@ fcitx::MacosFrontend *Fcitx::macosfrontend() { return macosfrontend_; }
 void Fcitx::showInputPanelAsync(bool show) {
     dispatch_async(dispatch_get_main_queue(), ^void() {
       if (show) {
-          float x = 0.f, y = 0.f;
+          double x = 0, y = 0;
           if (!SwiftFcitx::getCursorCoordinates(&x, &y)) {
               FCITX_WARN() << "Fail to get preedit coordinates";
           }
