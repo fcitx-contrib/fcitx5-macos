@@ -42,18 +42,14 @@ public:
     }
 
     void updateInputPanel() {
+        int highlighted = -1;
         const InputPanel &ip = inputPanel();
         frontend_->updateInputPanel(filterText(ip.preedit()),
                                     filterText(ip.auxUp()),
                                     filterText(ip.auxDown()));
         std::vector<std::string> candidates;
-        int highlighted = -1;
+        int size = 0;
         if (const auto &list = ip.candidateList()) {
-            for (int i = 0; i < list->size(); i++) {
-                candidates.emplace_back(
-                    filterString(list->candidate(i).text()));
-            }
-            highlighted = list->cursorIndex();
             /*  Do not delete; kept for scroll mode.
             const auto &bulk = list->toBulk();
             if (bulk) {
@@ -72,10 +68,17 @@ public:
                         break;
                     }
                 }
-            }
+            } else {
             */
+            size = list->size();
+            for (int i = 0; i < size; i++) {
+                candidates.emplace_back(
+                    filterString(list->candidate(i).text()));
+            }
+            highlighted = list->cursorIndex();
+            // }
         }
-        frontend_->updateCandidateList(candidates, highlighted);
+        frontend_->updateCandidateList(candidates, size, highlighted);
     }
 
     void selectCandidate(size_t index) {
@@ -148,8 +151,8 @@ void MacosFrontend::commitString(const std::string &text) {
 }
 
 void MacosFrontend::updateCandidateList(
-    const std::vector<std::string> &candidates, int highlighted) {
-    candidateListCallback(candidates, highlighted);
+    const std::vector<std::string> &candidates, int size, int highlighted) {
+    candidateListCallback(candidates, size, highlighted);
 }
 
 void MacosFrontend::selectCandidate(size_t index) {
