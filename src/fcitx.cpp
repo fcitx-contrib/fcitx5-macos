@@ -109,27 +109,33 @@ void Fcitx::setupFrontend() {
         [this](const std::vector<std::string> &candidateList, int,
                int highlighted) {
             window_->set_candidates(candidateList, highlighted);
-            // Don't read candidateList from callback function as it's
-            // transient.
-            auto empty = candidateList.empty();
-            dispatch_async(dispatch_get_main_queue(), ^void() {
-              float x = 0.f, y = 0.f;
-              // showPreeditCallback is executed before candidateListCallback,
-              // so in main thread preedit UI update happens before here.
-              if (!SwiftFcitx::getCursorCoordinates(&x, &y)) {
-                  FCITX_WARN() << "Fail to get preedit coordinates";
-              }
-              if (empty)
-                  window_->hide();
-              else
-                  window_->show(x, y);
-            });
+            updatePanelShowFlags(!candidateList.empty(),
+                                 PanelShowFlag::HasCandidates);
+            showInputPanelAsync(panelShow_);
         });
     macosfrontend_->setCommitStringCallback(
         [](const std::string &s) { SwiftFcitx::commit(s.c_str()); });
     macosfrontend_->setShowPreeditCallback(
         [](const std::string &s, int caretPos) {
             SwiftFcitx::setPreedit(s.c_str(), caretPos);
+        });
+    macosfrontend_->setUpdateInputPanelCallback(
+        [this](const fcitx::Text &preedit, const fcitx::Text &auxUp,
+               const fcitx::Text &auxDown) {
+            auto convert = [](const fcitx::Text &text) {
+                std::vector<std::pair<std::string, int>> res;
+                for (int i = 0; i < text.size(); i++) {
+                    res.emplace_back(make_pair(text.stringAt(i),
+                                               text.formatAt(i).toInteger()));
+                }
+                return res;
+            };
+            window_->update_input_panel(convert(preedit), preedit.cursor(),
+                                        convert(auxUp), convert(auxDown));
+            updatePanelShowFlags(!preedit.empty(), PanelShowFlag::HasPreedit);
+            updatePanelShowFlags(!auxUp.empty(), PanelShowFlag::HasAuxUp);
+            updatePanelShowFlags(!auxDown.empty(), PanelShowFlag::HasAuxDown);
+            showInputPanelAsync(panelShow_);
         });
 }
 
@@ -156,6 +162,24 @@ fcitx::AddonInstance *Fcitx::addon(const std::string &name) {
 }
 
 fcitx::MacosFrontend *Fcitx::macosfrontend() { return macosfrontend_; }
+
+/// Before calling this, the panel states must already be initialized
+/// sychronously, by using set_candidates, etc.
+void Fcitx::showInputPanelAsync(bool show) {
+    dispatch_async(dispatch_get_main_queue(), ^void() {
+      if (show) {
+          double x = 0, y = 0;
+          // showPreeditCallback is executed before candidateListCallback,
+          // so in main thread preedit UI update happens before here.
+          if (!SwiftFcitx::getCursorCoordinates(&x, &y)) {
+              FCITX_WARN() << "Fail to get preedit coordinates";
+          }
+          window_->show(x, y);
+      } else {
+          window_->hide();
+      }
+    });
+}
 
 /// A helper function to convert a vector of std::filesystem::path
 /// into a colon-separated string.
