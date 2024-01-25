@@ -44,16 +44,13 @@ public:
     void updateInputPanel() {
         int highlighted = -1;
         const InputPanel &ip = inputPanel();
-        // frontend_->updateInputPanel(
-        //         filterText(ip.preedit()),
-        //         filterText(ip.auxUp()),
-        //         filterText(ip.auxDown())
-        // );
+        frontend_->updateInputPanel(filterText(ip.preedit()),
+                                    filterText(ip.auxUp()),
+                                    filterText(ip.auxDown()));
         std::vector<std::string> candidates;
         int size = 0;
-        const auto &list = ip.candidateList();
-        if (list) {
-            /*
+        if (const auto &list = ip.candidateList()) {
+            /*  Do not delete; kept for scroll mode.
             const auto &bulk = list->toBulk();
             if (bulk) {
                 size = bulk->totalSize();
@@ -144,6 +141,11 @@ void MacosFrontend::setShowPreeditCallback(
     showPreeditCallback = callback;
 }
 
+void MacosFrontend::setUpdateInputPanelCallback(
+    const UpdateInputPanelCallback &callback) {
+    updateInputPanelCallback = callback;
+}
+
 void MacosFrontend::commitString(const std::string &text) {
     commitStringCallback(text);
 }
@@ -157,6 +159,12 @@ void MacosFrontend::selectCandidate(size_t index) {
     if (activeIC_) {
         activeIC_->selectCandidate(index);
     }
+}
+
+void MacosFrontend::updateInputPanel(const fcitx::Text &preedit,
+                                     const fcitx::Text &auxUp,
+                                     const fcitx::Text &auxDown) {
+    updateInputPanelCallback(preedit, auxUp, auxDown);
 }
 
 void MacosFrontend::showPreedit(const std::string &preedit, int caretPos) {

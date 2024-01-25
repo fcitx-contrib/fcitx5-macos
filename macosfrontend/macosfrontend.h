@@ -17,6 +17,9 @@ typedef std::function<void(const std::vector<std::string> &, int, int)>
     CandidateListCallback;
 typedef std::function<void(const std::string &)> CommitStringCallback;
 typedef std::function<void(const std::string &, int)> ShowPreeditCallback;
+typedef std::function<void(const fcitx::Text &, const fcitx::Text &,
+                           const fcitx::Text &)>
+    UpdateInputPanelCallback;
 
 namespace fcitx {
 
@@ -33,10 +36,13 @@ public:
     void selectCandidate(size_t index);
     void commitString(const std::string &text);
     void showPreedit(const std::string &, int);
+    void updateInputPanel(const fcitx::Text &preedit, const fcitx::Text &auxUp,
+                          const fcitx::Text &auxDown);
 
     void setCandidateListCallback(const CandidateListCallback &callback);
     void setCommitStringCallback(const CommitStringCallback &callback);
     void setShowPreeditCallback(const ShowPreeditCallback &callback);
+    void setUpdateInputPanelCallback(const UpdateInputPanelCallback &callback);
 
     ICUUID createInputContext(const std::string &appId);
     void destroyInputContext(ICUUID);
@@ -55,6 +61,8 @@ private:
         [](const std::vector<std::string> &, int, int) {};
     CommitStringCallback commitStringCallback = [](const std::string &) {};
     ShowPreeditCallback showPreeditCallback = [](const std::string &, int) {};
+    UpdateInputPanelCallback updateInputPanelCallback =
+        [](const fcitx::Text &, const fcitx::Text &, const fcitx::Text &) {};
 };
 
 class MacosFrontendFactory : public AddonFactory {
