@@ -51,7 +51,7 @@ private:
         if (condition)
             panelShow_ |= flag;
         else
-            panelShow_.unset(flag);
+            panelShow_ = panelShow_.unset(flag);
     }
 
     std::unique_ptr<fcitx::Instance> instance_;
