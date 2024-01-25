@@ -5,6 +5,7 @@
 #include <fcitx-config/iniparser.h>
 #include <fcitx-utils/i18n.h>
 #include <fcitx/addoninstance.h>
+#include <fcitx/icontheme.h>
 #include <fcitx/instance.h>
 #include <notifications_public.h>
 
@@ -118,6 +119,7 @@ private:
 
     NotificationsConfig config_;
     Instance *instance_;
+    std::unique_ptr<fcitx::IconTheme> iconTheme_;
 
     Flags<NotificationsCapability> capabilities_;
     std::unordered_set<std::string> hiddenNotifications_;
