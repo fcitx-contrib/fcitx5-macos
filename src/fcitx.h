@@ -10,10 +10,10 @@
 #include "webview_candidate_window.hpp"
 
 enum class PanelShowFlag : int {
-    HasAuxUp,
-    HasAuxDown,
-    HasPreedit,
-    HasCandidates
+    HasAuxUp = 1,
+    HasAuxDown = 1 << 1,
+    HasPreedit = 1 << 2,
+    HasCandidates = 1 << 3
 };
 
 using PanelShowFlags = fcitx::Flags<PanelShowFlag>;
