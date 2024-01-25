@@ -111,9 +111,10 @@ void Fcitx::setupFrontend() {
     macosfrontend_ =
         dynamic_cast<fcitx::MacosFrontend *>(addonMgr().addon("macosfrontend"));
     macosfrontend_->setCandidateListCallback(
-        [this](const std::vector<std::string> &candidateList, int,
+        [this](const std::vector<std::string> &candidateList,
+               const std::vector<std::string> &labelList, int,
                int highlighted) {
-            window_->set_candidates(candidateList, highlighted);
+            window_->set_candidates(candidateList, labelList, highlighted);
             updatePanelShowFlags(!candidateList.empty(),
                                  PanelShowFlag::HasCandidates);
             showInputPanelAsync(panelShow_);
