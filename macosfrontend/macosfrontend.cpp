@@ -48,6 +48,7 @@ public:
                                     filterText(ip.auxUp()),
                                     filterText(ip.auxDown()));
         std::vector<std::string> candidates;
+        std::vector<std::string> labels;
         int size = 0;
         if (const auto &list = ip.candidateList()) {
             /*  Do not delete; kept for scroll mode.
@@ -74,11 +75,12 @@ public:
             for (int i = 0; i < size; i++) {
                 candidates.emplace_back(
                     filterString(list->candidate(i).text()));
+                labels.emplace_back(list->label(i).toString());
             }
             highlighted = list->cursorIndex();
             // }
         }
-        frontend_->updateCandidateList(candidates, size, highlighted);
+        frontend_->updateCandidateList(candidates, labels, size, highlighted);
     }
 
     void selectCandidate(size_t index) {
@@ -151,8 +153,9 @@ void MacosFrontend::commitString(const std::string &text) {
 }
 
 void MacosFrontend::updateCandidateList(
-    const std::vector<std::string> &candidates, int size, int highlighted) {
-    candidateListCallback(candidates, size, highlighted);
+    const std::vector<std::string> &candidates,
+    const std::vector<std::string> &labels, int size, int highlighted) {
+    candidateListCallback(candidates, labels, size, highlighted);
 }
 
 void MacosFrontend::selectCandidate(size_t index) {
