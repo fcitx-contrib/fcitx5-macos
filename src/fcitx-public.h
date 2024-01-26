@@ -20,5 +20,7 @@ void set_current_input_method_group(const char *) noexcept;
 std::string get_current_input_method_group() noexcept;
 void set_current_input_method(const char *) noexcept;
 std::string get_current_input_method() noexcept;
+std::string current_actions() noexcept;
+void activate_action_by_id(int id) noexcept;
 
 #endif

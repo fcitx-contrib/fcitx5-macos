@@ -4,9 +4,13 @@
 #include "fcitx.h"
 #include "macosnotifications.h"
 
+static std::optional<std::string> locateIconPath(const std::string &appIcon);
+
 namespace fcitx {
 
-Notifications::Notifications(Instance *instance) : instance_(instance) {
+Notifications::Notifications(Instance *instance)
+    : instance_(instance),
+      iconTheme_(std::make_unique<fcitx::IconTheme>("hicolor")) {
     reloadConfig();
 }
 
@@ -38,8 +42,6 @@ uint32_t Notifications::sendNotification(
     NotificationActionCallback actionCallback,
     NotificationClosedCallback closedCallback) {
 
-    FCITX_UNUSED(appIcon); // No way to customize icon
-
     if (itemTable_.find(replaceId)) {
         closeNotification(replaceId);
     }
@@ -55,14 +57,18 @@ uint32_t Notifications::sendNotification(
                           closedCallback};
     itemTable_.insert(item);
 
+    // Find appIcon file.
+    static const std::vector<std::string> iconExtensions{".png"};
+    auto iconPath = iconTheme_->findIcon(appIcon, 48, 1, iconExtensions);
+
     // Send the notification.
     std::vector<const char *> cActionStrings;
     for (const auto &action : actions) {
         cActionStrings.push_back(action.c_str());
     }
-    SwiftNotify::sendNotificationProxy(externalId.c_str(), summary.c_str(),
-                                       body.c_str(), cActionStrings.data(),
-                                       cActionStrings.size(), timeout);
+    SwiftNotify::sendNotificationProxy(
+        externalId.c_str(), iconPath.c_str(), summary.c_str(), body.c_str(),
+        cActionStrings.data(), cActionStrings.size(), timeout);
 
     return internalId_;
 }

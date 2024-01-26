@@ -55,16 +55,14 @@ public:
     void updateInputPanel() {
         int highlighted = -1;
         const InputPanel &ip = inputPanel();
-        // frontend_->updateInputPanel(
-        //         filterText(ip.preedit()),
-        //         filterText(ip.auxUp()),
-        //         filterText(ip.auxDown())
-        // );
+        frontend_->updateInputPanel(filterText(ip.preedit()),
+                                    filterText(ip.auxUp()),
+                                    filterText(ip.auxDown()));
         std::vector<std::string> candidates;
+        std::vector<std::string> labels;
         int size = 0;
-        const auto &list = ip.candidateList();
-        if (list) {
-            /*
+        if (const auto &list = ip.candidateList()) {
+            /*  Do not delete; kept for scroll mode.
             const auto &bulk = list->toBulk();
             if (bulk) {
                 size = bulk->totalSize();
@@ -88,11 +86,12 @@ public:
             for (int i = 0; i < size; i++) {
                 candidates.emplace_back(
                     filterString(list->candidate(i).text()));
+                labels.emplace_back(list->label(i).toString());
             }
             highlighted = list->cursorIndex();
             // }
         }
-        frontend_->updateCandidateList(candidates, size, highlighted);
+        frontend_->updateCandidateList(candidates, labels, size, highlighted);
     }
 
     void selectCandidate(size_t index) {
@@ -146,25 +145,50 @@ MacosFrontend::MacosFrontend(Instance *instance)
         [this](size_t index) { selectCandidate(index); });
 }
 
-void MacosFrontend::updateCandidateList(
-    const std::vector<std::string> &candidateList, int size, int highlight) {
-    window_->set_candidates(candidateList, highlight);
-    // Don't read candidateList from callback function as it's
-    // transient.
-    auto empty = candidateList.empty();
+void MacosFrontend::updateInputPanel(const fcitx::Text &preedit,
+                                     const fcitx::Text &auxUp,
+                                     const fcitx::Text &auxDown) {
+    auto convert = [](const fcitx::Text &text) {
+        std::vector<std::pair<std::string, int>> ret;
+        for (int i = 0; i < text.size(); ++i) {
+            ret.emplace_back(
+                make_pair(text.stringAt(i), text.formatAt(i).toInteger()));
+        }
+        return ret;
+    };
+    window_->update_input_panel(convert(preedit), preedit.cursor(),
+                                convert(auxUp), convert(auxDown));
+    updatePanelShowFlags(!preedit.empty(), PanelShowFlag::HasPreedit);
+    updatePanelShowFlags(!auxUp.empty(), PanelShowFlag::HasAuxUp);
+    updatePanelShowFlags(!auxDown.empty(), PanelShowFlag::HasAuxDown);
+    showInputPanelAsync(panelShow_);
+}
+
+/// Before calling this, the panel states must already be initialized
+/// sychronously, by using set_candidates, etc.
+void MacosFrontend::showInputPanelAsync(bool show) {
     dispatch_async(dispatch_get_main_queue(), ^void() {
-      // showPreeditCallback is executed before candidateListCallback,
-      // so in main thread preedit UI update happens before here.
-      float x = 0.f, y = 0.f;
-      if (!activeIC_ ||
-          !SwiftFrontend::getCursorCoordinates(activeIC_->client(), &x, &y)) {
-          FCITX_WARN() << "Fail to get preedit coordinates";
-      }
-      if (empty)
-          window_->hide();
-      else
+      if (show) {
+          double x = 0, y = 0;
+          // showPreeditCallback is executed before candidateListCallback,
+          // so in main thread preedit UI update happens before here.
+          if (activeIC_ && !SwiftFrontend::getCursorCoordinates(
+                               activeIC_->client(), &x, &y)) {
+              FCITX_WARN() << "Fail to get preedit coordinates";
+          }
           window_->show(x, y);
+      } else {
+          window_->hide();
+      }
     });
+}
+
+void MacosFrontend::updateCandidateList(
+    const std::vector<std::string> &candidateList,
+    const std::vector<std::string> &labelList, int size, int highlight) {
+    window_->set_candidates(candidateList, labelList, highlight);
+    updatePanelShowFlags(!candidateList.empty(), PanelShowFlag::HasCandidates);
+    showInputPanelAsync(panelShow_);
 }
 
 void MacosFrontend::selectCandidate(size_t index) {

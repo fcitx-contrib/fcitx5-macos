@@ -9,7 +9,8 @@ public func commit(_ clientPtr: UnsafeMutableRawPointer, _ string: String) {
 
 // Executed in fcitx thread, so before process_key returns, no UI update
 // will happen. That means we can't get coordinates in this function.
-public func setPreedit(_ clientPtr: UnsafeMutableRawPointer, _ preedit: String, _ caretPosUtf8: Int) {
+public func setPreedit(_ clientPtr: UnsafeMutableRawPointer, _ preedit: String, _ caretPosUtf8: Int)
+{
   let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
   if let client = client as? IMKTextInput {
     // The caretPos argument is specified in UTF-8 bytes.
@@ -34,15 +35,15 @@ public func setPreedit(_ clientPtr: UnsafeMutableRawPointer, _ preedit: String, 
 // Must be executed after actual preedit UI update, i.e. not simply setPreedit.
 public func getCursorCoordinates(
   _ clientPtr: UnsafeMutableRawPointer,
-  _ x: UnsafeMutablePointer<Float>,
-  _ y: UnsafeMutablePointer<Float>
+  _ x: UnsafeMutablePointer<Double>,
+  _ y: UnsafeMutablePointer<Double>
 ) -> Bool {
   let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
   if let client = client as? IMKTextInput {
     var rect = NSRect(x: 0, y: 0, width: 0, height: 0)
     client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
-    x.pointee = Float(NSMinX(rect))
-    y.pointee = Float(NSMinY(rect))
+    x.pointee = Double(NSMinX(rect))
+    y.pointee = Double(NSMinY(rect))
     return true
   }
   return false

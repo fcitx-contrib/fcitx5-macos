@@ -17,3 +17,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/zh-Hans.lproj"
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/zh-Hant.lproj"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
+
+install(DIRECTORY "${PREBUILT_INSTALL_PATH}/share/icons"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share"
+)

@@ -11,6 +11,7 @@ INSTALL_PREFIX=/tmp/fcitx5
 mkdir -p $INSTALL_PREFIX
 
 deps=(
+  default-icon-theme
   expat
   fmt
   libintl

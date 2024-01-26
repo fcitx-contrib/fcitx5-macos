@@ -115,6 +115,22 @@ class FcitxInputController: IMKInputController {
     }
     menu.addItem(NSMenuItem.separator())
 
+    // Additional actions for the current IC
+    let actionJson = String(current_actions())
+    if let data = actionJson.data(using: .utf8) {
+      do {
+        let actions = try JSONDecoder().decode(Array<FcitxAction>.self, from: data)
+        for action in actions {
+          for item in action.toMenuItems(target: self) {
+            menu.addItem(item)
+          }
+        }
+        menu.addItem(NSMenuItem.separator())
+      } catch {
+        NSLog("Error decoding actions: \(error)")
+      }
+    }
+
     menu.addItem(withTitle: "Restart", action: #selector(restart(_:)), keyEquivalent: "")
     menu.addItem(withTitle: "About Fcitx5 macOS", action: #selector(about(_:)), keyEquivalent: "")
     return menu
@@ -129,6 +145,12 @@ class FcitxInputController: IMKInputController {
   @objc func switchInputMethod(sender: Any?) {
     if let imName = repObjectIMK(sender) as? String {
       set_current_input_method(imName)
+    }
+  }
+
+  @objc func activateFcitxAction(sender: Any?) {
+    if let action = repObjectIMK(sender) as? FcitxAction {
+      activate_action_by_id(Int32(action.id))
     }
   }
 }
@@ -152,9 +174,44 @@ private func removeCtrl(char: UInt32) -> UInt32 {
 /// }
 private func repObjectIMK(_ sender: Any?) -> Any? {
   if let sender = sender as? NSMutableDictionary {
-    if let menuItem = sender["IMKCommandMenuItem"] as? NSMenuItem {
+    if let menuItem = sender[kIMKCommandMenuItemName] as? NSMenuItem {
       return menuItem.representedObject
     }
   }
   return nil
+}
+
+struct FcitxAction: Codable {
+  let id: Int
+  let name: String
+  let desc: String
+  let checked: Bool?
+  let children: [FcitxAction]?
+  let separator: Bool?
+
+  // Returns a flattened array of the menu item and all of its children.
+  // Cannot use submenus directly because IMK submenus do not work as expected.
+  func toMenuItems(target: AnyObject, _ depth: Int = 0) -> [NSMenuItem] {
+    if separator ?? false {
+      // Separators should be skipped in a flattened view.
+      return []
+    }
+
+    let item = NSMenuItem(
+      title: String(repeating: "　　", count: depth) + desc,
+      action: #selector(FcitxInputController.activateFcitxAction), keyEquivalent: "")
+    item.target = target
+    item.representedObject = self
+    if let checked = checked {
+      item.state = checked ? .on : .off
+    }
+
+    var items = [item]
+
+    for child in children ?? [] {
+      items += child.toMenuItems(target: target, depth + 1)
+    }
+
+    return items
+  }
 }
