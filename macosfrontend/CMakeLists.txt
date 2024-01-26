@@ -1,11 +1,11 @@
 add_definitions(-DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\")
 
 _swift_generate_cxx_header_target(
-  macosfrontend_swift_h
-  SwiftFrontend
-  "${CMAKE_CURRENT_BINARY_DIR}/include/macosfrontend-swift.h"
-  SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/macosfrontend.swift"
-  SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}"
+    macosfrontend_swift_h
+    SwiftFrontend
+    "${CMAKE_CURRENT_BINARY_DIR}/include/macosfrontend-swift.h"
+    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/macosfrontend.swift"
+    SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
 add_library(SwiftFrontend STATIC macosfrontend.swift)
@@ -18,8 +18,8 @@ add_library(macosfrontend STATIC macosfrontend.cpp keycode.cpp)
 add_dependencies(macosfrontend SwiftFrontend)
 target_link_libraries(macosfrontend Fcitx5::Core)
 target_include_directories(macosfrontend PUBLIC
-  "${CMAKE_CURRENT_BINARY_DIR}/include"
-  "${CMAKE_SOURCE_DIR}/src"
+    "${CMAKE_CURRENT_BINARY_DIR}/include"
+    "${CMAKE_SOURCE_DIR}/src"
 )
 
 configure_file(macosfrontend.conf.in.in macosfrontend.conf.in @ONLY)

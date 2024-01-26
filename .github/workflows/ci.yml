@@ -20,7 +20,7 @@ jobs:
       - name: Lint
         run: |
           find macosfrontend macosnotifications src -name '*.cpp' -o -name '*.h' | xargs clang-format -Werror --dry-run -style=file:fcitx5/.clang-format
-          swift-format lint -rs macosnotifications src
+          swift-format lint -rs macosfrontend macosnotifications src
 
   build:
     needs: lint

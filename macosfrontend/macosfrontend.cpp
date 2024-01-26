@@ -254,8 +254,7 @@ bool process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };
     return with_fcitx([=](Fcitx &fcitx) {
-        auto that =
-            dynamic_cast<fcitx::MacosFrontend *>(fcitx.addon("macosfrontend"));
+        auto that = dynamic_cast<fcitx::MacosFrontend *>(fcitx.frontend());
         return that->keyEvent(uuid, parsedKey, isRelease);
     });
 }
