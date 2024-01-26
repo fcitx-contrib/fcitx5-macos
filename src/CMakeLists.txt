@@ -1,16 +1,3 @@
-_swift_generate_cxx_header_target(
-    fcitx_swift_h
-    SwiftFcitx
-    "${CMAKE_CURRENT_BINARY_DIR}/include/fcitx-swift.h"
-    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/fcitx.swift"
-)
-
-add_library(SwiftFcitx STATIC fcitx.swift)
-add_dependencies(SwiftFcitx fcitx_swift_h)
-set_target_properties(SwiftFcitx PROPERTIES Swift_MODULE_NAME SwiftFcitx)
-target_compile_options(SwiftFcitx PUBLIC
-  "$<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default>")
-
 add_executable(Fcitx5
     MACOSX_BUNDLE
     server.swift
@@ -18,7 +5,6 @@ add_executable(Fcitx5
     config/menu.swift
     config/about.swift
     fcitx.cpp
-    keycode.cpp
 )
 
 add_dependencies(Fcitx5 macosfrontend macosnotifications)
@@ -32,7 +18,7 @@ target_include_directories(Fcitx5 PRIVATE
 
 target_link_libraries(Fcitx5
     "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
-    SwiftFcitx
+    SwiftFrontend
     SwiftNotify
     Fcitx5::Core
     keyboard

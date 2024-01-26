@@ -11,10 +11,8 @@
 #include <keyboard.h>
 #include <nlohmann/json.hpp>
 
-#include "fcitx-swift.h"
 #include "fcitx.h"
 #include "../macosnotifications/macosnotifications.h"
-#include "keycode.h"
 #include "nativestreambuf.h"
 
 namespace fs = std::filesystem;
@@ -43,20 +41,19 @@ Fcitx &Fcitx::shared() {
     return fcitx;
 }
 
-Fcitx::Fcitx()
-    : window_(std::make_unique<candidate_window::WebviewCandidateWindow>()) {
+Fcitx::Fcitx() {
     setupLog(true);
     setupEnv();
-    setupCandidateWindow();
 }
 
 void Fcitx::setup() {
     setupInstance();
-    setupFrontend();
+    frontend_ =
+        dynamic_cast<fcitx::MacosFrontend *>(addonMgr().addon("macosfrontend"));
 }
 
 void Fcitx::teardown() {
-    macosfrontend_ = nullptr;
+    frontend_ = nullptr;
     instance_.reset();
 }
 
@@ -94,55 +91,12 @@ void Fcitx::setupEnv() {
     setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
 }
 
-void Fcitx::setupCandidateWindow() {
-    window_->set_select_callback(
-        [this](size_t index) { macosfrontend_->selectCandidate(index); });
-}
-
 void Fcitx::setupInstance() {
     instance_ = std::make_unique<fcitx::Instance>(0, nullptr);
     dispatcher_ = std::make_unique<fcitx::EventDispatcher>();
     auto &addonMgr = instance_->addonManager();
     addonMgr.registerDefaultLoader(&staticAddons);
     instance_->initialize();
-}
-
-void Fcitx::setupFrontend() {
-    macosfrontend_ =
-        dynamic_cast<fcitx::MacosFrontend *>(addonMgr().addon("macosfrontend"));
-    macosfrontend_->setCandidateListCallback(
-        [this](const std::vector<std::string> &candidateList,
-               const std::vector<std::string> &labelList, int,
-               int highlighted) {
-            window_->set_candidates(candidateList, labelList, highlighted);
-            updatePanelShowFlags(!candidateList.empty(),
-                                 PanelShowFlag::HasCandidates);
-            showInputPanelAsync(panelShow_);
-        });
-    macosfrontend_->setCommitStringCallback(
-        [](const std::string &s) { SwiftFcitx::commit(s.c_str()); });
-    macosfrontend_->setShowPreeditCallback(
-        [](const std::string &s, int caretPos) {
-            SwiftFcitx::setPreedit(s.c_str(), caretPos);
-        });
-    macosfrontend_->setUpdateInputPanelCallback(
-        [this](const fcitx::Text &preedit, const fcitx::Text &auxUp,
-               const fcitx::Text &auxDown) {
-            auto convert = [](const fcitx::Text &text) {
-                std::vector<std::pair<std::string, int>> res;
-                for (int i = 0; i < text.size(); i++) {
-                    res.emplace_back(make_pair(text.stringAt(i),
-                                               text.formatAt(i).toInteger()));
-                }
-                return res;
-            };
-            window_->update_input_panel(convert(preedit), preedit.cursor(),
-                                        convert(auxUp), convert(auxDown));
-            updatePanelShowFlags(!preedit.empty(), PanelShowFlag::HasPreedit);
-            updatePanelShowFlags(!auxUp.empty(), PanelShowFlag::HasAuxUp);
-            updatePanelShowFlags(!auxDown.empty(), PanelShowFlag::HasAuxDown);
-            showInputPanelAsync(panelShow_);
-        });
 }
 
 void Fcitx::exec() {
@@ -167,25 +121,7 @@ fcitx::AddonInstance *Fcitx::addon(const std::string &name) {
     return addonMgr().addon(name);
 }
 
-fcitx::MacosFrontend *Fcitx::macosfrontend() { return macosfrontend_; }
-
-/// Before calling this, the panel states must already be initialized
-/// sychronously, by using set_candidates, etc.
-void Fcitx::showInputPanelAsync(bool show) {
-    dispatch_async(dispatch_get_main_queue(), ^void() {
-      if (show) {
-          double x = 0, y = 0;
-          // showPreeditCallback is executed before candidateListCallback,
-          // so in main thread preedit UI update happens before here.
-          if (!SwiftFcitx::getCursorCoordinates(&x, &y)) {
-              FCITX_WARN() << "Fail to get preedit coordinates";
-          }
-          window_->show(x, y);
-      } else {
-          window_->hide();
-      }
-    });
-}
+fcitx::MacosFrontend *Fcitx::frontend() { return frontend_; }
 
 /// A helper function to convert a vector of std::filesystem::path
 /// into a colon-separated string.
@@ -226,38 +162,6 @@ void stop_fcitx_thread() noexcept {
 void restart_fcitx_thread() noexcept {
     stop_fcitx_thread();
     start_fcitx_thread();
-}
-
-bool process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
-                 uint16_t osxKeycode, bool isRelease) noexcept {
-    const fcitx::Key parsedKey{
-        osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
-        osx_modifiers_to_fcitx_keystates(osxModifiers),
-        osx_keycode_to_fcitx_keycode(osxKeycode),
-    };
-    return with_fcitx([=](Fcitx &fcitx) {
-        return fcitx.macosfrontend()->keyEvent(uuid, parsedKey, isRelease);
-    });
-}
-
-ICUUID create_input_context(const char *appId) noexcept {
-    return with_fcitx([=](Fcitx &fcitx) {
-        return fcitx.macosfrontend()->createInputContext(appId);
-    });
-}
-
-void destroy_input_context(ICUUID uuid) noexcept {
-    with_fcitx([=](Fcitx &fcitx) {
-        fcitx.macosfrontend()->destroyInputContext(uuid);
-    });
-}
-
-void focus_in(ICUUID uuid) noexcept {
-    with_fcitx([=](Fcitx &fcitx) { fcitx.macosfrontend()->focusIn(uuid); });
-}
-
-void focus_out(ICUUID uuid) noexcept {
-    with_fcitx([=](Fcitx &fcitx) { fcitx.macosfrontend()->focusOut(uuid); });
 }
 
 std::string input_method_groups() noexcept {

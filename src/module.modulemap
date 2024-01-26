@@ -1,3 +1,4 @@
 module Fcitx {
   header "fcitx-public.h"
+  export *
 }

@@ -1,0 +1,4 @@
+module CxxFrontend {
+  header "macosfrontend-public.h"
+  export *
+}
