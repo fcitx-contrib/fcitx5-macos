@@ -45,6 +45,7 @@ function(_swift_generate_cxx_header_target target module header)
       -emit-clang-header-path "${header}"
     DEPENDS
       ${ARG_DEPENDS}
+      ${ARG_SOURCES}
     COMMENT
       "Generating '${header}'"
   )
