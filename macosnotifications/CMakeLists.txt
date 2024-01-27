@@ -6,6 +6,7 @@ _swift_generate_cxx_header_target(
   "${CMAKE_CURRENT_BINARY_DIR}/include/notify-swift.h"
   SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/notify.swift"
   SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR};${PROJECT_BINARY_DIR}/logging"
+  DEPENDS Logging
 )
 
 add_library(SwiftNotify STATIC notify.swift)
