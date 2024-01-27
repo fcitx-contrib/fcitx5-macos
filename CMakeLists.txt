@@ -14,11 +14,11 @@ if(NOT CMAKE_OSX_ARCHITECTURES)
     set(CMAKE_OSX_ARCHITECTURES "${CMAKE_HOST_SYSTEM_PROCESSOR}")
 endif()
 
-set(ARM_TARGET "arm64-apple-macos11")
+set(CMAKE_OSX_DEPLOYMENT_TARGET 12)
 
 # Need HOMEBREW_PATH for iso-codes and xkeyboardconfig
 if(CMAKE_OSX_ARCHITECTURES STREQUAL arm64)
-    add_definitions(-target "${ARM_TARGET}")
+    add_definitions(-target "arm64-apple-macos12")
     set(HOMEBREW_PATH "/opt/homebrew")
 else()
     set(HOMEBREW_PATH "/usr/local")
