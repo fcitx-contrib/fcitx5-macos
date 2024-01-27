@@ -82,7 +82,7 @@ jobs:
             -DCMAKE_Swift_COMPILER=`which swiftc` \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_BUILD_TYPE=Release
-          cmake --build build || ./fix-cross-build.sh
+          cmake --build build || ./fix-cross-build.sh ${{ matrix.arch }}
           sudo cmake --install build
           dmgbuild -s dmg/config.py Fcitx5 Fcitx5-${{ matrix.arch }}.dmg
 

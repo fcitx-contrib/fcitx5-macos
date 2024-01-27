@@ -2,6 +2,10 @@ set -e
 if [[ -z "$CI" ]]; then
   exit 1
 fi
+# Don't hide cmake target dependency issue by rebuild
+if [[ $1 == x86_64 ]]; then
+  exit 1
+fi
 # HACK: temporarily replace comp-spell-dict from last successful build of native fcitx5
 wget https://github.com/fcitx-contrib/fcitx5-macos/releases/download/latest/Fcitx5-x86_64.dmg
 hdiutil attach Fcitx5-x86_64.dmg
