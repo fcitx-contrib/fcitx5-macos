@@ -1,12 +1,17 @@
 add_definitions(-DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\")
 
+set(NOTIFY_HEADER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/notify.swift")
+if(CMAKE_OSX_ARCHITECTURES STREQUAL arm64)
+    list(APPEND NOTIFY_HEADER_SOURCES "-target" "${ARM_TARGET}")
+endif()
+
 _swift_generate_cxx_header_target(
-  notify_swift_h
-  SwiftNotify
-  "${CMAKE_CURRENT_BINARY_DIR}/include/notify-swift.h"
-  SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/notify.swift"
-  SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR};${PROJECT_BINARY_DIR}/logging"
-  DEPENDS Logging
+    notify_swift_h
+    SwiftNotify
+    "${CMAKE_CURRENT_BINARY_DIR}/include/notify-swift.h"
+    SOURCES ${NOTIFY_HEADER_SOURCES}
+    SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR};${PROJECT_BINARY_DIR}/logging"
+    DEPENDS Logging
 )
 
 add_library(SwiftNotify STATIC notify.swift)
