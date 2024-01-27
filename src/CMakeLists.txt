@@ -25,6 +25,7 @@ target_link_libraries(Fcitx5
     macosfrontend
     macosnotifications
     WebviewCandidateWindow
+    Logging
 )
 
 set(APP_PATH "${CMAKE_CURRENT_BINARY_DIR}/Fcitx5.app/Contents")

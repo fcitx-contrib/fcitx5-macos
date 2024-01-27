@@ -56,6 +56,8 @@ set(CMAKE_INSTALL_PREFIX "${APP_INSTALL_PATH}/Fcitx5.app/Contents")
 set(CMAKE_INSTALL_LIBDATADIR "${CMAKE_INSTALL_PREFIX}/lib")
 add_subdirectory(fcitx5)
 
+add_subdirectory(logging)
+
 include_directories(
     fcitx5-webview/include
     fcitx5-webview/webview

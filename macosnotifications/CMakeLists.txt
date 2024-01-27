@@ -13,6 +13,7 @@ set_target_properties(SwiftNotify PROPERTIES Swift_MODULE_NAME SwiftNotify)
 target_compile_options(SwiftNotify PUBLIC "$<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default>")
 add_dependencies(SwiftNotify notify_swift_h)
 target_include_directories(SwiftNotify PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(SwiftNotify Logging)
 
 add_library(macosnotifications STATIC macosnotifications.cpp)
 add_dependencies(macosnotifications SwiftNotify)
