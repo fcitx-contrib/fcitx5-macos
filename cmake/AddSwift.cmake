@@ -17,7 +17,6 @@ function(_swift_generate_cxx_header_target target module header)
 
   if(ARG_SEARCH_PATHS)
     list(TRANSFORM ARG_SEARCH_PATHS PREPEND "-I")
-    string(REPLACE ";" " " EXPANDED_SEARCH_PATHS "${ARG_SEARCH_PATHS}")
   endif()
 
   if(APPLE)
@@ -31,7 +30,7 @@ function(_swift_generate_cxx_header_target target module header)
       "${header}"
     COMMAND
       ${CMAKE_Swift_COMPILER} -frontend -typecheck
-      ${EXPANDED_SEARCH_PATHS}
+      ${ARG_SEARCH_PATHS}
       ${ARG_SOURCES}
       ${SDK_FLAGS}
       -module-name "${module}"
