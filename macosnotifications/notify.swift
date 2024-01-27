@@ -1,4 +1,5 @@
 import CxxNotify
+import Logging
 import UserNotifications
 
 /// The notification center of the current app.
@@ -13,11 +14,11 @@ public class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
   public func requestAuthorization() {
     center.requestAuthorization(options: [.alert, .sound]) { (granted, error) in
       if let error = error {
-        NSLog("Error requesting notification permissions: \(error.localizedDescription)")
+        FCITX_ERROR("Error requesting notification permissions: \(error.localizedDescription)")
         return
       }
       if granted {
-        NSLog("Notification permission is granted")
+        FCITX_INFO("Notification permission is granted")
       }
     }
   }
@@ -111,7 +112,7 @@ public func sendNotification(
 
     center.add(request) { error in
       if let error = error {
-        NSLog("Cannot send notification: \(error.localizedDescription)")
+        FCITX_ERROR("Cannot send notification: \(error.localizedDescription)")
       }
       DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
         closeNotification(identifier, NOTIFICATION_CLOSED_REASON_EXPIRY.rawValue)

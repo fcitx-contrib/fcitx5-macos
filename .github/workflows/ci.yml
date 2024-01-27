@@ -21,6 +21,12 @@ jobs:
         run: |
           find macosfrontend macosnotifications src -name '*.cpp' -o -name '*.h' | xargs clang-format -Werror --dry-run -style=file:fcitx5/.clang-format
           swift-format lint -rs macosfrontend macosnotifications src
+          for file in $(git ls-files | grep '\.swift$'); do
+            if grep 'NSLog(' $file; then
+              echo "Please use Logging module instead of NSLog"
+              exit 1
+            fi
+          done
 
   build:
     needs: lint
@@ -76,7 +82,7 @@ jobs:
             -DCMAKE_Swift_COMPILER=`which swiftc` \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_BUILD_TYPE=Release
-          cmake --build build || ./fix-cross-build.sh
+          cmake --build build || ./fix-cross-build.sh ${{ matrix.arch }}
           sudo cmake --install build
           dmgbuild -s dmg/config.py Fcitx5 Fcitx5-${{ matrix.arch }}.dmg
 

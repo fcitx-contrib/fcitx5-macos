@@ -1,6 +1,7 @@
 import CxxFrontend
 import Fcitx
 import InputMethodKit
+import Logging
 
 class FcitxInputController: IMKInputController {
   var uuid: ICUUID
@@ -63,7 +64,7 @@ class FcitxInputController: IMKInputController {
       lastModifiers = mods
       return handled
     default:
-      NSLog("Unhandled event: \(String(describing: event.type))")
+      FCITX_ERROR("Unhandled event: \(String(describing: event.type))")
       return false
     }
   }
@@ -127,7 +128,7 @@ class FcitxInputController: IMKInputController {
         }
         menu.addItem(NSMenuItem.separator())
       } catch {
-        NSLog("Error decoding actions: \(error)")
+        FCITX_ERROR("Error decoding actions: \(error)")
       }
     }
 

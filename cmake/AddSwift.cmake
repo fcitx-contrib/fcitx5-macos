@@ -17,7 +17,6 @@ function(_swift_generate_cxx_header_target target module header)
 
   if(ARG_SEARCH_PATHS)
     list(TRANSFORM ARG_SEARCH_PATHS PREPEND "-I")
-    string(REPLACE ";" " " EXPANDED_SEARCH_PATHS "${ARG_SEARCH_PATHS}")
   endif()
 
   if(APPLE)
@@ -26,19 +25,27 @@ function(_swift_generate_cxx_header_target target module header)
     set(SDK_FLAGS "-sdk" "$ENV{SDKROOT}")
   endif()
 
+  # swiftc requires imported modules have the same target when
+  # cross-compiling.  This check only considers macOS.
+  if(CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
+    set(TARGET_FLAGS "-target" "arm64-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET}")
+  endif()
+
   add_custom_command(
     OUTPUT
       "${header}"
     COMMAND
       ${CMAKE_Swift_COMPILER} -frontend -typecheck
-      ${EXPANDED_SEARCH_PATHS}
+      ${ARG_SEARCH_PATHS}
       ${ARG_SOURCES}
       ${SDK_FLAGS}
+      ${TARGET_FLAGS}
       -module-name "${module}"
       -cxx-interoperability-mode=default
       -emit-clang-header-path "${header}"
     DEPENDS
       ${ARG_DEPENDS}
+      ${ARG_SOURCES}
     COMMENT
       "Generating '${header}'"
   )
