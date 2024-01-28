@@ -7,6 +7,9 @@ add_executable(Fcitx5
     config/about.swift
     config/plugin.swift
     config/ui.swift
+    config/config.swift
+    config/optionmodels.swift
+    config/optionviews.swift
     fcitx.cpp
 )
 
