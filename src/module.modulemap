@@ -1,4 +1,5 @@
 module Fcitx {
   header "fcitx-public.h"
+  header "config/config-public.h"
   export *
 }

@@ -136,6 +136,11 @@ static std::string join_paths(const std::vector<fs::path> &paths, char sep) {
     return result;
 }
 
+bool in_fcitx_thread() noexcept {
+    FCITX_ASSERT(fcitx_thread_started.load());
+    return std::this_thread::get_id() == fcitx_thread.get_id();
+}
+
 void start_fcitx_thread() noexcept {
     bool expected = false;
     if (!fcitx_thread_started.compare_exchange_strong(expected, true)) {

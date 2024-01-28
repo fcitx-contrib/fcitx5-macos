@@ -1,10 +1,12 @@
-file(GLOB CONFIG_UI_FILES config/*.swift)
-
 add_executable(Fcitx5
     MACOSX_BUNDLE
     server.swift
     controller.swift
-    ${CONFIG_UI_FILES}
+    config/config.cpp
+    config/menu.swift
+    config/about.swift
+    config/plugin.swift
+    config/ui.swift
     fcitx.cpp
 )
 
