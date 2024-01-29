@@ -51,7 +51,6 @@ private:
 
     inline MacosInputContext *findIC(ICUUID);
 
-private:
     void showInputPanelAsync(bool show);
     PanelShowFlags panelShow_;
     inline void updatePanelShowFlags(bool condition, PanelShowFlag flag) {
