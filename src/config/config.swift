@@ -11,6 +11,7 @@ public func getConfig(uri: String) throws -> Config {
     if json["ERROR"].exists() {
       throw FcitxConfigError.fcitxError(json["ERROR"].stringValue)
     }
+    print("DEBUG: ", jsonString)  // FIXME: Remove
     return try parseJSON(json, "")
   } catch let error as FcitxCodingError {
     throw FcitxConfigError.codingError(error)

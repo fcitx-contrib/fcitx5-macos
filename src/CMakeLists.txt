@@ -10,6 +10,7 @@ add_executable(Fcitx5
     config/config.swift
     config/optionmodels.swift
     config/optionviews.swift
+    config/globalconfig.swift
     fcitx.cpp
 )
 

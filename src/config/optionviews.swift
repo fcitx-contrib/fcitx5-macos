@@ -159,7 +159,7 @@ let testConfig = Config(
 #Preview {
   VStack {
     buildView(config: testConfig)
-    Button("Show") {
+    Button("Print") {
       print(testConfig)
     }
   }
