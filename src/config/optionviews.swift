@@ -34,11 +34,11 @@ struct IntegerOptionView: View {
     ZStack(alignment: .trailing) {
       TextField(label, value: $model.value, formatter: numberFormatter)
         .textFieldStyle(RoundedBorderTextFieldStyle())
-        .onChange(of: model.value) { oldValue, newValue in
+        .onChange(of: model.value) { newValue in
           if newValue > model.max {
-            model.value = oldValue
+            model.value = model.max
           } else if newValue < model.min {
-            model.value = oldValue
+            model.value = model.min
           }
         }
         .padding(.trailing, 60)
