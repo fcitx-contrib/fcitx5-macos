@@ -150,8 +150,8 @@ extension String: FcitxCodable {
     }
   }
   func encode() -> String {
-    let encodedString = self.replacingOccurrences(of: "\"", with: "\\\"")
-      .replacingOccurrences(of: "\\", with: "\\\\")
+    let encodedString = self.replacingOccurrences(of: "\\", with: "\\\\")
+      .replacingOccurrences(of: "\"", with: "\\\"")
     return "\"\(encodedString)\""
   }
 }
