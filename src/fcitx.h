@@ -39,10 +39,18 @@ private:
     fcitx::MacosFrontend *frontend_;
 };
 
+/// Check if we are on the fcitx thread.
+bool in_fcitx_thread() noexcept;
+
 /// Run a function in the fcitx thread and obtain its return value
-/// synchronously.
+/// synchronously.  If it's called in the fcitx thread, the functor is
+/// invoked immediately.
 template <class F, class T = std::invoke_result_t<F, Fcitx &>>
 inline T with_fcitx(F func) {
+    // Avoid deadlock when re-entered.
+    if (in_fcitx_thread()) {
+        return func(Fcitx::shared());
+    }
     auto &fcitx = Fcitx::shared();
     std::promise<T> prom;
     std::future<T> fut = prom.get_future();

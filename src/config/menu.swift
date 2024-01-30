@@ -2,15 +2,19 @@ import Cocoa
 import Fcitx
 
 extension FcitxInputController {
-  static var fcitxAbout: NSWindowController?
-  static var pluginManager: PluginManager?
+  static var fcitxAbout: NSWindowController = {
+    return FcitxAbout()
+  }()
+  static var pluginManager: PluginManager = {
+    return PluginManager()
+  }()
+  static var globalConfig: GlobalConfig = {
+    return GlobalConfig()
+  }()
 
   @objc func plugin(_: Any? = nil) {
-    if FcitxInputController.pluginManager == nil {
-      FcitxInputController.pluginManager = PluginManager()
-    }
-    FcitxInputController.pluginManager!.refreshPlugins()
-    FcitxInputController.pluginManager!.showWindow(nil)
+    FcitxInputController.pluginManager.refreshPlugins()
+    FcitxInputController.pluginManager.showWindow(nil)
   }
 
   @objc func restart(_: Any? = nil) {
@@ -18,9 +22,10 @@ extension FcitxInputController {
   }
 
   @objc func about(_: Any? = nil) {
-    if FcitxInputController.fcitxAbout == nil {
-      FcitxInputController.fcitxAbout = FcitxAbout()
-    }
-    FcitxInputController.fcitxAbout!.showWindow(nil)
+    FcitxInputController.fcitxAbout.showWindow(nil)
+  }
+
+  @objc func globalConfig(_: Any? = nil) {
+    FcitxInputController.globalConfig.showWindow(nil)
   }
 }

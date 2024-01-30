@@ -4,6 +4,7 @@ add_executable(Fcitx5
     MACOSX_BUNDLE
     server.swift
     controller.swift
+    config/config.cpp
     ${CONFIG_UI_FILES}
     fcitx.cpp
 )
@@ -19,6 +20,7 @@ target_include_directories(Fcitx5 PRIVATE
 
 target_link_libraries(Fcitx5
     "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
+    SwiftyJSON
     SwiftFrontend
     SwiftNotify
     Fcitx5::Core

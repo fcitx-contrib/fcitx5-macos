@@ -4,3 +4,6 @@
 [submodule "fcitx5-webview"]
 	path = fcitx5-webview
 	url = https://github.com/fcitx-contrib/fcitx5-webview
+[submodule "deps/SwiftyJSON"]
+	path = deps/SwiftyJSON
+	url = https://github.com/SwiftyJSON/SwiftyJSON
