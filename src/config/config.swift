@@ -70,6 +70,8 @@ func parseJSON(_ json: JSON, _ pathPrefix: String) throws -> Config {
         path: pathPrefix + "/" + key, context: subJson, error: error)
     }
   }
+  // JSON is unordered -- sort options by description lexically.
+  children.sort { $0.description < $1.description }
   return Config(path: pathPrefix, description: description, kind: .group(children))
 }
 
