@@ -46,6 +46,11 @@ Fcitx::Fcitx() {
     setupEnv();
 }
 
+Fcitx::~Fcitx() {
+    exit();
+    teardown();
+}
+
 void Fcitx::setup() {
     setupInstance();
     frontend_ =
@@ -105,8 +110,11 @@ void Fcitx::exec() {
 }
 
 void Fcitx::exit() {
-    dispatcher_->detach();
-    instance_->exit();
+    // the fcitx instance may have been destroyed by stop_fcitx_thread.
+    if (dispatcher_)
+        dispatcher_->detach();
+    if (instance_)
+        instance_->exit();
 }
 
 void Fcitx::schedule(std::function<void()> func) {

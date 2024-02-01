@@ -74,3 +74,6 @@ add_subdirectory(dmg)
 
 option(BUILD_PREVIEW "" OFF)
 add_subdirectory(fcitx5-webview)
+
+enable_testing()
+add_subdirectory(tests)

@@ -67,8 +67,7 @@ std::string getConfig(const std::string &uri) {
                    }
                    return configToJson(*config);
                } else {
-                   FCITX_ASSERT(false);
-                   return {{"ERROR", "unreachable"}};
+                   return {{"ERROR", "bad config uri"}};
                }
            })
         .dump(2);
