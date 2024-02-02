@@ -8,7 +8,7 @@ class InputMethodConfigController: NSWindowController {
       contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
       styleMask: [.titled, .closable],
       backing: .buffered, defer: false)
-    window.title = "Global Config"
+    window.title = "Input Methods"
     window.center()
     self.init(window: window)
     window.contentView = NSHostingView(rootView: InputMethodConfigView())
