@@ -2,6 +2,7 @@ import CxxFrontend
 import Fcitx
 import InputMethodKit
 import Logging
+import SwiftyJSON
 
 class FcitxInputController: IMKInputController {
   var uuid: ICUUID
@@ -81,11 +82,11 @@ class FcitxInputController: IMKInputController {
     let menu = NSMenu()
 
     // Group switcher
-    let groupNames = String(input_method_groups()).split(separator: "\n")
+    let groupNames = JSON(parseJSON: String(input_method_groups())).arrayValue
     let currentGroup = String(get_current_input_method_group())
     if groupNames.count > 1 {
       for groupName in groupNames {
-        let groupName = String(groupName)
+        let groupName = groupName.stringValue
         let item = NSMenuItem(title: groupName, action: #selector(switchGroup), keyEquivalent: "")
         item.representedObject = groupName
         if groupName == currentGroup {
@@ -97,12 +98,11 @@ class FcitxInputController: IMKInputController {
     }
 
     // Input method switcher
-    let inputMethodPairs = String(input_method_list()).split(separator: "\n")
+    let inputMethods = JSON(parseJSON: String(current_input_method_list()))
     let currentIM = String(get_current_input_method())
-    for inputMethodPair in inputMethodPairs {
-      let parts = inputMethodPair.split(separator: ":", maxSplits: 1)
-      let imName = String(parts[0])
-      let nativeName = String(parts[1])
+    for (_, inputMethod) in inputMethods {
+      let imName = inputMethod["name"].stringValue
+      let nativeName = inputMethod["displayName"].stringValue
       let item = NSMenuItem(
         title: nativeName,
         action: #selector(switchInputMethod),

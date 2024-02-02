@@ -14,8 +14,15 @@ void restart_fcitx_thread() noexcept;
 
 // NOTE: It's impossible to use std::vector<std::string> directly
 // until Swift fixes C++ interop.
+// Returns a json array of strings.
 std::string input_method_groups() noexcept;
-std::string input_method_list() noexcept;
+// Retruns json [["id1", "name1"], ["id2", "name2"], ...].
+std::string current_input_method_list() noexcept;
+// Returns json
+// [{"name": "group name", "inputMethods":
+//   [{"name": ..., "displayName": ...}...]}...].
+std::string all_input_methods() noexcept;
+std::string input_method_list(const char *) noexcept;
 void set_current_input_method_group(const char *) noexcept;
 std::string get_current_input_method_group() noexcept;
 void set_current_input_method(const char *) noexcept;

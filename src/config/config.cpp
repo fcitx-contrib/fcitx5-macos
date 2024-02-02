@@ -70,7 +70,7 @@ std::string getConfig(const std::string &uri) {
                    return {{"ERROR", "bad config uri"}};
                }
            })
-        .dump(2);
+        .dump();
 }
 
 nlohmann::json &jsonLocate(nlohmann::json &j, const std::string &groupPath,

@@ -179,32 +179,56 @@ void restart_fcitx_thread() noexcept {
 
 std::string input_method_groups() noexcept {
     return with_fcitx([](Fcitx &fcitx) {
-        std::stringstream ss;
+        nlohmann::json j;
         auto groups = fcitx.instance()->inputMethodManager().groups();
         for (const auto &g : groups) {
-            ss << g + "\n";
+            j.push_back(g);
         }
-        return std::move(ss).str();
+        return j.dump();
     });
 }
 
-std::string input_method_list() noexcept {
+static nlohmann::json json_describe_im(const fcitx::InputMethodEntry *entry) {
+    nlohmann::json j;
+    j["name"] = entry->uniqueName();
+    j["displayName"] = entry->nativeName() != "" ? entry->nativeName()
+                       : entry->name() != ""     ? entry->name()
+                                                 : entry->uniqueName();
+    return j;
+}
+
+std::string current_input_method_list() noexcept {
     return with_fcitx([](Fcitx &fcitx) noexcept {
-        std::stringstream ss;
+        nlohmann::json j;
         auto &imMgr = fcitx.instance()->inputMethodManager();
         auto group = imMgr.currentGroup();
         for (const auto &im : group.inputMethodList()) {
             auto entry = imMgr.entry(im.name());
             if (!entry)
                 continue;
-            std::string displayName =
-                entry->nativeName() != ""   ? entry->nativeName()
-                : entry->name() != ""       ? entry->name()
-                : entry->uniqueName() != "" ? entry->uniqueName()
-                                            : im.name();
-            ss << im.name() << ":" << displayName + "\n";
+            j.push_back(json_describe_im(entry));
         }
-        return std::move(ss).str();
+        return j.dump();
+    });
+}
+
+std::string all_input_methods() noexcept {
+    return with_fcitx([](Fcitx &fcitx) {
+        auto &imMgr = fcitx.instance()->inputMethodManager();
+        auto groups = imMgr.groups();
+        nlohmann::json j;
+        for (const auto &groupName : groups) {
+            if (auto group = imMgr.group(groupName)) {
+                nlohmann::json g;
+                g["name"] = groupName;
+                for (const auto &im : group->inputMethodList()) {
+                    if (auto entry = imMgr.entry(im.name()))
+                        g["inputMethods"].push_back(json_describe_im(entry));
+                }
+                j.push_back(g);
+            }
+        }
+        return j;
     });
 }
 
