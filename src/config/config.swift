@@ -162,8 +162,9 @@ extension String: FcitxCodable {
 extension Array: FcitxCodable where Element: FcitxCodable {
   static func decode(json: JSON) throws -> Self {
     var result: [Element] = []
-    for (_, subJSON): (String, JSON) in json {
-      result.append(try Element.decode(json: subJSON))
+    // Retrieve by key to preserve order.
+    for i in 0..<json.count {
+      result.append(try Element.decode(json: json[String(i)]))
     }
     return result
   }
