@@ -232,6 +232,26 @@ std::string all_input_methods() noexcept {
     });
 }
 
+void set_input_method_groups(const char *json) noexcept {
+    auto j = nlohmann::json::parse(json);
+    with_fcitx([j = std::move(j)](Fcitx &fcitx) {
+        auto &imMgr = fcitx.instance()->inputMethodManager();
+        for (const auto &g : j) {
+            if (!imMgr.group(g["name"])) {
+                imMgr.addEmptyGroup(g["name"]);
+            }
+            auto updated = *imMgr.group(g["name"]);
+            auto &imList = updated.inputMethodList();
+            imList.clear();
+            for (const auto &im : g["inputMethods"]) {
+                imList.emplace_back(im["name"]);
+            }
+            imMgr.setGroup(updated);
+        }
+        imMgr.save();
+    });
+}
+
 void set_current_input_method_group(const char *groupName) noexcept {
     return with_fcitx([=](Fcitx &fcitx) {
         fcitx.instance()->inputMethodManager().setCurrentGroup(groupName);

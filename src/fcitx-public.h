@@ -22,6 +22,8 @@ std::string current_input_method_list() noexcept;
 // [{"name": "group name", "inputMethods":
 //   [{"name": ..., "displayName": ...}...]}...].
 std::string all_input_methods() noexcept;
+// uses the same format as all_input_methods
+void set_input_method_groups(const char *) noexcept;
 std::string input_method_list(const char *) noexcept;
 void set_current_input_method_group(const char *) noexcept;
 std::string get_current_input_method_group() noexcept;

@@ -38,7 +38,11 @@ private struct InputMethod: Identifiable, Codable {
 }
 
 private class ViewModel: ObservableObject {
-  @Published var groups = [Group]()
+  @Published var groups = [Group]() {
+    didSet {
+      save()
+    }
+  }
   @Published var selectedInputMethod: UUID? {
     didSet {
       updateModel()
@@ -46,6 +50,7 @@ private class ViewModel: ObservableObject {
   }
   @Published var configModel: Config?
   @Published var errorMsg: String?
+  var loading = false
   var uuidToIM = [UUID: String]()
 
   init() {
@@ -54,6 +59,7 @@ private class ViewModel: ObservableObject {
 
   func load() {
     uuidToIM.removeAll(keepingCapacity: true)
+    loading = true
     do {
       let jsonStr = String(all_input_methods())
       if let jsonData = jsonStr.data(using: .utf8) {
@@ -69,6 +75,7 @@ private class ViewModel: ObservableObject {
     } catch {
       FCITX_ERROR("Couldn't load input method config: \(error)")
     }
+    loading = false
   }
 
   func updateModel() {
@@ -85,7 +92,19 @@ private class ViewModel: ObservableObject {
   }
 
   func save() {
-    // TODO
+    if loading {
+      return
+    }
+    do {
+      let data = try JSONEncoder().encode(groups)
+      if let jsonStr = String(data: data, encoding: .utf8) {
+        Fcitx.set_input_method_groups(jsonStr)
+      } else {
+        FCITX_ERROR("Couldn't save input method groups: failed to encode data as UTF-8")
+      }
+    } catch {
+      FCITX_ERROR("Couldn't save input method groups: \(error)")
+    }
   }
 }
 
