@@ -9,7 +9,7 @@ libs+=($(ls lib/fcitx5/*.so))
 libs+=(lib/fcitx5/libexec/comp-spell-dict)
 
 for lib in "${libs[@]}"; do
-  if otool -L $lib | grep /usr/local; then
+  if otool -L $lib | grep '/usr/local\|/opt/homebrew'; then
     otool -L $lib
     has_homebrew_deps=1
   fi

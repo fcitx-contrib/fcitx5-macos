@@ -15,10 +15,10 @@ if(NOT CMAKE_OSX_ARCHITECTURES)
 endif()
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET 13)
+add_definitions(-target "${CMAKE_OSX_ARCHITECTURES}-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET}")
 
 # Need HOMEBREW_PATH for iso-codes and xkeyboardconfig
 if(CMAKE_OSX_ARCHITECTURES STREQUAL arm64)
-    add_definitions(-target "arm64-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET}")
     set(HOMEBREW_PATH "/opt/homebrew")
 else()
     set(HOMEBREW_PATH "/usr/local")
