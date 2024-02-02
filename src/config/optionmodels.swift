@@ -88,11 +88,13 @@ class EnumOption: Option, ObservableObject, FcitxCodable {
   }
 
   static func decode(json: JSON) throws -> Self {
+    let enums = try [String].decode(json: json["Enum"])
+    let enumsi18n = try [String].decode(json: json["EnumI18n"])
     return Self(
       defaultValue: json["DefaultValue"].stringValue,
       value: json["Value"].stringValue,
-      enumStrings: try [String].decode(json: json["Enum"]),
-      enumStringsI18n: try [String].decode(json: json["EnumI18n"])
+      enumStrings: enums,
+      enumStringsI18n: enumsi18n.count < enums.count ? enums : enumsi18n
     )
   }
 }
