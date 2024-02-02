@@ -19,6 +19,7 @@ static void mergeSpecAndValue(nlohmann::json &specJson,
                               const nlohmann::json &valueJson);
 static std::tuple<std::string, std::string>
 parseAddonUri(const std::string &uri);
+static size_t counter = 0;
 
 std::string getConfig(const char *uri) { return getConfig(std::string(uri)); }
 
@@ -119,6 +120,7 @@ nlohmann::json configSpecToJson(const fcitx::RawConfig &config) {
             if (!typeField || !descriptionField)
                 continue;
             nlohmann::json &optSpec = jsonLocate(spec, group, option);
+            optSpec["__SortKey"] = counter++;
             optSpec["Type"] = typeField->value();
             optSpec["Description"] = descriptionField->value();
             optSpec["DefaultValue"] =
@@ -158,6 +160,9 @@ nlohmann::json configSpecToJson(const fcitx::Configuration &config) {
 }
 
 nlohmann::json configToJson(const fcitx::Configuration &config) {
+    // Each option or config group is identified with an '__SortKey'
+    // field to preserve insertion order.
+    counter = 0;
     auto specJson = configSpecToJson(config);
     auto valueJson = configValueToJson(config);
     mergeSpecAndValue(specJson, valueJson);

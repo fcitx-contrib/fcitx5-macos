@@ -130,27 +130,28 @@ func buildView(config: Config) -> AnyView {
 let testConfig = Config(
   path: "Fuzzy",
   description: "Fuzzy",
+  sortKey: 0,
   kind: .group([
     Config(
-      path: "AN_ANG", description: "Fuzzy an ang",
+      path: "AN_ANG", description: "Fuzzy an ang", sortKey: 1,
       kind: .option(BooleanOption(defaultValue: false, value: true))),
     Config(
-      path: "foo", description: "FOOOO!",
+      path: "foo", description: "FOOOO!", sortKey: 2,
       kind: .option(StringOption(defaultValue: "", value: "semicolon"))),
     Config(
-      path: "external", description: "External test",
+      path: "external", description: "External test", sortKey: 3,
       kind: .option(ExternalOption(launchSubConfig: true, external: "fcitx://addon/punctuation"))),
     Config(
-      path: "Shuangpin Profile", description: "双拼方案",
+      path: "Shuangpin Profile", description: "双拼方案", sortKey: 4,
       kind: .option(
         EnumOption(
           defaultValue: "Ziranma", value: "MS", enumStrings: ["Ziranma", "MS"],
           enumStringsI18n: ["自然码", "微软"]))),
     Config(
-      path: "interval", description: "int test",
+      path: "interval", description: "int test", sortKey: 5,
       kind: .option(IntegerOption(defaultValue: 0, value: 10, min: 0, max: 1000))),
     Config(
-      path: "list", description: "List test",
+      path: "list", description: "List test", sortKey: 6,
       kind: .option(
         ListOption(defaultValue: ["a", "b", "c"], value: ["c", "d"], elementType: "String"))
     ),

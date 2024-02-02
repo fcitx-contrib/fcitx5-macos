@@ -46,13 +46,15 @@ struct DynamicCodingKey: CodingKey {
 
 func parseJSON(_ json: JSON, _ pathPrefix: String) throws -> Config {
   let description = json["Description"].stringValue
+  let sortKey = json["__SortKey"].intValue
   // Option
   if let type = json["Type"].string,
     !type.contains("$")
   {
     do {
       let option = try parseOptionJSON(json, type)
-      return Config(path: pathPrefix, description: description, kind: .option(option))
+      return Config(
+        path: pathPrefix, description: description, sortKey: sortKey, kind: .option(option))
     } catch {
       throw FcitxCodingError.innerError(path: pathPrefix, context: json, error: error)
     }
@@ -70,9 +72,9 @@ func parseJSON(_ json: JSON, _ pathPrefix: String) throws -> Config {
         path: pathPrefix + "/" + key, context: subJson, error: error)
     }
   }
-  // JSON is unordered -- sort options by description lexically.
-  children.sort { $0.description < $1.description }
-  return Config(path: pathPrefix, description: description, kind: .group(children))
+  children.sort { $0.sortKey < $1.sortKey }
+  return Config(
+    path: pathPrefix, description: description, sortKey: sortKey, kind: .group(children))
 }
 
 func parseOptionJSON(_ json: JSON, _ type: String) throws -> any Option {
