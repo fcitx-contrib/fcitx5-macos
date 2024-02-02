@@ -177,7 +177,7 @@ void restart_fcitx_thread() noexcept {
     start_fcitx_thread();
 }
 
-std::string input_method_groups() noexcept {
+std::string imGetGroupNames() noexcept {
     return with_fcitx([](Fcitx &fcitx) {
         nlohmann::json j;
         auto groups = fcitx.instance()->inputMethodManager().groups();
@@ -185,6 +185,18 @@ std::string input_method_groups() noexcept {
             j.push_back(g);
         }
         return j.dump();
+    });
+}
+
+std::string imGetCurrentGroupName() noexcept {
+    return with_fcitx([=](Fcitx &fcitx) {
+        return fcitx.instance()->inputMethodManager().currentGroup().name();
+    });
+}
+
+void imSetCurrentGroup(const char *groupName) noexcept {
+    return with_fcitx([=](Fcitx &fcitx) {
+        fcitx.instance()->inputMethodManager().setCurrentGroup(groupName);
     });
 }
 
@@ -197,7 +209,7 @@ static nlohmann::json json_describe_im(const fcitx::InputMethodEntry *entry) {
     return j;
 }
 
-std::string current_input_method_list() noexcept {
+std::string imGetCurrentGroup() noexcept {
     return with_fcitx([](Fcitx &fcitx) noexcept {
         nlohmann::json j;
         auto &imMgr = fcitx.instance()->inputMethodManager();
@@ -212,7 +224,7 @@ std::string current_input_method_list() noexcept {
     });
 }
 
-std::string all_input_methods() noexcept {
+std::string imGetGroups() noexcept {
     return with_fcitx([](Fcitx &fcitx) {
         auto &imMgr = fcitx.instance()->inputMethodManager();
         auto groups = imMgr.groups();
@@ -232,7 +244,7 @@ std::string all_input_methods() noexcept {
     });
 }
 
-void set_input_method_groups(const char *json) noexcept {
+void imSetGroups(const char *json) noexcept {
     auto j = nlohmann::json::parse(json);
     with_fcitx([j = std::move(j)](Fcitx &fcitx) {
         auto &imMgr = fcitx.instance()->inputMethodManager();
@@ -252,24 +264,12 @@ void set_input_method_groups(const char *json) noexcept {
     });
 }
 
-void set_current_input_method_group(const char *groupName) noexcept {
-    return with_fcitx([=](Fcitx &fcitx) {
-        fcitx.instance()->inputMethodManager().setCurrentGroup(groupName);
-    });
-}
-
-std::string get_current_input_method_group() noexcept {
-    return with_fcitx([=](Fcitx &fcitx) {
-        return fcitx.instance()->inputMethodManager().currentGroup().name();
-    });
-}
-
-void set_current_input_method(const char *imName) noexcept {
+void imSetCurrentIM(const char *imName) noexcept {
     return with_fcitx(
         [=](Fcitx &fcitx) { fcitx.instance()->setCurrentInputMethod(imName); });
 }
 
-std::string get_current_input_method() noexcept {
+std::string imGetCurrentIMName() noexcept {
     return with_fcitx(
         [=](Fcitx &fcitx) { return fcitx.instance()->currentInputMethod(); });
 }
@@ -300,7 +300,7 @@ static nlohmann::json actionToJson(fcitx::Action *action,
 ///
 /// Each array element has a structure like:
 /// type Item = { name: str, desc: str, checked?: bool, children: Array<Item>? }
-std::string current_actions() noexcept {
+std::string getActions() noexcept {
     return with_fcitx([](Fcitx &fcitx) {
         nlohmann::json j = nlohmann::json::array();
         if (auto *ic = fcitx.instance()->mostRecentInputContext()) {
@@ -317,7 +317,7 @@ std::string current_actions() noexcept {
     });
 }
 
-void activate_action_by_id(int id) noexcept {
+void activateActionById(int id) noexcept {
     with_fcitx([=](Fcitx &fcitx) {
         auto *action =
             fcitx.instance()->userInterfaceManager().lookupActionById(id);

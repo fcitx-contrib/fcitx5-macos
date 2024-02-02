@@ -61,7 +61,7 @@ private class ViewModel: ObservableObject {
     uuidToIM.removeAll(keepingCapacity: true)
     loading = true
     do {
-      let jsonStr = String(all_input_methods())
+      let jsonStr = String(Fcitx.imGetGroups())
       if let jsonData = jsonStr.data(using: .utf8) {
         groups = try JSONDecoder().decode([Group].self, from: jsonData)
         for group in groups {
@@ -98,7 +98,7 @@ private class ViewModel: ObservableObject {
     do {
       let data = try JSONEncoder().encode(groups)
       if let jsonStr = String(data: data, encoding: .utf8) {
-        Fcitx.set_input_method_groups(jsonStr)
+        Fcitx.imSetGroups(jsonStr)
       } else {
         FCITX_ERROR("Couldn't save input method groups: failed to encode data as UTF-8")
       }

@@ -82,8 +82,8 @@ class FcitxInputController: IMKInputController {
     let menu = NSMenu()
 
     // Group switcher
-    let groupNames = JSON(parseJSON: String(input_method_groups())).arrayValue
-    let currentGroup = String(get_current_input_method_group())
+    let groupNames = JSON(parseJSON: String(Fcitx.imGetGroupNames())).arrayValue
+    let currentGroup = String(Fcitx.imGetCurrentGroupName())
     if groupNames.count > 1 {
       for groupName in groupNames {
         let groupName = groupName.stringValue
@@ -98,9 +98,9 @@ class FcitxInputController: IMKInputController {
     }
 
     // Input method switcher
-    let inputMethods = JSON(parseJSON: String(current_input_method_list()))
-    let currentIM = String(get_current_input_method())
-    for (_, inputMethod) in inputMethods {
+    let curGroup = JSON(parseJSON: String(Fcitx.imGetCurrentGroup()))
+    let currentIM = String(Fcitx.imGetCurrentIMName())
+    for (_, inputMethod) in curGroup {
       let imName = inputMethod["name"].stringValue
       let nativeName = inputMethod["displayName"].stringValue
       let item = NSMenuItem(
@@ -117,7 +117,7 @@ class FcitxInputController: IMKInputController {
     menu.addItem(NSMenuItem.separator())
 
     // Additional actions for the current IC
-    let actionJson = String(current_actions())
+    let actionJson = String(Fcitx.getActions())
     if let data = actionJson.data(using: .utf8) {
       do {
         let actions = try JSONDecoder().decode(Array<FcitxAction>.self, from: data)
@@ -142,19 +142,19 @@ class FcitxInputController: IMKInputController {
 
   @objc func switchGroup(sender: Any?) {
     if let groupName = repObjectIMK(sender) as? String {
-      set_current_input_method_group(groupName)
+      Fcitx.imSetCurrentGroup(groupName)
     }
   }
 
   @objc func switchInputMethod(sender: Any?) {
     if let imName = repObjectIMK(sender) as? String {
-      set_current_input_method(imName)
+      Fcitx.imSetCurrentIM(imName)
     }
   }
 
   @objc func activateFcitxAction(sender: Any?) {
     if let action = repObjectIMK(sender) as? FcitxAction {
-      activate_action_by_id(Int32(action.id))
+      Fcitx.activateActionById(Int32(action.id))
     }
   }
 }

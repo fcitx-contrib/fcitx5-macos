@@ -8,7 +8,7 @@ int main() {
     sleep(1);
     
     // Can get information about input methods.
-    all_input_methods();
+    imGetGroups();
     
     // Can get config.
     {
