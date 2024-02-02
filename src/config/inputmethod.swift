@@ -49,10 +49,10 @@ private class ViewModel {
   var errorMsg: String?
 
   init() {
-    refresh()
+    load()
   }
 
-  func refresh() {
+  func load() {
     do {
       let jsonStr = String(all_input_methods())
       if let jsonData = jsonStr.data(using: .utf8) {
@@ -73,6 +73,7 @@ private class ViewModel {
     } catch {
       configModel = nil
       errorMsg = error.localizedDescription
+      FCITX_ERROR("Couldn't build config view: \(error)")
     }
   }
 

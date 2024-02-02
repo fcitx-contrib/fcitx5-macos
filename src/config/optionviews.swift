@@ -140,7 +140,7 @@ let testConfig = Config(
       kind: .option(StringOption(defaultValue: "", value: "semicolon"))),
     Config(
       path: "external", description: "External test", sortKey: 3,
-      kind: .option(ExternalOption(launchSubConfig: true, external: "fcitx://addon/punctuation"))),
+      kind: .option(ExternalOption(external: "fcitx://addon/punctuation"))),
     Config(
       path: "Shuangpin Profile", description: "双拼方案", sortKey: 4,
       kind: .option(

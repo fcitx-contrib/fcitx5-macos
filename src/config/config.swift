@@ -93,6 +93,8 @@ func parseOptionJSON(_ json: JSON, _ type: String) throws -> any Option {
   } else if type == "List|Key" {
     // TODO
     return try ListOption<String>.decode(json: json)
+  } else if type == "External" {
+    return try ExternalOption.decode(json: json)
   } else {
     return try UnknownOption.decode(json: json)
   }
