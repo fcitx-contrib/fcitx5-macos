@@ -26,7 +26,7 @@ public func getConfig(addon: String) throws -> Config {
 }
 
 public func getConfig(im: String) throws -> Config {
-  return try getConfig(uri: "fcitx://config/inputmethod/\(im)/")
+  return try getConfig(uri: "fcitx://config/inputmethod/\(im)")
 }
 
 struct DynamicCodingKey: CodingKey {
