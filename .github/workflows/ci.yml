@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint:
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,11 +30,14 @@ jobs:
 
   build:
     needs: lint
-    runs-on: macos-13
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false # hdiutil: create failed - Resource busy
       matrix:
-        arch: [x86_64, arm64]
+        os: [macos-14, macos-13]
+        include:
+          - { os: macos-14, arch: arm64 }
+          - { os: macos-13, arch: x86_64 }
 
     steps:
       - uses: actions/checkout@v4
@@ -50,31 +53,13 @@ jobs:
       - name: Install dependencies
         run: |
           brew install \
+            nlohmann-json \
+            xkeyboardconfig \
+            iso-codes \
             extra-cmake-modules \
             ninja
           ./install-deps.sh ${{ matrix.arch }}
           pip install "dmgbuild[badge_icons]"
-
-      - name: Install dependencies (x64)
-        if: ${{ matrix.arch == 'x86_64' }}
-        run: |
-          brew install \
-            nlohmann-json \
-            xkeyboardconfig \
-            iso-codes
-
-      - name: Setup arm homebrew
-        if: ${{ matrix.arch == 'arm64' }}
-        uses: fcitx-contrib/macos-cross@master
-
-      - name: Install dependencies (arm)
-        if: ${{ matrix.arch == 'arm64' }}
-        run: |
-          arm-brew-install \
-            nlohmann-json \
-            xkeyboardconfig \
-            iso-codes
-          cp -f /usr/local/bin/msgfmt /tmp/fcitx5/bin
 
       - name: Build
         run: |
@@ -82,7 +67,7 @@ jobs:
             -DCMAKE_Swift_COMPILER=`which swiftc` \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_BUILD_TYPE=Release
-          cmake --build build || ./fix-cross-build.sh ${{ matrix.arch }}
+          cmake --build build
           sudo cmake --install build
           dmgbuild -s dmg/config.py Fcitx5 Fcitx5-${{ matrix.arch }}.dmg
 
@@ -94,7 +79,6 @@ jobs:
             Fcitx5-${{ matrix.arch }}.dmg
 
       - name: Check validity
-        if: ${{ matrix.arch == 'x86_64' }}
         run: ./check-validity.sh
 
       - name: Setup tmate session
