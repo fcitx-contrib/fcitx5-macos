@@ -121,9 +121,10 @@ struct InputMethodConfigView: View {
     } detail: {
       if let selectedInputMethod = viewModel.selectedInputMethod {
         if let configModel = viewModel.configModel {
-          ScrollView {
+          ScrollView([.vertical, .horizontal]) {
             buildView(config: configModel)
           }
+          .defaultScrollAnchor(.topTrailing)
         } else if let errorMsg = viewModel.errorMsg {
           Text("Cannot show config for \(selectedInputMethod): \(errorMsg)")
         }
