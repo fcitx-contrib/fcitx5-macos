@@ -37,26 +37,32 @@ private struct InputMethod: Identifiable, Codable {
   }
 }
 
-@Observable
-private class ViewModel {
-  var groups = [Group]()
-  var selectedInputMethod: String? {
+private class ViewModel: ObservableObject {
+  @Published var groups = [Group]()
+  @Published var selectedInputMethod: UUID? {
     didSet {
       updateModel()
     }
   }
-  var configModel: Config?
-  var errorMsg: String?
+  @Published var configModel: Config?
+  @Published var errorMsg: String?
+  var uuidToIM = [UUID: String]()
 
   init() {
     load()
   }
 
   func load() {
+    uuidToIM.removeAll(keepingCapacity: true)
     do {
       let jsonStr = String(all_input_methods())
       if let jsonData = jsonStr.data(using: .utf8) {
         groups = try JSONDecoder().decode([Group].self, from: jsonData)
+        for group in groups {
+          for im in group.inputMethods {
+            uuidToIM[im.id] = im.name
+          }
+        }
       } else {
         FCITX_ERROR("Couldn't decode input method config")
       }
@@ -66,7 +72,8 @@ private class ViewModel {
   }
 
   func updateModel() {
-    guard let im = selectedInputMethod else { return }
+    guard let uuid = selectedInputMethod else { return }
+    guard let im = uuidToIM[uuid] else { return }
     do {
       configModel = try getConfig(im: im)
       errorMsg = nil
@@ -83,13 +90,13 @@ private class ViewModel {
 }
 
 struct InputMethodConfigView: View {
-  @State private var viewModel = ViewModel()
+  @StateObject private var viewModel = ViewModel()
 
   var body: some View {
     NavigationSplitView {
       VStack {
         List(selection: $viewModel.selectedInputMethod) {
-          ForEach($viewModel.groups, id: \.name) { $group in
+          ForEach($viewModel.groups) { $group in
             let header = Text(group.name)
               .frame(maxWidth: .infinity, alignment: .leading)
               .contentShape(Rectangle())
@@ -99,14 +106,14 @@ struct InputMethodConfigView: View {
                 Button("Remove group") {}
               }
             Section(header: header) {
-              ForEach($group.inputMethods, id: \.name) { $inputMethod in
+              ForEach($group.inputMethods) { $inputMethod in
                 Text(inputMethod.displayName)
                   .contextMenu {
                     Button("Remove input method") {}
                   }
               }
               .onMove { indices, newOffset in
-                viewModel.groups.move(fromOffsets: indices, toOffset: newOffset)
+                group.inputMethods.move(fromOffsets: indices, toOffset: newOffset)
               }
             }
           }
