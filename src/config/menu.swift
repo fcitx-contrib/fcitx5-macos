@@ -8,8 +8,11 @@ extension FcitxInputController {
   static var pluginManager: PluginManager = {
     return PluginManager()
   }()
-  static var globalConfig: GlobalConfig = {
-    return GlobalConfig()
+  static var globalConfigController: GlobalConfigController = {
+    return GlobalConfigController()
+  }()
+  static var inputMethodConfigController: InputMethodConfigController = {
+    return InputMethodConfigController()
   }()
 
   @objc func plugin(_: Any? = nil) {
@@ -26,6 +29,10 @@ extension FcitxInputController {
   }
 
   @objc func globalConfig(_: Any? = nil) {
-    FcitxInputController.globalConfig.showWindow(nil)
+    FcitxInputController.globalConfigController.showWindow(nil)
+  }
+
+  @objc func inputMethod(_: Any? = nil) {
+    FcitxInputController.inputMethodConfigController.showWindow(nil)
   }
 }

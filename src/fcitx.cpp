@@ -228,7 +228,7 @@ std::string all_input_methods() noexcept {
                 j.push_back(g);
             }
         }
-        return j;
+        return j.dump();
     });
 }
 
