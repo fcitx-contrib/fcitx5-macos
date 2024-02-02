@@ -6,7 +6,7 @@ class InputMethodConfigController: NSWindowController {
   convenience init() {
     let window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
-      styleMask: [.titled, .closable],
+      styleMask: [.titled, .closable, .resizable, .utilityWindow],
       backing: .buffered, defer: false)
     window.title = "Input Methods"
     window.center()
