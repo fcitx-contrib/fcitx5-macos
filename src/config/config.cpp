@@ -1,3 +1,4 @@
+#include <string>
 #include <fcitx-config/configuration.h>
 #include <fcitx-config/rawconfig.h>
 #include <fcitx-utils/stringutils.h>
@@ -7,6 +8,8 @@
 
 #include "fcitx.h"
 #include "config.h"
+
+using namespace std::literals::string_literals;
 
 static std::string getConfig(const std::string &uri);
 static nlohmann::json &jsonLocate(nlohmann::json &j, const std::string &group,
@@ -33,19 +36,23 @@ std::string getConfig(const std::string &uri) {
                    auto [addonName, subPath] = parseAddonUri(uri);
                    auto *addonInfo = fcitx.addonMgr().addonInfo(addonName);
                    if (!addonInfo) {
-                       return {{"ERROR", "addon does not exist"}};
+                       return {{"ERROR",
+                                "Addon \""s + addonName + "\" does not exist"}};
                    } else if (!addonInfo->isConfigurable()) {
-                       return {{"ERROR", "addon not configurable"}};
+                       return {{"ERROR", "Addon \""s + addonName +
+                                             "\" is not configurable"}};
                    }
                    auto *addon = fcitx.addonMgr().addon(addonName, true);
                    if (!addon) {
-                       return {{"ERROR", "failed to get addon"}};
+                       return {{"ERROR", "Failed to get config for addon \""s +
+                                             addonName + "\""}};
                    }
                    auto *config = subPath.empty()
                                       ? addon->getConfig()
                                       : addon->getSubConfig(subPath);
                    if (!config) {
-                       return {{"ERROR", "failed to get config"}};
+                       return {{"ERROR", "Failed to get config for addon \""s +
+                                             addonName + "\""}};
                    }
                    return configToJson(*config);
                } else if (fcitx::stringutils::startsWith(uri, imConfigPrefix)) {
@@ -53,22 +60,28 @@ std::string getConfig(const std::string &uri) {
                    auto *entry =
                        fcitx.instance()->inputMethodManager().entry(imName);
                    if (!entry) {
-                       return {{"ERROR", "input method doesn't exist"}};
+                       return {{"ERROR", "Input method \""s + imName +
+                                             "\" doesn't exist"}};
                    }
                    if (!entry->isConfigurable()) {
-                       return {{"ERROR", "input method not configurable"}};
+                       return {{"ERROR", "Input method \""s + imName +
+                                             "\" is not configurable"}};
                    }
                    auto *engine = fcitx.instance()->inputMethodEngine(imName);
                    if (!engine) {
-                       return {{"ERROR", "failed to get engine"}};
+                       return {{"ERROR",
+                                "Failed to get engine for input method \""s +
+                                    imName + "\""}};
                    }
                    auto *config = engine->getConfigForInputMethod(*entry);
                    if (!config) {
-                       return {{"ERROR", "failed to get config"}};
+                       return {{"ERROR",
+                                "Failed to get config for input method \""s +
+                                    imName + "\""}};
                    }
                    return configToJson(*config);
                } else {
-                   return {{"ERROR", "bad config uri"}};
+                   return {{"ERROR", "Bad config URI \""s + uri + "\""}};
                }
            })
         .dump();
