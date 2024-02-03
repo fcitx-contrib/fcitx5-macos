@@ -1,12 +1,15 @@
 @testable import Fcitx
 import SwiftyJSON
+import Foundation
 
 @_cdecl("main")
-func main() {
+func main() -> Int {
   start_fcitx_thread()
+  Thread.sleep(forTimeInterval: 1)
   try! testGetConfigFromFcitx()
   try! testDecode()
   stop_fcitx_thread()
+  return 0
 }
 
 func testGetConfigFromFcitx() throws {

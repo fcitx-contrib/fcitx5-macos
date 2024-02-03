@@ -279,6 +279,25 @@ std::string imGetCurrentIMName() noexcept {
         [=](Fcitx &fcitx) { return fcitx.instance()->currentInputMethod(); });
 }
 
+std::string imGetAvailableIMs() noexcept {
+    return with_fcitx([](Fcitx &fcitx) {
+        nlohmann::json j;
+        fcitx.instance()->inputMethodManager().foreachEntries(
+            [&j](const fcitx::InputMethodEntry &entry) {
+                j.push_back(
+                    nlohmann::json{{"name", entry.name()},
+                                   {"uniqueName", entry.uniqueName()},
+                                   {"nativeName", entry.nativeName()},
+                                   {"isConfigurable", entry.isConfigurable()},
+                                   {"languageCode", entry.languageCode()},
+                                   {"icon", entry.icon()},
+                                   {"label", entry.label()}});
+                return true;
+            });
+        return j.dump();
+    });
+}
+
 static nlohmann::json actionToJson(fcitx::Action *action,
                                    fcitx::InputContext *ic) {
     nlohmann::json j;
