@@ -35,10 +35,14 @@ struct IntegerOptionView: View {
       TextField(label, value: $model.value, formatter: numberFormatter)
         .textFieldStyle(RoundedBorderTextFieldStyle())
         .onChange(of: model.value) { newValue in
-          if newValue > model.max {
-            model.value = model.max
-          } else if newValue < model.min {
-            model.value = model.min
+          if let max = model.max,
+            newValue > max
+          {
+            model.value = max
+          } else if let min = model.min,
+            newValue < min
+          {
+            model.value = min
           }
         }
         .padding(.trailing, 60)

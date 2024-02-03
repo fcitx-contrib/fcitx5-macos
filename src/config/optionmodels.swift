@@ -28,15 +28,15 @@ class SimpleOption<T: FcitxCodable>: Option, ObservableObject, FcitxCodable {
   let defaultValue: T
   @Published var value: T
 
-  required init(defaultValue: T, value: T) {
+  required init(defaultValue: T, value: T?) {
     self.defaultValue = defaultValue
-    self.value = value
+    self.value = value ?? defaultValue
   }
 
   static func decode(json: JSON) throws -> Self {
     return Self(
       defaultValue: try T.decode(json: json["DefaultValue"]),
-      value: try T.decode(json: json["Value"])
+      value: try T?.decode(json: json["Value"])
     )
   }
 }
@@ -52,13 +52,13 @@ typealias StringOption = SimpleOption<String>
 
 class IntegerOption: Option, ObservableObject, FcitxCodable {
   let defaultValue: Int
-  let max: Int
-  let min: Int
+  let max: Int?
+  let min: Int?
   @Published var value: Int
 
-  required init(defaultValue: Int, value: Int, min: Int, max: Int) {
+  required init(defaultValue: Int, value: Int?, min: Int?, max: Int?) {
     self.defaultValue = defaultValue
-    self.value = value
+    self.value = value ?? defaultValue
     self.min = min
     self.max = max
   }
@@ -66,9 +66,9 @@ class IntegerOption: Option, ObservableObject, FcitxCodable {
   static func decode(json: JSON) throws -> Self {
     return Self(
       defaultValue: try Int.decode(json: json["DefaultValue"]),
-      value: try Int.decode(json: json["Value"]),
-      min: try Int.decode(json: json["IntMin"]),
-      max: try Int.decode(json: json["IntMax"])
+      value: try Int?.decode(json: json["Value"]),
+      min: try Int?.decode(json: json["IntMin"]),
+      max: try Int?.decode(json: json["IntMax"])
     )
   }
 }
@@ -80,10 +80,10 @@ class EnumOption: Option, ObservableObject, FcitxCodable {
   @Published var value: String
 
   required init(
-    defaultValue: String, value: String, enumStrings: [String], enumStringsI18n: [String]
+    defaultValue: String, value: String?, enumStrings: [String], enumStringsI18n: [String]
   ) {
     self.defaultValue = defaultValue
-    self.value = value
+    self.value = value ?? defaultValue
     self.enumStrings = enumStrings
     self.enumStringsI18n = enumStringsI18n
   }
@@ -93,7 +93,7 @@ class EnumOption: Option, ObservableObject, FcitxCodable {
     let enumsi18n = try [String].decode(json: json["EnumI18n"])
     return Self(
       defaultValue: json["DefaultValue"].stringValue,
-      value: json["Value"].stringValue,
+      value: json["Value"].string,
       enumStrings: enums,
       enumStringsI18n: enumsi18n.count < enums.count ? enums : enumsi18n
     )
@@ -111,16 +111,16 @@ class ListOption<T: FcitxCodable>: Option, ObservableObject, FcitxCodable {
   @Published var value: [T]
   let elementType: String
 
-  required init(defaultValue: [T], value: [T], elementType: String) {
+  required init(defaultValue: [T], value: [T]?, elementType: String) {
     self.defaultValue = defaultValue
+    self.value = value ?? defaultValue
     self.elementType = elementType
-    self.value = value
   }
 
   static func decode(json: JSON) throws -> Self {
     return Self(
       defaultValue: try [T].decode(json: json["DefaultValue"]),
-      value: try [T].decode(json: json["Value"]),
+      value: try [T]?.decode(json: json["Value"]),
       elementType: json["Type"].stringValue
     )
   }

@@ -179,6 +179,16 @@ extension Array: FcitxCodable where Element: FcitxCodable {
   // }
 }
 
+extension Optional: FcitxCodable where Wrapped: FcitxCodable {
+  static func decode(json: JSON) throws -> Self {
+    do {
+      return try Wrapped.decode(json: json)
+    } catch {
+      return nil
+    }
+  }
+}
+
 enum FcitxConfigError: Error {
   case fcitxError(String)
   case codingError(FcitxCodingError)
