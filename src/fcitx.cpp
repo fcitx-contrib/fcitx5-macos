@@ -260,6 +260,11 @@ void imSetGroups(const char *json) noexcept {
             }
             imMgr.setGroup(updated);
         }
+        for (const auto &groupName : imMgr.groups()) {
+            if (j.find(groupName) == j.end()) {
+                imMgr.removeGroup(groupName);
+            }
+        }
         imMgr.save();
     });
 }

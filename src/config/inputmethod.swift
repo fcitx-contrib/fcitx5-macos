@@ -106,6 +106,10 @@ private class ViewModel: ObservableObject {
       FCITX_ERROR("Couldn't save input method groups: \(error)")
     }
   }
+
+  func removeGroup(_ name: String) {
+    groups.removeAll(where: { $0.name == name })
+  }
 }
 
 struct InputMethodConfigView: View {
