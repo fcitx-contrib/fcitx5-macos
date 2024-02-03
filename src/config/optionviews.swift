@@ -1,3 +1,4 @@
+import Logging
 import SwiftUI
 
 struct BooleanOptionView: View {
@@ -65,9 +66,59 @@ struct IntegerOptionView: View {
 struct ExternalOptionView: View {
   let label: String
   let model: ExternalOption
+
+  @StateObject private var viewModel = ViewModel()
+
   var body: some View {
     Button(label) {
-      // TODO
+      viewModel.showConfig(model.external)
+    }
+    .sheet(isPresented: $viewModel.hasConfig) {
+      VStack {
+        ScrollView([.horizontal, .vertical]) {
+          buildView(config: viewModel.externalConfig!)
+        }
+        Button("Hide") {
+          viewModel.externalConfig = nil
+        }
+      }
+    }
+    .alert(
+      "Error",
+      isPresented: $viewModel.hasError,
+      presenting: ()
+    ) { _ in
+      Button("OK") {
+        viewModel.errorMsg = nil
+      }
+    } message: { _ in
+      Text(viewModel.errorMsg!)
+    }
+  }
+
+  private class ViewModel: ObservableObject {
+    @Published var hasConfig = false
+    @Published var hasError = false
+    @Published var externalConfig: Config? {
+      didSet {
+        hasConfig = (externalConfig != nil)
+      }
+    }
+    @Published var errorMsg: String? {
+      didSet {
+        hasError = (errorMsg != nil)
+      }
+    }
+
+    func showConfig(_ uri: String) {
+      externalConfig = nil
+      errorMsg = nil
+      do {
+        externalConfig = try getConfig(uri: uri)
+      } catch {
+        FCITX_ERROR("When fetching external config: \(error)")
+        errorMsg = "Cannot show external config: \(error.localizedDescription)"
+      }
     }
   }
 }
