@@ -20,6 +20,7 @@ static nlohmann::json configSpecToJson(const fcitx::RawConfig &config);
 static nlohmann::json configSpecToJson(const fcitx::Configuration &config);
 static void mergeSpecAndValue(nlohmann::json &specJson,
                               const nlohmann::json &valueJson);
+static fcitx::RawConfig jsonToRawConfig(const nlohmann::json &);
 static std::tuple<std::string, std::string>
 parseAddonUri(const std::string &uri);
 static size_t counter = 0;
@@ -85,6 +86,80 @@ std::string getConfig(const std::string &uri) {
                }
            })
         .dump();
+}
+
+bool setConfig(const char *uri_, const char *json_) {
+    auto config = jsonToRawConfig(nlohmann::json::parse(json_));
+    auto uri = std::string(uri_);
+    if (uri == globalConfigPath) {
+        return with_fcitx([&](Fcitx &fcitx) {
+            auto &gc = fcitx.instance()->globalConfig();
+            gc.load(config, true);
+            if (gc.safeSave()) {
+                fcitx.instance()->reloadConfig();
+                return true;
+            } else {
+                return false;
+            }
+        });
+    } else if (fcitx::stringutils::startsWith(uri, addonConfigPrefix)) {
+        return with_fcitx([&](Fcitx &fcitx) {
+            auto [addonName, subPath] = parseAddonUri(uri);
+            auto *addon =
+                fcitx.instance()->addonManager().addon(addonName, true);
+            if (addon) {
+                FCITX_DEBUG() << "Saving addon config to: " << uri;
+                if (subPath.empty()) {
+                    addon->setConfig(config);
+                } else {
+                    addon->setSubConfig(subPath, config);
+                }
+                return true;
+            } else {
+                FCITX_ERROR() << "Failed to get addon";
+                return false;
+            }
+        });
+    } else if (fcitx::stringutils::startsWith(uri, imConfigPrefix)) {
+        return with_fcitx([&](Fcitx &fcitx) {
+            auto im = uri.substr(sizeof(imConfigPrefix) - 1);
+            const auto *entry =
+                fcitx.instance()->inputMethodManager().entry(im);
+            auto *engine = fcitx.instance()->inputMethodEngine(im);
+            if (entry && engine) {
+                FCITX_DEBUG() << "Saving input method config to: " << uri;
+                engine->setConfigForInputMethod(*entry, config);
+                return true;
+            } else {
+                FCITX_ERROR() << "Failed to get input method";
+                return false;
+            }
+        });
+    } else {
+        return false;
+    }
+}
+
+void jsonFillRawConfigValues(const nlohmann::json &j,
+                             fcitx::RawConfig &config) {
+    if (j.is_string()) {
+        config = j.get<std::string>();
+        return;
+    }
+    if (j.is_object()) {
+        for (const auto [key, subJson] : j.items()) {
+            auto subConfig = config.get(key, true);
+            jsonFillRawConfigValues(subJson, *subConfig);
+        }
+        return;
+    }
+    FCITX_FATAL() << "Unknown value json: " << j.dump();
+}
+
+fcitx::RawConfig jsonToRawConfig(const nlohmann::json &j) {
+    fcitx::RawConfig config;
+    jsonFillRawConfigValues(j, config);
+    return config;
 }
 
 nlohmann::json &jsonLocate(nlohmann::json &j, const std::string &groupPath,

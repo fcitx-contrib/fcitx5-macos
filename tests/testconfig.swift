@@ -30,7 +30,7 @@ func testDecode() throws {
   // empty object
   try {
     let json = JSON(parseJSON: #"null"#)
-    let cfg = try parseJSON(json, "")
+    let cfg = try jsonToConfig(json, "")
     switch cfg.kind {
     case .group(_): assert(true)
     case .option(_): assert(false)
@@ -43,7 +43,7 @@ func testDecode() throws {
       parseJSON:
         #"{"A": {"Description": "inside a" , "B": {"Description": "inside b", "C": {"Description": "inside c"}}}}"#
     )
-    let root = try parseJSON(json, "root")
+    let root = try jsonToConfig(json, "root")
     switch root.kind {
     case .option: assert(false)
     case .group(let rootchildren):
@@ -75,7 +75,7 @@ func testDecode() throws {
     let json = JSON(
       parseJSON:
         #"{"Type": "Boolean", "Value": "True", "DefaultValue": "False", "Description": "bool"}"#)
-    let cfg = try parseJSON(json, "")
+    let cfg = try jsonToConfig(json, "")
     assert(cfg.description == "bool")
     switch cfg.kind {
     case .option(let opt as BooleanOption):
@@ -92,7 +92,7 @@ func testDecode() throws {
       parseJSON:
         #"{"Type": "Integer", "Value": "100", "DefaultValue": "0", "IntMin": "0", "IntMax": "1000", "Description": "int"}"#
     )
-    let cfg = try parseJSON(json, "")
+    let cfg = try jsonToConfig(json, "")
     assert(cfg.description == "int")
     switch cfg.kind {
     case .option(let opt as IntegerOption):
@@ -110,7 +110,7 @@ func testDecode() throws {
     let json = JSON(
       parseJSON:
         #"{"Type": "String", "Value": "Hello Fcitx", "DefaultValue": "HSN", "Description": "str"}"#)
-    let cfg = try parseJSON(json, "")
+    let cfg = try jsonToConfig(json, "")
     assert(cfg.description == "str")
     switch cfg.kind {
     case .option(let opt as StringOption):
@@ -127,7 +127,7 @@ func testDecode() throws {
       parseJSON:
         #"{"Type": "Enum", "Value": "No", "DefaultValue": "Yes", "Enum": {"0": "Yes", "1": "No"},  "EnumI18n": {"0": "是", "1": "否"}, "Description": "enum"}"#
     )
-    let cfg = try parseJSON(json, "")
+    let cfg = try jsonToConfig(json, "")
     assert(cfg.description == "enum")
     switch cfg.kind {
     case .option(let opt as EnumOption):
@@ -140,14 +140,40 @@ func testDecode() throws {
 }
 
 func testEncode() {
-  assert((try! String.decode("abc")) == "abc")
-  assert("abc".encodeValue() == "abc")
+  assert("abc".encodeValue() == "\"abc\"")
+  assert(try! String.decode("abc".encodeValue()) == "abc")
+
+  assert(true.encodeValue() == "\"True\"")
+  assert(try! Bool.decode(true.encodeValue()) == true)
+  assert(try! Bool.decode(false.encodeValue()) == false)
 
   assert(try! Int.decode("\"100\"") == 100)
   assert(100.encodeValue() == "\"100\"")
+  assert(try! Int.decode(114.encodeValue()) == 114)
+  assert((try! Int.decode("\"514\"")).encodeValue() == "\"514\"")
 
-  assert(true.encodeValue() == "\"True\"")
+  do {
+    let d = try String.decode(#""abc""#)
+    assert(d == "abc")
+  } catch {
+    print("\(error)")
+    assert(false)
+  }
 
   assert(try! Bool.decode("\"False\"") == false)
   assert(false.encodeValue() == "\"False\"")
+
+  let cfg0 = Config(
+    path: "", description: "", sortKey: 0,
+    kind: .group([
+      Config(
+        path: "Behavior", description: "", sortKey: 1,
+        kind: .group([
+          Config(
+            path: "ActiveByDefault", description: "", sortKey: 2,
+            kind: .option(BooleanOption(defaultValue: false, value: true)))
+        ]))
+    ]))
+  let j0 = cfg0.encodeValueJSON()
+  assert(j0["Behavior"]["ActiveByDefault"].stringValue == "True")
 }

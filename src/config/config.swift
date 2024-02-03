@@ -11,7 +11,7 @@ func getConfig(uri: String) throws -> Config {
     if json["ERROR"].exists() {
       throw FcitxConfigError.fcitxError(json["ERROR"].stringValue)
     }
-    return try parseJSON(json, "")
+    return try jsonToConfig(json, "")
   } catch let error as FcitxCodingError {
     throw FcitxConfigError.codingError(error)
   }
@@ -29,7 +29,24 @@ func getConfig(im: String) throws -> Config {
   return try getConfig(uri: "fcitx://config/inputmethod/\(im)")
 }
 
-func parseJSON(_ json: JSON, _ pathPrefix: String) throws -> Config {
+func configToJson(_ config: Config) -> JSON {
+  switch config.kind {
+  case .group(let children):
+    var json = JSON()
+    for c in children {
+      if let key = c.key() {
+        json[key] = c.encodeValueJSON()
+      } else {
+        FCITX_ERROR("Cannot encode option at path " + c.path)
+      }
+    }
+    return json
+  case .option(let opt):
+    return opt.encodeValueJSON()
+  }
+}
+
+func jsonToConfig(_ json: JSON, _ pathPrefix: String) throws -> Config {
   let description = json["Description"].stringValue
   let sortKey = json["__SortKey"].intValue
   // Option
@@ -37,7 +54,7 @@ func parseJSON(_ json: JSON, _ pathPrefix: String) throws -> Config {
     !type.contains("$")
   {
     do {
-      let option = try parseOptionJSON(json, type)
+      let option = try jsonToOption(json, type)
       return Config(
         path: pathPrefix, description: description, sortKey: sortKey, kind: .option(option))
     } catch {
@@ -51,7 +68,7 @@ func parseJSON(_ json: JSON, _ pathPrefix: String) throws -> Config {
       continue
     }
     do {
-      children.append(try parseJSON(subJson, pathPrefix + "/" + key))
+      children.append(try jsonToConfig(subJson, pathPrefix + "/" + key))
     } catch {
       throw FcitxCodingError.innerError(
         path: pathPrefix + "/" + key, context: subJson, error: error)
@@ -62,7 +79,7 @@ func parseJSON(_ json: JSON, _ pathPrefix: String) throws -> Config {
     path: pathPrefix, description: description, sortKey: sortKey, kind: .group(children))
 }
 
-private func parseOptionJSON(_ json: JSON, _ type: String) throws -> any Option {
+private func jsonToOption(_ json: JSON, _ type: String) throws -> any Option {
   if type == "Integer" {
     return try IntegerOption.decode(json: json)
   } else if type == "Boolean" {
@@ -99,19 +116,39 @@ protocol FcitxCodable {
 
 extension FcitxCodable {
   static func decode(_ str: String) throws -> Self {
-    return try Self.decode(json: JSON(parseJSON: str))
+    let data = str.data(using: .utf8)!
+    let json = try JSON(data: data, options: [.fragmentsAllowed])
+    return try Self.decode(json: json)
   }
 
   func encodeValue() -> String {
-    // We expect this unwrap always works.
-    return self.encodeValueJSON().rawString()!
+    let json = self.encodeValueJSON()
+    // I'm amazed by the fact that SwiftyJSON has problems dealing with type conversion.
+    return jsonToString(json)
+  }
+}
+
+// Encode json to string and guarantee the round-trip property.
+// It is preferred to `.rawString` unconditionally!
+public func jsonToString(_ json: JSON) -> String {
+  if json.type == .string {
+    let str = json.object as! String
+    return "\""
+      + str.replacingOccurrences(of: "\\", with: "\\\\")
+      .replacingOccurrences(of: "\"", with: "\\\"") + "\""
+  } else {
+    // Assume that serialization always work.
+    return json.rawString([
+      .jsonSerialization: [JSONSerialization.WritingOptions.fragmentsAllowed],
+      .castNilToNSNull: true, .maxObjextDepth: 100,
+    ])!
   }
 }
 
 extension Int: FcitxCodable {
   static func decode(json: JSON) throws -> Int {
     // json is like "100"
-    if let int = Int(json.stringValue.trimmingCharacters(in: CharacterSet(charactersIn: "\""))) {
+    if let int = Int(json.stringValue) {
       return int
     } else {
       throw FcitxCodingError.invalidArgument(context: json)

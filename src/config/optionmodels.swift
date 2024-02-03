@@ -15,26 +15,13 @@ struct Config: Identifiable {
 
 extension Config: FcitxCodable {
   static func decode(json: JSON) throws -> Config {
-    return try parseJSON(json, "")
+    return try jsonToConfig(json, "")
   }
 
   /// Encode the config as a "value json" J.
   /// Such that J["A"]["B"]["C"] is the value for option A/B/C.
   func encodeValueJSON() -> JSON {
-    switch self.kind {
-    case .group(let children):
-      var json = JSON()
-      for c in children {
-        if let key = c.key() {
-          json[key] = c.encodeValueJSON()
-        } else {
-          FCITX_ERROR("Cannot encode option at path " + c.path)
-        }
-      }
-      return json
-    case .option(let opt):
-      return opt.encodeValueJSON()
-    }
+    return configToJson(self)
   }
 }
 
