@@ -12,6 +12,19 @@ public struct Config: Identifiable {
   public let id = UUID()
 }
 
+extension Config {
+  func resetToDefault() {
+    switch self.kind {
+    case .group(let children):
+      for child in children {
+        child.resetToDefault()
+      }
+    case .option(let opt):
+      opt.resetToDefault()
+    }
+  }
+}
+
 public enum ConfigKind {
   case group([Config])
   case option(any Option)
@@ -22,6 +35,7 @@ public enum ConfigKind {
 public protocol Option {
   associatedtype Storage
   var value: Storage { get }
+  func resetToDefault()
 }
 
 class SimpleOption<T: FcitxCodable>: Option, ObservableObject, FcitxCodable {
@@ -38,6 +52,10 @@ class SimpleOption<T: FcitxCodable>: Option, ObservableObject, FcitxCodable {
       defaultValue: try T.decode(json: json["DefaultValue"]),
       value: try T?.decode(json: json["Value"])
     )
+  }
+
+  func resetToDefault() {
+    value = defaultValue
   }
 }
 
@@ -71,6 +89,10 @@ class IntegerOption: Option, ObservableObject, FcitxCodable {
       max: try Int?.decode(json: json["IntMax"])
     )
   }
+
+  func resetToDefault() {
+    value = defaultValue
+  }
 }
 
 class EnumOption: Option, ObservableObject, FcitxCodable {
@@ -98,6 +120,10 @@ class EnumOption: Option, ObservableObject, FcitxCodable {
       enumStringsI18n: enumsi18n.count < enums.count ? enums : enumsi18n
     )
   }
+
+  func resetToDefault() {
+    value = defaultValue
+  }
 }
 
 extension EnumOption: CustomStringConvertible {
@@ -124,6 +150,10 @@ class ListOption<T: FcitxCodable>: Option, ObservableObject, FcitxCodable {
       elementType: json["Type"].stringValue
     )
   }
+
+  func resetToDefault() {
+    value = defaultValue
+  }
 }
 
 extension ListOption: CustomStringConvertible {
@@ -141,6 +171,8 @@ struct ExternalOption: Option, FcitxCodable {
       external: try String.decode(json: json["External"])
     )
   }
+
+  func resetToDefault() {}
 }
 
 struct UnknownOption: Option, FcitxCodable {
@@ -154,6 +186,8 @@ struct UnknownOption: Option, FcitxCodable {
       raw: json
     )
   }
+
+  func resetToDefault() {}
 }
 
 // TODO KeyOption
