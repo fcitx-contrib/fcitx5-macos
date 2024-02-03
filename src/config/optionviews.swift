@@ -84,11 +84,9 @@ struct ListOptionView: View {
   let label: String
   @ObservedObject var model: ListOption<String>
   var body: some View {
-    Section(label) {
-      List {
-        ForEach(0..<model.value.count, id: \.self) { index in
-          Text(model.value[index])
-        }
+    LabeledContent(label) {
+      ForEach(0..<model.value.count, id: \.self) { index in
+        Text(model.value[index])
       }
     }
   }
