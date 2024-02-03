@@ -1,10 +1,11 @@
 import Foundation
+import Logging
 import SwiftUI
 import SwiftyJSON
 
 // In fcitx, a "config" can be either an option or a container for
 // options.
-public struct Config: Identifiable {
+struct Config: Identifiable {
   public let path: String
   public let description: String
   public let sortKey: Int
@@ -12,7 +13,36 @@ public struct Config: Identifiable {
   public let id = UUID()
 }
 
+extension Config: FcitxCodable {
+  static func decode(json: JSON) throws -> Config {
+    return try parseJSON(json, "")
+  }
+
+  /// Encode the config as a "value json" J.
+  /// Such that J["A"]["B"]["C"] is the value for option A/B/C.
+  func encodeValueJSON() -> JSON {
+    switch self.kind {
+    case .group(let children):
+      var json = JSON()
+      for c in children {
+        if let key = c.key() {
+          json[key] = c.encodeValueJSON()
+        } else {
+          FCITX_ERROR("Cannot encode option at path " + c.path)
+        }
+      }
+      return json
+    case .option(let opt):
+      return opt.encodeValueJSON()
+    }
+  }
+}
+
 extension Config {
+  func key() -> String? {
+    return path.split(separator: "/").last.map { String($0) }
+  }
+
   func resetToDefault() {
     switch self.kind {
     case .group(let children):
@@ -25,20 +55,20 @@ extension Config {
   }
 }
 
-public enum ConfigKind {
+enum ConfigKind {
   case group([Config])
   case option(any Option)
 }
 
 // For type-erasure.
 // Typed data are stored in the `FooOption` structs.
-public protocol Option {
+protocol Option: FcitxCodable {
   associatedtype Storage
   var value: Storage { get }
   func resetToDefault()
 }
 
-class SimpleOption<T: FcitxCodable>: Option, ObservableObject, FcitxCodable {
+class SimpleOption<T: FcitxCodable>: Option, ObservableObject {
   let defaultValue: T
   @Published var value: T
 
@@ -52,6 +82,10 @@ class SimpleOption<T: FcitxCodable>: Option, ObservableObject, FcitxCodable {
       defaultValue: try T.decode(json: json["DefaultValue"]),
       value: try T?.decode(json: json["Value"])
     )
+  }
+
+  func encodeValueJSON() -> JSON {
+    return value.encodeValueJSON()
   }
 
   func resetToDefault() {
@@ -68,7 +102,7 @@ extension IntegerOption: CustomStringConvertible {
 typealias BooleanOption = SimpleOption<Bool>
 typealias StringOption = SimpleOption<String>
 
-class IntegerOption: Option, ObservableObject, FcitxCodable {
+class IntegerOption: Option, ObservableObject {
   let defaultValue: Int
   let max: Int?
   let min: Int?
@@ -90,12 +124,16 @@ class IntegerOption: Option, ObservableObject, FcitxCodable {
     )
   }
 
+  func encodeValueJSON() -> JSON {
+    return value.encodeValueJSON()
+  }
+
   func resetToDefault() {
     value = defaultValue
   }
 }
 
-class EnumOption: Option, ObservableObject, FcitxCodable {
+class EnumOption: Option, ObservableObject {
   let defaultValue: String
   let enumStrings: [String]
   let enumStringsI18n: [String]
@@ -121,6 +159,10 @@ class EnumOption: Option, ObservableObject, FcitxCodable {
     )
   }
 
+  func encodeValueJSON() -> JSON {
+    return value.encodeValueJSON()
+  }
+
   func resetToDefault() {
     value = defaultValue
   }
@@ -132,7 +174,7 @@ extension EnumOption: CustomStringConvertible {
   }
 }
 
-class ListOption<T: FcitxCodable>: Option, ObservableObject, FcitxCodable {
+class ListOption<T: FcitxCodable>: Option, ObservableObject {
   let defaultValue: [T]
   @Published var value: [T]
   let elementType: String
@@ -149,6 +191,10 @@ class ListOption<T: FcitxCodable>: Option, ObservableObject, FcitxCodable {
       value: try [T]?.decode(json: json["Value"]),
       elementType: json["Type"].stringValue
     )
+  }
+
+  func encodeValueJSON() -> JSON {
+    return value.encodeValueJSON()
   }
 
   func resetToDefault() {
@@ -172,10 +218,14 @@ struct ExternalOption: Option, FcitxCodable {
     )
   }
 
+  func encodeValueJSON() -> JSON {
+    return JSON()
+  }
+
   func resetToDefault() {}
 }
 
-struct UnknownOption: Option, FcitxCodable {
+struct UnknownOption: Option {
   let value: () = ()
   let type: String
   let raw: JSON
@@ -185,6 +235,10 @@ struct UnknownOption: Option, FcitxCodable {
       type: json["Type"].stringValue,
       raw: json
     )
+  }
+
+  func encodeValueJSON() -> JSON {
+    return raw["Value"]
   }
 
   func resetToDefault() {}

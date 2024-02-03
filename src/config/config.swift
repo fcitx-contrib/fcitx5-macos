@@ -3,7 +3,7 @@ import Foundation
 import Logging
 import SwiftyJSON
 
-public func getConfig(uri: String) throws -> Config {
+func getConfig(uri: String) throws -> Config {
   let jsonString = String(Fcitx.getConfig(uri))
   let data = jsonString.data(using: .utf8, allowLossyConversion: false)!
   do {
@@ -17,31 +17,16 @@ public func getConfig(uri: String) throws -> Config {
   }
 }
 
-public func getGlobalConfig() throws -> Config {
+func getGlobalConfig() throws -> Config {
   return try getConfig(uri: "fcitx://config/global")
 }
 
-public func getConfig(addon: String) throws -> Config {
+func getConfig(addon: String) throws -> Config {
   return try getConfig(uri: "fcitx://config/addon/\(addon)/")
 }
 
-public func getConfig(im: String) throws -> Config {
+func getConfig(im: String) throws -> Config {
   return try getConfig(uri: "fcitx://config/inputmethod/\(im)")
-}
-
-struct DynamicCodingKey: CodingKey {
-  var stringValue: String
-  var intValue: Int?
-
-  init?(stringValue: String) {
-    self.stringValue = stringValue
-    self.intValue = nil
-  }
-
-  init?(intValue: Int) {
-    self.stringValue = String(intValue)
-    self.intValue = intValue
-  }
 }
 
 func parseJSON(_ json: JSON, _ pathPrefix: String) throws -> Config {
@@ -77,7 +62,7 @@ func parseJSON(_ json: JSON, _ pathPrefix: String) throws -> Config {
     path: pathPrefix, description: description, sortKey: sortKey, kind: .group(children))
 }
 
-func parseOptionJSON(_ json: JSON, _ type: String) throws -> any Option {
+private func parseOptionJSON(_ json: JSON, _ type: String) throws -> any Option {
   if type == "Integer" {
     return try IntegerOption.decode(json: json)
   } else if type == "Boolean" {
@@ -108,12 +93,18 @@ enum FcitxCodingError: Error {
 protocol FcitxCodable {
   static func decode(json: JSON) throws -> Self
   static func decode(_ str: String) throws -> Self
-  // TODO: func encode() -> String
+  func encodeValueJSON() -> JSON
+  func encodeValue() -> String
 }
 
 extension FcitxCodable {
   static func decode(_ str: String) throws -> Self {
     return try Self.decode(json: JSON(parseJSON: str))
+  }
+
+  func encodeValue() -> String {
+    // We expect this unwrap always works.
+    return self.encodeValueJSON().rawString()!
   }
 }
 
@@ -126,8 +117,8 @@ extension Int: FcitxCodable {
       throw FcitxCodingError.invalidArgument(context: json)
     }
   }
-  func encode() -> String {
-    String(self)
+  func encodeValueJSON() -> JSON {
+    return JSON(String(self))
   }
 }
 
@@ -141,8 +132,8 @@ extension Bool: FcitxCodable {
       throw FcitxCodingError.invalidArgument(context: json)
     }
   }
-  func encode() -> String {
-    if self { return "True" } else { return "False" }
+  func encodeValueJSON() -> JSON {
+    if self { return JSON("True") } else { return JSON("False") }
   }
 }
 
@@ -154,10 +145,8 @@ extension String: FcitxCodable {
       throw FcitxCodingError.invalidArgument(context: json)
     }
   }
-  func encode() -> String {
-    let encodedString = self.replacingOccurrences(of: "\\", with: "\\\\")
-      .replacingOccurrences(of: "\"", with: "\\\"")
-    return "\"\(encodedString)\""
+  func encodeValueJSON() -> JSON {
+    return JSON(self)
   }
 }
 
@@ -170,13 +159,13 @@ extension Array: FcitxCodable where Element: FcitxCodable {
     }
     return result
   }
-  // func encode() -> String {
-  //   var json = JSON()
-  //   for (idx, obj) in self.enumerated() {
-  //     json[String(idx)] = obj.encode()
-  //   }
-  //   return json.rawStringes()
-  // }
+  func encodeValueJSON() -> JSON {
+    var json = JSON()
+    for (idx, element) in self.enumerated() {
+      json[String(idx)] = element.encodeValueJSON()
+    }
+    return json
+  }
 }
 
 extension Optional: FcitxCodable where Wrapped: FcitxCodable {
@@ -185,6 +174,14 @@ extension Optional: FcitxCodable where Wrapped: FcitxCodable {
       return try Wrapped.decode(json: json)
     } catch {
       return nil
+    }
+  }
+
+  func encodeValueJSON() -> JSON {
+    if let value = self {
+      return value.encodeValueJSON()
+    } else {
+      return JSON()
     }
   }
 }

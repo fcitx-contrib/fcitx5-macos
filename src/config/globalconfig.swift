@@ -31,7 +31,7 @@ struct GlobalConfigView: View {
         Spacer()
         Button("Print") {
           // Should see changes.
-          print(model)
+          print(model.encodeValue())
         }
       }
     }.padding()

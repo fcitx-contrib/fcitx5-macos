@@ -1,6 +1,7 @@
-@testable import Fcitx
-import SwiftyJSON
 import Foundation
+import SwiftyJSON
+
+@testable import Fcitx
 
 @_cdecl("main")
 func main() -> Int {
@@ -8,6 +9,7 @@ func main() -> Int {
   Thread.sleep(forTimeInterval: 1)
   try! testGetConfigFromFcitx()
   try! testDecode()
+  testEncode()
   stop_fcitx_thread()
   return 0
 }
@@ -16,7 +18,7 @@ func testGetConfigFromFcitx() throws {
   let _ = try getConfig(uri: "fcitx://config/global")
 
   do {
-    let _ = try getConfig(uri: "fcitx://NOT-FOUND");
+    let _ = try getConfig(uri: "fcitx://NOT-FOUND")
   } catch is FcitxConfigError {
     assert(true)
   } catch {
@@ -33,13 +35,16 @@ func testDecode() throws {
     case .group(_): assert(true)
     case .option(_): assert(false)
     }
-  }();
+  }()
 
   // path
   try {
-    let json = JSON(parseJSON: #"{"A": {"Description": "inside a" , "B": {"Description": "inside b", "C": {"Description": "inside c"}}}}"#)
+    let json = JSON(
+      parseJSON:
+        #"{"A": {"Description": "inside a" , "B": {"Description": "inside b", "C": {"Description": "inside c"}}}}"#
+    )
     let root = try parseJSON(json, "root")
-    switch root.kind{
+    switch root.kind {
     case .option: assert(false)
     case .group(let rootchildren):
       assert(rootchildren.count == 1)
@@ -67,7 +72,9 @@ func testDecode() throws {
 
   // Boolean
   try {
-    let json = JSON(parseJSON: #"{"Type": "Boolean", "Value": "True", "DefaultValue": "False", "Description": "bool"}"#)
+    let json = JSON(
+      parseJSON:
+        #"{"Type": "Boolean", "Value": "True", "DefaultValue": "False", "Description": "bool"}"#)
     let cfg = try parseJSON(json, "")
     assert(cfg.description == "bool")
     switch cfg.kind {
@@ -77,11 +84,14 @@ func testDecode() throws {
     case .group(_): assert(false)
     case .option(_): assert(false)
     }
-  }();
+  }()
 
   // Integer
   try {
-    let json = JSON(parseJSON: #"{"Type": "Integer", "Value": "100", "DefaultValue": "0", "IntMin": "0", "IntMax": "1000", "Description": "int"}"#)
+    let json = JSON(
+      parseJSON:
+        #"{"Type": "Integer", "Value": "100", "DefaultValue": "0", "IntMin": "0", "IntMax": "1000", "Description": "int"}"#
+    )
     let cfg = try parseJSON(json, "")
     assert(cfg.description == "int")
     switch cfg.kind {
@@ -93,11 +103,13 @@ func testDecode() throws {
     case .group(_): assert(false)
     case .option(_): assert(false)
     }
-  }();
+  }()
 
   // String
   try {
-    let json = JSON(parseJSON: #"{"Type": "String", "Value": "Hello Fcitx", "DefaultValue": "HSN", "Description": "str"}"#)
+    let json = JSON(
+      parseJSON:
+        #"{"Type": "String", "Value": "Hello Fcitx", "DefaultValue": "HSN", "Description": "str"}"#)
     let cfg = try parseJSON(json, "")
     assert(cfg.description == "str")
     switch cfg.kind {
@@ -107,11 +119,14 @@ func testDecode() throws {
     case .group(_): assert(false)
     case .option(_): assert(false)
     }
-  }();
+  }()
 
   // Enum
   try {
-    let json = JSON(parseJSON: #"{"Type": "Enum", "Value": "No", "DefaultValue": "Yes", "Enum": {"0": "Yes", "1": "No"},  "EnumI18n": {"0": "是", "1": "否"}, "Description": "enum"}"#)
+    let json = JSON(
+      parseJSON:
+        #"{"Type": "Enum", "Value": "No", "DefaultValue": "Yes", "Enum": {"0": "Yes", "1": "No"},  "EnumI18n": {"0": "是", "1": "否"}, "Description": "enum"}"#
+    )
     let cfg = try parseJSON(json, "")
     assert(cfg.description == "enum")
     switch cfg.kind {
@@ -121,5 +136,18 @@ func testDecode() throws {
     case .group(_): assert(false)
     case .option(_): assert(false)
     }
-  }();
+  }()
+}
+
+func testEncode() {
+  assert((try! String.decode("abc")) == "abc")
+  assert("abc".encodeValue() == "abc")
+
+  assert(try! Int.decode("\"100\"") == 100)
+  assert(100.encodeValue() == "\"100\"")
+
+  assert(true.encodeValue() == "\"True\"")
+
+  assert(try! Bool.decode("\"False\"") == false)
+  assert(false.encodeValue() == "\"False\"")
 }

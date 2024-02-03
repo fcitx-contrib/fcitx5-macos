@@ -214,7 +214,7 @@ let testConfig = Config(
   VStack {
     buildView(config: testConfig)
     Button("Print") {
-      print(testConfig)
+      print(testConfig.encodeValue())
     }
   }
 }
