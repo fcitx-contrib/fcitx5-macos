@@ -107,46 +107,100 @@ private class ViewModel: ObservableObject {
     }
   }
 
+  func addGroup(_ name: String) {
+    if name == "" || groups.contains(where: { $0.name == name }) {
+      return
+    }
+    groups.append(Group(name: name, inputMethods: []))
+  }
+
   func removeGroup(_ name: String) {
     groups.removeAll(where: { $0.name == name })
+  }
+
+  @Published var inputDialogInput: String = ""
+  @Published var hasInputDialog = false
+  func showInputDialog() {
+    inputDialogInput = ""
+    hasInputDialog = true
+  }
+  func cancelInputDialog() {
+    inputDialogInput = ""
+    hasInputDialog = false
   }
 }
 
 struct InputMethodConfigView: View {
   @StateObject private var viewModel = ViewModel()
 
+  @State var showConfirmDialog = false
+
   var body: some View {
     NavigationSplitView {
-      VStack {
-        List(selection: $viewModel.selectedInputMethod) {
-          ForEach($viewModel.groups) { $group in
-            let header = Text(group.name)
-              .frame(maxWidth: .infinity, alignment: .leading)
-              .contentShape(Rectangle())
-              .contextMenu {
-                Button("Rename group") {}
-                Button("Add input method") {}
-                Button("Remove group") {}
-              }
-            Section(header: header) {
-              ForEach($group.inputMethods) { $inputMethod in
-                Text(inputMethod.displayName)
-                  .contextMenu {
-                    Button("Remove input method") {}
-                  }
-              }
-              .onMove { indices, newOffset in
-                group.inputMethods.move(fromOffsets: indices, toOffset: newOffset)
+      List(selection: $viewModel.selectedInputMethod) {
+        ForEach($viewModel.groups) { $group in
+          let header = Text(group.name)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .contextMenu {
+              Button("Rename group") {}
+              Button("Add input method") {}
+              Button("Remove group") {
+                showConfirmDialog = true
               }
             }
-          }
-          .onMove { indices, newOffset in
-            viewModel.groups.move(fromOffsets: indices, toOffset: newOffset)
+            .alert(
+              "Confirm deletion",
+              isPresented: $showConfirmDialog,
+              presenting: ()
+            ) { details in
+              Button(role: .destructive) {
+                viewModel.removeGroup(group.name)
+                showConfirmDialog = false
+              } label: {
+                Text("Delete")
+              }
+              Button(role: .cancel) {
+              } label: {
+                Text("Cancel")
+              }
+            } message: {
+              Text("Are you sure you want to delete the \"\(group.name)\" group?")
+            }
+          Section(header: header) {
+            ForEach($group.inputMethods) { $inputMethod in
+              Text(inputMethod.displayName)
+                .contextMenu {
+                  Button("Remove input method") {}
+                }
+            }
+            .onMove { indices, newOffset in
+              group.inputMethods.move(fromOffsets: indices, toOffset: newOffset)
+            }
           }
         }
-        .contextMenu {
-          Button("Add group") {}
+        .onMove { indices, newOffset in
+          viewModel.groups.move(fromOffsets: indices, toOffset: newOffset)
         }
+      }
+      .contextMenu {
+        Button("Add group") {
+          viewModel.showInputDialog()
+        }
+      }
+      .sheet(isPresented: $viewModel.hasInputDialog) {
+        VStack {
+          TextField("Group name", text: $viewModel.inputDialogInput)
+          HStack {
+            Button("OK") {
+              viewModel.addGroup(viewModel.inputDialogInput)
+              viewModel.cancelInputDialog()
+            }
+            Button("Cancel") {
+              viewModel.cancelInputDialog()
+            }
+          }
+        }.padding()
       }
     } detail: {
       if let selectedInputMethod = viewModel.selectedInputMethod {
