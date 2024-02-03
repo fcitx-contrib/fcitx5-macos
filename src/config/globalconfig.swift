@@ -1,3 +1,4 @@
+import Fcitx
 import Logging
 import SwiftUI
 
@@ -32,6 +33,9 @@ struct GlobalConfigView: View {
         Button("Print") {
           // Should see changes.
           print(model.encodeValue())
+        }
+        Button("Save") {
+          Fcitx.setConfig("fcitx://config/global", model.encodeValue())
         }
       }
     }.padding()
