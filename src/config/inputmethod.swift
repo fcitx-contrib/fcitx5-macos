@@ -54,6 +54,7 @@ struct InputMethodConfigView: View {
 
   @State var addingInputMethod = false
   @State var inputMethodsToAdd = Set<InputMethod>()
+  @State var addToGroup: String?
 
   var body: some View {
     NavigationSplitView {
@@ -69,6 +70,7 @@ struct InputMethodConfigView: View {
                 }
               }
               Button("Add input method to \(group.name)") {
+                addToGroup = group.name
                 addingInputMethod = true
               }
               Button("Remove group \(group.name)") {
@@ -83,12 +85,15 @@ struct InputMethodConfigView: View {
                 AvailableInputMethodView(selection: $inputMethodsToAdd)
                 HStack {
                   Button("Add") {
-                    viewModel.addItems(group.name, inputMethodsToAdd)
+                    if let groupName = addToGroup {
+                      viewModel.addItems(groupName, inputMethodsToAdd)
+                    }
                     addingInputMethod = false
                     inputMethodsToAdd = Set()
                   }
                   Button("Cancel") {
                     addingInputMethod = false
+                    inputMethodsToAdd = Set()
                   }
                 }
               }.padding()
@@ -141,11 +146,7 @@ struct InputMethodConfigView: View {
   }
 
   private class ViewModel: ObservableObject {
-    @Published var groups = [Group]() {
-      didSet {
-        save()
-      }
-    }
+    @Published var groups = [Group]()
     @Published var selectedItem: UUID? {
       didSet {
         configModel = nil
@@ -154,8 +155,6 @@ struct InputMethodConfigView: View {
     }
     @Published var configModel: Config?
     @Published var errorMsg: String?
-    var loading = false
-    var saveMask = false
     var uuidToIM = [UUID: String]()
 
     init() {
@@ -167,7 +166,6 @@ struct InputMethodConfigView: View {
       configModel = nil
       selectedItem = nil
       uuidToIM.removeAll(keepingCapacity: true)
-      loading = true
       do {
         let jsonStr = String(Fcitx.imGetGroups())
         if let jsonData = jsonStr.data(using: .utf8) {
@@ -185,7 +183,6 @@ struct InputMethodConfigView: View {
         errorMsg = "Couldn't load input method config: \(error)"
         FCITX_ERROR("Couldn't load input method config: \(error)")
       }
-      loading = false
     }
 
     func updateModel() {
@@ -202,9 +199,6 @@ struct InputMethodConfigView: View {
     }
 
     func save() {
-      if loading || saveMask {
-        return
-      }
       do {
         let data = try JSONEncoder().encode(groups)
         if let jsonStr = String(data: data, encoding: .utf8) {
@@ -212,6 +206,7 @@ struct InputMethodConfigView: View {
         } else {
           FCITX_ERROR("Couldn't save input method groups: failed to encode data as UTF-8")
         }
+        load()
       } catch {
         FCITX_ERROR("Couldn't save input method groups: \(error)")
       }
@@ -222,13 +217,17 @@ struct InputMethodConfigView: View {
         return
       }
       groups.append(Group(name: name, inputMethods: []))
+      save()
     }
 
     func removeGroup(_ name: String) {
       if groups.count <= 1 {
         return
       }
-      groups.removeAll(where: { $0.name == name })
+      DispatchQueue.main.async {
+        self.groups = self.groups.filter({ $0.name != name })
+        self.save()
+      }
     }
 
     func renameGroup(_ group: inout Group, _ name: String) {
@@ -236,31 +235,34 @@ struct InputMethodConfigView: View {
         return
       }
       group.name = name
+      save()
     }
 
     func removeItem(_ groupName: String, _ uuid: UUID) {
-      for i in 0..<groups.count {
-        if groups[i].name == groupName {
-          groups[i].inputMethods.removeAll(where: { $0.id == uuid })
-          break
+      DispatchQueue.main.async {
+        for i in 0..<self.groups.count {
+          if self.groups[i].name == groupName {
+            self.groups[i].inputMethods.removeAll(where: { $0.id == uuid })
+            break
+          }
         }
+        self.save()
       }
     }
 
     func addItems(_ groupName: String, _ ims: Set<InputMethod>) {
-      saveMask = true
-      for i in 0..<groups.count {
-        if groups[i].name == groupName {
-          for im in ims {
-            let item = GroupItem(name: im.uniqueName, displayName: im.displayName)
-            groups[i].inputMethods.append(item)
-            uuidToIM[item.id] = item.name
+      DispatchQueue.main.async {
+        for i in 0..<self.groups.count {
+          if self.groups[i].name == groupName {
+            for im in ims {
+              let item = GroupItem(name: im.uniqueName, displayName: im.displayName)
+              self.groups[i].inputMethods.append(item)
+              self.uuidToIM[item.id] = item.name
+            }
           }
         }
+        self.save()
       }
-      saveMask = false
-      save()
-      load()
     }
   }
 }

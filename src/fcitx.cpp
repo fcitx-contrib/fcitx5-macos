@@ -248,10 +248,11 @@ void imSetGroups(const char *json) noexcept {
     auto j = nlohmann::json::parse(json);
     with_fcitx([j = std::move(j)](Fcitx &fcitx) {
         auto &imMgr = fcitx.instance()->inputMethodManager();
+        std::unordered_set<std::string> liveGroups;
         for (const auto &g : j) {
+            liveGroups.insert(g["name"]);
             if (!imMgr.group(g["name"])) {
                 imMgr.addEmptyGroup(g["name"]);
-                continue;
             }
             auto updated = *imMgr.group(g["name"]);
             auto &imList = updated.inputMethodList();
@@ -262,7 +263,7 @@ void imSetGroups(const char *json) noexcept {
             imMgr.setGroup(updated);
         }
         for (const auto &groupName : imMgr.groups()) {
-            if (j.find(groupName) == j.end()) {
+            if (!liveGroups.count(groupName)) {
                 imMgr.removeGroup(groupName);
             }
         }
