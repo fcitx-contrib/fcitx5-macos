@@ -238,6 +238,7 @@ struct InputMethodConfigView: View {
       for im in ims {
         let item = GroupItem(name: im.uniqueName, displayName: im.displayName)
         group.inputMethods.append(item)
+        uuidToIM[item.id] = item.name
       }
     }
   }
