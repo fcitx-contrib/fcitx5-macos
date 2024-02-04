@@ -133,7 +133,14 @@ struct InputMethodConfigView: View {
       if let selectedItem = viewModel.selectedItem {
         if let configModel = viewModel.configModel {
           ScrollView([.vertical, .horizontal]) {
-            buildView(config: configModel)
+            VStack {
+              buildView(config: configModel)
+              Button("Save") {
+                if let name = viewModel.selectedIMName {
+                  setConfig("fcitx://config/inputmethod/\(name)", configModel.encodeValue())
+                }
+              }
+            }
           }
           .defaultScrollAnchor(.topTrailing)
         } else if let errorMsg = viewModel.errorMsg {
@@ -151,8 +158,12 @@ struct InputMethodConfigView: View {
       didSet {
         configModel = nil
         updateModel()
+        if let uuid = selectedItem {
+          selectedIMName = uuidToIM[uuid]
+        }
       }
     }
+    @Published var selectedIMName: String?
     @Published var configModel: Config?
     @Published var errorMsg: String?
     var uuidToIM = [UUID: String]()
