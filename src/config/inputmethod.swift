@@ -47,111 +47,6 @@ private struct GroupItem: Identifiable, Codable {
   }
 }
 
-private class ViewModel: ObservableObject {
-  @Published var groups = [Group]() {
-    didSet {
-      save()
-    }
-  }
-  @Published var selectedItem: UUID? {
-    didSet {
-      updateModel()
-    }
-  }
-  @Published var configModel: Config?
-  @Published var errorMsg: String?
-  var loading = false
-  var uuidToIM = [UUID: String]()
-
-  init() {
-    load()
-  }
-
-  func load() {
-    uuidToIM.removeAll(keepingCapacity: true)
-    loading = true
-    do {
-      let jsonStr = String(Fcitx.imGetGroups())
-      if let jsonData = jsonStr.data(using: .utf8) {
-        groups = try JSONDecoder().decode([Group].self, from: jsonData)
-        for group in groups {
-          for im in group.inputMethods {
-            uuidToIM[im.id] = im.name
-          }
-        }
-      } else {
-        errorMsg = "Couldn't decode input method config: not UTF-8"
-        FCITX_ERROR("Couldn't decode input method config: not UTF-8")
-      }
-    } catch {
-      errorMsg = "Couldn't load input method config: \(error)"
-      FCITX_ERROR("Couldn't load input method config: \(error)")
-    }
-    loading = false
-  }
-
-  func updateModel() {
-    guard let uuid = selectedItem else { return }
-    guard let im = uuidToIM[uuid] else { return }
-    do {
-      configModel = try getConfig(im: im)
-      errorMsg = nil
-    } catch {
-      configModel = nil
-      errorMsg = error.localizedDescription
-      FCITX_ERROR("Couldn't build config view: \(error)")
-    }
-  }
-
-  func save() {
-    if loading {
-      return
-    }
-    do {
-      let data = try JSONEncoder().encode(groups)
-      if let jsonStr = String(data: data, encoding: .utf8) {
-        Fcitx.imSetGroups(jsonStr)
-      } else {
-        FCITX_ERROR("Couldn't save input method groups: failed to encode data as UTF-8")
-      }
-    } catch {
-      FCITX_ERROR("Couldn't save input method groups: \(error)")
-    }
-  }
-
-  func addGroup(_ name: String) {
-    if name == "" || groups.contains(where: { $0.name == name }) {
-      return
-    }
-    groups.append(Group(name: name, inputMethods: []))
-  }
-
-  func removeGroup(_ name: String) {
-    if groups.count <= 1 {
-      return
-    }
-    groups.removeAll(where: { $0.name == name })
-  }
-
-  func renameGroup(_ group: inout Group, _ name: String) {
-    if name == "" {
-      return
-    }
-    group.name = name
-  }
-
-  func removeItem(_ group: inout Group, _ uuid: UUID) {
-    group.inputMethods.removeAll(where: { $0.id == uuid })
-  }
-
-  func addItems(_ group: inout Group, _ ims: Set<InputMethod>) {
-    for im in ims {
-      let item = GroupItem(name: im.uniqueName, displayName: im.displayName)
-      group.inputMethods.append(item)
-    }
-  }
-}
-
 struct InputMethodConfigView: View {
   @StateObject private var viewModel = ViewModel()
   @StateObject var addGroupDialog = InputDialog(title: "Add an empty group", prompt: "Group name")
@@ -237,6 +132,112 @@ struct InputMethodConfigView: View {
         }
       } else {
         Text("Select an input method from the side bar.")
+      }
+    }
+  }
+
+  private class ViewModel: ObservableObject {
+    @Published var groups = [Group]() {
+      didSet {
+        save()
+      }
+    }
+    @Published var selectedItem: UUID? {
+      didSet {
+        configModel = nil
+        updateModel()
+      }
+    }
+    @Published var configModel: Config?
+    @Published var errorMsg: String?
+    var loading = false
+    var uuidToIM = [UUID: String]()
+
+    init() {
+      load()
+    }
+
+    func load() {
+      uuidToIM.removeAll(keepingCapacity: true)
+      loading = true
+      do {
+        let jsonStr = String(Fcitx.imGetGroups())
+        if let jsonData = jsonStr.data(using: .utf8) {
+          groups = try JSONDecoder().decode([Group].self, from: jsonData)
+          for group in groups {
+            for im in group.inputMethods {
+              uuidToIM[im.id] = im.name
+            }
+          }
+        } else {
+          errorMsg = "Couldn't decode input method config: not UTF-8"
+          FCITX_ERROR("Couldn't decode input method config: not UTF-8")
+        }
+      } catch {
+        errorMsg = "Couldn't load input method config: \(error)"
+        FCITX_ERROR("Couldn't load input method config: \(error)")
+      }
+      loading = false
+    }
+
+    func updateModel() {
+      guard let uuid = selectedItem else { return }
+      guard let im = uuidToIM[uuid] else { return }
+      do {
+        configModel = try getConfig(im: im)
+        errorMsg = nil
+      } catch {
+        configModel = nil
+        errorMsg = error.localizedDescription
+        FCITX_ERROR("Couldn't build config view: \(error)")
+      }
+    }
+
+    func save() {
+      if loading {
+        return
+      }
+      do {
+        let data = try JSONEncoder().encode(groups)
+        if let jsonStr = String(data: data, encoding: .utf8) {
+          Fcitx.imSetGroups(jsonStr)
+        } else {
+          FCITX_ERROR("Couldn't save input method groups: failed to encode data as UTF-8")
+        }
+      } catch {
+        FCITX_ERROR("Couldn't save input method groups: \(error)")
+      }
+    }
+
+    func addGroup(_ name: String) {
+      if name == "" || groups.contains(where: { $0.name == name }) {
+        return
+      }
+      groups.append(Group(name: name, inputMethods: []))
+    }
+
+    func removeGroup(_ name: String) {
+      if groups.count <= 1 {
+        return
+      }
+      groups.removeAll(where: { $0.name == name })
+    }
+
+    func renameGroup(_ group: inout Group, _ name: String) {
+      if name == "" {
+        return
+      }
+      group.name = name
+    }
+
+    func removeItem(_ group: inout Group, _ uuid: UUID) {
+      group.inputMethods.removeAll(where: { $0.id == uuid })
+    }
+
+    func addItems(_ group: inout Group, _ ims: Set<InputMethod>) {
+      for im in ims {
+        let item = GroupItem(name: im.uniqueName, displayName: im.displayName)
+        group.inputMethods.append(item)
       }
     }
   }
