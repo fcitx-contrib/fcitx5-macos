@@ -251,6 +251,7 @@ void imSetGroups(const char *json) noexcept {
         for (const auto &g : j) {
             if (!imMgr.group(g["name"])) {
                 imMgr.addEmptyGroup(g["name"]);
+                continue;
             }
             auto updated = *imMgr.group(g["name"]);
             auto &imList = updated.inputMethodList();
