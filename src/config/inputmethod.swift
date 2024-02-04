@@ -132,7 +132,7 @@ struct InputMethodConfigView: View {
     } detail: {
       if let selectedItem = viewModel.selectedItem {
         if let configModel = viewModel.configModel {
-          ScrollView([.vertical, .horizontal]) {
+          let scrollView = ScrollView([.vertical, .horizontal]) {
             VStack {
               buildView(config: configModel)
               Button("Save") {
@@ -142,7 +142,11 @@ struct InputMethodConfigView: View {
               }
             }
           }
-          .defaultScrollAnchor(.topTrailing)
+          if #available(macOS 14.0, *) {
+            scrollView.defaultScrollAnchor(.topTrailing)
+          } else {
+            scrollView
+          }
         } else if let errorMsg = viewModel.errorMsg {
           Text("Cannot show config for \(selectedItem): \(errorMsg)")
         }
