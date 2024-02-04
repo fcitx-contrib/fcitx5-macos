@@ -132,21 +132,21 @@ struct InputMethodConfigView: View {
     } detail: {
       if let selectedItem = viewModel.selectedItem {
         if let configModel = viewModel.configModel {
-          let scrollView = ScrollView([.vertical, .horizontal]) {
-            VStack {
+          VStack {
+            let scrollView = ScrollView([.vertical, .horizontal]) {
               buildView(config: configModel)
-              Button("Save") {
-                if let name = viewModel.selectedIMName {
-                  setConfig("fcitx://config/inputmethod/\(name)", configModel.encodeValue())
-                }
+            }
+            if #available(macOS 14.0, *) {
+              scrollView.defaultScrollAnchor(.topTrailing)
+            } else {
+              scrollView
+            }
+            Button("Save") {
+              if let name = viewModel.selectedIMName {
+                setConfig("fcitx://config/inputmethod/\(name)", configModel.encodeValue())
               }
             }
-          }
-          if #available(macOS 14.0, *) {
-            scrollView.defaultScrollAnchor(.topTrailing)
-          } else {
-            scrollView
-          }
+          }.padding()
         } else if let errorMsg = viewModel.errorMsg {
           Text("Cannot show config for \(selectedItem): \(errorMsg)")
         }
