@@ -271,8 +271,12 @@ struct AvailableInputMethodView: View {
     NavigationSplitView {
       List(selection: $viewModel.selectedLanguageCode) {
         let languages = Array(viewModel.availableIMs.keys).sorted()
+        let en = Locale(identifier: "en_US")
+        let locale = Locale()
         ForEach(languages, id: \.self) { language in
-          Text(language)
+          Text(
+            locale.localizedString(forIdentifier: language) ?? en.localizedString(
+              forIdentifier: language) ?? language)
         }
       }
     } detail: {
