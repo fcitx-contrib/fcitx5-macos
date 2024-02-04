@@ -63,15 +63,15 @@ struct InputMethodConfigView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
             .contextMenu {
-              Button("Rename group") {
+              Button("Rename group \(group.name)") {
                 renameGroupDialog.show { input in
                   viewModel.renameGroup(&group, input)
                 }
               }
-              Button("Add input method") {
+              Button("Add input method to \(group.name)") {
                 addingInputMethod = true
               }
-              Button("Remove group") {
+              Button("Remove group \(group.name)") {
                 viewModel.removeGroup(group.name)
               }
             }
@@ -83,7 +83,7 @@ struct InputMethodConfigView: View {
                 AvailableInputMethodView(selection: $inputMethodsToAdd)
                 HStack {
                   Button("Add") {
-                    viewModel.addItems(&group, inputMethodsToAdd)
+                    viewModel.addItems(group.name, inputMethodsToAdd)
                     addingInputMethod = false
                     inputMethodsToAdd = Set()
                   }
@@ -98,7 +98,7 @@ struct InputMethodConfigView: View {
               Text(inputMethod.displayName)
                 .contextMenu {
                   Button("Remove input method") {
-                    viewModel.removeItem(&group, inputMethod.id)
+                    viewModel.removeItem(group.name, inputMethod.id)
                   }
                 }
             }
@@ -116,6 +116,9 @@ struct InputMethodConfigView: View {
           addGroupDialog.show { input in
             viewModel.addGroup(input)
           }
+        }
+        Button("Refresh") {
+          viewModel.load()
         }
       }
       .sheet(isPresented: $addGroupDialog.presented) {
@@ -152,6 +155,7 @@ struct InputMethodConfigView: View {
     @Published var configModel: Config?
     @Published var errorMsg: String?
     var loading = false
+    var saveMask = false
     var uuidToIM = [UUID: String]()
 
     init() {
@@ -159,6 +163,9 @@ struct InputMethodConfigView: View {
     }
 
     func load() {
+      groups = []
+      configModel = nil
+      selectedItem = nil
       uuidToIM.removeAll(keepingCapacity: true)
       loading = true
       do {
@@ -195,7 +202,7 @@ struct InputMethodConfigView: View {
     }
 
     func save() {
-      if loading {
+      if loading || saveMask {
         return
       }
       do {
@@ -231,16 +238,29 @@ struct InputMethodConfigView: View {
       group.name = name
     }
 
-    func removeItem(_ group: inout Group, _ uuid: UUID) {
-      group.inputMethods.removeAll(where: { $0.id == uuid })
+    func removeItem(_ groupName: String, _ uuid: UUID) {
+      for i in 0..<groups.count {
+        if groups[i].name == groupName {
+          groups[i].inputMethods.removeAll(where: { $0.id == uuid })
+          break
+        }
+      }
     }
 
-    func addItems(_ group: inout Group, _ ims: Set<InputMethod>) {
-      for im in ims {
-        let item = GroupItem(name: im.uniqueName, displayName: im.displayName)
-        group.inputMethods.append(item)
-        uuidToIM[item.id] = item.name
+    func addItems(_ groupName: String, _ ims: Set<InputMethod>) {
+      saveMask = true
+      for i in 0..<groups.count {
+        if groups[i].name == groupName {
+          for im in ims {
+            let item = GroupItem(name: im.uniqueName, displayName: im.displayName)
+            groups[i].inputMethods.append(item)
+            uuidToIM[item.id] = item.name
+          }
+        }
       }
+      saveMask = false
+      save()
+      load()
     }
   }
 }
