@@ -85,6 +85,7 @@ struct InputMethodConfigView: View {
                   Button("Add") {
                     viewModel.addItems(&group, inputMethodsToAdd)
                     addingInputMethod = false
+                    inputMethodsToAdd = Set()
                   }
                   Button("Cancel") {
                     addingInputMethod = false
