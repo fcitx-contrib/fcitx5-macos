@@ -31,21 +31,14 @@ int main() {
     { std::cerr << imGetAvailableIMs() << std::endl; }
 
     // Can set config
-    {
-        nlohmann::json j{{"Behavior", {{"ActiveByDefault", "False"}}}};
+    std::vector<std::string> values{"False", "True"};
+    for (const auto &value : values) {
+        nlohmann::json j{{"Behavior", {{"ActiveByDefault", value}}}};
         assert(setConfig("fcitx://config/global", j.dump().c_str()));
         auto updated =
             nlohmann::json::parse(getConfig("fcitx://config/global"));
         assert(updated["Behavior"]["ActiveByDefault"]["Value"]
-                   .get<std::string>() == "False");
-    }
-    {
-        nlohmann::json j{{"Behavior", {{"ActiveByDefault", "True"}}}};
-        assert(setConfig("fcitx://config/global", j.dump().c_str()));
-        auto updated =
-            nlohmann::json::parse(getConfig("fcitx://config/global"));
-        assert(updated["Behavior"]["ActiveByDefault"]["Value"]
-                   .get<std::string>() == "True");
+                   .get<std::string>() == value);
     }
 
     stop_fcitx_thread();
