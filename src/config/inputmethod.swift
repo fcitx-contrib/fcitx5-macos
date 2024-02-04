@@ -143,12 +143,22 @@ private class ViewModel: ObservableObject {
   func removeItem(_ group: inout Group, _ uuid: UUID) {
     group.inputMethods.removeAll(where: { $0.id == uuid })
   }
+
+  func addItems(_ group: inout Group, _ ims: Set<InputMethod>) {
+    for im in ims {
+      let item = GroupItem(name: im.uniqueName, displayName: im.displayName)
+      group.inputMethods.append(item)
+    }
+  }
 }
 
 struct InputMethodConfigView: View {
   @StateObject private var viewModel = ViewModel()
   @StateObject var addGroupDialog = InputDialog(title: "Add an empty group", prompt: "Group name")
   @StateObject var renameGroupDialog = InputDialog(title: "Rename group", prompt: "Group name")
+
+  @State var addingInputMethod = false
+  @State var inputMethodsToAdd = Set<InputMethod>()
 
   var body: some View {
     NavigationSplitView {
@@ -163,6 +173,8 @@ struct InputMethodConfigView: View {
                   viewModel.renameGroup(&group, input)
                 }
               }
+              Button("Add input method") {
+                addingInputMethod = true
               }
               Button("Remove group") {
                 viewModel.removeGroup(group.name)
@@ -171,6 +183,19 @@ struct InputMethodConfigView: View {
             .sheet(isPresented: $renameGroupDialog.presented) {
               renameGroupDialog.view()
             }
+            .sheet(isPresented: $addingInputMethod) {
+              VStack {
+                AvailableInputMethodView(selection: $inputMethodsToAdd)
+                HStack {
+                  Button("Add") {
+                    viewModel.addItems(&group, inputMethodsToAdd)
+                    addingInputMethod = false
+                  }
+                  Button("Cancel") {
+                    addingInputMethod = false
+                  }
+                }
+              }.padding()
             }
           Section(header: header) {
             ForEach($group.inputMethods) { $inputMethod in
@@ -212,6 +237,104 @@ struct InputMethodConfigView: View {
         }
       } else {
         Text("Select an input method from the side bar.")
+      }
+    }
+  }
+}
+
+struct InputMethod: Codable, Hashable {
+  let name: String
+  let nativeName: String
+  let uniqueName: String
+  let languageCode: String
+  let icon: String
+  let isConfigurable: Bool
+
+  var displayName: String {
+    if nativeName != "" {
+      nativeName
+    } else if name != "" {
+      name
+    } else {
+      uniqueName
+    }
+  }
+}
+
+struct AvailableInputMethodView: View {
+  @Binding var selection: Set<InputMethod>
+  @StateObject private var viewModel = ViewModel()
+
+  var body: some View {
+    NavigationSplitView {
+      List(selection: $viewModel.selectedLanguageCode) {
+        let languages = Array(viewModel.availableIMs.keys).sorted()
+        ForEach(languages, id: \.self) { language in
+          Text(language)
+        }
+      }
+    } detail: {
+      // Input methods for this language
+      if let selectedLanguageCode = viewModel.selectedLanguageCode {
+        List(selection: $selection) {
+          if let ims = viewModel.availableIMs[selectedLanguageCode] {
+            ForEach(ims, id: \.self) { im in
+              Text(im.displayName)
+            }
+          } else {
+            Text("Error: Unknown language code \(selectedLanguageCode). Please report a bug!")
+          }
+        }
+      } else {
+        Text("Select a language from the left list.")
+      }
+    }
+    .frame(minWidth: 640, minHeight: 480)
+    .onAppear {
+      viewModel.refresh()
+    }
+    .alert(
+      "Error",
+      isPresented: $viewModel.hasError,
+      presenting: ()
+    ) { _ in
+      Button("OK") {
+        viewModel.errorMsg = nil
+      }
+    } message: { _ in
+      Text(viewModel.errorMsg!)
+    }
+  }
+
+  private class ViewModel: ObservableObject {
+    @Published var availableIMs = [String: [InputMethod]]()
+    @Published var hasError = false
+    @Published var selectedLanguageCode: String?
+    var errorMsg: String? {
+      didSet {
+        hasError = (errorMsg != nil)
+      }
+    }
+
+    func refresh() {
+      availableIMs.removeAll()
+      let jsonStr = String(Fcitx.imGetAvailableIMs())
+      if let jsonData = jsonStr.data(using: .utf8) {
+        do {
+          let array = try JSONDecoder().decode([InputMethod].self, from: jsonData)
+          for im in array {
+            if var imList = availableIMs[im.languageCode] {
+              imList.append(im)
+              availableIMs[im.languageCode] = imList
+            } else {
+              availableIMs[im.languageCode] = [im]
+            }
+          }
+        } catch {
+          errorMsg = "Cannot parse json: \(error.localizedDescription)"
+        }
+      } else {
+        errorMsg = "Cannot decode json string into UTF-8 data"
       }
     }
   }
