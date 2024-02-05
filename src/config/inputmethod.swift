@@ -6,12 +6,16 @@ class InputMethodConfigController: NSWindowController {
   convenience init() {
     let window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
-      styleMask: [.titled, .closable, .resizable, .utilityWindow],
+      styleMask: [.titled, .closable, .resizable, .fullSizeContentView],
       backing: .buffered, defer: false)
     window.title = "Input Methods"
     window.center()
     self.init(window: window)
     window.contentView = NSHostingView(rootView: InputMethodConfigView())
+    window.level = .floating
+    window.titlebarAppearsTransparent = true
+    window.toolbar?.showsBaselineSeparator = false
+    window.toolbarStyle = .unified
   }
 }
 
