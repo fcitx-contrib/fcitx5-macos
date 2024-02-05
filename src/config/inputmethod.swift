@@ -311,13 +311,8 @@ struct AvailableInputMethodView: View {
   var body: some View {
     NavigationSplitView {
       List(selection: $viewModel.selectedLanguageCode) {
-        let languages = Array(viewModel.availableIMs.keys).sorted()
-        let en = Locale(identifier: "en_US")
-        let locale = Locale()
-        ForEach(languages, id: \.self) { language in
-          Text(
-            locale.localizedString(forIdentifier: language) ?? en.localizedString(
-              forIdentifier: language) ?? language)
+        ForEach(viewModel.languages(), id: \.code) { language in
+          Text(language.localized)
         }
       }
     } detail: {
@@ -389,6 +384,39 @@ struct AvailableInputMethodView: View {
       } else {
         errorMsg = "Cannot decode json string into UTF-8 data"
       }
+    }
+
+    fileprivate struct LocalizedLanguageCode: Comparable {
+      let code: String
+      let localized: String
+
+      init(code: String) {
+        self.code = code
+        if code == "" {
+          localized = "Unknown"
+        } else {
+          let locale = Locale.current
+          let s = locale.localizedString(forIdentifier: code) ?? ""
+          localized = s != "" ? s : "Unknown - \(code)"
+        }
+      }
+
+      public static func < (lhs: Self, rhs: Self) -> Bool {
+        let curIdent = Locale.current.identifier.prefix(2)
+        if lhs.code.prefix(2) == curIdent {
+          return true
+        } else if rhs.code.prefix(2) == curIdent {
+          return false
+        } else {
+          return lhs.localized.localizedCompare(rhs.localized) == .orderedAscending
+        }
+      }
+    }
+
+    fileprivate func languages() -> [LocalizedLanguageCode] {
+      return Array(availableIMs.keys)
+        .map { LocalizedLanguageCode(code: $0) }
+        .sorted()
     }
   }
 }
