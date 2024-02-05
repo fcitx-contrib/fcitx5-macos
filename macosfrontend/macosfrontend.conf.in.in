@@ -4,3 +4,4 @@ Type=StaticLibrary
 Library=libmacosfrontend
 Category=Frontend
 Version=@PROJECT_VERSION@
+Configurable=True
