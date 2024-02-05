@@ -234,14 +234,11 @@ bool MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
                     KeyEvent releaseEvent(ic, key, true);
                     ic->keyEvent(releaseEvent);
                 }
-                source->setEnabled(false);
                 delete source;
                 return true;
             });
         // Leak it from unique_ptr, and let it delete itself when it's done.
         auto timeEventPtr = timeEvent.release();
-        timeEventPtr->setEnabled(true);
-        timeEventPtr->setOneShot();
     }
 
     return keyEvent.accepted();
