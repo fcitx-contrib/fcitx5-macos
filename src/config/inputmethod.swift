@@ -54,7 +54,7 @@ struct InputMethodConfigView: View {
 
   @State var addingInputMethod = false
   @State var inputMethodsToAdd = Set<InputMethod>()
-  @State var addToGroup: String?
+  @State fileprivate var addToGroup: Group?
 
   var body: some View {
     NavigationSplitView {
@@ -70,7 +70,7 @@ struct InputMethodConfigView: View {
                 }
               }
               Button("Add input method to \(group.name)") {
-                addToGroup = group.name
+                addToGroup = group
                 addingInputMethod = true
               }
               Button("Remove group \(group.name)") {
@@ -82,10 +82,12 @@ struct InputMethodConfigView: View {
             }
             .sheet(isPresented: $addingInputMethod) {
               VStack {
-                AvailableInputMethodView(selection: $inputMethodsToAdd)
+                AvailableInputMethodView(
+                  selection: $inputMethodsToAdd,
+                  addToGroup: $addToGroup)
                 HStack {
                   Button("Add") {
-                    if let groupName = addToGroup {
+                    if let groupName = addToGroup?.name {
                       viewModel.addItems(groupName, inputMethodsToAdd)
                     }
                     addingInputMethod = false
@@ -303,6 +305,7 @@ struct InputMethod: Codable, Hashable {
 
 struct AvailableInputMethodView: View {
   @Binding var selection: Set<InputMethod>
+  @Binding fileprivate var addToGroup: Group?
   @StateObject private var viewModel = ViewModel()
 
   var body: some View {
@@ -322,7 +325,9 @@ struct AvailableInputMethodView: View {
       if let selectedLanguageCode = viewModel.selectedLanguageCode {
         List(selection: $selection) {
           if let ims = viewModel.availableIMs[selectedLanguageCode] {
-            ForEach(ims, id: \.self) { im in
+            let alreadyEnabled = enabledIMs()
+            let newAvailable = ims.filter { !alreadyEnabled.contains($0.uniqueName) }
+            ForEach(newAvailable, id: \.self) { im in
               Text(im.displayName)
             }
           } else {
@@ -348,6 +353,10 @@ struct AvailableInputMethodView: View {
     } message: { _ in
       Text(viewModel.errorMsg!)
     }
+  }
+
+  func enabledIMs() -> Set<String> {
+    return Set(addToGroup?.inputMethods.map { $0.name } ?? [])
   }
 
   private class ViewModel: ObservableObject {
