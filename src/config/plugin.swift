@@ -1,5 +1,6 @@
 import Logging
 import SwiftUI
+import SwiftyJSON
 
 private func getArch() -> String {
   #if arch(x86_64)
@@ -88,6 +89,26 @@ private func extractPlugin(_ plugin: String) -> Bool {
   return true
 }
 
+private func getFiles(_ descriptor: URL) -> [String] {
+  do {
+    let content = try String(contentsOf: descriptor, encoding: .utf8)
+    let data = content.data(using: .utf8, allowLossyConversion: false)!
+    let json = try JSON(data: data)
+    return json["files"].arrayValue.map { $0.stringValue }
+  } catch {
+    FCITX_WARN("Skipped invalid JSON \(descriptor.path())")
+    return []
+  }
+}
+
+private func removeFile(_ file: URL) {
+  do {
+    try FileManager.default.removeItem(at: file)
+  } catch {
+    FCITX_ERROR("Error removing \(file.path()): \(error.localizedDescription)")
+  }
+}
+
 class PluginVM: ObservableObject {
   @Published private(set) var installedPlugins: [Plugin] = []
   @Published private(set) var availablePlugins: [Plugin] = []
@@ -104,6 +125,7 @@ class PluginVM: ObservableObject {
 }
 
 struct PluginView: View {
+  @State private var selectedInstalled = Set<String>()
   @State private var selectedAvailable = Set<String>()
   @State private var installResults: [String: Result<Void, Error>] = [:]
   @State private var processing = false
@@ -112,6 +134,34 @@ struct PluginView: View {
 
   func refreshPlugins() {
     pluginVM.refreshPlugins()
+  }
+
+  private func uninstall() {
+    processing = true
+    var keptFiles = Set<String>()
+    for plugin in pluginVM.installedPlugins {
+      if selectedInstalled.contains(plugin.id) {
+        continue
+      }
+      let descriptor = pluginDirectory.appendingPathComponent(plugin.id + ".json")
+      keptFiles.formUnion(getFiles(descriptor))
+    }
+    for selectedPlugin in selectedInstalled {
+      let descriptor = pluginDirectory.appendingPathComponent(selectedPlugin + ".json")
+      let files = getFiles(descriptor)
+      for file in files {
+        // Don't remove files shared by other plugins
+        if keptFiles.contains(file) {
+          continue
+        }
+        removeFile(fcitxDirectory.appendingPathComponent(file))
+      }
+      removeFile(descriptor)
+      FCITX_INFO("Uninstalled \(selectedPlugin)")
+    }
+    selectedInstalled.removeAll()
+    refreshPlugins()
+    processing = false
   }
 
   private func install() {
@@ -184,11 +234,12 @@ struct PluginView: View {
       VStack {
         Text("Installed").font(.system(size: sectionHeaderSize)).frame(
           maxWidth: .infinity, alignment: .leading)
-        List {
+        List(selection: $selectedInstalled) {
           ForEach(pluginVM.installedPlugins) { plugin in
             Text(plugin.id)
           }
         }
+        Button("Uninstall", action: uninstall).disabled(selectedInstalled.isEmpty || processing)
       }
       VStack {
         Text("Available").font(.system(size: sectionHeaderSize)).frame(
