@@ -150,7 +150,7 @@ MacosFrontend::MacosFrontend(Instance *instance)
 void MacosFrontend::updateConfig() {
     simulateKeyRelease_ = config_.simulateKeyRelease.value();
     simulateKeyReleaseDelay_ =
-        static_cast<long>(config_.simulateKeyRelease.value()) * 1000L;
+        static_cast<long>(config_.simulateKeyReleaseDelay.value()) * 1000L;
 }
 
 void MacosFrontend::reloadConfig() {
