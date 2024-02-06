@@ -8,6 +8,9 @@
 #ifndef _FCITX5_MACOS_MACOSFRONTEND_H_
 #define _FCITX5_MACOS_MACOSFRONTEND_H_
 
+#include <fcitx-config/configuration.h>
+#include <fcitx-config/iniparser.h>
+#include <fcitx-utils/i18n.h>
 #include <fcitx/addonfactory.h>
 #include <fcitx/addoninstance.h>
 #include <fcitx/addonmanager.h>
@@ -22,11 +25,24 @@ class MacosInputContext;
 enum class PanelShowFlag : int;
 using PanelShowFlags = fcitx::Flags<PanelShowFlag>;
 
+FCITX_CONFIGURATION(MacosFrontendConfig,
+                    Option<bool> simulateKeyRelease{this, "SimulateKeyRelease",
+                                                    _("Simulate key release")};
+                    Option<int, IntConstrain> simulateKeyReleaseDelay{
+                        this, "SimulateKeyReleaseDelay",
+                        _("Delay of simulated key release in milliseconds"),
+                        100, IntConstrain(10, 1500)};);
+
 class MacosFrontend : public AddonInstance {
 public:
     MacosFrontend(Instance *instance);
 
     Instance *instance() { return instance_; }
+
+    void updateConfig();
+    void reloadConfig() override;
+    void save() override;
+    const Configuration *getConfig() const override { return &config_; }
 
     void updateCandidateList(const std::vector<std::string> &candidates,
                              const std::vector<std::string> &labels, int size,
@@ -44,6 +60,12 @@ public:
 private:
     Instance *instance_;
     std::unique_ptr<candidate_window::CandidateWindow> window_;
+
+    MacosFrontendConfig config_;
+    bool simulateKeyRelease_;
+    long simulateKeyReleaseDelay_;
+
+    static const inline std::string ConfPath = "conf/macosfrontend.conf";
 
     MacosInputContext *activeIC_;
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>>

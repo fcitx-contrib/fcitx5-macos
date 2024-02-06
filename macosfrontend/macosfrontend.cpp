@@ -11,6 +11,7 @@
 #include "macosfrontend-swift.h"
 
 #include <CoreFoundation/CoreFoundation.h>
+#include <fcitx-utils/event.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputcontext.h>
 #include <fcitx/inputpanel.h>
@@ -125,6 +126,7 @@ private:
 MacosFrontend::MacosFrontend(Instance *instance)
     : instance_(instance), activeIC_(nullptr),
       window_(std::make_unique<candidate_window::WebviewCandidateWindow>()) {
+    reloadConfig();
     eventHandlers_.emplace_back(instance_->watchEvent(
         EventType::InputContextFlushUI, EventWatcherPhase::Default,
         [this](Event &event) {
@@ -143,6 +145,23 @@ MacosFrontend::MacosFrontend(Instance *instance)
         }));
     window_->set_select_callback(
         [this](size_t index) { selectCandidate(index); });
+}
+
+void MacosFrontend::updateConfig() {
+    simulateKeyRelease_ = config_.simulateKeyRelease.value();
+    simulateKeyReleaseDelay_ =
+        static_cast<long>(config_.simulateKeyReleaseDelay.value()) * 1000L;
+}
+
+void MacosFrontend::reloadConfig() {
+    readAsIni(config_, ConfPath);
+    updateConfig();
+}
+
+void MacosFrontend::save() {
+    config_.simulateKeyRelease.setValue(simulateKeyRelease_);
+    config_.simulateKeyReleaseDelay.setValue(simulateKeyReleaseDelay_ / 1000);
+    safeSaveAsIni(config_, ConfPath);
 }
 
 void MacosFrontend::updateInputPanel(const fcitx::Text &preedit,
@@ -205,6 +224,23 @@ bool MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
     }
     KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
+
+    if (simulateKeyRelease_ && !isRelease && !key.isModifier()) {
+        auto timeEvent = instance()->eventLoop().addTimeEvent(
+            CLOCK_MONOTONIC, now(CLOCK_MONOTONIC) + simulateKeyReleaseDelay_,
+            10000, [this, ic, key = key](EventSourceTime *source, uint64_t) {
+                FCITX_DEBUG() << "Simulate key release " << key.toString();
+                if (activeIC_ == ic) {
+                    KeyEvent releaseEvent(ic, key, true);
+                    ic->keyEvent(releaseEvent);
+                }
+                delete source;
+                return true;
+            });
+        // Leak it from unique_ptr, and let it delete itself when it's done.
+        auto timeEventPtr = timeEvent.release();
+    }
+
     return keyEvent.accepted();
 }
 
@@ -253,6 +289,7 @@ bool process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
         osx_modifiers_to_fcitx_keystates(osxModifiers),
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };
+
     return with_fcitx([=](Fcitx &fcitx) {
         auto that = dynamic_cast<fcitx::MacosFrontend *>(fcitx.frontend());
         return that->keyEvent(uuid, parsedKey, isRelease);
