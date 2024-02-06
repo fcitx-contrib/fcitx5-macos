@@ -26,12 +26,12 @@ enum class PanelShowFlag : int;
 using PanelShowFlags = fcitx::Flags<PanelShowFlag>;
 
 FCITX_CONFIGURATION(MacosFrontendConfig,
-                    fcitx::Option<bool> simulateKeyRelease{
-                        this, "SimulateKeyRelease", _("Simulate key release")};
-                    fcitx::Option<int> simulateKeyReleaseDelay{
+                    Option<bool> simulateKeyRelease{this, "SimulateKeyRelease",
+                                                    _("Simulate key release")};
+                    Option<int, IntConstrain> simulateKeyReleaseDelay{
                         this, "SimulateKeyReleaseDelay",
                         _("Delay of simulated key release in milliseconds"),
-                        100};);
+                        100, IntConstrain(10, 1500)};);
 
 class MacosFrontend : public AddonInstance {
 public:
