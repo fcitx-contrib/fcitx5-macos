@@ -1,7 +1,8 @@
+import Fcitx
 import Logging
 import SwiftUI
 
-class GlobalConfig: NSWindowController {
+class GlobalConfigController: NSWindowController {
   convenience init() {
     let window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
@@ -31,7 +32,10 @@ struct GlobalConfigView: View {
         Spacer()
         Button("Print") {
           // Should see changes.
-          print(model)
+          print(model.encodeValue())
+        }
+        Button("Save") {
+          Fcitx.setConfig("fcitx://config/global", model.encodeValue())
         }
       }
     }.padding()

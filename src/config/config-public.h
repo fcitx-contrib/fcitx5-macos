@@ -20,6 +20,5 @@ std::string getConfig(const char *uri);
 /// This function applies jsonPatch to the current "Value" for config
 /// uri.
 ///
-/// This function only "updates" the current value, and does not
-/// reload the config.
-void setConfig(const char *uri, const char *jsonPatch);
+/// This function updates the current value and then reload the config.
+bool setConfig(const char *uri, const char *jsonPatch);

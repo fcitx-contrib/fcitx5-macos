@@ -14,13 +14,29 @@ void restart_fcitx_thread() noexcept;
 
 // NOTE: It's impossible to use std::vector<std::string> directly
 // until Swift fixes C++ interop.
-std::string input_method_groups() noexcept;
-std::string input_method_list() noexcept;
-void set_current_input_method_group(const char *) noexcept;
-std::string get_current_input_method_group() noexcept;
-void set_current_input_method(const char *) noexcept;
-std::string get_current_input_method() noexcept;
-std::string current_actions() noexcept;
-void activate_action_by_id(int id) noexcept;
+// Returns a json array of group names.
+std::string imGetGroupNames() noexcept;
+std::string imGetCurrentGroupName() noexcept;
+void imSetCurrentGroup(const char *groupName) noexcept;
+
+// Returns a json array of { "name": ..., "displayName": ... }
+std::string imGetCurrentGroup() noexcept;
+
+// Returns json
+// [{"name": "group name", "inputMethods":
+//   [{"name": ..., "displayName": ...}...]}...].
+std::string imGetGroups() noexcept;
+void imSetGroups(const char *json) noexcept;
+
+std::string imGetCurrentIMName() noexcept;
+void imSetCurrentIM(const char *imName) noexcept;
+
+// Returns a json array of Input Methods.
+// type InputMethod := {uniqueName:str, name:str, nativeName:str,
+// languageCode:str, icon:str, label:str, isConfigurable: bool}
+std::string imGetAvailableIMs() noexcept;
+
+std::string getActions() noexcept;
+void activateActionById(int id) noexcept;
 
 #endif

@@ -2,6 +2,7 @@ import CxxFrontend
 import Fcitx
 import InputMethodKit
 import Logging
+import SwiftyJSON
 
 class FcitxInputController: IMKInputController {
   var uuid: ICUUID
@@ -81,11 +82,11 @@ class FcitxInputController: IMKInputController {
     let menu = NSMenu()
 
     // Group switcher
-    let groupNames = String(input_method_groups()).split(separator: "\n")
-    let currentGroup = String(get_current_input_method_group())
+    let groupNames = JSON(parseJSON: String(Fcitx.imGetGroupNames())).arrayValue
+    let currentGroup = String(Fcitx.imGetCurrentGroupName())
     if groupNames.count > 1 {
       for groupName in groupNames {
-        let groupName = String(groupName)
+        let groupName = groupName.stringValue
         let item = NSMenuItem(title: groupName, action: #selector(switchGroup), keyEquivalent: "")
         item.representedObject = groupName
         if groupName == currentGroup {
@@ -97,12 +98,11 @@ class FcitxInputController: IMKInputController {
     }
 
     // Input method switcher
-    let inputMethodPairs = String(input_method_list()).split(separator: "\n")
-    let currentIM = String(get_current_input_method())
-    for inputMethodPair in inputMethodPairs {
-      let parts = inputMethodPair.split(separator: ":", maxSplits: 1)
-      let imName = String(parts[0])
-      let nativeName = String(parts[1])
+    let curGroup = JSON(parseJSON: String(Fcitx.imGetCurrentGroup()))
+    let currentIM = String(Fcitx.imGetCurrentIMName())
+    for (_, inputMethod) in curGroup {
+      let imName = inputMethod["name"].stringValue
+      let nativeName = inputMethod["displayName"].stringValue
       let item = NSMenuItem(
         title: nativeName,
         action: #selector(switchInputMethod),
@@ -117,7 +117,7 @@ class FcitxInputController: IMKInputController {
     menu.addItem(NSMenuItem.separator())
 
     // Additional actions for the current IC
-    let actionJson = String(current_actions())
+    let actionJson = String(Fcitx.getActions())
     if let data = actionJson.data(using: .utf8) {
       do {
         let actions = try JSONDecoder().decode(Array<FcitxAction>.self, from: data)
@@ -132,6 +132,7 @@ class FcitxInputController: IMKInputController {
       }
     }
 
+    menu.addItem(withTitle: "Input Methods", action: #selector(inputMethod(_:)), keyEquivalent: "")
     menu.addItem(withTitle: "Global Config", action: #selector(globalConfig(_:)), keyEquivalent: "")
     menu.addItem(withTitle: "Plugin Manager", action: #selector(plugin(_:)), keyEquivalent: "")
     menu.addItem(withTitle: "Restart", action: #selector(restart(_:)), keyEquivalent: "")
@@ -141,19 +142,19 @@ class FcitxInputController: IMKInputController {
 
   @objc func switchGroup(sender: Any?) {
     if let groupName = repObjectIMK(sender) as? String {
-      set_current_input_method_group(groupName)
+      Fcitx.imSetCurrentGroup(groupName)
     }
   }
 
   @objc func switchInputMethod(sender: Any?) {
     if let imName = repObjectIMK(sender) as? String {
-      set_current_input_method(imName)
+      Fcitx.imSetCurrentIM(imName)
     }
   }
 
   @objc func activateFcitxAction(sender: Any?) {
     if let action = repObjectIMK(sender) as? FcitxAction {
-      activate_action_by_id(Int32(action.id))
+      Fcitx.activateActionById(Int32(action.id))
     }
   }
 }

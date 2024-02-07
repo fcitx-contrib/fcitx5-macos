@@ -1,3 +1,4 @@
+import Logging
 import SwiftUI
 
 struct BooleanOptionView: View {
@@ -35,10 +36,14 @@ struct IntegerOptionView: View {
       TextField(label, value: $model.value, formatter: numberFormatter)
         .textFieldStyle(RoundedBorderTextFieldStyle())
         .onChange(of: model.value) { newValue in
-          if newValue > model.max {
-            model.value = model.max
-          } else if newValue < model.min {
-            model.value = model.min
+          if let max = model.max,
+            newValue > max
+          {
+            model.value = max
+          } else if let min = model.min,
+            newValue < min
+          {
+            model.value = min
           }
         }
         .padding(.trailing, 60)
@@ -61,9 +66,59 @@ struct IntegerOptionView: View {
 struct ExternalOptionView: View {
   let label: String
   let model: ExternalOption
+
+  @StateObject private var viewModel = ViewModel()
+
   var body: some View {
     Button(label) {
-      // TODO
+      viewModel.showConfig(model.external)
+    }
+    .sheet(isPresented: $viewModel.hasConfig) {
+      VStack {
+        ScrollView([.horizontal, .vertical]) {
+          buildView(config: viewModel.externalConfig!)
+        }
+        Button("Hide") {
+          viewModel.externalConfig = nil
+        }
+      }
+    }
+    .alert(
+      "Error",
+      isPresented: $viewModel.hasError,
+      presenting: ()
+    ) { _ in
+      Button("OK") {
+        viewModel.errorMsg = nil
+      }
+    } message: { _ in
+      Text(viewModel.errorMsg!)
+    }
+  }
+
+  private class ViewModel: ObservableObject {
+    @Published var hasConfig = false
+    @Published var hasError = false
+    @Published var externalConfig: Config? {
+      didSet {
+        hasConfig = (externalConfig != nil)
+      }
+    }
+    @Published var errorMsg: String? {
+      didSet {
+        hasError = (errorMsg != nil)
+      }
+    }
+
+    func showConfig(_ uri: String) {
+      externalConfig = nil
+      errorMsg = nil
+      do {
+        externalConfig = try getConfig(uri: uri)
+      } catch {
+        FCITX_ERROR("When fetching external config: \(error)")
+        errorMsg = "Cannot show external config: \(error.localizedDescription)"
+      }
     }
   }
 }
@@ -84,11 +139,9 @@ struct ListOptionView: View {
   let label: String
   @ObservedObject var model: ListOption<String>
   var body: some View {
-    Section(label) {
-      List {
-        ForEach(0..<model.value.count, id: \.self) { index in
-          Text(model.value[index])
-        }
+    LabeledContent(label) {
+      ForEach(0..<model.value.count, id: \.self) { index in
+        Text(model.value[index])
       }
     }
   }
@@ -130,27 +183,28 @@ func buildView(config: Config) -> AnyView {
 let testConfig = Config(
   path: "Fuzzy",
   description: "Fuzzy",
+  sortKey: 0,
   kind: .group([
     Config(
-      path: "AN_ANG", description: "Fuzzy an ang",
+      path: "AN_ANG", description: "Fuzzy an ang", sortKey: 1,
       kind: .option(BooleanOption(defaultValue: false, value: true))),
     Config(
-      path: "foo", description: "FOOOO!",
+      path: "foo", description: "FOOOO!", sortKey: 2,
       kind: .option(StringOption(defaultValue: "", value: "semicolon"))),
     Config(
-      path: "external", description: "External test",
-      kind: .option(ExternalOption(launchSubConfig: true, external: "fcitx://addon/punctuation"))),
+      path: "external", description: "External test", sortKey: 3,
+      kind: .option(ExternalOption(external: "fcitx://addon/punctuation"))),
     Config(
-      path: "Shuangpin Profile", description: "双拼方案",
+      path: "Shuangpin Profile", description: "双拼方案", sortKey: 4,
       kind: .option(
         EnumOption(
           defaultValue: "Ziranma", value: "MS", enumStrings: ["Ziranma", "MS"],
           enumStringsI18n: ["自然码", "微软"]))),
     Config(
-      path: "interval", description: "int test",
+      path: "interval", description: "int test", sortKey: 5,
       kind: .option(IntegerOption(defaultValue: 0, value: 10, min: 0, max: 1000))),
     Config(
-      path: "list", description: "List test",
+      path: "list", description: "List test", sortKey: 6,
       kind: .option(
         ListOption(defaultValue: ["a", "b", "c"], value: ["c", "d"], elementType: "String"))
     ),
@@ -160,7 +214,7 @@ let testConfig = Config(
   VStack {
     buildView(config: testConfig)
     Button("Print") {
-      print(testConfig)
+      print(testConfig.encodeValue())
     }
   }
 }
