@@ -2,7 +2,7 @@ import Fcitx
 import Logging
 import SwiftUI
 
-class InputMethodConfigController: NSWindowController {
+class InputMethodConfigController: ConfigWindowController {
   convenience init() {
     let window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
