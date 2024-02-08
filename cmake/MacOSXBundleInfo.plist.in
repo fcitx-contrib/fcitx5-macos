@@ -16,8 +16,8 @@
   <string>org.fcitx.inputmethod.Fcitx5_Connection</string>
   <key>InputMethodServerControllerClass</key>
   <string>Fcitx5.FcitxInputController</string>
-  <key>LSUIElement</key>
-  <string>1</string>
+  <key>LSBackgroundOnly</key>
+  <true/>
   <key>tsInputMethodCharacterRepertoireKey</key>
   <array>
     <string>Latn</string>
