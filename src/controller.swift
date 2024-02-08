@@ -8,6 +8,11 @@ class FcitxInputController: IMKInputController {
   var uuid: ICUUID
   var appId: String
   var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
+  let client: Any
+
+  // A registry of live FcitxInputController objects.
+  // Use NSHashTable to store weak references.
+  static var registry = NSHashTable<FcitxInputController>.weakObjects()
 
   // A new InputController is created for each server-client
   // connection. We use the finest granularity here (one InputContext
@@ -19,12 +24,22 @@ class FcitxInputController: IMKInputController {
     } else {
       appId = ""
     }
+    self.client = client!
     uuid = create_input_context(appId, client)
     super.init(server: server, delegate: delegate, client: client)
+    FcitxInputController.registry.add(self)
   }
 
   deinit {
     destroy_input_context(uuid)
+    FcitxInputController.registry.remove(self)
+  }
+
+  func reconnectToFcitx() {
+    // The old fcitx input context was automatically destroyed when
+    // restarting fcitx. So just start a new one here.
+    FCITX_DEBUG("Reconnecting to \(appId), client = \(String(describing: client))")
+    uuid = create_input_context(appId, client)
   }
 
   // Default behavior is to recognize keyDown only
