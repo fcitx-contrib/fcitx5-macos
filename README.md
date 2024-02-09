@@ -9,9 +9,14 @@ Native build on Intel and Apple Silicon is supported.
 Cross build from Intel to Apple Silicon is performed in [CI](.github/workflows/ci.yml).
 
 ### Install dependencies
+You may use [nvm](https://github.com/nvm-sh/nvm)
+to install node, then
+
 ```sh
 brew install cmake ninja extra-cmake-modules gettext iso-codes xkeyboardconfig nlohmann-json
 ./install-deps.sh
+npm i -g pnpm
+pnpm --prefix=fcitx5-webview i
 ```
 
 ### Build with CMake
