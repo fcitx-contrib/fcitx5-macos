@@ -40,7 +40,6 @@ class FcitxInputController: IMKInputController {
     // restarting fcitx. So just start a new one here.
     FCITX_DEBUG("Reconnecting to \(appId), client = \(String(describing: client))")
     uuid = create_input_context(appId, client)
-    focus_in(uuid)
   }
 
   // Default behavior is to recognize keyDown only
