@@ -218,14 +218,20 @@ void MacosFrontend::selectCandidate(size_t index) {
 
 bool MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
     auto *ic = this->findIC(uuid);
-    activeIC_ = ic;
+    if (activeIC_ != ic) {
+        if (activeIC_)
+            activeIC_->focusOut();
+        ic->focusIn();
+        activeIC_ = ic;
+    }
     if (!ic) {
         return false;
     }
     KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
 
-    if (simulateKeyRelease_ && !isRelease && !key.isModifier()) {
+    if (simulateKeyRelease_ && !isRelease && !key.isModifier() &&
+        keyEvent.accepted()) {
         auto timeEvent = instance()->eventLoop().addTimeEvent(
             CLOCK_MONOTONIC, now(CLOCK_MONOTONIC) + simulateKeyReleaseDelay_,
             10000, [this, ic, key = key](EventSourceTime *source, uint64_t) {
@@ -271,6 +277,9 @@ void MacosFrontend::focusIn(ICUUID uuid) {
     if (!ic)
         return;
     ic->focusIn();
+    if (activeIC_)
+        activeIC_->focusOut();
+    activeIC_ = ic;
 }
 
 void MacosFrontend::focusOut(ICUUID uuid) {
@@ -278,6 +287,8 @@ void MacosFrontend::focusOut(ICUUID uuid) {
     if (!ic)
         return;
     ic->focusOut();
+    if (activeIC_ == ic)
+        activeIC_ = nullptr;
 }
 
 } // namespace fcitx

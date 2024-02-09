@@ -22,6 +22,9 @@ extension FcitxInputController {
 
   @objc func restart(_: Any? = nil) {
     restart_fcitx_thread()
+    for controller in FcitxInputController.registry.allObjects {
+      controller.reconnectToFcitx()
+    }
   }
 
   @objc func about(_: Any? = nil) {
