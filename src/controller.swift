@@ -8,7 +8,7 @@ class FcitxInputController: IMKInputController {
   var uuid: ICUUID
   var appId: String
   var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
-  let client: Any
+  let client: Any!
 
   // A registry of live FcitxInputController objects.
   // Use NSHashTable to store weak references.
@@ -24,7 +24,7 @@ class FcitxInputController: IMKInputController {
     } else {
       appId = ""
     }
-    self.client = client!
+    self.client = client
     uuid = create_input_context(appId, client)
     super.init(server: server, delegate: delegate, client: client)
     FcitxInputController.registry.add(self)
