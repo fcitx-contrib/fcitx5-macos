@@ -86,6 +86,10 @@ class FcitxInputController: IMKInputController {
   }
 
   override func activateServer(_ client: Any!) {
+    // overrideKeyboard is needed for pressing space to play in Shotcut.
+    if let client = client as? IMKTextInput {
+      client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.ABC")
+    }
     focus_in(uuid)
   }
 
