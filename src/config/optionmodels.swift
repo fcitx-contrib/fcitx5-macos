@@ -197,10 +197,12 @@ extension ListOption: CustomStringConvertible {
 
 struct ExternalOption: Option, FcitxCodable {
   let value: () = ()
+  let option: String
   let external: String
 
   static func decode(json: JSON) throws -> Self {
     ExternalOption(
+      option: try String.decode(json: json["Option"]),
       external: try String.decode(json: json["External"])
     )
   }

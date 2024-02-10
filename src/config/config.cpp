@@ -209,6 +209,7 @@ nlohmann::json configSpecToJson(const fcitx::RawConfig &config) {
                 continue;
             nlohmann::json &optSpec = jsonLocate(spec, group, option);
             optSpec["__SortKey"] = counter++;
+            optSpec["Option"] = option;
             optSpec["Type"] = typeField->value();
             optSpec["Description"] = descriptionField->value();
             optSpec["DefaultValue"] =

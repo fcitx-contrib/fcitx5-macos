@@ -71,7 +71,18 @@ struct ExternalOptionView: View {
 
   var body: some View {
     Button(label) {
-      viewModel.showConfig(model.external)
+      switch model.option {
+      case "UserDataDir":
+        let rimeUserDir = FileManager.default.homeDirectoryForCurrentUser
+          .appendingPathComponent(".local")
+          .appendingPathComponent("share")
+          .appendingPathComponent("fcitx5")
+          .appendingPathComponent("rime")
+        mkdirP(rimeUserDir.path())
+        NSWorkspace.shared.open(rimeUserDir)
+      default:
+        viewModel.showConfig(model.external)
+      }
     }
     .sheet(isPresented: $viewModel.hasConfig) {
       VStack {
@@ -193,7 +204,7 @@ let testConfig = Config(
       kind: .option(StringOption(defaultValue: "", value: "semicolon"))),
     Config(
       path: "external", description: "External test", sortKey: 3,
-      kind: .option(ExternalOption(external: "fcitx://addon/punctuation"))),
+      kind: .option(ExternalOption(option: "Punctuation", external: "fcitx://addon/punctuation"))),
     Config(
       path: "Shuangpin Profile", description: "双拼方案", sortKey: 4,
       kind: .option(

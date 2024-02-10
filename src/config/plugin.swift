@@ -51,7 +51,7 @@ private func getInstalledPlugins() -> [Plugin] {
   }
 }
 
-private func mkdirP(_ path: String) {
+func mkdirP(_ path: String) {
   do {
     try FileManager.default.createDirectory(
       atPath: path, withIntermediateDirectories: true, attributes: nil)
