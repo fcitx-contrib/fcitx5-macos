@@ -150,13 +150,26 @@ struct ListOptionView: View {
 func buildViewImpl(config: Config) -> any View {
   switch config.kind {
   case .group(let children):
-    Form {
-      Section(config.description) {
+    if config.path == "" {
+      // Top-level group
+      Form {
         ForEach(children) { child in
           buildView(config: child)
         }
       }
+    } else {
+      // A subgroup.
+      LabeledContent(config.description) {
+        GroupBox {
+          Form {
+            ForEach(children) { child in
+              buildView(config: child)
+            }
+          }
+        }
+      }
     }
+
   case .option(let option):
     if let option = option as? BooleanOption {
       BooleanOptionView(label: config.description, model: option)
