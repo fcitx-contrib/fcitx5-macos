@@ -162,7 +162,7 @@ func buildViewImpl(config: Config) -> any View {
       // A subgroup.
       return LabeledContent(config.description) {
         GroupBox {
-          form
+          form.padding()
         }
       }
     }
