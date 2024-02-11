@@ -150,41 +150,38 @@ struct ListOptionView: View {
 func buildViewImpl(config: Config) -> any View {
   switch config.kind {
   case .group(let children):
+    let form = Form {
+      ForEach(children) { child in
+        buildView(config: child)
+      }
+    }
     if config.path == "" {
       // Top-level group
-      Form {
-        ForEach(children) { child in
-          buildView(config: child)
-        }
-      }
+      return form
     } else {
       // A subgroup.
-      LabeledContent(config.description) {
+      return LabeledContent(config.description) {
         GroupBox {
-          Form {
-            ForEach(children) { child in
-              buildView(config: child)
-            }
-          }
+          form
         }
       }
     }
 
   case .option(let option):
     if let option = option as? BooleanOption {
-      BooleanOptionView(label: config.description, model: option)
+      return BooleanOptionView(label: config.description, model: option)
     } else if let option = option as? StringOption {
-      StringOptionView(label: config.description, model: option)
+      return StringOptionView(label: config.description, model: option)
     } else if let option = option as? ExternalOption {
-      ExternalOptionView(label: config.description, model: option)
+      return ExternalOptionView(label: config.description, model: option)
     } else if let option = option as? EnumOption {
-      EnumOptionView(label: config.description, model: option)
+      return EnumOptionView(label: config.description, model: option)
     } else if let option = option as? IntegerOption {
-      IntegerOptionView(label: config.description, model: option)
+      return IntegerOptionView(label: config.description, model: option)
     } else if let option = option as? ListOption<String> {
-      ListOptionView(label: config.description, model: option)
+      return ListOptionView(label: config.description, model: option)
     } else {
-      Text("Unsupported option type \(String(describing: option))")
+      return Text("Unsupported option type \(String(describing: option))")
     }
   }
 }
