@@ -1,19 +1,25 @@
 #pragma once
+#include <string>
 
 /// Get a json document describing the current config for uri.
 ///
 /// The formats of the json object are:
 ///  - {"ERROR": "error message"}, if there are errors
 ///  - otherwise, it is a json object satisfying
-///    returnValue["Foo"]["Bar"] corresponds to an option object Foo/Bar.
+///    returnValue["Children"][i]["Children"][j] corresponds to an option object
+///    Foo/Bar, satisfying returnValue["Children"][i]["Option"] == "Foo" and
+///    returnValue["Children"][i]["Children"][j]["Option"] == "Bar"
 ///
 /// type OptionObject = {
+///   Option: str,
 ///   Type: str,
 ///   Description: str,
 ///   DefaultValue: T,
 ///   Value: T,                // Current value
 ///   ... other keys,          // Relevant to the option type
-///   ... suboptions
+///   Children: [
+///     ... suboptions
+///   ]
 /// }
 std::string getConfig(const char *uri);
 

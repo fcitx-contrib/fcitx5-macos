@@ -37,8 +37,18 @@ int main() {
         assert(setConfig("fcitx://config/global", j.dump().c_str()));
         auto updated =
             nlohmann::json::parse(getConfig("fcitx://config/global"));
-        assert(updated["Behavior"]["ActiveByDefault"]["Value"]
-                   .get<std::string>() == value);
+        for (const auto &child : updated["Children"]) {
+            if (child["Option"] == "Behavior") {
+                for (const auto &grand_child : child["Children"]) {
+                    if (grand_child["Option"] == "ActiveByDefault") {
+                        assert(grand_child["Value"]
+                            .get<std::string>() == value);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
     }
 
     stop_fcitx_thread();

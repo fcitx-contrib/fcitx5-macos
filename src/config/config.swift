@@ -48,7 +48,6 @@ func configToJson(_ config: Config) -> JSON {
 
 func jsonToConfig(_ json: JSON, _ pathPrefix: String) throws -> Config {
   let description = json["Description"].stringValue
-  let sortKey = json["__SortKey"].intValue
   // Option
   if let type = json["Type"].string,
     !type.contains("$")
@@ -56,19 +55,15 @@ func jsonToConfig(_ json: JSON, _ pathPrefix: String) throws -> Config {
     do {
       let option = try jsonToOption(json, type)
       return Config(
-        path: pathPrefix, description: description, sortKey: sortKey, kind: .option(option))
+        path: pathPrefix, description: description, kind: .option(option))
     } catch {
       throw FcitxCodingError.innerError(path: pathPrefix, context: json, error: error)
     }
   }
   // Group
   var children: [Config] = []
-  for (key, subJson): (String, JSON) in json {
-    if key == "Value" || key == "Description" || key == "DefaultValue" || key == "Type"
-      || key == "__SortKey"
-    {
-      continue
-    }
+  for (_, subJson) in json["Children"] {
+    let key = try String.decode(json: subJson["Option"])
     do {
       children.append(try jsonToConfig(subJson, pathPrefix + "/" + key))
     } catch {
@@ -76,9 +71,8 @@ func jsonToConfig(_ json: JSON, _ pathPrefix: String) throws -> Config {
         path: pathPrefix + "/" + key, context: subJson, error: error)
     }
   }
-  children.sort { $0.sortKey < $1.sortKey }
   return Config(
-    path: pathPrefix, description: description, sortKey: sortKey, kind: .group(children))
+    path: pathPrefix, description: description, kind: .group(children))
 }
 
 private func jsonToOption(_ json: JSON, _ type: String) throws -> any Option {

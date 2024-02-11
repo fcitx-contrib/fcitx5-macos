@@ -41,7 +41,7 @@ func testDecode() throws {
   try {
     let json = JSON(
       parseJSON:
-        #"{"A": {"Description": "inside a" , "B": {"Description": "inside b", "C": {"Description": "inside c"}}}}"#
+        #"{"Children": [{"Option": "A", "Description": "inside a" , "Children": [{"Option": "B", "Description": "inside b", "Children": [{"Option": "C", "Description": "inside c"}]}]}]}"#
     )
     let root = try jsonToConfig(json, "root")
     switch root.kind {
@@ -164,13 +164,13 @@ func testEncode() {
   assert(false.encodeValue() == "\"False\"")
 
   let cfg0 = Config(
-    path: "", description: "", sortKey: 0,
+    path: "", description: "",
     kind: .group([
       Config(
-        path: "Behavior", description: "", sortKey: 1,
+        path: "Behavior", description: "",
         kind: .group([
           Config(
-            path: "ActiveByDefault", description: "", sortKey: 2,
+            path: "ActiveByDefault", description: "",
             kind: .option(BooleanOption(defaultValue: false, value: true)))
         ]))
     ]))

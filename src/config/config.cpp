@@ -23,11 +23,11 @@ static void mergeSpecAndValue(nlohmann::json &specJson,
 static fcitx::RawConfig jsonToRawConfig(const nlohmann::json &);
 static std::tuple<std::string, std::string>
 parseAddonUri(const std::string &uri);
-static size_t counter = 0;
 
 std::string getConfig(const char *uri) { return getConfig(std::string(uri)); }
 
 std::string getConfig(const std::string &uri) {
+    FCITX_DEBUG() << "getConfig " << uri;
     return with_fcitx([&](Fcitx &fcitx) -> nlohmann::json {
                if (uri == globalConfigPath) {
                    auto &config = fcitx.instance()->globalConfig().config();
@@ -89,6 +89,7 @@ std::string getConfig(const std::string &uri) {
 }
 
 bool setConfig(const char *uri_, const char *json_) {
+    FCITX_DEBUG() << "setConfig " << uri_;
     auto config = jsonToRawConfig(nlohmann::json::parse(json_));
     auto uri = std::string(uri_);
     if (uri == globalConfigPath) {
@@ -169,7 +170,19 @@ nlohmann::json &jsonLocate(nlohmann::json &j, const std::string &groupPath,
     paths.push_back(option);
     nlohmann::json *cur = &j;
     for (const auto &part : paths) {
-        cur = &((*cur)[part]);
+        auto &children =
+            *cur->emplace("Children", nlohmann::json::array()).first;
+        bool exist = false;
+        for (auto &child : children) {
+            if (child["Option"] == part) {
+                exist = true;
+                cur = &child;
+                break;
+            }
+        }
+        if (!exist) {
+            cur = &children.emplace_back(nlohmann::json::object());
+        }
     }
     return *cur;
 }
@@ -202,25 +215,10 @@ nlohmann::json configSpecToJson(const fcitx::RawConfig &config) {
         auto options = groupConfig->subItems();
         for (const auto &option : options) {
             auto optionConfig = groupConfig->get(option);
-            auto typeField = optionConfig->get("Type");
-            auto descriptionField = optionConfig->get("Description");
-            auto defaultValueField = optionConfig->get("DefaultValue");
-            if (!typeField || !descriptionField)
-                continue;
             nlohmann::json &optSpec = jsonLocate(spec, group, option);
-            optSpec["__SortKey"] = counter++;
             optSpec["Option"] = option;
-            optSpec["Type"] = typeField->value();
-            optSpec["Description"] = descriptionField->value();
-            optSpec["DefaultValue"] =
-                defaultValueField ? configValueToJson(*defaultValueField)
-                                  : nlohmann::json(); // null
             optionConfig->visitSubItems(
                 [&](const fcitx::RawConfig &config, const std::string &path) {
-                    if (path == "Type" || path == "Description" ||
-                        path == "DefaultValue") {
-                        return true;
-                    }
                     optSpec[path] = configValueToJson(config);
                     return true;
                 });
@@ -234,10 +232,10 @@ void mergeSpecAndValue(nlohmann::json &specJson,
     if (specJson.find("Type") != specJson.end()) {
         specJson["Value"] = valueJson;
     }
-    for (const auto &el : specJson.items()) {
-        if (el.value().is_object() &&
-            valueJson.find(el.key()) != valueJson.end()) {
-            mergeSpecAndValue(el.value(), valueJson.at(el.key()));
+    for (auto &child : specJson["Children"]) {
+        const auto iter = valueJson.find(child["Option"]);
+        if (iter != valueJson.end()) {
+            mergeSpecAndValue(child, *iter);
         }
     }
 }
@@ -249,10 +247,9 @@ nlohmann::json configSpecToJson(const fcitx::Configuration &config) {
 }
 
 nlohmann::json configToJson(const fcitx::Configuration &config) {
-    // Each option or config group is identified with an '__SortKey'
-    // field to preserve insertion order.
-    counter = 0;
+    // specJson contains config definitions
     auto specJson = configSpecToJson(config);
+    // valueJson contains actual values that user could change
     auto valueJson = configValueToJson(config);
     mergeSpecAndValue(specJson, valueJson);
     return specJson;
