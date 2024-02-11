@@ -64,7 +64,9 @@ func jsonToConfig(_ json: JSON, _ pathPrefix: String) throws -> Config {
   // Group
   var children: [Config] = []
   for (key, subJson): (String, JSON) in json {
-    if key == "Value" || key == "Description" || key == "DefaultValue" || key == "Type" {
+    if key == "Value" || key == "Description" || key == "DefaultValue" || key == "Type"
+      || key == "__SortKey"
+    {
       continue
     }
     do {
