@@ -205,7 +205,6 @@ void MacosFrontend::showInputPanelAsync(bool show) {
 void MacosFrontend::updateCandidateList(
     const std::vector<std::string> &candidateList,
     const std::vector<std::string> &labelList, int size, int highlight) {
-    window_->set_layout(candidate_window::layout_t::vertical);
     window_->set_candidates(candidateList, labelList, highlight);
     updatePanelShowFlags(!candidateList.empty(), PanelShowFlag::HasCandidates);
     showInputPanelAsync(panelShow_);
