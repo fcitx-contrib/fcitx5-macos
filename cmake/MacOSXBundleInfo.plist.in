@@ -30,6 +30,9 @@
     <dict>
       <key>org.fcitx.inputmethod.fcitx5</key>
       <dict>
+        <!-- register as Chinese to disable on login/Terminal sudo password input -->
+        <key>TISIntendedLanguage</key>
+        <string>zh-Hans</string>
       </dict>
     </dict>
   </dict>
