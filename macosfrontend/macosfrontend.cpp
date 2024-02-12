@@ -184,7 +184,7 @@ void MacosFrontend::updateInputPanel(const fcitx::Text &preedit,
 }
 
 /// Before calling this, the panel states must already be initialized
-/// sychronously, by using set_candidates, etc.
+/// synchronously, by using set_candidates, etc.
 void MacosFrontend::showInputPanelAsync(bool show) {
     dispatch_async(dispatch_get_main_queue(), ^void() {
       if (show) {
@@ -283,6 +283,7 @@ void MacosFrontend::focusIn(ICUUID uuid) {
 }
 
 void MacosFrontend::focusOut(ICUUID uuid) {
+    showInputPanelAsync(false);
     auto *ic = findIC(uuid);
     if (!ic)
         return;
