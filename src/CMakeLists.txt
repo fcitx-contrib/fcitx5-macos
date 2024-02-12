@@ -1,24 +1,19 @@
 file(GLOB CONFIG_UI_FILES config/*.swift)
 
-add_executable(Fcitx5
-    MACOSX_BUNDLE
-    server.swift
-    controller.swift
-    config/config.cpp
-    ${CONFIG_UI_FILES}
+add_library(Fcitx5Objs STATIC
     fcitx.cpp
+    config/config.cpp
+    controller.swift
+    ${CONFIG_UI_FILES}
 )
 
-add_dependencies(Fcitx5 macosfrontend macosnotifications)
-
-target_include_directories(Fcitx5 PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/include")
-target_include_directories(Fcitx5 PRIVATE
+target_include_directories(Fcitx5Objs PUBLIC
+    "${CMAKE_CURRENT_BINARY_DIR}/include"
     "${PROJECT_SOURCE_DIR}/fcitx5/src/im/keyboard"
     "${PROJECT_SOURCE_DIR}/fcitx5/src/modules/quickphrase/"
     "${CMAKE_CURRENT_BINARY_DIR}/../fcitx5"
 )
-
-target_link_libraries(Fcitx5
+target_link_libraries(Fcitx5Objs
     "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
     SwiftyJSON
     SwiftFrontend
@@ -30,6 +25,15 @@ target_link_libraries(Fcitx5
     WebviewCandidateWindow
     Logging
 )
+
+add_executable(Fcitx5
+    MACOSX_BUNDLE
+    server.swift
+    controller.swift
+    ${CONFIG_UI_FILES}
+)
+
+target_link_libraries(Fcitx5 Fcitx5Objs)
 
 set(APP_PATH "${CMAKE_CURRENT_BINARY_DIR}/Fcitx5.app/Contents")
 
