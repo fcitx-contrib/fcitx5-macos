@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <fcitx-config/configuration.h>
 #include <nlohmann/json.hpp>
 

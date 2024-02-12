@@ -8,7 +8,6 @@ import SwiftyJSON
 struct Config: Identifiable {
   public let path: String
   public let description: String
-  public let sortKey: Int
   public let kind: ConfigKind
   public let id = UUID()
 }
