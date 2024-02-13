@@ -6,7 +6,6 @@ WARNING: not ready for any non-developers.
 
 ## Build
 Native build on Intel and Apple Silicon is supported.
-Cross build from Intel to Apple Silicon is performed in [CI](.github/workflows/ci.yml).
 
 ### Install dependencies
 You may use [nvm](https://github.com/nvm-sh/nvm)
