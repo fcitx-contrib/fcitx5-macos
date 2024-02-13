@@ -146,14 +146,85 @@ struct EnumOptionView: View {
   }
 }
 
-struct ListOptionView: View {
+struct StringListOptionView: View {
   let label: String
   @ObservedObject var model: ListOption<String>
+
   var body: some View {
     LabeledContent(label) {
-      ForEach(0..<model.value.count, id: \.self) { index in
-        Text(model.value[index])
+      VStack {
+        ForEach(model.value) { element in
+          HStack {
+            TextField("", text: binding(for: element.id))
+              .frame(maxWidth: .infinity, alignment: .leading)
+
+            let index = findElementIndex(element)
+            Button(action: { moveUp(index: index) }) {
+              Image(systemName: "arrow.up")
+            }
+            .disabled(index == 0)
+            .buttonStyle(BorderlessButtonStyle())
+
+            Button(action: { moveDown(index: index) }) {
+              Image(systemName: "arrow.down")
+            }
+            .disabled(index == model.value.count - 1)
+            .buttonStyle(BorderlessButtonStyle())
+
+            Button(action: { remove(at: index) }) {
+              Image(systemName: "minus")
+            }
+            .buttonStyle(BorderlessButtonStyle())
+
+            Button(action: { add(at: index) }) {
+              Image(systemName: "plus")
+            }
+            .buttonStyle(BorderlessButtonStyle())
+          }
+        }
+
+        Button(action: { add(at: model.value.count) }) {
+          Image(systemName: "plus")
+        }
+        .buttonStyle(BorderlessButtonStyle())
+        .frame(maxWidth: .infinity, alignment: .trailing)
       }
+    }
+  }
+
+  private func binding(for id: UUID) -> Binding<String> {
+    return Binding(
+      get: { self.model.value.first { $0.id == id }?.value ?? "" },
+      set: { newValue in
+        if let index = self.model.value.firstIndex(where: { $0.id == id }) {
+          self.model.value[index].value = newValue
+        }
+      }
+    )
+  }
+
+  private func findElementIndex(_ element: Identified<String>) -> Int {
+    // SAFETY: element should be inside the array.
+    return model.value.firstIndex(where: { $0.id == element.id })!
+  }
+
+  private func add(at index: Int) {
+    model.value.insert(Identified(value: ""), at: index)
+  }
+
+  private func remove(at index: Int) {
+    model.value.remove(at: index)
+  }
+
+  private func moveUp(index: Int) {
+    if index > 0 {
+      model.value.swapAt(index, index - 1)
+    }
+  }
+
+  private func moveDown(index: Int) {
+    if index < model.value.count - 1 {
+      model.value.swapAt(index, index + 1)
     }
   }
 }
@@ -190,7 +261,7 @@ func buildViewImpl(config: Config) -> any View {
     } else if let option = option as? IntegerOption {
       return IntegerOptionView(label: config.description, model: option)
     } else if let option = option as? ListOption<String> {
-      return ListOptionView(label: config.description, model: option)
+      return StringListOptionView(label: config.description, model: option)
     } else {
       return Text("Unsupported option type \(String(describing: option))")
     }

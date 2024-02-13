@@ -54,6 +54,21 @@ protocol Option: FcitxCodable {
   func resetToDefault()
 }
 
+struct Identified<T>: Identifiable {
+  var value: T
+  let id = UUID()
+}
+
+extension Identified: FcitxCodable where T: FcitxCodable {
+  static func decode(json: JSON) throws -> Self {
+    return Identified(value: try T.decode(json: json))
+  }
+
+  func encodeValueJSON() -> JSON {
+    return value.encodeValueJSON()
+  }
+}
+
 class SimpleOption<T: FcitxCodable>: Option, ObservableObject {
   let defaultValue: T
   @Published var value: T
@@ -162,12 +177,12 @@ extension EnumOption: CustomStringConvertible {
 
 class ListOption<T: FcitxCodable>: Option, ObservableObject {
   let defaultValue: [T]
-  @Published var value: [T]
+  @Published var value: [Identified<T>]
   let elementType: String
 
   required init(defaultValue: [T], value: [T]?, elementType: String) {
     self.defaultValue = defaultValue
-    self.value = value ?? defaultValue
+    self.value = (value ?? defaultValue).map { Identified(value: $0) }
     self.elementType = elementType
   }
 
@@ -184,7 +199,7 @@ class ListOption<T: FcitxCodable>: Option, ObservableObject {
   }
 
   func resetToDefault() {
-    value = defaultValue
+    value = defaultValue.map { Identified(value: $0) }
   }
 }
 
