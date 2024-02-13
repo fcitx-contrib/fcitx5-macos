@@ -135,6 +135,9 @@ MacosFrontend::MacosFrontend(Instance *instance)
             case UserInterfaceComponent::InputPanel: {
                 if (activeIC_)
                     activeIC_->updateInputPanel();
+                else
+                    panelShow_ = false; // focus out
+                showInputPanelAsync(panelShow_);
                 break;
             }
             case UserInterfaceComponent::StatusArea: {
@@ -180,7 +183,6 @@ void MacosFrontend::updateInputPanel(const fcitx::Text &preedit,
     updatePanelShowFlags(!preedit.empty(), PanelShowFlag::HasPreedit);
     updatePanelShowFlags(!auxUp.empty(), PanelShowFlag::HasAuxUp);
     updatePanelShowFlags(!auxDown.empty(), PanelShowFlag::HasAuxDown);
-    showInputPanelAsync(panelShow_);
 }
 
 /// Before calling this, the panel states must already be initialized
@@ -207,7 +209,6 @@ void MacosFrontend::updateCandidateList(
     const std::vector<std::string> &labelList, int size, int highlight) {
     window_->set_candidates(candidateList, labelList, highlight);
     updatePanelShowFlags(!candidateList.empty(), PanelShowFlag::HasCandidates);
-    showInputPanelAsync(panelShow_);
 }
 
 void MacosFrontend::selectCandidate(size_t index) {
@@ -283,7 +284,6 @@ void MacosFrontend::focusIn(ICUUID uuid) {
 }
 
 void MacosFrontend::focusOut(ICUUID uuid) {
-    showInputPanelAsync(false);
     auto *ic = findIC(uuid);
     if (!ic)
         return;
