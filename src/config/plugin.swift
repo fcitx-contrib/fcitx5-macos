@@ -12,7 +12,7 @@ private func getArch() -> String {
 let arch = getArch()
 
 let baseURL = "https://github.com/fcitx-contrib/fcitx5-macos-plugins/releases/download/latest/"
-// let baseURL = "http://localhost:8000/" // For local debug
+// let baseURL = "http://localhost:8080/" // For local debug with nginx
 
 let errorDomain = "org.fcitx.inputmethod.Fcitx5"
 
@@ -69,7 +69,8 @@ private func getCacheURL(_ plugin: String) -> URL {
 
 private func extractPlugin(_ plugin: String) -> Bool {
   mkdirP(fcitxDirectory.path())
-  let path = getCacheURL(plugin).path()
+  let url = getCacheURL(plugin)
+  let path = url.path()
   let task = Process()
   task.launchPath = "/usr/bin/tar"
   task.arguments = ["-xjf", path, "-C", fcitxDirectory.path()]
@@ -84,6 +85,7 @@ private func extractPlugin(_ plugin: String) -> Bool {
   task.waitUntilExit()
   if task.terminationStatus != 0 {
     FCITX_ERROR("Fail to extract \(path): \(output)")
+    removeFile(url)  // might be invalid so do not use in the future
     return false
   }
   return true
@@ -130,6 +132,11 @@ struct PluginView: View {
   @State private var installResults: [String: Result<Void, Error>] = [:]
   @State private var processing = false
 
+  @State private var observers: [NSKeyValueObservation] = []
+  @State private var downloadedBytes: [Int64] = []
+  @State private var totalBytes: [Int64] = []
+  @State private var downloadProgress = 0.0
+
   @ObservedObject private var pluginVM = PluginVM()
 
   func refreshPlugins() {
@@ -168,7 +175,11 @@ struct PluginView: View {
     processing = true
     mkdirP(cacheDirectory.path())
     let downloadGroup = DispatchGroup()
-    for selectedPlugin in selectedAvailable {
+    observers.removeAll()
+    downloadedBytes.removeAll()
+    totalBytes.removeAll()
+
+    for (i, selectedPlugin) in selectedAvailable.enumerated() {
       let fileName = getFileName(selectedPlugin)
       let destinationURL = getCacheURL(selectedPlugin)
       if FileManager.default.fileExists(atPath: destinationURL.path()) {
@@ -179,7 +190,8 @@ struct PluginView: View {
 
       guard let url = URL(string: baseURL + fileName) else { continue }
       downloadGroup.enter()
-      URLSession.shared.downloadTask(with: url) { localURL, response, error in
+      let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
+        observers[i].invalidate()
         defer { downloadGroup.leave() }
 
         if let error = error {
@@ -206,7 +218,16 @@ struct PluginView: View {
             installResults[selectedPlugin] = .failure(error)
           }
         }
-      }.resume()
+      }
+      let observer = task.progress.observe(\.fractionCompleted) { progress, _ in
+        downloadedBytes[i] = task.countOfBytesReceived
+        totalBytes[i] = task.countOfBytesExpectedToReceive
+        downloadProgress = Double(downloadedBytes.reduce(0, +)) / Double(totalBytes.reduce(0, +))
+      }
+      observers.append(observer)
+      downloadedBytes.append(0)
+      totalBytes.append(0)
+      task.resume()
     }
     selectedAvailable.removeAll()
 
@@ -230,6 +251,9 @@ struct PluginView: View {
   }
 
   var body: some View {
+    if processing {
+      ProgressView(value: downloadProgress, total: 1)
+    }
     HStack {
       VStack {
         Text("Installed").font(.system(size: sectionHeaderSize)).frame(
