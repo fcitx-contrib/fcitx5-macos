@@ -14,6 +14,7 @@
 #include <fcitx/addonfactory.h>
 #include <fcitx/addoninstance.h>
 #include <fcitx/addonmanager.h>
+#include <fcitx/focusgroup.h>
 #include <fcitx/instance.h>
 
 #include "macosfrontend-public.h"
@@ -67,6 +68,7 @@ private:
 
     static const inline std::string ConfPath = "conf/macosfrontend.conf";
 
+    FocusGroup focusGroup_; // ensure there is at most one active ic
     MacosInputContext *activeIC_;
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>>
         eventHandlers_;
