@@ -124,7 +124,8 @@ private:
 };
 
 MacosFrontend::MacosFrontend(Instance *instance)
-    : instance_(instance), activeIC_(nullptr),
+    : instance_(instance),
+      focusGroup_("macos", instance->inputContextManager()), activeIC_(nullptr),
       window_(std::make_unique<candidate_window::WebviewCandidateWindow>()) {
     reloadConfig();
     eventHandlers_.emplace_back(instance_->watchEvent(
@@ -259,6 +260,7 @@ MacosInputContext *MacosFrontend::findIC(ICUUID uuid) {
 ICUUID MacosFrontend::createInputContext(const std::string &appId, id client) {
     auto ic = new MacosInputContext(this, instance_->inputContextManager(),
                                     appId, client);
+    ic->setFocusGroup(&focusGroup_);
     return ic->uuid();
 }
 
@@ -271,6 +273,7 @@ void MacosFrontend::destroyInputContext(ICUUID uuid) {
         activeIC_ = nullptr;
     }
     delete ic;
+    focusGroup_.setFocusedInputContext(nullptr);
 }
 
 void MacosFrontend::focusIn(ICUUID uuid) {
@@ -278,8 +281,6 @@ void MacosFrontend::focusIn(ICUUID uuid) {
     if (!ic)
         return;
     ic->focusIn();
-    if (activeIC_)
-        activeIC_->focusOut();
     activeIC_ = ic;
 }
 
