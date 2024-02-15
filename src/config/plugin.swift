@@ -168,6 +168,7 @@ struct PluginView: View {
     }
     selectedInstalled.removeAll()
     refreshPlugins()
+    restartAndReconnect()
     processing = false
   }
 
@@ -246,6 +247,7 @@ struct PluginView: View {
       }
       installResults.removeAll()
       refreshPlugins()
+      restartAndReconnect()
       processing = false
     }
   }
@@ -279,7 +281,7 @@ struct PluginView: View {
   }
 }
 
-class PluginManager: NSWindowController {
+class PluginManager: ConfigWindowController {
   let view = PluginView()
   convenience init() {
     let window = NSWindow(

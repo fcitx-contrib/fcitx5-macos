@@ -220,14 +220,12 @@ void MacosFrontend::selectCandidate(size_t index) {
 
 bool MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
     auto *ic = this->findIC(uuid);
-    if (activeIC_ != ic) {
-        if (activeIC_)
-            activeIC_->focusOut();
-        ic->focusIn();
-        activeIC_ = ic;
-    }
     if (!ic) {
         return false;
+    }
+    if (activeIC_ != ic) {
+        ic->focusIn();
+        activeIC_ = ic;
     }
     KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);

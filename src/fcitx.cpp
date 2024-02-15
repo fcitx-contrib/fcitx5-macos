@@ -102,12 +102,10 @@ void Fcitx::setupInstance() {
     auto &addonMgr = instance_->addonManager();
     addonMgr.registerDefaultLoader(&staticAddons);
     instance_->initialize();
+    dispatcher_->attach(&instance_->eventLoop());
 }
 
-void Fcitx::exec() {
-    dispatcher_->attach(&instance_->eventLoop());
-    instance_->exec();
-}
+void Fcitx::exec() { instance_->exec(); }
 
 void Fcitx::exit() {
     // the fcitx instance may have been destroyed by stop_fcitx_thread.
