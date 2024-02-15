@@ -3,6 +3,7 @@ import Logging
 import SwiftUI
 
 class InputMethodConfigController: ConfigWindowController {
+  let view = InputMethodConfigView()
   convenience init() {
     let window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
@@ -11,11 +12,15 @@ class InputMethodConfigController: ConfigWindowController {
     window.title = "Input Methods"
     window.center()
     self.init(window: window)
-    window.contentView = NSHostingView(rootView: InputMethodConfigView())
+    window.contentView = NSHostingView(rootView: view)
     window.level = .floating
     window.titlebarAppearsTransparent = true
     window.toolbar?.showsBaselineSeparator = false
     window.toolbarStyle = .unified
+  }
+
+  func refresh() {
+    view.refresh()
   }
 }
 
@@ -52,7 +57,7 @@ private struct GroupItem: Identifiable, Codable {
 }
 
 struct InputMethodConfigView: View {
-  @StateObject private var viewModel = ViewModel()
+  @ObservedObject private var viewModel = ViewModel()
   @StateObject var addGroupDialog = InputDialog(title: "Add an empty group", prompt: "Group name")
   @StateObject var renameGroupDialog = InputDialog(title: "Rename group", prompt: "Group name")
 
@@ -162,6 +167,10 @@ struct InputMethodConfigView: View {
     }
   }
 
+  func refresh() {
+    viewModel.load()
+  }
+
   private class ViewModel: ObservableObject {
     @Published var groups = [Group]()
     @Published var selectedItem: UUID? {
@@ -177,10 +186,6 @@ struct InputMethodConfigView: View {
     @Published var configModel: Config?
     @Published var errorMsg: String?
     var uuidToIM = [UUID: String]()
-
-    init() {
-      load()
-    }
 
     func load() {
       groups = []

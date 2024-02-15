@@ -1,6 +1,13 @@
 import Cocoa
 import Fcitx
 
+func restartAndReconnect() {
+  restart_fcitx_thread()
+  for controller in FcitxInputController.registry.allObjects {
+    controller.reconnectToFcitx()
+  }
+}
+
 extension FcitxInputController {
   static var fcitxAbout: NSWindowController = {
     return FcitxAbout()
@@ -21,10 +28,7 @@ extension FcitxInputController {
   }
 
   @objc func restart(_: Any? = nil) {
-    restart_fcitx_thread()
-    for controller in FcitxInputController.registry.allObjects {
-      controller.reconnectToFcitx()
-    }
+    restartAndReconnect()
   }
 
   @objc func about(_: Any? = nil) {
@@ -36,6 +40,7 @@ extension FcitxInputController {
   }
 
   @objc func inputMethod(_: Any? = nil) {
+    FcitxInputController.inputMethodConfigController.refresh()
     FcitxInputController.inputMethodConfigController.showWindow(nil)
   }
 }
