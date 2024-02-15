@@ -1,3 +1,4 @@
+import Fcitx
 import Logging
 import SwiftUI
 
@@ -89,10 +90,17 @@ struct ExternalOptionView: View {
         ScrollView([.horizontal, .vertical]) {
           buildView(config: viewModel.externalConfig!)
         }
-        Button("Hide") {
-          viewModel.externalConfig = nil
+        HStack {
+          Button("Save") {
+            viewModel.saveExternalConfig(model.external)
+          }
+          Button("Close") {
+            viewModel.externalConfig = nil
+          }
         }
       }
+      .padding()
+      .frame(minWidth: 400)
     }
     .alert(
       "Error",
@@ -130,6 +138,12 @@ struct ExternalOptionView: View {
         FCITX_ERROR("When fetching external config: \(error)")
         errorMsg = "Cannot show external config: \(error.localizedDescription)"
       }
+    }
+
+    func saveExternalConfig(_ uri: String) {
+      if !uri.hasPrefix("fcitx://config") { return }
+      guard let config = externalConfig else { return }
+      Fcitx.setConfig(uri, config.encodeValue())
     }
   }
 }
