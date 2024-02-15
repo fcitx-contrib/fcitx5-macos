@@ -86,29 +86,6 @@ struct InputMethodConfigView: View {
                 viewModel.removeGroup(group.name)
               }
             }
-            .sheet(isPresented: $renameGroupDialog.presented) {
-              renameGroupDialog.view()
-            }
-            .sheet(isPresented: $addingInputMethod) {
-              VStack {
-                AvailableInputMethodView(
-                  selection: $inputMethodsToAdd,
-                  addToGroup: $addToGroup)
-                HStack {
-                  Button("Add") {
-                    if let groupName = addToGroup?.name {
-                      viewModel.addItems(groupName, inputMethodsToAdd)
-                    }
-                    addingInputMethod = false
-                    inputMethodsToAdd = Set()
-                  }
-                  Button("Cancel") {
-                    addingInputMethod = false
-                    inputMethodsToAdd = Set()
-                  }
-                }
-              }.padding()
-            }
           Section(header: header) {
             ForEach($group.inputMethods) { $inputMethod in
               Text(inputMethod.displayName)
@@ -137,9 +114,6 @@ struct InputMethodConfigView: View {
           viewModel.load()
         }
       }
-      .sheet(isPresented: $addGroupDialog.presented) {
-        addGroupDialog.view()
-      }
     } detail: {
       if let selectedItem = viewModel.selectedItem {
         if let configModel = viewModel.configModel {
@@ -164,6 +138,32 @@ struct InputMethodConfigView: View {
       } else {
         Text("Select an input method from the side bar.")
       }
+    }
+    .sheet(isPresented: $addGroupDialog.presented) {
+      addGroupDialog.view()
+    }
+    .sheet(isPresented: $renameGroupDialog.presented) {
+      renameGroupDialog.view()
+    }
+    .sheet(isPresented: $addingInputMethod) {
+      VStack {
+        AvailableInputMethodView(
+          selection: $inputMethodsToAdd,
+          addToGroup: $addToGroup)
+        HStack {
+          Button("Add") {
+            if let groupName = addToGroup?.name {
+              viewModel.addItems(groupName, inputMethodsToAdd)
+            }
+            addingInputMethod = false
+            inputMethodsToAdd = Set()
+          }
+          Button("Cancel") {
+            addingInputMethod = false
+            inputMethodsToAdd = Set()
+          }
+        }
+      }.padding()
     }
   }
 
