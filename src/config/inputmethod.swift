@@ -209,6 +209,7 @@ struct InputMethodConfigView: View {
         errorMsg = "Couldn't load input method config: \(error)"
         FCITX_ERROR("Couldn't load input method config: \(error)")
       }
+      selectCurrentIM()
     }
 
     func updateModel() {
@@ -235,6 +236,22 @@ struct InputMethodConfigView: View {
         load()
       } catch {
         FCITX_ERROR("Couldn't save input method groups: \(error)")
+      }
+    }
+
+    func selectCurrentIM() {
+      let groupName = String(Fcitx.imGetCurrentGroupName())
+      let imName = String(imGetCurrentIMName())
+      // Search for imName in groupName.
+      for group in groups {
+        if group.name == groupName {
+          for item in group.inputMethods {
+            if item.name == imName {
+              selectedItem = item.id
+              return
+            }
+          }
+        }
       }
     }
 
