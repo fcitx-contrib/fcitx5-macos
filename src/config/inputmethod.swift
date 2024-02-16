@@ -189,6 +189,7 @@ struct InputMethodConfigView: View {
             addingInputMethod = false
             inputMethodsToAdd = Set()
           }
+          .disabled(inputMethodsToAdd.count == 0)
           Button("Cancel") {
             addingInputMethod = false
             inputMethodsToAdd = Set()
