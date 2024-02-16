@@ -302,7 +302,7 @@ struct InputMethodConfigView: View {
       DispatchQueue.main.async {
         self.groups = self.groups.filter({ $0.name != name })
         self.save()
-        self.load() // Refresh to avoid UI state inconsistency.
+        self.load()  // Refresh to avoid UI state inconsistency.
       }
     }
 
