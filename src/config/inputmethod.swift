@@ -299,8 +299,11 @@ struct InputMethodConfigView: View {
       if groups.count <= 1 {
         return
       }
-      self.groups = self.groups.filter({ $0.name != name })
-      self.save()
+      DispatchQueue.main.async {
+        self.groups = self.groups.filter({ $0.name != name })
+        self.save()
+        self.load() // Refresh to avoid UI state inconsistency.
+      }
     }
 
     func renameGroup(_ group: inout Group, _ name: String) {
