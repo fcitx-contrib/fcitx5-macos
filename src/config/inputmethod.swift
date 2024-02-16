@@ -124,10 +124,6 @@ struct InputMethodConfigView: View {
             }
           }
         }
-        .onMove { indices, newOffset in
-          viewModel.groups.move(fromOffsets: indices, toOffset: newOffset)
-          viewModel.save()
-        }
       }
       .contextMenu {
         Button("Add group") {
