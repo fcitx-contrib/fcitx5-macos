@@ -76,47 +76,37 @@ struct InputMethodConfigView: View {
             if mouseHoverGroupName == group.name {
               Spacer()
 
+              Button {
+                addToGroup = group
+                addingInputMethod = true
+              } label: {
+                Image(systemName: "plus.circle")
+              }
+              .buttonStyle(BorderlessButtonStyle())
+              .help("Add input methods to '\(group.name)'")
+
+              Button {
+                renameGroupDialog.show { input in
+                  viewModel.renameGroup(&group, input)
+                }
+              } label: {
+                Image(systemName: "pencil")
+              }
+              .buttonStyle(BorderlessButtonStyle())
+              .help("Rename '\(group.name)'")
             }
           }
           .frame(maxWidth: .infinity, alignment: .leading)
           .contentShape(Rectangle())
           .contextMenu {
-            Button("Rename group \(group.name)") {
-              renameGroupDialog.show { input in
-                viewModel.renameGroup(&group, input)
-              }
-            }
-            Button("Add input method to \(group.name)") {
-              addToGroup = group
-              addingInputMethod = true
-            }
-            Button("Remove group \(group.name)") {
+            Button("Remove '\(group.name)'") {
               viewModel.removeGroup(group.name)
             }
           }
-          .sheet(isPresented: $renameGroupDialog.presented) {
-            renameGroupDialog.view()
+          .onHover { hovering in
+            mouseHoverGroupName = hovering ? group.name : nil
           }
-          .sheet(isPresented: $addingInputMethod) {
-            VStack {
-              AvailableInputMethodView(
-                selection: $inputMethodsToAdd,
-                addToGroup: $addToGroup)
-              HStack {
-                Button("Add") {
-                  if let groupName = addToGroup?.name {
-                    viewModel.addItems(groupName, inputMethodsToAdd)
-                  }
-                  addingInputMethod = false
-                  inputMethodsToAdd = Set()
-                }
-                Button("Cancel") {
-                  addingInputMethod = false
-                  inputMethodsToAdd = Set()
-                }
-              }
-            }.padding()
-          }
+
           Section(header: header) {
             ForEach($group.inputMethods) { $inputMethod in
               HStack {
@@ -133,35 +123,16 @@ struct InputMethodConfigView: View {
                 }
               }
               .onHover { hovering in
-                if hovering {
-                  mouseHoverIMID = inputMethod.id
-                }
-                // We cannot unset mouseHoverIMID here, because
-                // `inputMethod` can be dangling after it's deleted.
+                mouseHoverIMID = hovering ? inputMethod.id : nil
               }
             }
             .onMove { indices, newOffset in
               group.inputMethods.move(fromOffsets: indices, toOffset: newOffset)
             }
           }
-          .onHover { hovering in
-            // ... Instead, we unset mouseHoverIMID after the mouse left the section.
-            if !hovering {
-              mouseHoverIMID = nil
-            }
-            // Do the same trick for mouseHoverGroupName.
-            if hovering {
-              mouseHoverGroupName = group.name
-            }
-          }
         }
         .onMove { indices, newOffset in
           viewModel.groups.move(fromOffsets: indices, toOffset: newOffset)
-        }
-        .onHover { hovering in
-          if !hovering {
-            mouseHoverGroupName = nil
-          }
         }
       }
       .contextMenu {
@@ -173,9 +144,6 @@ struct InputMethodConfigView: View {
         Button("Refresh") {
           viewModel.load()
         }
-      }
-      .sheet(isPresented: $addGroupDialog.presented) {
-        addGroupDialog.view()
       }
     } detail: {
       if let selectedItem = viewModel.selectedItem {
@@ -201,6 +169,32 @@ struct InputMethodConfigView: View {
       } else {
         Text("Select an input method from the side bar.")
       }
+    }
+    .sheet(isPresented: $addGroupDialog.presented) {
+      addGroupDialog.view()
+    }
+    .sheet(isPresented: $renameGroupDialog.presented) {
+      renameGroupDialog.view()
+    }
+    .sheet(isPresented: $addingInputMethod) {
+      VStack {
+        AvailableInputMethodView(
+          selection: $inputMethodsToAdd,
+          addToGroup: $addToGroup)
+        HStack {
+          Button("Add") {
+            if let groupName = addToGroup?.name {
+              viewModel.addItems(groupName, inputMethodsToAdd)
+            }
+            addingInputMethod = false
+            inputMethodsToAdd = Set()
+          }
+          Button("Cancel") {
+            addingInputMethod = false
+            inputMethodsToAdd = Set()
+          }
+        }
+      }.padding()
     }
   }
 
@@ -246,6 +240,7 @@ struct InputMethodConfigView: View {
         errorMsg = "Couldn't load input method config: \(error)"
         FCITX_ERROR("Couldn't load input method config: \(error)")
       }
+      selectCurrentIM()
     }
 
     func updateModel() {
@@ -275,6 +270,22 @@ struct InputMethodConfigView: View {
       }
     }
 
+    func selectCurrentIM() {
+      let groupName = String(Fcitx.imGetCurrentGroupName())
+      let imName = String(imGetCurrentIMName())
+      // Search for imName in groupName.
+      for group in groups {
+        if group.name == groupName {
+          for item in group.inputMethods {
+            if item.name == imName {
+              selectedItem = item.id
+              return
+            }
+          }
+        }
+      }
+    }
+
     func addGroup(_ name: String) {
       if name == "" || groups.contains(where: { $0.name == name }) {
         return
@@ -287,10 +298,8 @@ struct InputMethodConfigView: View {
       if groups.count <= 1 {
         return
       }
-      DispatchQueue.main.async {
-        self.groups = self.groups.filter({ $0.name != name })
-        self.save()
-      }
+      self.groups = self.groups.filter({ $0.name != name })
+      self.save()
     }
 
     func renameGroup(_ group: inout Group, _ name: String) {
