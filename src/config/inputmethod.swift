@@ -64,36 +64,60 @@ struct InputMethodConfigView: View {
   @State var addingInputMethod = false
   @State var inputMethodsToAdd = Set<InputMethod>()
   @State fileprivate var addToGroup: Group?
+  @State var mouseHoverIMID: UUID?
 
   var body: some View {
     NavigationSplitView {
       List(selection: $viewModel.selectedItem) {
         ForEach($viewModel.groups) { $group in
-          let header = Text(group.name)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
-            .contextMenu {
-              Button("Rename group \(group.name)") {
-                renameGroupDialog.show { input in
-                  viewModel.renameGroup(&group, input)
-                }
-              }
-              Button("Add input method to \(group.name)") {
-                addToGroup = group
-                addingInputMethod = true
-              }
-              Button("Remove group \(group.name)") {
-                viewModel.removeGroup(group.name)
-              }
+          let header = HStack {
+            Text(group.name)
+
+            Button {
+              addToGroup = group
+              addingInputMethod = true
+            } label: {
+              Image(systemName: "plus.circle")
             }
+            .buttonStyle(BorderlessButtonStyle())
+            .help("Add input methods to '\(group.name)'")
+
+            Button {
+              renameGroupDialog.show { input in
+                viewModel.renameGroup(&group, input)
+              }
+            } label: {
+              Image(systemName: "pencil")
+            }
+            .buttonStyle(BorderlessButtonStyle())
+            .help("Rename '\(group.name)'")
+          }
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .contentShape(Rectangle())
+          .contextMenu {
+            Button("Remove '\(group.name)'") {
+              viewModel.removeGroup(group.name)
+            }
+          }
+
           Section(header: header) {
             ForEach($group.inputMethods) { $inputMethod in
-              Text(inputMethod.displayName)
-                .contextMenu {
-                  Button("Remove input method") {
+              HStack {
+                Text(inputMethod.displayName)
+                Spacer()
+                if mouseHoverIMID == inputMethod.id {
+                  Button {
                     viewModel.removeItem(group.name, inputMethod.id)
+                  } label: {
+                    Image(systemName: "minus")
                   }
+                  .buttonStyle(BorderlessButtonStyle())
+                  .frame(alignment: .trailing)
                 }
+              }
+              .onHover { hovering in
+                mouseHoverIMID = hovering ? inputMethod.id : nil
+              }
             }
             .onMove { indices, newOffset in
               group.inputMethods.move(fromOffsets: indices, toOffset: newOffset)
@@ -156,6 +180,7 @@ struct InputMethodConfigView: View {
             addingInputMethod = false
             inputMethodsToAdd = Set()
           }
+          .disabled(inputMethodsToAdd.count == 0)
           Button("Cancel") {
             addingInputMethod = false
             inputMethodsToAdd = Set()
@@ -268,6 +293,7 @@ struct InputMethodConfigView: View {
       DispatchQueue.main.async {
         self.groups = self.groups.filter({ $0.name != name })
         self.save()
+        self.load()  // Refresh to avoid UI state inconsistency.
       }
     }
 
