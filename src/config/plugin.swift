@@ -1,3 +1,4 @@
+import Fcitx
 import Logging
 import SwiftUI
 import SwiftyJSON
@@ -108,6 +109,18 @@ private func removeFile(_ file: URL) {
     try FileManager.default.removeItem(at: file)
   } catch {
     FCITX_ERROR("Error removing \(file.path()): \(error.localizedDescription)")
+  }
+}
+
+private func getAutoAddIms(_ plugin: String) -> [String] {
+  let descriptor = pluginDirectory.appendingPathComponent(plugin + ".json")
+  do {
+    let content = try String(contentsOf: descriptor, encoding: .utf8)
+    let data = content.data(using: .utf8, allowLossyConversion: false)!
+    let json = try JSON(data: data)
+    return json["input_methods"].arrayValue.map { $0.stringValue }
+  } catch {
+    return []
   }
 }
 
@@ -233,11 +246,15 @@ struct PluginView: View {
     selectedAvailable.removeAll()
 
     downloadGroup.notify(queue: .main) {
+      var inputMethods: [String] = []
       for (plugin, result) in installResults {
         switch result {
         case .success:
           if extractPlugin(plugin) {
             FCITX_INFO("Successful installed \(plugin)")
+            for im in getAutoAddIms(plugin) {
+              inputMethods.append(im)
+            }
           } else {
             FCITX_ERROR("Failed to install \(plugin)")
           }
@@ -248,6 +265,12 @@ struct PluginView: View {
       installResults.removeAll()
       refreshPlugins()
       restartAndReconnect()
+      if Fcitx.imGroupCount() == 1 {
+        // Otherwise user knows how to play with it, don't mess it up.
+        for im in inputMethods {
+          Fcitx.imAddToCurrentGroup(im)
+        }
+      }
       processing = false
     }
   }

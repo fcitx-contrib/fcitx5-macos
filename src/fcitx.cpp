@@ -222,6 +222,21 @@ std::string imGetCurrentGroup() noexcept {
     });
 }
 
+int imGroupCount() noexcept {
+    return with_fcitx([](Fcitx &fcitx) {
+        return fcitx.instance()->inputMethodManager().groupCount();
+    });
+}
+
+void imAddToCurrentGroup(const char *imName) noexcept {
+    return with_fcitx([=](Fcitx &fcitx) {
+        auto &imMgr = fcitx.instance()->inputMethodManager();
+        auto group = imMgr.currentGroup();
+        group.inputMethodList().emplace_back(imName);
+        imMgr.setGroup(group);
+    });
+}
+
 std::string imGetGroups() noexcept {
     return with_fcitx([](Fcitx &fcitx) {
         auto &imMgr = fcitx.instance()->inputMethodManager();
