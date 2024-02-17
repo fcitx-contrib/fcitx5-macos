@@ -65,7 +65,6 @@ struct InputMethodConfigView: View {
   @State var inputMethodsToAdd = Set<InputMethod>()
   @State fileprivate var addToGroup: Group?
   @State var mouseHoverIMID: UUID?
-  @State var mouseHoverGroupName: String?
 
   var body: some View {
     NavigationSplitView {
@@ -73,28 +72,25 @@ struct InputMethodConfigView: View {
         ForEach($viewModel.groups) { $group in
           let header = HStack {
             Text(group.name)
-            if mouseHoverGroupName == group.name {
-              Spacer()
 
-              Button {
-                addToGroup = group
-                addingInputMethod = true
-              } label: {
-                Image(systemName: "plus.circle")
-              }
-              .buttonStyle(BorderlessButtonStyle())
-              .help("Add input methods to '\(group.name)'")
-
-              Button {
-                renameGroupDialog.show { input in
-                  viewModel.renameGroup(&group, input)
-                }
-              } label: {
-                Image(systemName: "pencil")
-              }
-              .buttonStyle(BorderlessButtonStyle())
-              .help("Rename '\(group.name)'")
+            Button {
+              addToGroup = group
+              addingInputMethod = true
+            } label: {
+              Image(systemName: "plus.circle")
             }
+            .buttonStyle(BorderlessButtonStyle())
+            .help("Add input methods to '\(group.name)'")
+
+            Button {
+              renameGroupDialog.show { input in
+                viewModel.renameGroup(&group, input)
+              }
+            } label: {
+              Image(systemName: "pencil")
+            }
+            .buttonStyle(BorderlessButtonStyle())
+            .help("Rename '\(group.name)'")
           }
           .frame(maxWidth: .infinity, alignment: .leading)
           .contentShape(Rectangle())
@@ -102,9 +98,6 @@ struct InputMethodConfigView: View {
             Button("Remove '\(group.name)'") {
               viewModel.removeGroup(group.name)
             }
-          }
-          .onHover { hovering in
-            mouseHoverGroupName = hovering ? group.name : nil
           }
 
           Section(header: header) {
