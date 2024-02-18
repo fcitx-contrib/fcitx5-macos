@@ -22,6 +22,9 @@ void imSetCurrentGroup(const char *groupName) noexcept;
 // Returns a json array of { "name": ..., "displayName": ... }
 std::string imGetCurrentGroup() noexcept;
 
+int imGroupCount() noexcept;
+void imAddToCurrentGroup(const char *imName) noexcept;
+
 // Returns json
 // [{"name": "group name", "inputMethods":
 //   [{"name": ..., "displayName": ...}...]}...].
