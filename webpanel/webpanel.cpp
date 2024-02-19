@@ -19,6 +19,23 @@ WebPanel::WebPanel(Instance *instance)
             FCITX_ERROR() << "select candidate index out of range";
         }
     });
+    reloadConfig();
+}
+
+void WebPanel::updateConfig() {
+    window_->set_layout(config_.layout.value());
+    window_->set_theme(config_.theme.value());
+}
+
+void WebPanel::reloadConfig() {
+    readAsIni(config_, ConfPath);
+    updateConfig();
+}
+
+void WebPanel::setConfig(const RawConfig &config) {
+    config_.load(config, true);
+    safeSaveAsIni(config_, ConfPath);
+    updateConfig();
 }
 
 void WebPanel::update(UserInterfaceComponent component,
