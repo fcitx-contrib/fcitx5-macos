@@ -14,6 +14,7 @@
 
 #include "fcitx.h"
 #include "../macosnotifications/macosnotifications.h"
+#include "../webpanel/webpanel.h"
 #include "nativestreambuf.h"
 
 namespace fs = std::filesystem;
@@ -22,12 +23,15 @@ namespace fs = std::filesystem;
 
 fcitx::KeyboardEngineFactory keyboardFactory;
 fcitx::MacosFrontendFactory macosFrontendFactory;
+fcitx::WebPanelFactory webpanelFactory;
 fcitx::MacosNotificationsFactory macosNotificationsFactory;
 fcitx::StaticAddonRegistry staticAddons = {
     std::make_pair<std::string, fcitx::AddonFactory *>("keyboard",
                                                        &keyboardFactory),
     std::make_pair<std::string, fcitx::AddonFactory *>("macosfrontend",
                                                        &macosFrontendFactory),
+    std::make_pair<std::string, fcitx::AddonFactory *>("webpanel",
+                                                       &webpanelFactory),
     std::make_pair<std::string, fcitx::AddonFactory *>(
         "notifications", &macosNotificationsFactory)};
 
@@ -98,7 +102,9 @@ void Fcitx::setupEnv() {
 }
 
 void Fcitx::setupInstance() {
-    instance_ = std::make_unique<fcitx::Instance>(0, nullptr);
+    int argc = 3;
+    const char *argv[] = {"Fcitx5", "-u", "webpanel", nullptr};
+    instance_ = std::make_unique<fcitx::Instance>(argc, (char **)argv);
     dispatcher_ = std::make_unique<fcitx::EventDispatcher>();
     auto &addonMgr = instance_->addonManager();
     addonMgr.registerDefaultLoader(&staticAddons);

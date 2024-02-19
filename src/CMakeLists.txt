@@ -20,6 +20,7 @@ target_link_libraries(Fcitx5Objs
     SwiftNotify
     Fcitx5::Core
     keyboard
+    webpanel
     macosfrontend
     macosnotifications
     WebviewCandidateWindow
