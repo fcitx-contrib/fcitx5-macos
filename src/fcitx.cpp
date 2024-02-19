@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <algorithm>
 #include <atomic>
 #include <filesystem>
 #include <sstream>
@@ -309,6 +310,40 @@ std::string imGetAvailableIMs() noexcept {
                                    {"label", entry.label()}});
                 return true;
             });
+        return j.dump();
+    });
+}
+
+const char *addon_category_name[] = {"Input Method", "Frontend", "Loader",
+                                     "Module", "UI"};
+
+std::string getAddons() noexcept {
+    return with_fcitx([](Fcitx &fcitx) {
+        auto instance = fcitx.instance();
+        auto j = nlohmann::json::array();
+        for (auto category :
+             {fcitx::AddonCategory::InputMethod, fcitx::AddonCategory::Frontend,
+              fcitx::AddonCategory::Loader, fcitx::AddonCategory::Module,
+              fcitx::AddonCategory::UI}) {
+            auto addons = nlohmann::json::array();
+            auto names = instance->addonManager().addonNames(category);
+            for (const auto &name : names) {
+                const auto *info = instance->addonManager().addonInfo(name);
+                if (!info) {
+                    continue;
+                }
+                addons.push_back(
+                    nlohmann::json{{"id", info->uniqueName()},
+                                   {"name", info->name().match()},
+                                   {"comment", info->comment().match()},
+                                   {"isConfigurable", info->isConfigurable()}});
+            }
+            if (!addons.empty()) {
+                j.push_back({{"id", category},
+                             {"name", addon_category_name[(int)category]},
+                             {"addons", addons}});
+            }
+        }
         return j.dump();
     });
 }

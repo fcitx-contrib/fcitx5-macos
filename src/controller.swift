@@ -153,6 +153,7 @@ class FcitxInputController: IMKInputController {
 
     menu.addItem(withTitle: "Input Methods", action: #selector(inputMethod(_:)), keyEquivalent: "")
     menu.addItem(withTitle: "Global Config", action: #selector(globalConfig(_:)), keyEquivalent: "")
+    menu.addItem(withTitle: "Addon Config", action: #selector(addonConfig(_:)), keyEquivalent: "")
     menu.addItem(withTitle: "Plugin Manager", action: #selector(plugin(_:)), keyEquivalent: "")
     menu.addItem(withTitle: "Restart", action: #selector(restart(_:)), keyEquivalent: "")
     menu.addItem(withTitle: "About Fcitx5 macOS", action: #selector(about(_:)), keyEquivalent: "")

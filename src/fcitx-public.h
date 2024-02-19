@@ -39,6 +39,8 @@ void imSetCurrentIM(const char *imName) noexcept;
 // languageCode:str, icon:str, label:str, isConfigurable: bool}
 std::string imGetAvailableIMs() noexcept;
 
+std::string getAddons() noexcept;
+
 std::string getActions() noexcept;
 void activateActionById(int id) noexcept;
 

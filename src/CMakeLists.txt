@@ -1,4 +1,4 @@
-file(GLOB CONFIG_UI_FILES config/*.swift)
+file(GLOB CONFIG_UI_FILES CONFIGURE_DEPENDS config/*.swift)
 
 add_library(Fcitx5Objs STATIC
     fcitx.cpp
