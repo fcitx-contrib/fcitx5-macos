@@ -51,6 +51,7 @@ void WebPanel::update(UserInterfaceComponent component,
         std::vector<std::string> candidates;
         std::vector<std::string> labels;
         int size = 0;
+        candidate_window::layout_t layout = config_.layout.value();
         if (const auto &list = inputPanel.candidateList()) {
             /*  Do not delete; kept for scroll mode.
             const auto &bulk = list->toBulk();
@@ -82,8 +83,20 @@ void WebPanel::update(UserInterfaceComponent component,
             }
             highlighted = list->cursorIndex();
             // }
+            switch (list->layoutHint()) {
+            case CandidateLayoutHint::Vertical:
+                layout = candidate_window::layout_t::vertical;
+                break;
+            case CandidateLayoutHint::Horizontal:
+                layout = candidate_window::layout_t::horizontal;
+                break;
+            default:
+                layout = config_.layout.value();
+                break;
+            }
         }
         window_->set_candidates(candidates, labels, highlighted);
+        window_->set_layout(layout);
         updatePanelShowFlags(!candidates.empty(), PanelShowFlag::HasCandidates);
         showAsync(panelShow_);
         break;
