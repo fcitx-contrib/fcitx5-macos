@@ -19,7 +19,7 @@ WebPanel::WebPanel(Instance *instance)
             FCITX_ERROR() << "select candidate index out of range";
         }
     });
-    reloadConfig();
+    window_->set_init_callback([this]() { reloadConfig(); });
 }
 
 void WebPanel::updateConfig() {
