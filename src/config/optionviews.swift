@@ -64,11 +64,43 @@ struct IntegerOptionView: View {
   }
 }
 
+class ExternalConfigViewModel: ObservableObject {
+  @Published var hasConfig = false
+  @Published var hasError = false
+  @Published var externalConfig: Config? {
+    didSet {
+      hasConfig = (externalConfig != nil)
+    }
+  }
+  @Published var errorMsg: String? {
+    didSet {
+      hasError = (errorMsg != nil)
+    }
+  }
+
+  func showConfig(_ uri: String) {
+    externalConfig = nil
+    errorMsg = nil
+    do {
+      externalConfig = try getConfig(uri: uri)
+    } catch {
+      FCITX_ERROR("When fetching external config: \(error)")
+      errorMsg = "Cannot show external config: \(error.localizedDescription)"
+    }
+  }
+
+  func saveExternalConfig(_ uri: String) {
+    if !uri.hasPrefix("fcitx://config") { return }
+    guard let config = externalConfig else { return }
+    Fcitx.setConfig(uri, config.encodeValue())
+  }
+}
+
 struct ExternalOptionView: View {
   let label: String
   let model: ExternalOption
 
-  @StateObject private var viewModel = ViewModel()
+  @StateObject private var viewModel = ExternalConfigViewModel()
 
   var body: some View {
     Button(label) {
@@ -112,38 +144,6 @@ struct ExternalOptionView: View {
       }
     } message: { _ in
       Text(viewModel.errorMsg!)
-    }
-  }
-
-  private class ViewModel: ObservableObject {
-    @Published var hasConfig = false
-    @Published var hasError = false
-    @Published var externalConfig: Config? {
-      didSet {
-        hasConfig = (externalConfig != nil)
-      }
-    }
-    @Published var errorMsg: String? {
-      didSet {
-        hasError = (errorMsg != nil)
-      }
-    }
-
-    func showConfig(_ uri: String) {
-      externalConfig = nil
-      errorMsg = nil
-      do {
-        externalConfig = try getConfig(uri: uri)
-      } catch {
-        FCITX_ERROR("When fetching external config: \(error)")
-        errorMsg = "Cannot show external config: \(error.localizedDescription)"
-      }
-    }
-
-    func saveExternalConfig(_ uri: String) {
-      if !uri.hasPrefix("fcitx://config") { return }
-      guard let config = externalConfig else { return }
-      Fcitx.setConfig(uri, config.encodeValue())
     }
   }
 }

@@ -44,6 +44,11 @@ public:
     void reloadConfig() override;
     void save() override;
     const Configuration *getConfig() const override { return &config_; }
+    void setConfig(const RawConfig &config) override {
+        config_.load(config, true);
+        safeSaveAsIni(config_, ConfPath);
+        updateConfig();
+    }
 
     void updateCandidateList(const std::vector<std::string> &candidates,
                              const std::vector<std::string> &labels, int size,

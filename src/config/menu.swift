@@ -21,6 +21,9 @@ extension FcitxInputController {
   static var inputMethodConfigController: InputMethodConfigController = {
     return InputMethodConfigController()
   }()
+  static var addonConfigController: AddonConfigController = {
+    return AddonConfigController()
+  }()
 
   @objc func plugin(_: Any? = nil) {
     FcitxInputController.pluginManager.refreshPlugins()
@@ -42,6 +45,11 @@ extension FcitxInputController {
   @objc func inputMethod(_: Any? = nil) {
     FcitxInputController.inputMethodConfigController.refresh()
     FcitxInputController.inputMethodConfigController.showWindow(nil)
+  }
+
+  @objc func addonConfig(_: Any? = nil) {
+    FcitxInputController.addonConfigController.refresh()
+    FcitxInputController.addonConfigController.showWindow(nil)
   }
 }
 
