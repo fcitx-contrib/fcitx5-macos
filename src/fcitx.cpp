@@ -102,9 +102,7 @@ void Fcitx::setupEnv() {
 }
 
 void Fcitx::setupInstance() {
-    int argc = 3;
-    const char *argv[] = {"Fcitx5", "-u", "webpanel", nullptr};
-    instance_ = std::make_unique<fcitx::Instance>(argc, (char **)argv);
+    instance_ = std::make_unique<fcitx::Instance>(0, nullptr);
     dispatcher_ = std::make_unique<fcitx::EventDispatcher>();
     auto &addonMgr = instance_->addonManager();
     addonMgr.registerDefaultLoader(&staticAddons);
