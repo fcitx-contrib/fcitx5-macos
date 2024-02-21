@@ -26,6 +26,10 @@ jobs:
               echo "Please use Logging module instead of NSLog"
               exit 1
             fi
+            if grep 'ScrollView.*\.horizontal' $file; then
+              echo "Please don't use horizontal scroll"
+              exit 1
+            fi
           done
 
   build:

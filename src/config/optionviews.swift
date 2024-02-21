@@ -119,7 +119,7 @@ struct ExternalOptionView: View {
     }
     .sheet(isPresented: $viewModel.hasConfig) {
       VStack {
-        ScrollView([.horizontal, .vertical]) {
+        ScrollView([.vertical]) {
           buildView(config: viewModel.externalConfig!)
         }
         HStack {

@@ -47,7 +47,7 @@ private struct AddonRowView: View {
           Button("Setting", systemImage: "gearshape", action: openSetting).labelStyle(.iconOnly)
             .sheet(isPresented: $viewModel.hasConfig) {
               VStack {
-                ScrollView([.horizontal, .vertical]) {
+                ScrollView([.vertical]) {
                   buildView(config: viewModel.externalConfig!)
                 }
                 HStack {
