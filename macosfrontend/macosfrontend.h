@@ -23,8 +23,6 @@
 namespace fcitx {
 
 class MacosInputContext;
-enum class PanelShowFlag : int;
-using PanelShowFlags = fcitx::Flags<PanelShowFlag>;
 
 FCITX_CONFIGURATION(MacosFrontendConfig,
                     Option<bool> simulateKeyRelease{this, "SimulateKeyRelease",
@@ -50,13 +48,6 @@ public:
         updateConfig();
     }
 
-    void updateCandidateList(const std::vector<std::string> &candidates,
-                             const std::vector<std::string> &labels, int size,
-                             int highlight);
-    void selectCandidate(size_t index);
-    void updateInputPanel(const fcitx::Text &preedit, const fcitx::Text &auxUp,
-                          const fcitx::Text &auxDown);
-
     ICUUID createInputContext(const std::string &appId, id client);
     void destroyInputContext(ICUUID);
     bool keyEvent(ICUUID, const Key &key, bool isRelease);
@@ -65,7 +56,6 @@ public:
 
 private:
     Instance *instance_;
-    std::unique_ptr<candidate_window::CandidateWindow> window_;
 
     MacosFrontendConfig config_;
     bool simulateKeyRelease_;
@@ -79,15 +69,27 @@ private:
         eventHandlers_;
 
     inline MacosInputContext *findIC(ICUUID);
+};
 
-    void showInputPanelAsync(bool show);
-    PanelShowFlags panelShow_;
-    inline void updatePanelShowFlags(bool condition, PanelShowFlag flag) {
-        if (condition)
-            panelShow_ |= flag;
-        else
-            panelShow_ = panelShow_.unset(flag);
-    }
+class MacosInputContext : public InputContext {
+public:
+    MacosInputContext(MacosFrontend *frontend,
+                      InputContextManager &inputContextManager,
+                      const std::string &program, id client);
+    ~MacosInputContext();
+
+    const char *frontend() const override { return "macos"; }
+    void commitStringImpl(const std::string &text) override;
+    void deleteSurroundingTextImpl(int offset, unsigned int size) override {}
+    void forwardKeyImpl(const ForwardKeyEvent &key) override {}
+    void updatePreeditImpl() override;
+
+    std::pair<double, double> getCursorCoordinates();
+    id client() { return client_; }
+
+private:
+    MacosFrontend *frontend_;
+    id client_;
 };
 
 class MacosFrontendFactory : public AddonFactory {
@@ -95,13 +97,6 @@ public:
     AddonInstance *create(AddonManager *manager) override {
         return new MacosFrontend(manager->instance());
     }
-};
-
-enum class PanelShowFlag : int {
-    HasAuxUp = 1,
-    HasAuxDown = 1 << 1,
-    HasPreedit = 1 << 2,
-    HasCandidates = 1 << 3
 };
 
 } // namespace fcitx

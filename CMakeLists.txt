@@ -68,6 +68,7 @@ include_directories(
 )
 add_subdirectory(macosfrontend)
 add_subdirectory(macosnotifications)
+add_subdirectory(webpanel)
 
 add_subdirectory(src)
 add_subdirectory(dmg)

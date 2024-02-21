@@ -1,0 +1,7 @@
+[Addon]
+Name=WebPanel
+Type=StaticLibrary
+Library=libwebpanel
+Category=UI
+Version=@PROJECT_VERSION@
+Configurable=True

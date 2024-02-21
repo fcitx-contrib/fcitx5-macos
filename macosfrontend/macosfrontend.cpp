@@ -18,137 +18,11 @@
 
 namespace fcitx {
 
-class MacosInputContext : public InputContext {
-public:
-    MacosInputContext(MacosFrontend *frontend,
-                      InputContextManager &inputContextManager,
-                      const std::string &program, id client)
-        : InputContext(inputContextManager, program), frontend_(frontend),
-          client_(client) {
-        CFRetain(client_);
-        CapabilityFlags flags = CapabilityFlag::Preedit;
-        setCapabilityFlags(flags);
-        created();
-    }
-
-    ~MacosInputContext() {
-        CFRelease(client_);
-        destroy();
-    }
-
-    const char *frontend() const override { return "macos"; }
-
-    void commitStringImpl(const std::string &text) override {
-        SwiftFrontend::commit(client_, text);
-    }
-
-    void deleteSurroundingTextImpl(int offset, unsigned int size) override {}
-
-    void forwardKeyImpl(const ForwardKeyEvent &key) override {}
-
-    void updatePreeditImpl() override {
-        auto preedit = frontend_->instance()->outputFilter(
-            this, inputPanel().clientPreedit());
-        SwiftFrontend::setPreedit(client_, preedit.toString(),
-                                  preedit.cursor());
-    }
-
-    void updateInputPanel() {
-        int highlighted = -1;
-        const InputPanel &ip = inputPanel();
-        frontend_->updateInputPanel(filterText(ip.preedit()),
-                                    filterText(ip.auxUp()),
-                                    filterText(ip.auxDown()));
-        std::vector<std::string> candidates;
-        std::vector<std::string> labels;
-        int size = 0;
-        if (const auto &list = ip.candidateList()) {
-            /*  Do not delete; kept for scroll mode.
-            const auto &bulk = list->toBulk();
-            if (bulk) {
-                size = bulk->totalSize();
-                // limit candidate count to 16 (for paging)
-                const int limit = size < 0 ? 16 : std::min(size, 16);
-                for (int i = 0; i < limit; i++) {
-                    try {
-                        auto &candidate = bulk->candidateFromAll(i);
-                        // maybe unnecessary; I don't see anywhere using
-            `CandidateWord::setPlaceHolder`
-                        // if (candidate.isPlaceHolder()) continue;
-                        candidates.emplace_back(filterString(candidate.text()));
-                    } catch (const std::invalid_argument &e) {
-                        size = static_cast<int>(candidates.size());
-                        break;
-                    }
-                }
-            } else {
-            */
-            size = list->size();
-            for (int i = 0; i < size; i++) {
-                candidates.emplace_back(
-                    filterString(list->candidate(i).text()));
-                labels.emplace_back(list->label(i).toString());
-            }
-            highlighted = list->cursorIndex();
-            // }
-        }
-        frontend_->updateCandidateList(candidates, labels, size, highlighted);
-    }
-
-    void selectCandidate(size_t index) {
-        const auto &list = inputPanel().candidateList();
-        if (!list) {
-            return;
-        }
-        try {
-            list->candidate(index).select(this);
-        } catch (const std::invalid_argument &e) {
-            FCITX_ERROR() << "selectCandidate index out of range";
-        }
-        return;
-    }
-
-    id client() { return client_; }
-
-private:
-    MacosFrontend *frontend_;
-    id client_;
-
-    inline Text filterText(const Text &orig) {
-        return frontend_->instance()->outputFilter(this, orig);
-    }
-
-    inline std::string filterString(const Text &orig) {
-        return filterText(orig).toString();
-    }
-};
-
 MacosFrontend::MacosFrontend(Instance *instance)
     : instance_(instance),
-      focusGroup_("macos", instance->inputContextManager()), activeIC_(nullptr),
-      window_(std::make_unique<candidate_window::WebviewCandidateWindow>()) {
+      focusGroup_("macos", instance->inputContextManager()),
+      activeIC_(nullptr) {
     reloadConfig();
-    eventHandlers_.emplace_back(instance_->watchEvent(
-        EventType::InputContextFlushUI, EventWatcherPhase::Default,
-        [this](Event &event) {
-            auto &e = static_cast<InputContextFlushUIEvent &>(event);
-            switch (e.component()) {
-            case UserInterfaceComponent::InputPanel: {
-                if (activeIC_)
-                    activeIC_->updateInputPanel();
-                else
-                    panelShow_ = false; // focus out
-                showInputPanelAsync(panelShow_);
-                break;
-            }
-            case UserInterfaceComponent::StatusArea: {
-                // statusAreaUpdateCallback();
-                break;
-            }
-            }
-        }));
-    window_->set_select_callback(
-        [this](size_t index) { selectCandidate(index); });
 }
 
 void MacosFrontend::updateConfig() {
@@ -166,56 +40,6 @@ void MacosFrontend::save() {
     config_.simulateKeyRelease.setValue(simulateKeyRelease_);
     config_.simulateKeyReleaseDelay.setValue(simulateKeyReleaseDelay_ / 1000);
     safeSaveAsIni(config_, ConfPath);
-}
-
-void MacosFrontend::updateInputPanel(const fcitx::Text &preedit,
-                                     const fcitx::Text &auxUp,
-                                     const fcitx::Text &auxDown) {
-    auto convert = [](const fcitx::Text &text) {
-        std::vector<std::pair<std::string, int>> ret;
-        for (int i = 0; i < text.size(); ++i) {
-            ret.emplace_back(
-                make_pair(text.stringAt(i), text.formatAt(i).toInteger()));
-        }
-        return ret;
-    };
-    window_->update_input_panel(convert(preedit), preedit.cursor(),
-                                convert(auxUp), convert(auxDown));
-    updatePanelShowFlags(!preedit.empty(), PanelShowFlag::HasPreedit);
-    updatePanelShowFlags(!auxUp.empty(), PanelShowFlag::HasAuxUp);
-    updatePanelShowFlags(!auxDown.empty(), PanelShowFlag::HasAuxDown);
-}
-
-/// Before calling this, the panel states must already be initialized
-/// synchronously, by using set_candidates, etc.
-void MacosFrontend::showInputPanelAsync(bool show) {
-    dispatch_async(dispatch_get_main_queue(), ^void() {
-      if (show) {
-          double x = 0, y = 0;
-          // showPreeditCallback is executed before candidateListCallback,
-          // so in main thread preedit UI update happens before here.
-          if (activeIC_ && !SwiftFrontend::getCursorCoordinates(
-                               activeIC_->client(), &x, &y)) {
-              FCITX_WARN() << "Fail to get preedit coordinates";
-          }
-          window_->show(x, y);
-      } else {
-          window_->hide();
-      }
-    });
-}
-
-void MacosFrontend::updateCandidateList(
-    const std::vector<std::string> &candidateList,
-    const std::vector<std::string> &labelList, int size, int highlight) {
-    window_->set_candidates(candidateList, labelList, highlight);
-    updatePanelShowFlags(!candidateList.empty(), PanelShowFlag::HasCandidates);
-}
-
-void MacosFrontend::selectCandidate(size_t index) {
-    if (activeIC_) {
-        activeIC_->selectCandidate(index);
-    }
 }
 
 bool MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
@@ -289,6 +113,40 @@ void MacosFrontend::focusOut(ICUUID uuid) {
     ic->focusOut();
     if (activeIC_ == ic)
         activeIC_ = nullptr;
+}
+
+MacosInputContext::MacosInputContext(MacosFrontend *frontend,
+                                     InputContextManager &inputContextManager,
+                                     const std::string &program, id client)
+    : InputContext(inputContextManager, program), frontend_(frontend),
+      client_(client) {
+    CFRetain(client_);
+    CapabilityFlags flags = CapabilityFlag::Preedit;
+    setCapabilityFlags(flags);
+    created();
+}
+
+MacosInputContext::~MacosInputContext() {
+    CFRelease(client_);
+    destroy();
+}
+
+void MacosInputContext::commitStringImpl(const std::string &text) {
+    SwiftFrontend::commit(client_, text);
+}
+
+void MacosInputContext::updatePreeditImpl() {
+    auto preedit =
+        frontend_->instance()->outputFilter(this, inputPanel().clientPreedit());
+    SwiftFrontend::setPreedit(client_, preedit.toString(), preedit.cursor());
+}
+
+std::pair<double, double> MacosInputContext::getCursorCoordinates() {
+    double x = 0, y = 0;
+    if (!SwiftFrontend::getCursorCoordinates(client_, &x, &y)) {
+        FCITX_WARN() << "Failed to get cursor coordinates";
+    }
+    return std::make_pair(x, y);
 }
 
 } // namespace fcitx
