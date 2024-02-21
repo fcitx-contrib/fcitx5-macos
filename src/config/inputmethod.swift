@@ -140,7 +140,7 @@ struct InputMethodConfigView: View {
       if let selectedItem = viewModel.selectedItem {
         if let configModel = viewModel.configModel {
           VStack {
-            let scrollView = ScrollView([.vertical, .horizontal]) {
+            let scrollView = ScrollView([.vertical]) {
               buildView(config: configModel)
             }
             if #available(macOS 14.0, *) {
