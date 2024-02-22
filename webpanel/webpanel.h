@@ -18,11 +18,17 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(layout_t, N_("Horizontal"), N_("Vertical"))
 
 namespace fcitx {
 
+struct NoSaveAnnotation {
+    bool skipDescription() { return false; }
+    bool skipSave() { return true; }
+    void dumpDescription(RawConfig &config) const {}
+};
+
 FCITX_CONFIGURATION(
     WebPanelConfig,
 
-    Option<std::string> preview{this, "Preview",
-                                _("Type here to preview style")};
+    OptionWithAnnotation<std::string, NoSaveAnnotation> preview{
+        this, "Preview", _("Type here to preview style")};
     Option<candidate_window::theme_t> theme{this, "Theme", _("Theme"),
                                             candidate_window::theme_t::system};
     Option<candidate_window::layout_t> layout{
