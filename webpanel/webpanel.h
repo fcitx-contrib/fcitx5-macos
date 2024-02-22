@@ -8,6 +8,7 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
 
+#include "candidate_window.hpp"
 #include "webview_candidate_window.hpp"
 
 namespace candidate_window {
@@ -17,14 +18,26 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(layout_t, N_("Horizontal"), N_("Vertical"))
 
 namespace fcitx {
 
+struct NoSaveAnnotation {
+    bool skipDescription() { return false; }
+    bool skipSave() { return true; }
+    void dumpDescription(RawConfig &config) const {}
+};
+
 FCITX_CONFIGURATION(
     WebPanelConfig,
-    // Option<bool> enableTranslucency{this, "EnableTranslucency",
-    //                                 _("Enable translucency")};
-    // Option<bool> enableShadow{this, "EnableShadow",
-    //                           _("Enable shadow")};
-    Option<candidate_window::theme_t> theme{this, "Theme", _("Theme")};
-    Option<candidate_window::layout_t> layout{this, "Layout", _("Layout")};);
+
+    OptionWithAnnotation<std::string, NoSaveAnnotation> preview{
+        this, "Preview", _("Type here to preview style")};
+    Option<candidate_window::theme_t> theme{this, "Theme", _("Theme"),
+                                            candidate_window::theme_t::system};
+    Option<candidate_window::layout_t> layout{
+        this, "Layout", _("Layout"), candidate_window::layout_t::horizontal};
+    Option<bool> backgroundBlur{this, "BackgroundBlur", _("Background blur"),
+                                true};
+    Option<int, IntConstrain> blurRadius{
+        this, "BlurRadius", _("Radius of blur (px)"), 16, IntConstrain(1, 32)};
+    Option<bool> shadow{this, "Shadow", _("Shadow"), true};);
 
 enum class PanelShowFlag : int;
 using PanelShowFlags = fcitx::Flags<PanelShowFlag>;

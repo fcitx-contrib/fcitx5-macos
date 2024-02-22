@@ -11,3 +11,5 @@ constexpr char imConfigPrefix[] = "fcitx://config/inputmethod/";
 
 /// Convert configuration into a json object.
 nlohmann::json configToJson(const fcitx::Configuration &config);
+
+nlohmann::json configValueToJson(const fcitx::Configuration &config);
