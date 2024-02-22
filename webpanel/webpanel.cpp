@@ -1,6 +1,7 @@
 #include <fcitx/inputpanel.h>
 
 #include "../macosfrontend/macosfrontend.h"
+#include "config/config.h"
 #include "webpanel.h"
 
 namespace fcitx {
@@ -25,6 +26,9 @@ WebPanel::WebPanel(Instance *instance)
 void WebPanel::updateConfig() {
     window_->set_layout(config_.layout.value());
     window_->set_theme(config_.theme.value());
+    config_.preview.setValue("");
+    auto style = configValueToJson(config_).dump();
+    window_->set_style(style.c_str());
 }
 
 void WebPanel::reloadConfig() {

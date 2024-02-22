@@ -15,7 +15,6 @@ static std::string getConfig(const std::string &uri);
 static nlohmann::json &jsonLocate(nlohmann::json &j, const std::string &group,
                                   const std::string &option);
 static nlohmann::json configValueToJson(const fcitx::RawConfig &config);
-static nlohmann::json configValueToJson(const fcitx::Configuration &config);
 static nlohmann::json configSpecToJson(const fcitx::RawConfig &config);
 static nlohmann::json configSpecToJson(const fcitx::Configuration &config);
 static void mergeSpecAndValue(nlohmann::json &specJson,
