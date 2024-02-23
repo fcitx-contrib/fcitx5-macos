@@ -20,8 +20,7 @@ namespace fcitx {
 
 MacosFrontend::MacosFrontend(Instance *instance)
     : instance_(instance),
-      focusGroup_("macos", instance->inputContextManager()),
-      activeIC_(nullptr) {
+      focusGroup_("macos", instance->inputContextManager()) {
     reloadConfig();
 }
 
@@ -47,10 +46,7 @@ bool MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
     if (!ic) {
         return false;
     }
-    if (activeIC_ != ic) {
-        ic->focusIn();
-        activeIC_ = ic;
-    }
+    ic->focusIn();
     KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
 
@@ -60,7 +56,7 @@ bool MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
             CLOCK_MONOTONIC, now(CLOCK_MONOTONIC) + simulateKeyReleaseDelay_,
             10000, [this, ic, key = key](EventSourceTime *source, uint64_t) {
                 FCITX_DEBUG() << "Simulate key release " << key.toString();
-                if (activeIC_ == ic) {
+                if (instance_->mostRecentInputContext() == ic) {
                     KeyEvent releaseEvent(ic, key, true);
                     ic->keyEvent(releaseEvent);
                 }
@@ -91,9 +87,7 @@ void MacosFrontend::destroyInputContext(ICUUID uuid) {
     // The only exception is when Instance is destroyed,
     // InputContextManager deletes all InputContexts.
     auto ic = findIC(uuid);
-    if (activeIC_ == ic) {
-        activeIC_ = nullptr;
-    }
+    ic->focusOut();
     delete ic;
     focusGroup_.setFocusedInputContext(nullptr);
 }
@@ -103,7 +97,6 @@ void MacosFrontend::focusIn(ICUUID uuid) {
     if (!ic)
         return;
     ic->focusIn();
-    activeIC_ = ic;
 }
 
 void MacosFrontend::focusOut(ICUUID uuid) {
@@ -111,8 +104,6 @@ void MacosFrontend::focusOut(ICUUID uuid) {
     if (!ic)
         return;
     ic->focusOut();
-    if (activeIC_ == ic)
-        activeIC_ = nullptr;
 }
 
 MacosInputContext::MacosInputContext(MacosFrontend *frontend,
