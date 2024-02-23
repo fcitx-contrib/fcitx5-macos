@@ -84,7 +84,7 @@ public:
     void forwardKeyImpl(const ForwardKeyEvent &key) override {}
     void updatePreeditImpl() override;
 
-    std::pair<double, double> getCursorCoordinates();
+    std::pair<double, double> getCursorCoordinates(bool followCursor);
     id client() { return client_; }
 
 private:

@@ -136,9 +136,11 @@ void WebPanel::showAsync(bool show) {
       if (show) {
           if (auto ic = dynamic_cast<MacosInputContext *>(
                   instance_->mostRecentInputContext())) {
-              // showPreeditCallback is executed before candidateListCallback,
-              // so in main thread preedit UI update happens before here.
-              auto [x, y] = ic->getCursorCoordinates();
+              // MacosInputContext::updatePreeditImpl is executed before
+              // WebPanel::update, so in main thread preedit UI update happens
+              // before here.
+              auto [x, y] =
+                  ic->getCursorCoordinates(config_.followCursor.value());
               window_->show(x, y);
           }
       } else {
