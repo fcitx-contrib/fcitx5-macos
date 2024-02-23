@@ -141,9 +141,10 @@ void MacosInputContext::updatePreeditImpl() {
     SwiftFrontend::setPreedit(client_, preedit.toString(), preedit.cursor());
 }
 
-std::pair<double, double> MacosInputContext::getCursorCoordinates() {
+std::pair<double, double>
+MacosInputContext::getCursorCoordinates(bool followCursor) {
     double x = 0, y = 0;
-    if (!SwiftFrontend::getCursorCoordinates(client_, &x, &y)) {
+    if (!SwiftFrontend::getCursorCoordinates(client_, followCursor, &x, &y)) {
         FCITX_WARN() << "Failed to get cursor coordinates";
     }
     return std::make_pair(x, y);

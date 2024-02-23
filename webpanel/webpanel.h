@@ -29,6 +29,7 @@ FCITX_CONFIGURATION(
 
     OptionWithAnnotation<std::string, NoSaveAnnotation> preview{
         this, "Preview", _("Type here to preview style")};
+    Option<bool> followCursor{this, "FollowCursor", _("Follow cursor"), false};
     Option<candidate_window::theme_t> theme{this, "Theme", _("Theme"),
                                             candidate_window::theme_t::system};
     Option<candidate_window::layout_t> layout{

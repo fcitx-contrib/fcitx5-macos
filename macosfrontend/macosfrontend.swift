@@ -1,5 +1,8 @@
 import InputMethodKit
 
+private var u16pos = 0
+private var currentPreedit = ""
+
 public func commit(_ clientPtr: UnsafeMutableRawPointer, _ string: String) {
   let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
   if let client = client as? IMKTextInput {
@@ -13,10 +16,11 @@ public func setPreedit(_ clientPtr: UnsafeMutableRawPointer, _ preedit: String, 
 {
   let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
   if let client = client as? IMKTextInput {
+    currentPreedit = preedit
     // The caretPos argument is specified in UTF-8 bytes.
     // Convert it to UTF-16.
     var u8pos = 0
-    var u16pos = 0
+    u16pos = 0
     for ch in preedit {
       if u8pos == caretPosUtf8 {
         break
@@ -35,15 +39,24 @@ public func setPreedit(_ clientPtr: UnsafeMutableRawPointer, _ preedit: String, 
 // Must be executed after actual preedit UI update, i.e. not simply setPreedit.
 public func getCursorCoordinates(
   _ clientPtr: UnsafeMutableRawPointer,
+  _ followCursor: Bool,
   _ x: UnsafeMutablePointer<Double>,
   _ y: UnsafeMutablePointer<Double>
 ) -> Bool {
   let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
   if let client = client as? IMKTextInput {
     var rect = NSRect(x: 0, y: 0, width: 0, height: 0)
-    client.attributes(forCharacterIndex: 0, lineHeightRectangle: &rect)
+    // n characters have n+1 cursor positions, but character index only accepts 0 to n-1,
+    // and passing n results in (0,0). So if cursor is in the end, go back and add 10px
+    let isEnd = u16pos == currentPreedit.count
+    client.attributes(
+      forCharacterIndex: followCursor ? (isEnd ? u16pos - 1 : u16pos) : 0,
+      lineHeightRectangle: &rect)
     x.pointee = Double(NSMinX(rect))
     y.pointee = Double(NSMinY(rect))
+    if followCursor && isEnd {
+      x.pointee += 10
+    }
     return true
   }
   return false
