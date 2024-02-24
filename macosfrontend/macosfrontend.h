@@ -64,7 +64,6 @@ private:
     static const inline std::string ConfPath = "conf/macosfrontend.conf";
 
     FocusGroup focusGroup_; // ensure there is at most one active ic
-    MacosInputContext *activeIC_;
     std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>>
         eventHandlers_;
 
