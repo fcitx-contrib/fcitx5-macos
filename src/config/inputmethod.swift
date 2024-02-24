@@ -2,7 +2,7 @@ import Fcitx
 import Logging
 import SwiftUI
 
-class InputMethodConfigController: ConfigWindowController {
+class InputMethodConfigController: ConfigWindowController, NSToolbarDelegate {
   let view = InputMethodConfigView()
   convenience init() {
     let window = NSWindow(
@@ -15,12 +15,51 @@ class InputMethodConfigController: ConfigWindowController {
     window.contentView = NSHostingView(rootView: view)
     window.level = .floating
     window.titlebarAppearsTransparent = true
-    window.toolbar?.showsBaselineSeparator = false
     window.toolbarStyle = .unified
+
+    // Prior to macOS 14.0, NSHostingView doesn't host toolbars, and
+    // we have to create a toolbar manually.
+    //
+    // Cannot use #available check here because it's a runtime check,
+    // but the following code should work nevertheless: NSHostingView
+    // will replace the toolbar if it works.
+    let toolbar = NSToolbar(identifier: "MainToolbar")
+    toolbar.delegate = self
+    toolbar.displayMode = .iconOnly
+    toolbar.showsBaselineSeparator = false
+    window.toolbar = toolbar
   }
 
   func refresh() {
     view.refresh()
+  }
+
+  func toolbar(
+    _ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
+    willBeInsertedIntoToolbar flag: Bool
+  ) -> NSToolbarItem? {
+    if itemIdentifier == .toggleSidebar {
+      let item = NSToolbarItem(itemIdentifier: .toggleSidebar)
+      item.label = "Toggle Sidebar"
+      item.paletteLabel = "Toggle Sidebar"
+      item.toolTip = "Toggle the visibility of the sidebar"
+      item.target = self
+      item.action = #selector(toggleSidebar)
+      return item
+    }
+    return nil
+  }
+
+  func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+    return [.toggleSidebar, .flexibleSpace]
+  }
+
+  func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+    return [.toggleSidebar, .flexibleSpace]
+  }
+
+  @objc func toggleSidebar(_ sender: Any?) {
+    // Wow, we don't have to do anything here.
   }
 }
 
