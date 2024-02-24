@@ -29,15 +29,22 @@ struct GlobalConfigView: View {
         buildView(config: model)
       }
       HStack {
-        Spacer()
-        Button("Print") {
-          // Should see changes.
-          print(model.encodeValue())
+        Button("Reset to default") {
+          model.resetToDefault()
         }
-        Button("Save") {
-          Fcitx.setConfig("fcitx://config/global", model.encodeValue())
+        Spacer()
+        Button("Apply") {
+          save()
+        }
+        Button("OK") {
+          save()
+          FcitxInputController.globalConfigController.window?.performClose(_: nil)
         }
       }
     }.padding()
+  }
+
+  private func save() {
+    Fcitx.setConfig("fcitx://config/global", model.encodeValue())
   }
 }

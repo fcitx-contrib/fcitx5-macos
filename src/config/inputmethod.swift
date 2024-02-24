@@ -148,9 +148,17 @@ struct InputMethodConfigView: View {
             } else {
               scrollView
             }
-            Button("Save") {
-              if let name = viewModel.selectedIMName {
-                setConfig("fcitx://config/inputmethod/\(name)", configModel.encodeValue())
+            HStack {
+              Button("Reset to default") {
+                configModel.resetToDefault()
+              }
+              Spacer()
+              Button("Apply") {
+                save(configModel)
+              }
+              Button("OK") {
+                save(configModel)
+                FcitxInputController.inputMethodConfigController.window?.performClose(_: nil)
               }
             }
           }.padding()
@@ -187,6 +195,12 @@ struct InputMethodConfigView: View {
           }
         }
       }.padding()
+    }
+  }
+
+  private func save(_ configModel: Config) {
+    if let name = viewModel.selectedIMName {
+      setConfig("fcitx://config/inputmethod/\(name)", configModel.encodeValue())
     }
   }
 
