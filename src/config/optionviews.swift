@@ -123,10 +123,14 @@ struct ExternalOptionView: View {
           buildView(config: viewModel.externalConfig!)
         }
         HStack {
-          Button("Save") {
+          Button("Reset to default") {
+            model.resetToDefault()
+          }
+          Spacer()
+          Button("Apply") {
             viewModel.saveExternalConfig(model.external)
           }
-          Button("Close") {
+          Button("OK") {
             viewModel.externalConfig = nil
           }
         }

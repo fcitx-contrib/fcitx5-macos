@@ -51,10 +51,15 @@ private struct AddonRowView: View {
                   buildView(config: viewModel.externalConfig!)
                 }
                 HStack {
-                  Button("Save") {
-                    viewModel.saveExternalConfig("fcitx://config/addon/\(addon.id)/")
+                  Button("Reset to default") {
+                    viewModel.externalConfig?.resetToDefault()
                   }
-                  Button("Close") {
+                  Spacer()
+                  Button("Apply") {
+                    save()
+                  }
+                  Button("OK") {
+                    save()
                     viewModel.externalConfig = nil
                   }
                 }
@@ -68,6 +73,10 @@ private struct AddonRowView: View {
         Text(addon.comment)
       }
     }.padding()
+  }
+
+  private func save() {
+    viewModel.saveExternalConfig("fcitx://config/addon/\(addon.id)/")
   }
 
   private func openSetting() {
