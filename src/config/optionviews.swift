@@ -9,10 +9,14 @@ protocol OptionView: View {
 
 struct BooleanOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = ""
+  var overrideLabel: String? {
+    return label
+  }
   @ObservedObject var model: BooleanOption
   var body: some View {
-    Toggle(label, isOn: $model.value)
+    Toggle("", isOn: $model.value)
+      .toggleStyle(.switch)
+      .frame(alignment: .trailing)
   }
 }
 
@@ -262,12 +266,13 @@ struct GroupOptionView: OptionView {
       ForEach(children) { child in
         let subView = buildViewImpl(config: child)
         let subLabel = Text(subView.overrideLabel ?? subView.label)
-          .frame(minWidth: 100, maxWidth: 400, alignment: .trailing)
         if subView is GroupOptionView {
           // If this is a nested group, put it inside a box, and let
           // it span two columns.
           GridRow {
             subLabel
+              .font(.title3)
+              .gridCellColumns(2)
           }
           GridRow {
             GroupBox {
@@ -279,6 +284,7 @@ struct GroupOptionView: OptionView {
           // content in the right column.
           GridRow {
             subLabel
+              .frame(minWidth: 100, maxWidth: 400, alignment: .trailing)
             AnyView(subView)
           }
         }
