@@ -86,6 +86,8 @@ private func jsonToOption(_ json: JSON, _ type: String) throws -> any Option {
     return try EnumOption.decode(json: json)
   } else if type == "Key" {
     return try KeyOption.decode(json: json)
+  } else if type == "Color" {
+    return try ColorOption.decode(json: json)
   } else if type == "List|String" {
     return try ListOption<String>.decode(json: json)
   } else if type == "List|Key" {

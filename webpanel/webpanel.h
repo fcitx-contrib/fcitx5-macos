@@ -24,6 +24,25 @@ struct NoSaveAnnotation {
     void dumpDescription(RawConfig &config) const {}
 };
 
+FCITX_CONFIGURATION(LightModeConfig,
+                    Option<bool> overrideDefault{this, "OverrideDefault",
+                                                 _("Override default"), false};
+                    Option<Color> highlightColor{this, "HighlightColor",
+                                                 "Highlight color",
+                                                 Color(0, 0, 255, 255)};
+                    Option<Color> panelColor{this, "PanelColor", "Panel color",
+                                             Color(255, 255, 255, 255)};);
+
+FCITX_CONFIGURATION(
+    DarkModeConfig, Option<bool> overrideDefault{this, "OverrideDefault",
+                                                 _("Override default"), false};
+    Option<bool> sameWithLightMode{this, "SameWithLightMode",
+                                   _("Same with light mode"), false};
+    Option<Color> highlightColor{this, "HighlightColor", "Highlight color",
+                                 Color(0, 0, 255, 255)};
+    Option<Color> panelColor{this, "PanelColor", "Panel color",
+                             Color(255, 255, 255, 255)};);
+
 FCITX_CONFIGURATION(
     WebPanelConfig,
 
@@ -32,6 +51,8 @@ FCITX_CONFIGURATION(
     Option<bool> followCursor{this, "FollowCursor", _("Follow cursor"), false};
     Option<candidate_window::theme_t> theme{this, "Theme", _("Theme"),
                                             candidate_window::theme_t::system};
+    Option<LightModeConfig> lightMode{this, "LightMode", _("Light mode")};
+    Option<DarkModeConfig> darkMode{this, "DarkMode", _("Dark mode")};
     Option<candidate_window::layout_t> layout{
         this, "Layout", _("Layout"), candidate_window::layout_t::horizontal};
     Option<bool> backgroundBlur{this, "BackgroundBlur", _("Background blur"),
