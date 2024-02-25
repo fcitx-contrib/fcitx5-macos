@@ -2,28 +2,36 @@ import Fcitx
 import Logging
 import SwiftUI
 
-struct BooleanOptionView: View {
+protocol OptionView: View {
+  var label: String { get }
+  var overrideLabel: String? { get }
+}
+
+struct BooleanOptionView: OptionView {
   let label: String
+  var overrideLabel: String? {
+    return label
+  }
   @ObservedObject var model: BooleanOption
   var body: some View {
-    Toggle(isOn: $model.value) {
-      Text(label)
-    }
+    Toggle("", isOn: $model.value)
+      .toggleStyle(.switch)
+      .frame(alignment: .trailing)
   }
 }
 
-struct StringOptionView: View {
+struct StringOptionView: OptionView {
   let label: String
+  let overrideLabel: String? = nil
   @ObservedObject var model: StringOption
   var body: some View {
-    TextField(text: $model.value) {
-      Text(label)
-    }
+    TextField(label, text: $model.value)
   }
 }
 
-struct IntegerOptionView: View {
+struct IntegerOptionView: OptionView {
   let label: String
+  let overrideLabel: String? = nil
   @ObservedObject var model: IntegerOption
   let numberFormatter: NumberFormatter = {
     let formatter = NumberFormatter()
@@ -96,9 +104,10 @@ class ExternalConfigViewModel: ObservableObject {
   }
 }
 
-struct ExternalOptionView: View {
+struct ExternalOptionView: OptionView {
   let label: String
   let model: ExternalOption
+  let overrideLabel: String? = ""
 
   @StateObject private var viewModel = ExternalConfigViewModel()
 
@@ -152,11 +161,12 @@ struct ExternalOptionView: View {
   }
 }
 
-struct EnumOptionView: View {
+struct EnumOptionView: OptionView {
   let label: String
+  let overrideLabel: String? = nil
   @ObservedObject var model: EnumOption
   var body: some View {
-    Picker(label, selection: $model.value) {
+    Picker("", selection: $model.value) {
       ForEach(0..<model.enumStrings.count, id: \.self) { i in
         Text(model.enumStringsI18n[i]).tag(model.enumStrings[i])
       }
@@ -164,49 +174,48 @@ struct EnumOptionView: View {
   }
 }
 
-struct StringListOptionView: View {
+struct StringListOptionView: OptionView {
   let label: String
+  let overrideLabel: String? = nil
   @ObservedObject var model: ListOption<String>
 
   var body: some View {
-    LabeledContent(label) {
-      VStack {
-        ForEach(model.value) { element in
-          HStack {
-            TextField("", text: binding(for: element.id))
-              .frame(maxWidth: .infinity, alignment: .leading)
+    VStack {
+      ForEach(model.value) { element in
+        HStack {
+          TextField("", text: binding(for: element.id))
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            let index = findElementIndex(element)
-            Button(action: { moveUp(index: index) }) {
-              Image(systemName: "arrow.up")
-            }
-            .disabled(index == 0)
-            .buttonStyle(BorderlessButtonStyle())
-
-            Button(action: { moveDown(index: index) }) {
-              Image(systemName: "arrow.down")
-            }
-            .disabled(index == model.value.count - 1)
-            .buttonStyle(BorderlessButtonStyle())
-
-            Button(action: { remove(at: index) }) {
-              Image(systemName: "minus")
-            }
-            .buttonStyle(BorderlessButtonStyle())
-
-            Button(action: { add(at: index) }) {
-              Image(systemName: "plus")
-            }
-            .buttonStyle(BorderlessButtonStyle())
+          let index = findElementIndex(element)
+          Button(action: { moveUp(index: index) }) {
+            Image(systemName: "arrow.up")
           }
-        }
+          .disabled(index == 0)
+          .buttonStyle(BorderlessButtonStyle())
 
-        Button(action: { add(at: model.value.count) }) {
-          Image(systemName: "plus")
+          Button(action: { moveDown(index: index) }) {
+            Image(systemName: "arrow.down")
+          }
+          .disabled(index == model.value.count - 1)
+          .buttonStyle(BorderlessButtonStyle())
+
+          Button(action: { remove(at: index) }) {
+            Image(systemName: "minus")
+          }
+          .buttonStyle(BorderlessButtonStyle())
+
+          Button(action: { add(at: index) }) {
+            Image(systemName: "plus")
+          }
+          .buttonStyle(BorderlessButtonStyle())
         }
-        .buttonStyle(BorderlessButtonStyle())
-        .frame(maxWidth: .infinity, alignment: .trailing)
       }
+
+      Button(action: { add(at: model.value.count) }) {
+        Image(systemName: "plus")
+      }
+      .buttonStyle(BorderlessButtonStyle())
+      .frame(maxWidth: .infinity, alignment: .trailing)
     }
   }
 
@@ -247,26 +256,57 @@ struct StringListOptionView: View {
   }
 }
 
-func buildViewImpl(config: Config) -> any View {
-  switch config.kind {
-  case .group(let children):
-    let form = Form {
+struct GroupOptionView: OptionView {
+  let label: String
+  let overrideLabel: String? = nil
+  let children: [Config]
+
+  var body: some View {
+    Grid(alignment: .topLeading) {
       ForEach(children) { child in
-        buildView(config: child)
-      }
-    }
-    if config.path == "" {
-      // Top-level group
-      return form
-    } else {
-      // A subgroup.
-      return LabeledContent(config.description) {
-        GroupBox {
-          form.padding()
+        let subView = buildViewImpl(config: child)
+        let subLabel = Text(subView.overrideLabel ?? subView.label)
+        if subView is GroupOptionView {
+          // If this is a nested group, put it inside a box, and let
+          // it span two columns.
+          GridRow {
+            subLabel
+              .font(.title3)
+              .gridCellColumns(2)
+          }
+          GridRow {
+            GroupBox {
+              AnyView(subView)
+            }.gridCellColumns(2)
+          }
+        } else {
+          // Otherwise, put the label in the left column and the
+          // content in the right column.
+          GridRow {
+            subLabel
+              .frame(minWidth: 100, maxWidth: 400, alignment: .trailing)
+            AnyView(subView)
+          }
         }
       }
     }
+  }
+}
 
+struct UnsupportedOptionView: OptionView {
+  let label = ""
+  let overrideLabel: String? = nil
+  let model: any Option
+
+  var body: some View {
+    Text("Unsupported option type \(String(describing: model))")
+  }
+}
+
+func buildViewImpl(config: Config) -> any OptionView {
+  switch config.kind {
+  case .group(let children):
+    return GroupOptionView(label: config.path == "" ? "" : config.description, children: children)
   case .option(let option):
     if let option = option as? BooleanOption {
       return BooleanOptionView(label: config.description, model: option)
@@ -281,7 +321,7 @@ func buildViewImpl(config: Config) -> any View {
     } else if let option = option as? ListOption<String> {
       return StringListOptionView(label: config.description, model: option)
     } else {
-      return Text("Unsupported option type \(String(describing: option))")
+      return UnsupportedOptionView(model: option)
     }
   }
 }
