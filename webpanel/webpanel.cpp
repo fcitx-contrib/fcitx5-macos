@@ -104,7 +104,7 @@ void WebPanel::update(UserInterfaceComponent component,
         updatePanelShowFlags(!candidates.empty(), PanelShowFlag::HasCandidates);
         dynamic_cast<MacosInputContext *>(inputContext)
             ->forcePreedit((panelShow_ & PanelShowFlag::HasPreedit) |
-                           (panelShow_ & PanelShowFlag::HasPreedit));
+                           (panelShow_ & PanelShowFlag::HasCandidates));
         showAsync(panelShow_);
         break;
     }
