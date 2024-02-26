@@ -82,6 +82,7 @@ public:
     void deleteSurroundingTextImpl(int offset, unsigned int size) override {}
     void forwardKeyImpl(const ForwardKeyEvent &key) override {}
     void updatePreeditImpl() override;
+    void forcePreedit(bool show);
 
     std::pair<double, double> getCursorCoordinates(bool followCursor);
     id client() { return client_; }
@@ -89,6 +90,7 @@ public:
 private:
     MacosFrontend *frontend_;
     id client_;
+    bool preeditEmpty = true; // the fake preedit doesn't count here
 };
 
 class MacosFrontendFactory : public AddonFactory {
