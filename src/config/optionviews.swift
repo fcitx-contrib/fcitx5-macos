@@ -29,17 +29,19 @@ struct StringOptionView: OptionView {
   }
 }
 
+let numberFormatter: NumberFormatter = {
+  let formatter = NumberFormatter()
+  formatter.numberStyle = .decimal
+  formatter.allowsFloats = false
+  formatter.usesGroupingSeparator = false
+  return formatter
+}()
+
 struct IntegerOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
   @ObservedObject var model: IntegerOption
-  let numberFormatter: NumberFormatter = {
-    let formatter = NumberFormatter()
-    formatter.numberStyle = .decimal
-    formatter.allowsFloats = false
-    formatter.usesGroupingSeparator = false
-    return formatter
-  }()
+
   var body: some View {
     ZStack(alignment: .trailing) {
       TextField(label, value: $model.value, formatter: numberFormatter)
@@ -66,6 +68,26 @@ struct IntegerOptionView: OptionView {
           model.value += 1
         } label: {
           Image(systemName: "plus")
+        }
+      }
+    }
+  }
+}
+
+struct ColorOptionView: OptionView {
+  let label: String
+  let overrideLabel: String? = nil
+  @ObservedObject var model: ColorOption
+  var body: some View {
+    HStack {
+      ColorPicker("", selection: $model.rgb, supportsOpacity: true)
+      Text("Alpha (0-255)")
+      TextField("", value: $model.alpha, formatter: numberFormatter).onChange(of: model.alpha) {
+        newValue in
+        if newValue > 255 {
+          model.alpha = 255
+        } else if newValue < 0 {
+          model.alpha = 0
         }
       }
     }
@@ -318,6 +340,8 @@ func buildViewImpl(config: Config) -> any OptionView {
       return EnumOptionView(label: config.description, model: option)
     } else if let option = option as? IntegerOption {
       return IntegerOptionView(label: config.description, model: option)
+    } else if let option = option as? ColorOption {
+      return ColorOptionView(label: config.description, model: option)
     } else if let option = option as? ListOption<String> {
       return StringListOptionView(label: config.description, model: option)
     } else {

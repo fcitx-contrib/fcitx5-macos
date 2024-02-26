@@ -134,6 +134,68 @@ class IntegerOption: Option, ObservableObject {
   }
 }
 
+func stringToColor(_ hex: String) -> Color {
+  let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+  var rgbValue: UInt64 = 0
+
+  Scanner(string: hex).scanHexInt64(&rgbValue)
+
+  let hasAlpha = hex.count > 6
+  let alpha = hasAlpha ? Double(rgbValue & 0xFF) / 255.0 : 1.0
+  if hasAlpha {
+    rgbValue >>= 8
+  }
+  let red = Double((rgbValue & 0xFF0000) >> 16) / 255.0
+  let green = Double((rgbValue & 0x00FF00) >> 8) / 255.0
+  let blue = Double(rgbValue & 0x0000FF) / 255.0
+
+  return Color(.sRGB, red: red, green: green, blue: blue, opacity: alpha)
+}
+
+func colorToString(_ color: Color) -> String {
+  let components = color.cgColor!.components!
+  let red = UInt8(round(components[0] * 255.0))
+  let green = UInt8(round(components[1] * 255.0))
+  let blue = UInt8(round(components[2] * 255.0))
+  let alpha = UInt8(round(components[3] * 255.0))
+
+  return String(format: "#%02X%02X%02X%02X", red, green, blue, alpha)
+}
+
+class ColorOption: Option, ObservableObject {
+  let defaultValue: Color
+  // Prior to macOS 14.0, ColorPicker doesn't support alpha
+  var value: Color {
+    let s = colorToString(rgb)
+    return stringToColor(String(format: "%@%02X", String(s.prefix(s.count - 2)), alpha))
+  }
+  @Published var rgb: Color
+  @Published var alpha: Int
+
+  required init(defaultValue: String, value: String?) {
+    self.defaultValue = stringToColor(defaultValue)
+    let rgb = value == nil ? self.defaultValue : stringToColor(value!)
+    self.rgb = rgb
+    self.alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
+  }
+
+  static func decode(json: JSON) throws -> Self {
+    return Self(
+      defaultValue: try String.decode(json: json["DefaultValue"]),
+      value: try String?.decode(json: json["Value"])
+    )
+  }
+
+  func encodeValueJSON() -> JSON {
+    return colorToString(value).encodeValueJSON()
+  }
+
+  func resetToDefault() {
+    rgb = defaultValue
+    alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
+  }
+}
+
 class EnumOption: Option, ObservableObject {
   let defaultValue: String
   let enumStrings: [String]
