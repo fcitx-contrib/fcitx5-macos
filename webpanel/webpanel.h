@@ -11,6 +11,8 @@
 #include "candidate_window.hpp"
 #include "webview_candidate_window.hpp"
 
+#define BORDER_WIDTH_MAX 10
+
 namespace candidate_window {
 FCITX_CONFIG_ENUM_NAME_WITH_I18N(theme_t, N_("System"), N_("Light"), N_("Dark"))
 FCITX_CONFIG_ENUM_NAME_WITH_I18N(layout_t, N_("Horizontal"), N_("Vertical"))
@@ -24,14 +26,18 @@ struct NoSaveAnnotation {
     void dumpDescription(RawConfig &config) const {}
 };
 
-FCITX_CONFIGURATION(LightModeConfig,
-                    Option<bool> overrideDefault{this, "OverrideDefault",
-                                                 _("Override default"), false};
-                    Option<Color> highlightColor{this, "HighlightColor",
-                                                 "Highlight color",
-                                                 Color(0, 0, 255, 255)};
-                    Option<Color> panelColor{this, "PanelColor", "Panel color",
-                                             Color(255, 255, 255, 255)};);
+FCITX_CONFIGURATION(
+    LightModeConfig, Option<bool> overrideDefault{this, "OverrideDefault",
+                                                  _("Override default"), false};
+    Option<Color> highlightColor{this, "HighlightColor", "Highlight color",
+                                 Color(0, 0, 255, 255)};
+    Option<Color> panelColor{this, "PanelColor", "Panel color",
+                             Color(255, 255, 255, 255)};
+    Option<Color> borderColor{this, "BorderColor", "Border color",
+                              Color(0, 0, 0, 255)};
+    Option<Color> horizontalDividerColor{this, "HorizontalDividerColor",
+                                         "Horizontal divider color",
+                                         Color(0, 0, 0, 255)};);
 
 FCITX_CONFIGURATION(
     DarkModeConfig, Option<bool> overrideDefault{this, "OverrideDefault",
@@ -41,7 +47,12 @@ FCITX_CONFIGURATION(
     Option<Color> highlightColor{this, "HighlightColor", "Highlight color",
                                  Color(0, 0, 255, 255)};
     Option<Color> panelColor{this, "PanelColor", "Panel color",
-                             Color(255, 255, 255, 255)};);
+                             Color(255, 255, 255, 255)};
+    Option<Color> borderColor{this, "BorderColor", "Border color",
+                              Color(0, 0, 0, 255)};
+    Option<Color> horizontalDividerColor{this, "HorizontalDividerColor",
+                                         "Horizontal divider color",
+                                         Color(0, 0, 0, 255)};);
 
 FCITX_CONFIGURATION(
     WebPanelConfig,
@@ -59,7 +70,15 @@ FCITX_CONFIGURATION(
                                 true};
     Option<int, IntConstrain> blurRadius{
         this, "BlurRadius", _("Radius of blur (px)"), 16, IntConstrain(1, 32)};
-    Option<bool> shadow{this, "Shadow", _("Shadow"), true};);
+    Option<bool> shadow{this, "Shadow", _("Shadow"), true};
+    Option<int, IntConstrain> borderWidth{this, "BorderWidth",
+                                          _("Border width (px)"), 1,
+                                          IntConstrain(0, BORDER_WIDTH_MAX)};
+    Option<int, IntConstrain> borderRadius{
+        this, "BorderRadius", _("Border radius (px)"), 6, IntConstrain(0, 100)};
+    Option<int, IntConstrain> horizontalDividerWidth{
+        this, "HorizontalDividerWidth", _("Horizontal divider width (px)"), 1,
+        IntConstrain(0, BORDER_WIDTH_MAX)};);
 
 enum class PanelShowFlag : int;
 using PanelShowFlags = fcitx::Flags<PanelShowFlag>;
