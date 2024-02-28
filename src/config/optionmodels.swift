@@ -49,7 +49,7 @@ enum ConfigKind {
 // For type-erasure.
 // Typed data are stored in the `FooOption` structs.
 protocol Option: FcitxCodable {
-  associatedtype Storage
+  associatedtype Storage: FcitxCodable
   var value: Storage { get }
   func resetToDefault()
 }
@@ -134,7 +134,41 @@ class IntegerOption: Option, ObservableObject {
   }
 }
 
-func stringToColor(_ hex: String) -> Color {
+class ColorOption: Option, ObservableObject {
+  let defaultValue: Color
+  // Prior to macOS 14.0, ColorPicker doesn't support alpha
+  var value: Color {
+    let s = colorToString(rgb)
+    return stringToColor(String(format: "%@%02X", String(s.prefix(s.count - 2)), alpha))
+  }
+  @Published var rgb: Color
+  @Published var alpha: Int
+
+  required init(defaultValue: Color, value: Color?) {
+    self.defaultValue = defaultValue
+    let rgb = value ?? self.defaultValue
+    self.rgb = rgb
+    self.alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
+  }
+
+  static func decode(json: JSON) throws -> Self {
+    return Self(
+      defaultValue: try Color.decode(json: json["DefaultValue"]),
+      value: try Color?.decode(json: json["Value"])
+    )
+  }
+
+  func encodeValueJSON() -> JSON {
+    return value.encodeValueJSON()
+  }
+
+  func resetToDefault() {
+    rgb = defaultValue
+    alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
+  }
+}
+
+private func stringToColor(_ hex: String) -> Color {
   let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
   var rgbValue: UInt64 = 0
 
@@ -152,7 +186,7 @@ func stringToColor(_ hex: String) -> Color {
   return Color(.sRGB, red: red, green: green, blue: blue, opacity: alpha)
 }
 
-func colorToString(_ color: Color) -> String {
+private func colorToString(_ color: Color) -> String {
   let components = color.cgColor!.components!
   let red = UInt8(round(components[0] * 255.0))
   let green = UInt8(round(components[1] * 255.0))
@@ -162,37 +196,14 @@ func colorToString(_ color: Color) -> String {
   return String(format: "#%02X%02X%02X%02X", red, green, blue, alpha)
 }
 
-class ColorOption: Option, ObservableObject {
-  let defaultValue: Color
-  // Prior to macOS 14.0, ColorPicker doesn't support alpha
-  var value: Color {
-    let s = colorToString(rgb)
-    return stringToColor(String(format: "%@%02X", String(s.prefix(s.count - 2)), alpha))
-  }
-  @Published var rgb: Color
-  @Published var alpha: Int
-
-  required init(defaultValue: String, value: String?) {
-    self.defaultValue = stringToColor(defaultValue)
-    let rgb = value == nil ? self.defaultValue : stringToColor(value!)
-    self.rgb = rgb
-    self.alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
-  }
-
+extension Color: FcitxCodable {
   static func decode(json: JSON) throws -> Self {
-    return Self(
-      defaultValue: try String.decode(json: json["DefaultValue"]),
-      value: try String?.decode(json: json["Value"])
-    )
+    let colorStr = try String.decode(json: json)
+    return stringToColor(colorStr)
   }
 
   func encodeValueJSON() -> JSON {
-    return colorToString(value).encodeValueJSON()
-  }
-
-  func resetToDefault() {
-    rgb = defaultValue
-    alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
+    return colorToString(self).encodeValueJSON()
   }
 }
 
@@ -237,12 +248,12 @@ extension EnumOption: CustomStringConvertible {
   }
 }
 
-class ListOption<T: FcitxCodable>: Option, ObservableObject {
-  let defaultValue: [T]
-  @Published var value: [Identified<T>]
+class ListOption<T: Option>: Option, ObservableObject {
+  let defaultValue: [T.Storage]
+  @Published var value: [Identified<T.Storage>]
   let elementType: String
 
-  required init(defaultValue: [T], value: [T]?, elementType: String) {
+  required init(defaultValue: [T.Storage], value: [T.Storage]?, elementType: String) {
     self.defaultValue = defaultValue
     self.value = (value ?? defaultValue).map { Identified(value: $0) }
     self.elementType = elementType
@@ -250,8 +261,8 @@ class ListOption<T: FcitxCodable>: Option, ObservableObject {
 
   static func decode(json: JSON) throws -> Self {
     return Self(
-      defaultValue: try [T].decode(json: json["DefaultValue"]),
-      value: try [T]?.decode(json: json["Value"]),
+      defaultValue: try [T.Storage].decode(json: json["DefaultValue"]),
+      value: try [T.Storage]?.decode(json: json["Value"]),
       elementType: json["Type"].stringValue
     )
   }
@@ -272,7 +283,7 @@ extension ListOption: CustomStringConvertible {
 }
 
 struct ExternalOption: Option, FcitxCodable {
-  let value: () = ()
+  let value = UnusedCodable()
   let option: String
   let external: String
 
@@ -291,7 +302,7 @@ struct ExternalOption: Option, FcitxCodable {
 }
 
 struct UnknownOption: Option {
-  let value: () = ()
+  let value = UnusedCodable()
   let type: String
   let raw: JSON
 

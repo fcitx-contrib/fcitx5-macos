@@ -199,7 +199,7 @@ struct EnumOptionView: OptionView {
 struct StringListOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
-  @ObservedObject var model: ListOption<String>
+  @ObservedObject var model: ListOption<StringOption>
 
   var body: some View {
     VStack {
@@ -342,7 +342,7 @@ func buildViewImpl(config: Config) -> any OptionView {
       return IntegerOptionView(label: config.description, model: option)
     } else if let option = option as? ColorOption {
       return ColorOptionView(label: config.description, model: option)
-    } else if let option = option as? ListOption<String> {
+    } else if let option = option as? ListOption<StringOption> {
       return StringListOptionView(label: config.description, model: option)
     } else {
       return UnsupportedOptionView(model: option)
@@ -379,7 +379,8 @@ let testConfig = Config(
     Config(
       path: "list", description: "List test",
       kind: .option(
-        ListOption(defaultValue: ["a", "b", "c"], value: ["c", "d"], elementType: "String"))
+        ListOption<StringOption>(
+          defaultValue: ["a", "b", "c"], value: ["c", "d"], elementType: "String"))
     ),
   ]))
 
