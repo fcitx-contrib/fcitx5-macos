@@ -196,17 +196,16 @@ struct EnumOptionView: OptionView {
   }
 }
 
-struct StringListOptionView: OptionView {
+struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
   let label: String
   let overrideLabel: String? = nil
-  @ObservedObject var model: ListOption<StringOption>
+  @ObservedObject var model: ListOption<T>
 
   var body: some View {
     VStack {
       ForEach(model.value) { element in
         HStack {
-          TextField("", text: binding(for: element.id))
-            .frame(maxWidth: .infinity, alignment: .leading)
+          AnyView(buildViewImpl(label: "", option: element.value))
 
           let index = findElementIndex(element)
           Button(action: { moveUp(index: index) }) {
@@ -241,24 +240,26 @@ struct StringListOptionView: OptionView {
     }
   }
 
-  private func binding(for id: UUID) -> Binding<String> {
+  private func binding(for id: UUID) -> Binding<T.Storage?> {
     return Binding(
-      get: { self.model.value.first { $0.id == id }?.value ?? "" },
+      get: { self.model.value.first { $0.id == id }?.value.value },
       set: { newValue in
-        if let index = self.model.value.firstIndex(where: { $0.id == id }) {
-          self.model.value[index].value = newValue
+        if let newValue = newValue,
+          let index = self.model.value.firstIndex(where: { $0.id == id })
+        {
+          self.model.value[index].value.value = newValue
         }
       }
     )
   }
 
-  private func findElementIndex(_ element: Identified<String>) -> Int {
+  private func findElementIndex(_ element: Identified<T>) -> Int {
     // SAFETY: element should be inside the array.
     return model.value.firstIndex(where: { $0.id == element.id })!
   }
 
   private func add(at index: Int) {
-    model.value.insert(Identified(value: ""), at: index)
+    model.addEmpty(at: index)
   }
 
   private func remove(at index: Int) {
@@ -325,28 +326,34 @@ struct UnsupportedOptionView: OptionView {
   }
 }
 
+func buildViewImpl(label: String, option: any Option) -> any OptionView {
+  if let option = option as? BooleanOption {
+    return BooleanOptionView(label: label, model: option)
+  } else if let option = option as? StringOption {
+    return StringOptionView(label: label, model: option)
+  } else if let option = option as? ExternalOption {
+    return ExternalOptionView(label: label, model: option)
+  } else if let option = option as? EnumOption {
+    return EnumOptionView(label: label, model: option)
+  } else if let option = option as? IntegerOption {
+    return IntegerOptionView(label: label, model: option)
+  } else if let option = option as? ColorOption {
+    return ColorOptionView(label: label, model: option)
+  } else if let option = option as? ListOption<StringOption> {
+    return ListOptionView<StringOption>(label: label, model: option)
+  } else if let option = option as? ListOption<EnumOption> {
+    return ListOptionView<EnumOption>(label: label, model: option)
+  } else {
+    return UnsupportedOptionView(model: option)
+  }
+}
+
 func buildViewImpl(config: Config) -> any OptionView {
   switch config.kind {
   case .group(let children):
     return GroupOptionView(label: config.path == "" ? "" : config.description, children: children)
   case .option(let option):
-    if let option = option as? BooleanOption {
-      return BooleanOptionView(label: config.description, model: option)
-    } else if let option = option as? StringOption {
-      return StringOptionView(label: config.description, model: option)
-    } else if let option = option as? ExternalOption {
-      return ExternalOptionView(label: config.description, model: option)
-    } else if let option = option as? EnumOption {
-      return EnumOptionView(label: config.description, model: option)
-    } else if let option = option as? IntegerOption {
-      return IntegerOptionView(label: config.description, model: option)
-    } else if let option = option as? ColorOption {
-      return ColorOptionView(label: config.description, model: option)
-    } else if let option = option as? ListOption<StringOption> {
-      return StringListOptionView(label: config.description, model: option)
-    } else {
-      return UnsupportedOptionView(model: option)
-    }
+    return buildViewImpl(label: config.description, option: option)
   }
 }
 
@@ -376,12 +383,12 @@ let testConfig = Config(
     Config(
       path: "interval", description: "int test",
       kind: .option(IntegerOption(defaultValue: 0, value: 10, min: 0, max: 1000))),
-    Config(
-      path: "list", description: "List test",
-      kind: .option(
-        ListOption<StringOption>(
-          defaultValue: ["a", "b", "c"], value: ["c", "d"], elementType: "String"))
-    ),
+    // Config(
+    //   path: "list", description: "List test",
+    //   kind: .option(
+    //     ListOption(
+    //       defaultValue: ["a", "b", "c"], value: ["c", "d"], elementType: "String"))
+    // ),
   ]))
 
 #Preview {

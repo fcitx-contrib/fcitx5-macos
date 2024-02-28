@@ -93,6 +93,8 @@ private func jsonToOption(_ json: JSON, _ type: String) throws -> any Option {
   } else if type == "List|Key" {
     // TODO
     return try ListOption<StringOption>.decode(json: json)
+  } else if type == "List|Enum" {
+    return try ListOption<EnumOption>.decode(json: json)
   } else if type == "External" {
     return try ExternalOption.decode(json: json)
   } else {

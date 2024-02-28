@@ -50,7 +50,7 @@ enum ConfigKind {
 // Typed data are stored in the `FooOption` structs.
 protocol Option: FcitxCodable {
   associatedtype Storage: FcitxCodable
-  var value: Storage { get }
+  var value: Storage { get set }
   func resetToDefault()
 }
 
@@ -94,14 +94,14 @@ class SimpleOption<T: FcitxCodable>: Option, ObservableObject {
   }
 }
 
-extension IntegerOption: CustomStringConvertible {
-  var description: String {
-    return "\(value) (was \(defaultValue))"
-  }
-}
-
 typealias BooleanOption = SimpleOption<Bool>
 typealias StringOption = SimpleOption<String>
+
+extension StringOption: EmptyConstructible {
+  static func empty(json: JSON) throws -> Self {
+    return Self(defaultValue: "", value: "")
+  }
+}
 
 class IntegerOption: Option, ObservableObject {
   let defaultValue: Int
@@ -134,21 +134,42 @@ class IntegerOption: Option, ObservableObject {
   }
 }
 
+extension IntegerOption: CustomStringConvertible {
+  var description: String {
+    return "\(value) (was \(defaultValue))"
+  }
+}
+
 class ColorOption: Option, ObservableObject {
+  typealias Storage = Color
   let defaultValue: Color
   // Prior to macOS 14.0, ColorPicker doesn't support alpha
   var value: Color {
-    let s = colorToString(rgb)
-    return stringToColor(String(format: "%@%02X", String(s.prefix(s.count - 2)), alpha))
+    didSet { updateRGBA() }
   }
-  @Published var rgb: Color
-  @Published var alpha: Int
+  @Published var rgb: Color {
+    didSet { updateColor() }
+  }
+  @Published var alpha: Int {
+    didSet { updateColor() }
+  }
 
   required init(defaultValue: Color, value: Color?) {
     self.defaultValue = defaultValue
-    let rgb = value ?? self.defaultValue
+    let rgb = value ?? defaultValue
     self.rgb = rgb
     self.alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
+    self.value = value ?? defaultValue
+  }
+
+  func updateRGBA() {
+    rgb = value
+    alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
+  }
+
+  func updateColor() {
+    let s = colorToString(rgb)
+    value = stringToColor(String(format: "%@%02X", String(s.prefix(s.count - 2)), alpha))
   }
 
   static func decode(json: JSON) throws -> Self {
@@ -163,8 +184,7 @@ class ColorOption: Option, ObservableObject {
   }
 
   func resetToDefault() {
-    rgb = defaultValue
-    alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
+    value = defaultValue
   }
 }
 
@@ -207,7 +227,7 @@ extension Color: FcitxCodable {
   }
 }
 
-class EnumOption: Option, ObservableObject {
+class EnumOption: Option, ObservableObject, EmptyConstructible {
   let defaultValue: String
   let enumStrings: [String]
   let enumStringsI18n: [String]
@@ -223,13 +243,12 @@ class EnumOption: Option, ObservableObject {
   }
 
   static func decode(json: JSON) throws -> Self {
-    let enums = try [String].decode(json: json["Enum"])
-    let enumsi18n = try [String].decode(json: json["EnumI18n"])
+    let obj = try Self.empty(json: json)
     return Self(
       defaultValue: json["DefaultValue"].stringValue,
       value: json["Value"].string,
-      enumStrings: enums,
-      enumStringsI18n: enumsi18n.count < enums.count ? enums : enumsi18n
+      enumStrings: obj.enumStrings,
+      enumStringsI18n: obj.enumStringsI18n
     )
   }
 
@@ -240,6 +259,17 @@ class EnumOption: Option, ObservableObject {
   func resetToDefault() {
     value = defaultValue
   }
+
+  static func empty(json: JSON) throws -> Self {
+    let enums = try [String].decode(json: json["Enum"])
+    let enumsi18n = try [String].decode(json: json["EnumI18n"])
+    return Self(
+      defaultValue: "",
+      value: "",
+      enumStrings: enums,
+      enumStringsI18n: enumsi18n.count < enums.count ? enums : enumsi18n
+    )
+  }
 }
 
 extension EnumOption: CustomStringConvertible {
@@ -248,22 +278,37 @@ extension EnumOption: CustomStringConvertible {
   }
 }
 
-class ListOption<T: Option>: Option, ObservableObject {
-  let defaultValue: [T.Storage]
-  @Published var value: [Identified<T.Storage>]
-  let elementType: String
+/// Construct an "empty" object from the json document, in the sense
+/// that Value and DefaultValue can be uninitialized.
+protocol EmptyConstructible {
+  static func empty(json: JSON) throws -> Self
+}
 
-  required init(defaultValue: [T.Storage], value: [T.Storage]?, elementType: String) {
+class ListOption<T: Option & EmptyConstructible>: Option, ObservableObject {
+  let defaultValue: [T]
+  @Published var value: [Identified<T>]
+  let elementType: String
+  let raw: JSON
+
+  required init(defaultValue: [T], value: [T]?, elementType: String, raw: JSON) {
     self.defaultValue = defaultValue
     self.value = (value ?? defaultValue).map { Identified(value: $0) }
     self.elementType = elementType
+    self.raw = raw
   }
 
   static func decode(json: JSON) throws -> Self {
+    let defaultOptions = try [T.Storage].decode(json: json["DefaultValue"]).map {
+      try T.decode(json: try json.merged(with: ["DefaultValue": $0, "Value": $0]))
+    }
+    let options = try [T.Storage].decode(json: json["Value"]).map {
+      try T.decode(json: try json.merged(with: ["DefaultValue": $0, "Value": $0]))
+    }
     return Self(
-      defaultValue: try [T.Storage].decode(json: json["DefaultValue"]),
-      value: try [T.Storage]?.decode(json: json["Value"]),
-      elementType: json["Type"].stringValue
+      defaultValue: defaultOptions,
+      value: options,
+      elementType: json["Type"].stringValue,
+      raw: json
     )
   }
 
@@ -274,6 +319,17 @@ class ListOption<T: Option>: Option, ObservableObject {
   func resetToDefault() {
     value = defaultValue.map { Identified(value: $0) }
   }
+
+  func addEmpty(at index: Int) {
+    do {
+      let newOpt = try T.empty(json: raw)
+      self.value.insert(Identified(value: newOpt), at: index)
+    } catch {
+      FCITX_ERROR(
+        "Cannot add new elements because I cannot construct empty objects: \(error.localizedDescription)"
+      )
+    }
+  }
 }
 
 extension ListOption: CustomStringConvertible {
@@ -283,7 +339,8 @@ extension ListOption: CustomStringConvertible {
 }
 
 struct ExternalOption: Option, FcitxCodable {
-  let value = UnusedCodable()
+  typealias Storage = UnusedCodable
+  var value = UnusedCodable()
   let option: String
   let external: String
 
@@ -302,7 +359,8 @@ struct ExternalOption: Option, FcitxCodable {
 }
 
 struct UnknownOption: Option {
-  let value = UnusedCodable()
+  typealias Storage = UnusedCodable
+  var value = UnusedCodable()
   let type: String
   let raw: JSON
 
