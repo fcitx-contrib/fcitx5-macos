@@ -54,6 +54,15 @@ FCITX_CONFIGURATION(
                                          "Horizontal divider color",
                                          Color(0, 0, 0, 255)};);
 
+FCITX_CONFIGURATION(BackgroundConfig,
+                    Option<std::string> imageUrl{this, "ImageUrl",
+                                                 _("Image URL"), ""};
+                    Option<bool> blur{this, "Blur", _("Blur"), true};
+                    Option<int, IntConstrain> blurRadius{
+                        this, "BlurRadius", _("Radius of blur (px)"), 16,
+                        IntConstrain(1, 32)};
+                    Option<bool> shadow{this, "Shadow", _("Shadow"), true};);
+
 FCITX_CONFIGURATION(
     WebPanelConfig,
 
@@ -66,11 +75,7 @@ FCITX_CONFIGURATION(
     Option<DarkModeConfig> darkMode{this, "DarkMode", _("Dark mode")};
     Option<candidate_window::layout_t> layout{
         this, "Layout", _("Layout"), candidate_window::layout_t::horizontal};
-    Option<bool> backgroundBlur{this, "BackgroundBlur", _("Background blur"),
-                                true};
-    Option<int, IntConstrain> blurRadius{
-        this, "BlurRadius", _("Radius of blur (px)"), 16, IntConstrain(1, 32)};
-    Option<bool> shadow{this, "Shadow", _("Shadow"), true};
+    Option<BackgroundConfig> background{this, "Background", _("Background")};
     Option<int, IntConstrain> borderWidth{this, "BorderWidth",
                                           _("Border width (px)"), 1,
                                           IntConstrain(0, BORDER_WIDTH_MAX)};
