@@ -144,9 +144,7 @@ class ColorOption: Option, ObservableObject {
   typealias Storage = Color
   let defaultValue: Color
   // Prior to macOS 14.0, ColorPicker doesn't support alpha
-  var value: Color {
-    didSet { updateRGBA() }
-  }
+  var value: Color
   @Published var rgb: Color {
     didSet { updateColor() }
   }
@@ -185,6 +183,7 @@ class ColorOption: Option, ObservableObject {
 
   func resetToDefault() {
     value = defaultValue
+    updateRGBA()
   }
 }
 
