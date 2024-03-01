@@ -89,10 +89,12 @@ private func jsonToOption(_ json: JSON, _ type: String) throws -> any Option {
   } else if type == "Color" {
     return try ColorOption.decode(json: json)
   } else if type == "List|String" {
-    return try ListOption<String>.decode(json: json)
+    return try ListOption<StringOption>.decode(json: json)
   } else if type == "List|Key" {
     // TODO
-    return try ListOption<String>.decode(json: json)
+    return try ListOption<StringOption>.decode(json: json)
+  } else if type == "List|Enum" {
+    return try ListOption<EnumOption>.decode(json: json)
   } else if type == "External" {
     return try ExternalOption.decode(json: json)
   } else {
@@ -218,6 +220,22 @@ extension Optional: FcitxCodable where Wrapped: FcitxCodable {
     } else {
       return JSON()
     }
+  }
+}
+
+struct UnusedCodable {}
+
+extension UnusedCodable: FcitxCodable {
+  static func decode(json: JSON) throws -> Self {
+    // should never be decoded
+    assert(false)
+    return UnusedCodable()
+  }
+
+  func encodeValueJSON() -> JSON {
+    // Should never be encoded
+    assert(false)
+    return JSON()
   }
 }
 
