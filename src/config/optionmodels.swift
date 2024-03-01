@@ -157,12 +157,7 @@ class ColorOption: Option, ObservableObject {
     let rgb = value ?? defaultValue
     self.rgb = rgb
     self.alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
-    self.value = value ?? defaultValue
-  }
-
-  func updateRGBA() {
-    rgb = value
-    alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
+    self.value = rgb
   }
 
   func updateColor() {
@@ -182,8 +177,8 @@ class ColorOption: Option, ObservableObject {
   }
 
   func resetToDefault() {
-    value = defaultValue
-    updateRGBA()
+    rgb = defaultValue
+    alpha = Int(round(rgb.cgColor!.components![3] * 255.0))
   }
 }
 
