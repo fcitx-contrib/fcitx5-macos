@@ -297,6 +297,10 @@ struct PluginView: View {
           ForEach(pluginVM.availablePlugins) { plugin in
             Text(plugin.id)
           }
+        }.contextMenu(forSelectionType: String.self) { items in
+        } primaryAction: { items in
+          // Double click
+          install()
         }
         Button("Install", action: install).disabled(selectedAvailable.isEmpty || processing)
       }
