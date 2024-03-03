@@ -301,7 +301,10 @@ struct FontOptionView: OptionView {
     if searchInput.trimmingCharacters(in: .whitespaces).isEmpty {
       return availableFontFamilies
     } else {
-      return availableFontFamilies.filter { $0.localizedCaseInsensitiveContains(searchInput) }
+      return availableFontFamilies.filter {
+        $0.localizedCaseInsensitiveContains(searchInput)
+          || localize($0).localizedCaseInsensitiveContains(searchInput)
+      }
     }
   }
   @State private var selectedFontFamily: String?
@@ -311,7 +314,7 @@ struct FontOptionView: OptionView {
       if model.value.isEmpty {
         Text("Select font")
       } else {
-        Text(model.value)
+        Text(localize(model.value))
       }
     }
     .sheet(isPresented: $selectorIsOpen) {
@@ -319,7 +322,7 @@ struct FontOptionView: OptionView {
         TextField("Search", text: $searchInput)
         List(selection: $selectedFontFamily) {
           ForEach(filteredFontFamilies, id: \.self) { family in
-            Text(family)
+            Text(localize(family))
           }
         }
         HStack {
@@ -343,6 +346,10 @@ struct FontOptionView: OptionView {
   private func openSelector() {
     availableFontFamilies = NSFontManager.shared.availableFontFamilies
     selectorIsOpen = true
+  }
+
+  private func localize(_ fontFamily: String) -> String {
+    return NSFontManager.shared.localizedName(forFamily: fontFamily, face: nil)
   }
 }
 
