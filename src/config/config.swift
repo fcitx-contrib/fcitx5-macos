@@ -89,6 +89,9 @@ private func jsonToOption(_ json: JSON, _ type: String) throws -> any Option {
   } else if type == "Color" {
     return try ColorOption.decode(json: json)
   } else if type == "List|String" {
+    if let font = json["Font"].string, font == "True" {
+      return try ListOption<FontOption>.decode(json: json)
+    }
     return try ListOption<StringOption>.decode(json: json)
   } else if type == "List|Key" {
     // TODO

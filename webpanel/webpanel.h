@@ -29,14 +29,26 @@ struct NoSaveAnnotation {
 FCITX_CONFIGURATION(
     LightModeConfig, Option<bool> overrideDefault{this, "OverrideDefault",
                                                   _("Override default"), false};
-    Option<Color> highlightColor{this, "HighlightColor", "Highlight color",
+    Option<Color> highlightColor{this, "HighlightColor", _("Highlight color"),
                                  Color(0, 0, 255, 255)};
-    Option<Color> panelColor{this, "PanelColor", "Panel color",
+    Option<Color> highlightTextColor{this, "HighlightTextColor",
+                                     _("Highlight text color"),
+                                     Color(255, 255, 255, 255)};
+    Option<Color> highlightLabelColor{this, "HighlightLabelColor",
+                                      _("Highlight label color"),
+                                      Color(255, 255, 255, 255)};
+    Option<Color> panelColor{this, "PanelColor", _("Panel color"),
                              Color(255, 255, 255, 255)};
-    Option<Color> borderColor{this, "BorderColor", "Border color",
+    Option<Color> textColor{this, "TextColor", _("Text color"),
+                            Color(0, 0, 0, 255)};
+    Option<Color> labelColor{this, "LabelColor", _("Label color"),
+                             Color(0, 0, 0, 255)};
+    Option<Color> preeditColor{this, "PreeditColor", _("Preedit color"),
+                               Color(0, 0, 0, 255)};
+    Option<Color> borderColor{this, "BorderColor", _("Border color"),
                               Color(0, 0, 0, 255)};
     Option<Color> horizontalDividerColor{this, "HorizontalDividerColor",
-                                         "Horizontal divider color",
+                                         _("Horizontal divider color"),
                                          Color(0, 0, 0, 255)};);
 
 FCITX_CONFIGURATION(
@@ -46,8 +58,20 @@ FCITX_CONFIGURATION(
                                    _("Same with light mode"), false};
     Option<Color> highlightColor{this, "HighlightColor", "Highlight color",
                                  Color(0, 0, 255, 255)};
+    Option<Color> highlightTextColor{this, "HighlightTextColor",
+                                     _("Highlight text color"),
+                                     Color(255, 255, 255, 255)};
+    Option<Color> highlightLabelColor{this, "HighlightLabelColor",
+                                      _("Highlight label color"),
+                                      Color(255, 255, 255, 255)};
     Option<Color> panelColor{this, "PanelColor", "Panel color",
                              Color(255, 255, 255, 255)};
+    Option<Color> textColor{this, "TextColor", _("Text color"),
+                            Color(0, 0, 0, 255)};
+    Option<Color> labelColor{this, "LabelColor", _("Label color"),
+                             Color(0, 0, 0, 255)};
+    Option<Color> preeditColor{this, "PreeditColor", _("Preedit color"),
+                               Color(0, 0, 0, 255)};
     Option<Color> borderColor{this, "BorderColor", "Border color",
                               Color(0, 0, 0, 255)};
     Option<Color> horizontalDividerColor{this, "HorizontalDividerColor",
@@ -63,6 +87,28 @@ FCITX_CONFIGURATION(BackgroundConfig,
                         IntConstrain(1, 32)};
                     Option<bool> shadow{this, "Shadow", _("Shadow"), true};);
 
+using FontFamilyOption =
+    OptionWithAnnotation<std::vector<std::string>, FontAnnotation>;
+
+FCITX_CONFIGURATION(
+    FontConfig,
+    FontFamilyOption textFontFamily{
+        this, "TextFontFamily", _("Text font family"), {""}};
+    Option<int, IntConstrain> textFontSize{
+        this, "TextFontSize", _("Text font size"), 16, IntConstrain(4, 100)};
+    FontFamilyOption labelFontFamily{
+        this, "LabelFontFamily", _("Label font family"), {""}};
+    Option<int, IntConstrain> labelFontSize{
+        this, "LabelFontSize", _("Label font size"), 16, IntConstrain(4, 100)};
+    FontFamilyOption preeditFontFamily{
+        this, "PreeditFontFamily", _("Preedit font family"), {""}};
+    Option<int, IntConstrain> preeditFontSize{this, "PreeditFontSize",
+                                              _("Preedit font size"), 16,
+                                              IntConstrain(4, 100)};
+    ExternalOption userFontDir{this, "UserFontDir", _("User font dir"), ""};
+    ExternalOption systemFontDir{this, "SystemFontDir", _("System font dir"),
+                                 ""};);
+
 FCITX_CONFIGURATION(
     WebPanelConfig,
 
@@ -76,6 +122,7 @@ FCITX_CONFIGURATION(
     Option<candidate_window::layout_t> layout{
         this, "Layout", _("Layout"), candidate_window::layout_t::horizontal};
     Option<BackgroundConfig> background{this, "Background", _("Background")};
+    Option<FontConfig> font{this, "Font", _("Font")};
     Option<int, IntConstrain> borderWidth{this, "BorderWidth",
                                           _("Border width (px)"), 1,
                                           IntConstrain(0, BORDER_WIDTH_MAX)};
