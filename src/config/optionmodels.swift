@@ -278,6 +278,8 @@ protocol EmptyConstructible {
   static func empty(json: JSON) throws -> Self
 }
 
+class FontOption: StringOption {}
+
 class ListOption<T: Option & EmptyConstructible>: Option, ObservableObject {
   let defaultValue: [T]
   @Published var value: [Identified<T>]

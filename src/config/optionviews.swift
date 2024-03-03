@@ -136,6 +136,14 @@ struct ExternalOptionView: OptionView {
   var body: some View {
     Button(label) {
       switch model.option {
+      case "UserFontDir":
+        let fontDir = FileManager.default.homeDirectoryForCurrentUser
+          .appendingPathComponent("Library")
+          .appendingPathComponent("Fonts")
+        NSWorkspace.shared.open(fontDir)
+      case "SystemFontDir":
+        let fontDir = URL(fileURLWithPath: "/Library/Fonts")
+        NSWorkspace.shared.open(fontDir)
       case "UserDataDir":
         let rimeUserDir = FileManager.default.homeDirectoryForCurrentUser
           .appendingPathComponent(".local")
@@ -205,6 +213,7 @@ struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
     VStack {
       ForEach(model.value) { element in
         HStack {
+          Spacer()
           AnyView(buildViewImpl(label: "", option: element.value))
 
           let index = findElementIndex(element)
@@ -279,6 +288,71 @@ struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
   }
 }
 
+struct FontOptionView: OptionView {
+  let label: String
+  let overrideLabel: String? = nil
+  @ObservedObject var model: FontOption
+  @State private var selectorIsOpen = false
+  @State var searchInput = ""
+
+  // If initialize [], the sheet will list nothing on first open.
+  @State var availableFontFamilies = NSFontManager.shared.availableFontFamilies
+  var filteredFontFamilies: [String] {
+    if searchInput.trimmingCharacters(in: .whitespaces).isEmpty {
+      return availableFontFamilies
+    } else {
+      return availableFontFamilies.filter {
+        $0.localizedCaseInsensitiveContains(searchInput)
+          || localize($0).localizedCaseInsensitiveContains(searchInput)
+      }
+    }
+  }
+  @State private var selectedFontFamily: String?
+
+  var body: some View {
+    Button(action: openSelector) {
+      if model.value.isEmpty {
+        Text("Select font")
+      } else {
+        Text(localize(model.value))
+      }
+    }
+    .sheet(isPresented: $selectorIsOpen) {
+      VStack {
+        TextField("Search", text: $searchInput)
+        List(selection: $selectedFontFamily) {
+          ForEach(filteredFontFamilies, id: \.self) { family in
+            Text(localize(family))
+          }
+        }
+        HStack {
+          Button("Cancel") {
+            selectorIsOpen = false
+          }
+          Spacer()
+          Button("Select") {
+            if let selectedFontFamily = selectedFontFamily {
+              model.value = selectedFontFamily
+            }
+            selectorIsOpen = false
+          }.disabled(selectedFontFamily == nil)
+        }
+      }
+      .padding()
+      .frame(minWidth: 400, minHeight: 400)
+    }
+  }
+
+  private func openSelector() {
+    availableFontFamilies = NSFontManager.shared.availableFontFamilies
+    selectorIsOpen = true
+  }
+
+  private func localize(_ fontFamily: String) -> String {
+    return NSFontManager.shared.localizedName(forFamily: fontFamily, face: nil)
+  }
+}
+
 struct GroupOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
@@ -329,6 +403,8 @@ struct UnsupportedOptionView: OptionView {
 func buildViewImpl(label: String, option: any Option) -> any OptionView {
   if let option = option as? BooleanOption {
     return BooleanOptionView(label: label, model: option)
+  } else if let option = option as? FontOption {
+    return FontOptionView(label: label, model: option)
   } else if let option = option as? StringOption {
     return StringOptionView(label: label, model: option)
   } else if let option = option as? ExternalOption {
@@ -339,6 +415,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return IntegerOptionView(label: label, model: option)
   } else if let option = option as? ColorOption {
     return ColorOptionView(label: label, model: option)
+  } else if let option = option as? ListOption<FontOption> {
+    return ListOptionView<FontOption>(label: label, model: option)
   } else if let option = option as? ListOption<StringOption> {
     return ListOptionView<StringOption>(label: label, model: option)
   } else if let option = option as? ListOption<EnumOption> {
