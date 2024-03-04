@@ -26,6 +26,9 @@ WebPanel::WebPanel(Instance *instance)
 void WebPanel::updateConfig() {
     window_->set_layout(config_.layout.value());
     window_->set_theme(config_.theme.value());
+    window_->set_cursor_text(config_.cursor->style.value() == CursorStyle::Text
+                                 ? config_.cursor->text.value()
+                                 : "");
     config_.preview.setValue("");
     auto style = configValueToJson(config_).dump();
     window_->set_style(style.c_str());
