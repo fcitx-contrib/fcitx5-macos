@@ -324,18 +324,18 @@ struct FontOptionView: OptionView {
           ForEach(filteredFontFamilies, id: \.self) { family in
             Text(localize(family))
           }
+        }.contextMenu(forSelectionType: String.self) { items in
+        } primaryAction: { items in
+          // Double click
+          select()
         }
         HStack {
           Button("Cancel") {
             selectorIsOpen = false
           }
           Spacer()
-          Button("Select") {
-            if let selectedFontFamily = selectedFontFamily {
-              model.value = selectedFontFamily
-            }
-            selectorIsOpen = false
-          }.disabled(selectedFontFamily == nil)
+          Button("Select", action: select)
+            .disabled(selectedFontFamily == nil)
         }
       }
       .padding()
@@ -346,6 +346,13 @@ struct FontOptionView: OptionView {
   private func openSelector() {
     availableFontFamilies = NSFontManager.shared.availableFontFamilies
     selectorIsOpen = true
+  }
+
+  private func select() {
+    if let selectedFontFamily = selectedFontFamily {
+      model.value = selectedFontFamily
+    }
+    selectorIsOpen = false
   }
 
   private func localize(_ fontFamily: String) -> String {

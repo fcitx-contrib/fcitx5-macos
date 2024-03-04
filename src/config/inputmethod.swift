@@ -218,14 +218,12 @@ struct InputMethodConfigView: View {
       VStack {
         AvailableInputMethodView(
           selection: $inputMethodsToAdd,
-          addToGroup: $addToGroup)
+          addToGroup: $addToGroup,
+          onDoubleClick: add)
         HStack {
           Button("Add") {
-            if let groupName = addToGroup?.name {
-              viewModel.addItems(groupName, inputMethodsToAdd)
-            }
+            add()
             addingInputMethod = false
-            inputMethodsToAdd = Set()
           }
           .disabled(inputMethodsToAdd.count == 0)
           Button("Cancel") {
@@ -235,6 +233,13 @@ struct InputMethodConfigView: View {
         }
       }.padding()
     }
+  }
+
+  private func add() {
+    if let groupName = addToGroup?.name {
+      viewModel.addItems(groupName, inputMethodsToAdd)
+    }
+    inputMethodsToAdd = Set()
   }
 
   private func save(_ configModel: Config) {
@@ -410,6 +415,8 @@ struct AvailableInputMethodView: View {
   @Binding var selection: Set<InputMethod>
   @Binding fileprivate var addToGroup: Group?
   @StateObject private var viewModel = ViewModel()
+  @State var enabledIMs = Set<String>()
+  var onDoubleClick: () -> Void
 
   var body: some View {
     NavigationSplitView {
@@ -420,17 +427,17 @@ struct AvailableInputMethodView: View {
       }
     } detail: {
       // Input methods for this language
-      if let selectedLanguageCode = viewModel.selectedLanguageCode {
+      if viewModel.selectedLanguageCode != nil {
         List(selection: $selection) {
-          if let ims = viewModel.availableIMs[selectedLanguageCode] {
-            let alreadyEnabled = enabledIMs()
-            let newAvailable = ims.filter { !alreadyEnabled.contains($0.uniqueName) }
-            ForEach(newAvailable, id: \.self) { im in
-              Text(im.displayName)
-            }
-          } else {
-            Text("Error: Unknown language code \(selectedLanguageCode). Please report a bug!")
+          ForEach(viewModel.availableIMsForLanguage, id: \.self) { im in
+            Text(im.displayName)
           }
+        }.contextMenu(forSelectionType: InputMethod.self) { items in
+        } primaryAction: { items in
+          onDoubleClick()
+          // Hack: enabledIMs isn't synced with group's inputMethods.
+          enabledIMs.formUnion(items.map { $0.uniqueName })
+          viewModel.refresh(enabledIMs)
         }
       } else {
         Text("Select a language from the left list.")
@@ -438,7 +445,8 @@ struct AvailableInputMethodView: View {
     }
     .frame(minWidth: 640, minHeight: 480)
     .onAppear {
-      viewModel.refresh()
+      enabledIMs = Set(addToGroup?.inputMethods.map { $0.name } ?? [])
+      viewModel.refresh(enabledIMs)
     }
     .alert(
       "Error",
@@ -453,21 +461,38 @@ struct AvailableInputMethodView: View {
     }
   }
 
-  func enabledIMs() -> Set<String> {
-    return Set(addToGroup?.inputMethods.map { $0.name } ?? [])
-  }
-
   private class ViewModel: ObservableObject {
     @Published var availableIMs = [String: [InputMethod]]()
     @Published var hasError = false
-    @Published var selectedLanguageCode: String?
+    @Published var selectedLanguageCode: String? {
+      didSet {
+        updateList()
+      }
+    }
+    @Published var alreadyEnabled = Set<String>() {
+      didSet {
+        updateList()
+      }
+    }
+    @Published var availableIMsForLanguage: [InputMethod] = []
+
     var errorMsg: String? {
       didSet {
         hasError = (errorMsg != nil)
       }
     }
 
-    func refresh() {
+    private func updateList() {
+      if let selectedLanguageCode = selectedLanguageCode {
+        if let ims = availableIMs[selectedLanguageCode] {
+          availableIMsForLanguage = ims.filter { !alreadyEnabled.contains($0.uniqueName) }
+          return
+        }
+      }
+      availableIMsForLanguage = []
+    }
+
+    func refresh(_ alreadyEnabled: Set<String>) {
       availableIMs.removeAll()
       let jsonStr = String(Fcitx.imGetAvailableIMs())
       if let jsonData = jsonStr.data(using: .utf8) {
@@ -487,6 +512,7 @@ struct AvailableInputMethodView: View {
       } else {
         errorMsg = "Cannot decode json string into UTF-8 data"
       }
+      self.alreadyEnabled = alreadyEnabled
     }
 
     fileprivate struct LocalizedLanguageCode: Comparable {
