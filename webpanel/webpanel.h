@@ -18,6 +18,10 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(theme_t, N_("System"), N_("Light"), N_("Dark"))
 FCITX_CONFIG_ENUM_NAME_WITH_I18N(layout_t, N_("Horizontal"), N_("Vertical"))
 } // namespace candidate_window
 
+enum class CursorStyle { Blink, Static, Text };
+FCITX_CONFIG_ENUM_NAME_WITH_I18N(CursorStyle, N_("Blink"), N_("Static"),
+                                 N_("Text"))
+
 namespace fcitx {
 
 struct NoSaveAnnotation {
@@ -65,15 +69,15 @@ FCITX_CONFIGURATION(
                                       _("Highlight label color"),
                                       Color(255, 255, 255, 255)};
     Option<Color> panelColor{this, "PanelColor", "Panel color",
-                             Color(255, 255, 255, 255)};
-    Option<Color> textColor{this, "TextColor", _("Text color"),
-                            Color(0, 0, 0, 255)};
-    Option<Color> labelColor{this, "LabelColor", _("Label color"),
                              Color(0, 0, 0, 255)};
+    Option<Color> textColor{this, "TextColor", _("Text color"),
+                            Color(255, 255, 255, 255)};
+    Option<Color> labelColor{this, "LabelColor", _("Label color"),
+                             Color(255, 255, 255, 255)};
     Option<Color> preeditColor{this, "PreeditColor", _("Preedit color"),
-                               Color(0, 0, 0, 255)};
+                               Color(255, 255, 255, 255)};
     Option<Color> borderColor{this, "BorderColor", "Border color",
-                              Color(0, 0, 0, 255)};
+                              Color(255, 255, 255, 255)};
     Option<Color> horizontalDividerColor{this, "HorizontalDividerColor",
                                          "Horizontal divider color",
                                          Color(0, 0, 0, 255)};);
@@ -109,6 +113,11 @@ FCITX_CONFIGURATION(
     ExternalOption systemFontDir{this, "SystemFontDir", _("System font dir"),
                                  ""};);
 
+FCITX_CONFIGURATION(CursorConfig,
+                    Option<CursorStyle> style{this, "Style", _("Style"),
+                                              CursorStyle::Blink};
+                    Option<std::string> text{this, "Text", _("Text"), "‸"};);
+
 FCITX_CONFIGURATION(
     WebPanelConfig,
 
@@ -123,6 +132,7 @@ FCITX_CONFIGURATION(
         this, "Layout", _("Layout"), candidate_window::layout_t::horizontal};
     Option<BackgroundConfig> background{this, "Background", _("Background")};
     Option<FontConfig> font{this, "Font", _("Font")};
+    Option<CursorConfig> cursor{this, "Cursor", _("Cursor")};
     Option<int, IntConstrain> borderWidth{this, "BorderWidth",
                                           _("Border width (px)"), 1,
                                           IntConstrain(0, BORDER_WIDTH_MAX)};
