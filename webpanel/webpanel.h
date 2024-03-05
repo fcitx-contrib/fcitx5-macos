@@ -119,6 +119,28 @@ FCITX_CONFIGURATION(CursorConfig,
                     Option<std::string> text{this, "Text", _("Text"), "‸"};);
 
 FCITX_CONFIGURATION(
+    Size,
+    Option<int, IntConstrain> borderWidth{this, "BorderWidth",
+                                          _("Border width (px)"), 1,
+                                          IntConstrain(0, BORDER_WIDTH_MAX)};
+    Option<int, IntConstrain> borderRadius{
+        this, "BorderRadius", _("Border radius (px)"), 6, IntConstrain(0, 100)};
+    Option<int, IntConstrain> margin{this, "Margin", _("Margin (px)"), 0,
+                                     IntConstrain(0, 16)};
+    Option<int, IntConstrain> highlightRadius{this, "HighlightRadius",
+                                              _("Highlight radius (px)"), 0,
+                                              IntConstrain(0, 16)};
+    Option<int, IntConstrain> verticalPadding{this, "VerticalPadding",
+                                              _("Vertical padding (px)"), 3,
+                                              IntConstrain(0, 16)};
+    Option<int, IntConstrain> horizontalPadding{this, "HorizontalPadding",
+                                                _("Horizontal padding (px)"), 7,
+                                                IntConstrain(0, 16)};
+    Option<int, IntConstrain> horizontalDividerWidth{
+        this, "HorizontalDividerWidth", _("Horizontal divider width (px)"), 1,
+        IntConstrain(0, BORDER_WIDTH_MAX)};);
+
+FCITX_CONFIGURATION(
     WebPanelConfig,
 
     OptionWithAnnotation<std::string, NoSaveAnnotation> preview{
@@ -133,14 +155,7 @@ FCITX_CONFIGURATION(
     Option<BackgroundConfig> background{this, "Background", _("Background")};
     Option<FontConfig> font{this, "Font", _("Font")};
     Option<CursorConfig> cursor{this, "Cursor", _("Cursor")};
-    Option<int, IntConstrain> borderWidth{this, "BorderWidth",
-                                          _("Border width (px)"), 1,
-                                          IntConstrain(0, BORDER_WIDTH_MAX)};
-    Option<int, IntConstrain> borderRadius{
-        this, "BorderRadius", _("Border radius (px)"), 6, IntConstrain(0, 100)};
-    Option<int, IntConstrain> horizontalDividerWidth{
-        this, "HorizontalDividerWidth", _("Horizontal divider width (px)"), 1,
-        IntConstrain(0, BORDER_WIDTH_MAX)};);
+    Option<Size> size{this, "Size", _("Size")};);
 
 enum class PanelShowFlag : int;
 using PanelShowFlags = fcitx::Flags<PanelShowFlag>;
