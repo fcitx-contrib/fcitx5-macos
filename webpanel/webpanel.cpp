@@ -29,6 +29,10 @@ void WebPanel::updateConfig() {
     window_->set_cursor_text(config_.cursor->style.value() == CursorStyle::Text
                                  ? config_.cursor->text.value()
                                  : "");
+    window_->set_highlight_mark_text(config_.highlightMark->style.value() ==
+                                             HighlightMarkStyle::Text
+                                         ? config_.highlightMark->text.value()
+                                         : "");
     config_.preview.setValue("");
     auto style = configValueToJson(config_).dump();
     window_->set_style(style.c_str());

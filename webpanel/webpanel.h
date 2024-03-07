@@ -22,6 +22,10 @@ enum class CursorStyle { Blink, Static, Text };
 FCITX_CONFIG_ENUM_NAME_WITH_I18N(CursorStyle, N_("Blink"), N_("Static"),
                                  N_("Text"))
 
+enum class HighlightMarkStyle { None, Bar, Text };
+FCITX_CONFIG_ENUM_NAME_WITH_I18N(HighlightMarkStyle, N_("None"), N_("Bar"),
+                                 N_("Text"))
+
 namespace fcitx {
 
 struct NoSaveAnnotation {
@@ -41,6 +45,9 @@ FCITX_CONFIGURATION(
     Option<Color> highlightLabelColor{this, "HighlightLabelColor",
                                       _("Highlight label color"),
                                       Color(255, 255, 255, 255)};
+    Option<Color> highlightMarkColor{this, "HighlightMarkColor",
+                                     _("Highlight mark color"),
+                                     Color(255, 255, 255, 255)};
     Option<Color> panelColor{this, "PanelColor", _("Panel color"),
                              Color(255, 255, 255, 255)};
     Option<Color> textColor{this, "TextColor", _("Text color"),
@@ -68,6 +75,9 @@ FCITX_CONFIGURATION(
     Option<Color> highlightLabelColor{this, "HighlightLabelColor",
                                       _("Highlight label color"),
                                       Color(255, 255, 255, 255)};
+    Option<Color> highlightMarkColor{this, "HighlightMarkColor",
+                                     _("Highlight mark color"),
+                                     Color(255, 255, 255, 255)};
     Option<Color> panelColor{this, "PanelColor", "Panel color",
                              Color(0, 0, 0, 255)};
     Option<Color> textColor{this, "TextColor", _("Text color"),
@@ -118,6 +128,11 @@ FCITX_CONFIGURATION(CursorConfig,
                                               CursorStyle::Blink};
                     Option<std::string> text{this, "Text", _("Text"), "‸"};);
 
+FCITX_CONFIGURATION(HighlightMarkConfig,
+                    Option<HighlightMarkStyle> style{this, "Style", _("Style"),
+                                                     HighlightMarkStyle::None};
+                    Option<std::string> text{this, "Text", _("Text"), ""};);
+
 FCITX_CONFIGURATION(
     Size,
     Option<int, IntConstrain> borderWidth{this, "BorderWidth",
@@ -130,12 +145,17 @@ FCITX_CONFIGURATION(
     Option<int, IntConstrain> highlightRadius{this, "HighlightRadius",
                                               _("Highlight radius (px)"), 0,
                                               IntConstrain(0, 16)};
-    Option<int, IntConstrain> verticalPadding{this, "VerticalPadding",
-                                              _("Vertical padding (px)"), 3,
-                                              IntConstrain(0, 16)};
-    Option<int, IntConstrain> horizontalPadding{this, "HorizontalPadding",
-                                                _("Horizontal padding (px)"), 7,
-                                                IntConstrain(0, 16)};
+    Option<int, IntConstrain> topPadding{
+        this, "TopPadding", _("Top padding (px)"), 3, IntConstrain(0, 16)};
+    Option<int, IntConstrain> rightPadding{
+        this, "RightPadding", _("Right padding (px)"), 7, IntConstrain(0, 16)};
+    Option<int, IntConstrain> bottomPadding{this, "BottomPadding",
+                                            _("Bottom padding (px)"), 3,
+                                            IntConstrain(0, 16)};
+    Option<int, IntConstrain> leftPadding{
+        this, "LeftPadding", _("Left padding (px)"), 7, IntConstrain(0, 16)};
+    Option<int, IntConstrain> labelTextGap{
+        this, "LabelTextGap", _("Gap between label and text (px)"), 6, IntConstrain(0, 16)};
     Option<int, IntConstrain> horizontalDividerWidth{
         this, "HorizontalDividerWidth", _("Horizontal divider width (px)"), 1,
         IntConstrain(0, BORDER_WIDTH_MAX)};);
@@ -155,6 +175,8 @@ FCITX_CONFIGURATION(
     Option<BackgroundConfig> background{this, "Background", _("Background")};
     Option<FontConfig> font{this, "Font", _("Font")};
     Option<CursorConfig> cursor{this, "Cursor", _("Cursor")};
+    Option<HighlightMarkConfig> highlightMark{this, "HighlightMark",
+                                              _("Highlight mark")};
     Option<Size> size{this, "Size", _("Size")};);
 
 enum class PanelShowFlag : int;
