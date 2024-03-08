@@ -239,6 +239,7 @@ void imAddToCurrentGroup(const char *imName) noexcept {
         auto group = imMgr.currentGroup();
         group.inputMethodList().emplace_back(imName);
         imMgr.setGroup(group);
+        imMgr.save();
     });
 }
 
