@@ -1,5 +1,6 @@
 #include <fcitx/inputpanel.h>
 
+#include "fcitx.h"
 #include "../macosfrontend/macosfrontend.h"
 #include "config/config.h"
 #include "webpanel.h"
@@ -10,15 +11,17 @@ WebPanel::WebPanel(Instance *instance)
     : instance_(instance),
       window_(std::make_unique<candidate_window::WebviewCandidateWindow>()) {
     window_->set_select_callback([this](size_t index) {
-        auto ic = instance_->mostRecentInputContext();
-        const auto &list = ic->inputPanel().candidateList();
-        if (!list)
-            return;
-        try {
-            list->candidate(index).select(ic);
-        } catch (const std::invalid_argument &e) {
-            FCITX_ERROR() << "select candidate index out of range";
-        }
+        with_fcitx([&](Fcitx &fcitx) {
+            auto ic = instance_->mostRecentInputContext();
+            const auto &list = ic->inputPanel().candidateList();
+            if (!list)
+                return;
+            try {
+                list->candidate(index).select(ic);
+            } catch (const std::invalid_argument &e) {
+                FCITX_ERROR() << "select candidate index out of range";
+            }
+        });
     });
     window_->set_init_callback([this]() { reloadConfig(); });
 }
