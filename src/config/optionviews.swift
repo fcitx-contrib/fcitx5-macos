@@ -41,35 +41,45 @@ struct IntegerOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
   @ObservedObject var model: IntegerOption
+  @FocusState private var isFocused: Bool
 
   var body: some View {
     ZStack(alignment: .trailing) {
       TextField(label, value: $model.value, formatter: numberFormatter)
+        .focused($isFocused)
         .textFieldStyle(RoundedBorderTextFieldStyle())
-        .onChange(of: model.value) { newValue in
-          if let max = model.max,
-            newValue > max
-          {
-            model.value = max
-          } else if let min = model.min,
-            newValue < min
-          {
-            model.value = min
+        .onChange(of: isFocused) { newValue in
+          if !newValue {  // lose focus
+            validate()
           }
         }
         .padding(.trailing, 60)
       HStack(spacing: 0) {
         Button {
           model.value -= 1
+          validate()
         } label: {
           Image(systemName: "minus")
         }
         Button {
           model.value += 1
+          validate()
         } label: {
           Image(systemName: "plus")
         }
       }
+    }
+  }
+
+  func validate() {
+    if let max = model.max,
+      model.value > max
+    {
+      model.value = max
+    } else if let min = model.min,
+      model.value < min
+    {
+      model.value = min
     }
   }
 }
