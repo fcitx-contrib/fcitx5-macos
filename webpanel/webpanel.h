@@ -26,6 +26,10 @@ enum class HighlightMarkStyle { None, Bar, Text };
 FCITX_CONFIG_ENUM_NAME_WITH_I18N(HighlightMarkStyle, N_("None"), N_("Bar"),
                                  N_("Text"))
 
+enum class HoverBehavior { None, Move, Add };
+FCITX_CONFIG_ENUM_NAME_WITH_I18N(HoverBehavior, N_("None"), N_("Move"),
+                                 N_("Add"))
+
 namespace fcitx {
 
 struct NoSaveAnnotation {
@@ -128,10 +132,13 @@ FCITX_CONFIGURATION(CursorConfig,
                                               CursorStyle::Blink};
                     Option<std::string> text{this, "Text", _("Text"), "‸"};);
 
-FCITX_CONFIGURATION(HighlightMarkConfig,
-                    Option<HighlightMarkStyle> style{this, "Style", _("Style"),
-                                                     HighlightMarkStyle::None};
-                    Option<std::string> text{this, "Text", _("Text"), ""};);
+FCITX_CONFIGURATION(
+    HighlightConfig,
+    Option<HighlightMarkStyle> markStyle{this, "MarkStyle", _("Mark style"),
+                                         HighlightMarkStyle::None};
+    Option<std::string> markText{this, "MarkText", _("Mark text"), "🐧"};
+    Option<HoverBehavior> hoverBehavior{
+        this, "HoverBehavior", _("Hover behavior"), HoverBehavior::None};);
 
 FCITX_CONFIGURATION(
     Size,
@@ -176,8 +183,7 @@ FCITX_CONFIGURATION(
     Option<BackgroundConfig> background{this, "Background", _("Background")};
     Option<FontConfig> font{this, "Font", _("Font")};
     Option<CursorConfig> cursor{this, "Cursor", _("Cursor")};
-    Option<HighlightMarkConfig> highlightMark{this, "HighlightMark",
-                                              _("Highlight mark")};
+    Option<HighlightConfig> highlight{this, "Highlight", _("Highlight")};
     Option<Size> size{this, "Size", _("Size")};);
 
 enum class PanelShowFlag : int;
