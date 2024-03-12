@@ -280,6 +280,77 @@ protocol EmptyConstructible {
 
 class FontOption: StringOption {}
 
+class AppIMOption: Option, ObservableObject, EmptyConstructible {
+  typealias Storage = String
+  let defaultValue: String
+  var value: String
+  @Published var appId: String {
+    didSet { updateValue() }
+  }
+  @Published var appName: String {
+    didSet { updateValue() }
+  }
+  @Published var appPath: String {
+    didSet { updateValue() }
+  }
+  @Published var imName: String {
+    didSet { updateValue() }
+  }
+
+  required init(defaultValue: String, value: String?) {
+    self.defaultValue = defaultValue
+    self.value = value ?? defaultValue
+    do {
+      if let data = (value ?? defaultValue).data(using: .utf8) {
+        let json = try JSON(data: data)
+        appId = try String?.decode(json: json["appId"]) ?? ""
+        appName = try String?.decode(json: json["appName"]) ?? ""
+        appPath = try String?.decode(json: json["appPath"]) ?? ""
+        imName = try String?.decode(json: json["imName"]) ?? ""
+      } else {
+        throw NSError()
+      }
+    } catch {
+      appId = ""
+      appName = ""
+      appPath = ""
+      imName = ""
+    }
+  }
+
+  private func updateValue() {
+    let json = JSON([
+      "appId": appId.encodeValueJSON(),
+      "appName": appName.encodeValueJSON(),
+      "appPath": appPath.encodeValueJSON(),
+      "imName": imName.encodeValueJSON(),
+    ])
+    value = jsonToString(json)
+  }
+
+  static func decode(json: JSON) throws -> Self {
+    return Self(
+      defaultValue: try String.decode(json: json["DefaultValue"]),
+      value: try String?.decode(json: json["Value"])
+    )
+  }
+
+  func encodeValueJSON() -> JSON {
+    return value.encodeValueJSON()
+  }
+
+  func resetToDefault() {
+    appId = ""
+    appName = ""
+    appPath = ""
+    imName = ""
+  }
+
+  static func empty(json: JSON) throws -> Self {
+    return Self(defaultValue: "", value: "")
+  }
+}
+
 class ListOption<T: Option & EmptyConstructible>: Option, ObservableObject {
   let defaultValue: [T]
   @Published var value: [Identified<T>]
