@@ -20,17 +20,32 @@
 #include "macosfrontend-public.h"
 #include "webview_candidate_window.hpp"
 
+#define TERMINAL_USE_EN                                                        \
+    R"JSON({"appPath": "/System/Applications/Utilities/Terminal.app/", "appName": "Terminal", "appId": "com.apple.Terminal", "imName": "keyboard-us"})JSON"
+
 namespace fcitx {
 
 class MacosInputContext;
 
-FCITX_CONFIGURATION(MacosFrontendConfig,
-                    Option<bool> simulateKeyRelease{this, "SimulateKeyRelease",
-                                                    _("Simulate key release")};
-                    Option<int, IntConstrain> simulateKeyReleaseDelay{
-                        this, "SimulateKeyReleaseDelay",
-                        _("Delay of simulated key release in milliseconds"),
-                        100, IntConstrain(10, 1500)};);
+struct AppIMAnnotation {
+    bool skipDescription() { return false; }
+    bool skipSave() { return false; }
+    void dumpDescription(RawConfig &config) {
+        config.setValueByPath("AppIM", "True");
+    }
+};
+
+FCITX_CONFIGURATION(
+    MacosFrontendConfig,
+    OptionWithAnnotation<std::vector<std::string>, AppIMAnnotation>
+        appDefaultIM{
+            this, "AppDefaultIM", _("App default IM"), {TERMINAL_USE_EN}};
+    Option<bool> simulateKeyRelease{this, "SimulateKeyRelease",
+                                    _("Simulate key release")};
+    Option<int, IntConstrain> simulateKeyReleaseDelay{
+        this, "SimulateKeyReleaseDelay",
+        _("Delay of simulated key release in milliseconds"), 100,
+        IntConstrain(10, 1500)};);
 
 class MacosFrontend : public AddonInstance {
 public:
@@ -68,6 +83,7 @@ private:
         eventHandlers_;
 
     inline MacosInputContext *findIC(ICUUID);
+    void useAppDefaultIM(const std::string &appId);
 };
 
 class MacosInputContext : public InputContext {

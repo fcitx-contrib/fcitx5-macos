@@ -92,6 +92,9 @@ private func jsonToOption(_ json: JSON, _ type: String) throws -> any Option {
     if let font = json["Font"].string, font == "True" {
       return try ListOption<FontOption>.decode(json: json)
     }
+    if let appIM = json["AppIM"].string, appIM == "True" {
+      return try ListOption<AppIMOption>.decode(json: json)
+    }
     return try ListOption<StringOption>.decode(json: json)
   } else if type == "List|Key" {
     // TODO

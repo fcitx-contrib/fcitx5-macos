@@ -1,6 +1,7 @@
 import Fcitx
 import Logging
 import SwiftUI
+import SwiftyJSON
 
 protocol OptionView: View {
   var label: String { get }
@@ -370,6 +371,67 @@ struct FontOptionView: OptionView {
   }
 }
 
+func bundleIdentifier(_ appPath: String) -> String {
+  guard let bundle = Bundle(path: appPath) else {
+    return ""
+  }
+  return bundle.bundleIdentifier ?? ""
+}
+
+struct AppIMOptionView: OptionView {
+  let label: String
+  let overrideLabel: String? = nil
+  @ObservedObject var model: AppIMOption
+  @State private var appIcon: NSImage? = nil
+  @State private var imNameMap: [String: String] = [:]
+
+  var body: some View {
+    HStack {
+      if !model.appPath.isEmpty {
+        let icon = NSWorkspace.shared.icon(forFile: model.appPath)
+        Image(nsImage: icon)
+          .padding(.trailing, 8)
+      }
+      Button(action: openSelector) {
+        Text(model.appName.isEmpty ? "Select App" : model.appName)
+      }
+      Picker("uses", selection: $model.imName) {
+        ForEach(Array(imNameMap.keys), id: \.self) { key in
+          Text(imNameMap[key] ?? "").tag(key)
+        }
+      }
+    }.padding(.bottom, 8)
+      .onAppear {
+        imNameMap = [:]
+        let curGroup = JSON(parseJSON: String(Fcitx.imGetCurrentGroup()))
+        for (_, inputMethod) in curGroup {
+          let imName = inputMethod["name"].stringValue
+          let nativeName = inputMethod["displayName"].stringValue
+          imNameMap[imName] = nativeName
+        }
+      }
+  }
+
+  private func openSelector() {
+    let openPanel = NSOpenPanel()
+    openPanel.allowsMultipleSelection = false
+    openPanel.canChooseDirectories = false
+    openPanel.allowedContentTypes = [.application]
+    openPanel.directoryURL = URL(fileURLWithPath: "/Applications")
+    openPanel.begin { response in
+      if response == .OK {
+        let selectedApp = openPanel.urls.first
+        if let appURL = selectedApp {
+          model.appId = bundleIdentifier(appURL.path())
+          let name = appURL.lastPathComponent
+          model.appName = name.hasSuffix(".app") ? String(name.dropLast(4)) : name
+          model.appPath = appURL.path()
+        }
+      }
+    }
+  }
+}
+
 struct GroupOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
@@ -422,6 +484,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return BooleanOptionView(label: label, model: option)
   } else if let option = option as? FontOption {
     return FontOptionView(label: label, model: option)
+  } else if let option = option as? AppIMOption {
+    return AppIMOptionView(label: label, model: option)
   } else if let option = option as? StringOption {
     return StringOptionView(label: label, model: option)
   } else if let option = option as? ExternalOption {
@@ -434,6 +498,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return ColorOptionView(label: label, model: option)
   } else if let option = option as? ListOption<FontOption> {
     return ListOptionView<FontOption>(label: label, model: option)
+  } else if let option = option as? ListOption<AppIMOption> {
+    return ListOptionView<AppIMOption>(label: label, model: option)
   } else if let option = option as? ListOption<StringOption> {
     return ListOptionView<StringOption>(label: label, model: option)
   } else if let option = option as? ListOption<EnumOption> {

@@ -92,11 +92,32 @@ void MacosFrontend::destroyInputContext(ICUUID uuid) {
     focusGroup_.setFocusedInputContext(nullptr);
 }
 
+void MacosFrontend::useAppDefaultIM(const std::string &appId) {
+    auto appDefaultIM = config_.appDefaultIM.value();
+    for (const auto &item : appDefaultIM) {
+        try {
+            auto j = nlohmann::json::parse(item);
+            auto app = j["appId"];
+            auto im = j["imName"];
+            if (app.is_string() && app.get<std::string>() == appId) {
+                if (im.is_string()) {
+                    auto imName = im.get<std::string>();
+                    imSetCurrentIM(imName.c_str());
+                }
+                return;
+            }
+        } catch (const std::exception &e) {
+            FCITX_WARN() << "Failed to parse appDefaultIM: " << item;
+        }
+    }
+}
+
 void MacosFrontend::focusIn(ICUUID uuid) {
     auto *ic = findIC(uuid);
     if (!ic)
         return;
     ic->focusIn();
+    useAppDefaultIM(ic->program());
 }
 
 void MacosFrontend::focusOut(ICUUID uuid) {
