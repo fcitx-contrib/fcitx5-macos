@@ -43,9 +43,15 @@ FCITX_CONFIGURATION(
                                                   _("Override default"), false};
     Option<Color> highlightColor{this, "HighlightColor", _("Highlight color"),
                                  Color(0, 0, 255, 255)};
+    Option<Color> highlightHoverColor{this, "HighlightHoverColor",
+                                      _("Highlight color on hover"),
+                                      Color(0, 0, 127, 255)};
     Option<Color> highlightTextColor{this, "HighlightTextColor",
                                      _("Highlight text color"),
                                      Color(255, 255, 255, 255)};
+    Option<Color> highlightTextPressColor{this, "HighlightTextPressColor",
+                                          _("Highlight text color on press"),
+                                          Color(127, 127, 127, 255)};
     Option<Color> highlightLabelColor{this, "HighlightLabelColor",
                                       _("Highlight label color"),
                                       Color(255, 255, 255, 255)};
@@ -73,9 +79,15 @@ FCITX_CONFIGURATION(
                                    _("Same with light mode"), false};
     Option<Color> highlightColor{this, "HighlightColor", "Highlight color",
                                  Color(0, 0, 255, 255)};
+    Option<Color> highlightHoverColor{this, "HighlightHoverColor",
+                                      _("Highlight color on hover"),
+                                      Color(0, 0, 127, 255)};
     Option<Color> highlightTextColor{this, "HighlightTextColor",
                                      _("Highlight text color"),
                                      Color(255, 255, 255, 255)};
+    Option<Color> highlightTextPressColor{this, "HighlightTextPressColor",
+                                          _("Highlight text color on press"),
+                                          Color(127, 127, 127, 255)};
     Option<Color> highlightLabelColor{this, "HighlightLabelColor",
                                       _("Highlight label color"),
                                       Color(255, 255, 255, 255)};
