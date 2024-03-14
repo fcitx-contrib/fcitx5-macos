@@ -9,7 +9,7 @@ class InputMethodConfigController: ConfigWindowController, NSToolbarDelegate {
       contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
       styleMask: [.titled, .closable, .resizable, .fullSizeContentView],
       backing: .buffered, defer: false)
-    window.title = "Input Methods"
+    window.title = NSLocalizedString("Input Methods", comment: "")
     window.center()
     self.init(window: window)
     window.contentView = NSHostingView(rootView: view)
@@ -40,9 +40,9 @@ class InputMethodConfigController: ConfigWindowController, NSToolbarDelegate {
   ) -> NSToolbarItem? {
     if itemIdentifier == .toggleSidebar {
       let item = NSToolbarItem(itemIdentifier: .toggleSidebar)
-      item.label = "Toggle Sidebar"
-      item.paletteLabel = "Toggle Sidebar"
-      item.toolTip = "Toggle the visibility of the sidebar"
+      item.label = NSLocalizedString("Toggle Sidebar", comment: "label")
+      item.paletteLabel = NSLocalizedString("Toggle Sidebar", comment: "label")
+      item.toolTip = NSLocalizedString("Toggle the visibility of the sidebar", comment: "tooltip")
       item.target = self
       item.action = #selector(toggleSidebar)
       return item
@@ -97,8 +97,12 @@ private struct GroupItem: Identifiable, Codable {
 
 struct InputMethodConfigView: View {
   @ObservedObject private var viewModel = ViewModel()
-  @StateObject var addGroupDialog = InputDialog(title: "Add an empty group", prompt: "Group name")
-  @StateObject var renameGroupDialog = InputDialog(title: "Rename group", prompt: "Group name")
+  @StateObject var addGroupDialog = InputDialog(
+    title: NSLocalizedString("Add an empty group", comment: "dialog title"),
+    prompt: NSLocalizedString("Group name", comment: "dialog prompt"))
+  @StateObject var renameGroupDialog = InputDialog(
+    title: NSLocalizedString("Rename group", comment: "dialog title"),
+    prompt: NSLocalizedString("Group name", comment: "dialog prompt"))
 
   @State var addingInputMethod = false
   @State var inputMethodsToAdd = Set<InputMethod>()
@@ -119,7 +123,7 @@ struct InputMethodConfigView: View {
               Image(systemName: "plus.circle")
             }
             .buttonStyle(BorderlessButtonStyle())
-            .help("Add input methods to '\(group.name)'")
+            .help(LocalizedStringKey("Add input methods to '\(group.name)'"))
 
             Button {
               renameGroupDialog.show { input in
@@ -129,12 +133,12 @@ struct InputMethodConfigView: View {
               Image(systemName: "pencil")
             }
             .buttonStyle(BorderlessButtonStyle())
-            .help("Rename '\(group.name)'")
+            .help(LocalizedStringKey("Rename '\(group.name)'"))
           }
           .frame(maxWidth: .infinity, alignment: .leading)
           .contentShape(Rectangle())
           .contextMenu {
-            Button("Remove '\(group.name)'") {
+            Button(LocalizedStringKey("Remove '\(group.name)'")) {
               viewModel.removeGroup(group.name)
             }
           }
@@ -166,12 +170,12 @@ struct InputMethodConfigView: View {
         }
       }
       .contextMenu {
-        Button("Add group") {
+        Button(LocalizedStringKey("Add group")) {
           addGroupDialog.show { input in
             viewModel.addGroup(input)
           }
         }
-        Button("Refresh") {
+        Button(LocalizedStringKey("Refresh")) {
           viewModel.load()
         }
       }
@@ -188,14 +192,14 @@ struct InputMethodConfigView: View {
               scrollView
             }
             HStack {
-              Button("Reset to default") {
+              Button(LocalizedStringKey("Reset to default")) {
                 configModel.resetToDefault()
               }
               Spacer()
-              Button("Apply") {
+              Button(LocalizedStringKey("Apply")) {
                 save(configModel)
               }
-              Button("OK") {
+              Button(LocalizedStringKey("OK")) {
                 save(configModel)
                 FcitxInputController.inputMethodConfigController.window?.performClose(_: nil)
               }
@@ -221,12 +225,12 @@ struct InputMethodConfigView: View {
           addToGroup: $addToGroup,
           onDoubleClick: add)
         HStack {
-          Button("Add") {
+          Button(LocalizedStringKey("Add")) {
             add()
             addingInputMethod = false
           }
           .disabled(inputMethodsToAdd.count == 0)
-          Button("Cancel") {
+          Button(LocalizedStringKey("Cancel")) {
             addingInputMethod = false
             inputMethodsToAdd = Set()
           }
@@ -283,11 +287,13 @@ struct InputMethodConfigView: View {
             }
           }
         } else {
-          errorMsg = "Couldn't decode input method config: not UTF-8"
+          errorMsg = NSLocalizedString(
+            "Couldn't decode input method config: not UTF-8", comment: "")
           FCITX_ERROR("Couldn't decode input method config: not UTF-8")
         }
       } catch {
-        errorMsg = "Couldn't load input method config: \(error)"
+        errorMsg =
+          NSLocalizedString("Couldn't load input method config", comment: "") + ": \(error)"
         FCITX_ERROR("Couldn't load input method config: \(error)")
       }
       selectCurrentIM()
@@ -449,11 +455,11 @@ struct AvailableInputMethodView: View {
       viewModel.refresh(enabledIMs)
     }
     .alert(
-      "Error",
+      LocalizedStringKey("Error"),
       isPresented: $viewModel.hasError,
       presenting: ()
     ) { _ in
-      Button("OK") {
+      Button(LocalizedStringKey("OK")) {
         viewModel.errorMsg = nil
       }
     } message: { _ in
@@ -507,10 +513,11 @@ struct AvailableInputMethodView: View {
             }
           }
         } catch {
-          errorMsg = "Cannot parse json: \(error.localizedDescription)"
+          errorMsg =
+            NSLocalizedString("Cannot parse json", comment: "") + ": \(error.localizedDescription)"
         }
       } else {
-        errorMsg = "Cannot decode json string into UTF-8 data"
+        errorMsg = NSLocalizedString("Cannot decode json string into UTF-8 data", comment: "")
       }
       self.alreadyEnabled = alreadyEnabled
     }
@@ -522,7 +529,7 @@ struct AvailableInputMethodView: View {
       init(code: String) {
         self.code = code
         if code == "" {
-          localized = "Unknown"
+          localized = NSLocalizedString("Unknown", comment: "")
         } else {
           let locale = Locale.current
           let s = locale.localizedString(forIdentifier: code) ?? ""
@@ -597,13 +604,13 @@ class InputDialog: ObservableObject {
     VStack {
       TextField(title, text: myBinding)
       HStack {
-        Button("OK") {
+        Button(LocalizedStringKey("OK")) {
           if let cont = self.continuation {
             cont(self.userInput)
           }
           self.presented = false
         }
-        Button("Cancel") {
+        Button(LocalizedStringKey("Cancel")) {
           self.presented = false
         }
       }

@@ -48,3 +48,16 @@ add_custom_command(TARGET Fcitx5 POST_BUILD
 install(TARGETS Fcitx5
     BUNDLE DESTINATION "${APP_INSTALL_PATH}"
 )
+
+# Update Localizable.strings
+set(LOCALIZABLE_SOURCES controller.swift server.swift ${CONFIG_UI_FILES})
+add_custom_command(
+    OUTPUT ${PROJECT_SOURCE_DIR}/dmg/en.lproj/Localizable.strings
+    COMMAND genstrings ${LOCALIZABLE_SOURCES} -SwiftUI -o ${PROJECT_SOURCE_DIR}/dmg/en.lproj
+    DEPENDS ${LOCALIZABLE_SOURCES}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating Localizable.strings..."
+)
+add_custom_target(GenerateStrings
+    DEPENDS ${PROJECT_SOURCE_DIR}/dmg/en.lproj/Localizable.strings
+)

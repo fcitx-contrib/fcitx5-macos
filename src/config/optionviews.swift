@@ -126,7 +126,9 @@ class ExternalConfigViewModel: ObservableObject {
       externalConfig = try getConfig(uri: uri)
     } catch {
       FCITX_ERROR("When fetching external config: \(error)")
-      errorMsg = "Cannot show external config: \(error.localizedDescription)"
+      errorMsg =
+        NSLocalizedString("Cannot show external config: ", comment: "")
+        + ": \(error.localizedDescription)"
     }
   }
 
@@ -189,12 +191,14 @@ struct ExternalOptionView: OptionView {
       .frame(minWidth: 400)
     }
     .alert(
-      "Error",
+      Text("Error"),
       isPresented: $viewModel.hasError,
       presenting: ()
     ) { _ in
-      Button("OK") {
+      Button {
         viewModel.errorMsg = nil
+      } label: {
+        Text("OK")
       }
     } message: { _ in
       Text(viewModel.errorMsg!)
@@ -330,7 +334,7 @@ struct FontOptionView: OptionView {
     }
     .sheet(isPresented: $selectorIsOpen) {
       VStack {
-        TextField("Search", text: $searchInput)
+        TextField(NSLocalizedString("Search", comment: ""), text: $searchInput)
         List(selection: $selectedFontFamily) {
           ForEach(filteredFontFamilies, id: \.self) { family in
             Text(localize(family))
@@ -341,12 +345,18 @@ struct FontOptionView: OptionView {
           select()
         }
         HStack {
-          Button("Cancel") {
+          Button {
             selectorIsOpen = false
+          } label: {
+            Text("Cancel")
           }
           Spacer()
-          Button("Select", action: select)
-            .disabled(selectedFontFamily == nil)
+          Button {
+            select()
+          } label: {
+            Text("Select")
+          }
+          .disabled(selectedFontFamily == nil)
         }
       }
       .padding()
@@ -393,9 +403,12 @@ struct AppIMOptionView: OptionView {
           .padding(.trailing, 8)
       }
       Button(action: openSelector) {
-        Text(model.appName.isEmpty ? "Select App" : model.appName)
+        Text(model.appName.isEmpty ? NSLocalizedString("Select App", comment: "") : model.appName)
       }
-      Picker("uses", selection: $model.imName) {
+      Picker(
+        NSLocalizedString("uses", comment: "App X *uses* some input method"),
+        selection: $model.imName
+      ) {
         ForEach(Array(imNameMap.keys), id: \.self) { key in
           Text(imNameMap[key] ?? "").tag(key)
         }
