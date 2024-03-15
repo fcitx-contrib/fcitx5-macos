@@ -3,3 +3,6 @@ build
 *.dmg
 *.tar.bz2
 .cache
+
+# Auto-generated data
+dmg/en.lproj/Localizable.strings
