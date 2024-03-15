@@ -47,6 +47,14 @@ $ /usr/bin/lldb
 Fcitx5 only packges keyboard engine.
 To install other engines, see [fcitx5-macos-plugins](https://github.com/fcitx-contrib/fcitx5-macos-plugins).
 
+## Translation
+To update .strings files for each supported locale, run
+```sh
+cmake --build build --target GenerateStrings
+```
+
+This will, e.g., update dmg/zh-Hans/Localizable.strings, and then the translator can work on it.
+
 ## Credits
 * [fcitx5-android](https://github.com/fcitx5-android/fcitx5-android): LGPL-2.1-or-later
 * [squirrel](https://github.com/rime/squirrel): GPL-3.0-only
