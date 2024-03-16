@@ -71,7 +71,7 @@ add_subdirectory(macosnotifications)
 add_subdirectory(webpanel)
 
 add_subdirectory(src)
-add_subdirectory(dmg)
+add_subdirectory(assets)
 
 option(BUILD_PREVIEW "" OFF)
 add_subdirectory(fcitx5-webview)
