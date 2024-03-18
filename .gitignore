@@ -5,4 +5,4 @@ build
 .cache
 
 # Auto-generated data
-dmg/en.lproj/Localizable.strings
+assets/en.lproj/Localizable.strings

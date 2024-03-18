@@ -52,17 +52,17 @@ install(TARGETS Fcitx5
 # Update Localizable.strings
 set(LOCALIZABLE_SOURCES controller.swift server.swift ${CONFIG_UI_FILES})
 set(LOCALIZABLE_STRINGS_FILES
-    ${PROJECT_SOURCE_DIR}/dmg/en.lproj/Localizable.strings
-    ${PROJECT_SOURCE_DIR}/dmg/zh-Hans.lproj/Localizable.strings
+    ${PROJECT_SOURCE_DIR}/assets/en.lproj/Localizable.strings
+    ${PROJECT_SOURCE_DIR}/assets/zh-Hans.lproj/Localizable.strings
 )
 add_custom_command(
     OUTPUT ${LOCALIZABLE_STRINGS_FILES}
-    COMMAND genstrings ${LOCALIZABLE_SOURCES} -SwiftUI -o ${PROJECT_SOURCE_DIR}/dmg/en.lproj
-    COMMAND ${PROJECT_SOURCE_DIR}/dmg/update_translations.py ${LOCALIZABLE_STRINGS_FILES}
+    COMMAND genstrings ${LOCALIZABLE_SOURCES} -SwiftUI -o ${PROJECT_SOURCE_DIR}/assets/en.lproj
+    COMMAND ${PROJECT_SOURCE_DIR}/assets/update_translations.py ${LOCALIZABLE_STRINGS_FILES}
     DEPENDS ${LOCALIZABLE_SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating Localizable.strings..."
 )
 add_custom_target(GenerateStrings
-    DEPENDS ${PROJECT_SOURCE_DIR}/dmg/en.lproj/Localizable.strings
+    DEPENDS ${PROJECT_SOURCE_DIR}/assets/en.lproj/Localizable.strings
 )

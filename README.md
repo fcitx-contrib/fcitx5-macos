@@ -57,7 +57,7 @@ To update .strings files for each supported locale, run
 cmake --build build --target GenerateStrings
 ```
 
-This will, e.g., update dmg/zh-Hans/Localizable.strings, and then the translator can work on it.
+This will, e.g., update assets/zh-Hans/Localizable.strings, and then the translator can work on it.
 
 ## Credits
 * [fcitx5-android](https://github.com/fcitx5-android/fcitx5-android): LGPL-2.1-or-later
