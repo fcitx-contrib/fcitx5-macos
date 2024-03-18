@@ -10,7 +10,7 @@ class AddonConfigController: ConfigWindowController {
       contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
       styleMask: [.titled, .closable],
       backing: .buffered, defer: false)
-    window.title = "Addon Config"
+    window.title = NSLocalizedString("Addon Config", comment: "")
     window.center()
     self.init(window: window)
     window.contentView = NSHostingView(rootView: view)
@@ -44,23 +44,31 @@ private struct AddonRowView: View {
         Text(addon.name).font(.headline)
         if addon.isConfigurable {
           Spacer()
-          Button("Setting", systemImage: "gearshape", action: openSetting).labelStyle(.iconOnly)
+          Button(
+            NSLocalizedString("Setting", comment: ""), systemImage: "gearshape", action: openSetting
+          ).labelStyle(.iconOnly)
             .sheet(isPresented: $viewModel.hasConfig) {
               VStack {
                 ScrollView([.vertical]) {
                   buildView(config: viewModel.externalConfig!)
                 }
                 HStack {
-                  Button("Reset to default") {
+                  Button {
                     viewModel.externalConfig?.resetToDefault()
+                  } label: {
+                    Text("Reset to default")
                   }
                   Spacer()
-                  Button("Apply") {
+                  Button {
                     save()
+                  } label: {
+                    Text("Apply")
                   }
-                  Button("OK") {
+                  Button {
                     save()
                     viewModel.externalConfig = nil
+                  } label: {
+                    Text("OK")
                   }
                 }
               }

@@ -151,12 +151,24 @@ class FcitxInputController: IMKInputController {
       }
     }
 
-    menu.addItem(withTitle: "Input Methods", action: #selector(inputMethod(_:)), keyEquivalent: "")
-    menu.addItem(withTitle: "Global Config", action: #selector(globalConfig(_:)), keyEquivalent: "")
-    menu.addItem(withTitle: "Addon Config", action: #selector(addonConfig(_:)), keyEquivalent: "")
-    menu.addItem(withTitle: "Plugin Manager", action: #selector(plugin(_:)), keyEquivalent: "")
-    menu.addItem(withTitle: "Restart", action: #selector(restart(_:)), keyEquivalent: "")
-    menu.addItem(withTitle: "About Fcitx5 macOS", action: #selector(about(_:)), keyEquivalent: "")
+    menu.addItem(
+      withTitle: NSLocalizedString("Input Methods", comment: ""),
+      action: #selector(inputMethod(_:)), keyEquivalent: "")
+    menu.addItem(
+      withTitle: NSLocalizedString("Global Config", comment: ""),
+      action: #selector(globalConfig(_:)), keyEquivalent: "")
+    menu.addItem(
+      withTitle: NSLocalizedString("Addon Config", comment: ""), action: #selector(addonConfig(_:)),
+      keyEquivalent: "")
+    menu.addItem(
+      withTitle: NSLocalizedString("Plugin Manager", comment: ""), action: #selector(plugin(_:)),
+      keyEquivalent: "")
+    menu.addItem(
+      withTitle: NSLocalizedString("Restart", comment: ""), action: #selector(restart(_:)),
+      keyEquivalent: "")
+    menu.addItem(
+      withTitle: NSLocalizedString("About Fcitx5 macOS", comment: ""), action: #selector(about(_:)),
+      keyEquivalent: "")
     return menu
   }
 

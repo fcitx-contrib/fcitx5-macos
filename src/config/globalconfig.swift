@@ -8,7 +8,7 @@ class GlobalConfigController: ConfigWindowController {
       contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
       styleMask: [.titled, .closable],
       backing: .buffered, defer: false)
-    window.title = "Global Config"
+    window.title = NSLocalizedString("Global Config", comment: "")
     window.center()
     self.init(window: window)
     do {
@@ -29,16 +29,22 @@ struct GlobalConfigView: View {
         buildView(config: model)
       }
       HStack {
-        Button("Reset to default") {
+        Button {
           model.resetToDefault()
+        } label: {
+          Text("Reset to default")
         }
         Spacer()
-        Button("Apply") {
+        Button {
           save()
+        } label: {
+          Text("Apply")
         }
-        Button("OK") {
+        Button {
           save()
           FcitxInputController.globalConfigController.window?.performClose(_: nil)
+        } label: {
+          Text("OK")
         }
       }
     }.padding()
