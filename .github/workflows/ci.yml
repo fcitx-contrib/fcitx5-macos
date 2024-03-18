@@ -36,7 +36,7 @@ jobs:
     needs: lint
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false # hdiutil: create failed - Resource busy
+      fail-fast: false
       matrix:
         os: [macos-14, macos-13]
         include:
