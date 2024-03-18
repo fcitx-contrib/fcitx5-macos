@@ -22,9 +22,9 @@ class TranslationFile:
                         continue
                     self.table[m.group(1)] = m.group(2)
         except:
-            self.contents = ""
+            self.contents = ''
 
-    def update_from(self, base):
+    def update_from(self, base: 'TranslationFile'):
         with open(self.path, 'w', encoding=ENCODING) as out:
             with open(base.path, 'r', encoding=ENCODING) as inp:
                 for line in inp:
@@ -39,7 +39,7 @@ class TranslationFile:
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print("USAGE: base.strings locale1.strings locale2.strings locale3.strings ...")
+        print('USAGE: base.strings locale1.strings locale2.strings locale3.strings ...')
         sys.exit(1)
     print(f'base = {sys.argv[1]}')
     base = TranslationFile(sys.argv[1])
