@@ -1,8 +1,12 @@
+English
+|
+[中文](README.zh-CN.md)
+
 # Fcitx5 macOS
 
 [Fcitx5](https://github.com/fcitx/fcitx5) input method framework ported to macOS.
 
-WARNING: not ready for any non-developers.
+Public beta: please download [installer](https://github.com/fcitx-contrib/fcitx5-macos-installer).
 
 ## Build
 Native build on Intel and Apple Silicon is supported.
