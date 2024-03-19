@@ -46,6 +46,7 @@ struct GlobalConfigView: View {
         } label: {
           Text("OK")
         }
+        .buttonStyle(.borderedProminent)
       }
     }.padding()
   }

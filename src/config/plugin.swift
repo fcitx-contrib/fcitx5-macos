@@ -288,7 +288,8 @@ struct PluginView: View {
             Text(plugin.id)
           }
         }
-        Button("Uninstall", action: uninstall).disabled(selectedInstalled.isEmpty || processing)
+        Button("Uninstall", role: .destructive, action: uninstall).disabled(
+          selectedInstalled.isEmpty || processing)
       }
       VStack {
         Text("Available").font(.system(size: sectionHeaderSize)).frame(
@@ -303,6 +304,7 @@ struct PluginView: View {
           install()
         }
         Button("Install", action: install).disabled(selectedAvailable.isEmpty || processing)
+          .buttonStyle(.borderedProminent)
       }
     }.padding()
   }

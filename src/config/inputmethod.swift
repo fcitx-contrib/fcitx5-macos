@@ -203,6 +203,7 @@ struct InputMethodConfigView: View {
                 save(configModel)
                 FcitxInputController.inputMethodConfigController.window?.performClose(_: nil)
               }
+              .buttonStyle(.borderedProminent)
             }
           }.padding()
         } else if let errorMsg = viewModel.errorMsg {
@@ -230,7 +231,7 @@ struct InputMethodConfigView: View {
             addingInputMethod = false
           }
           .disabled(inputMethodsToAdd.count == 0)
-          Button(LocalizedStringKey("Cancel")) {
+          Button(LocalizedStringKey("Cancel"), role: .cancel) {
             addingInputMethod = false
             inputMethodsToAdd = Set()
           }
@@ -462,6 +463,7 @@ struct AvailableInputMethodView: View {
       Button(LocalizedStringKey("OK")) {
         viewModel.errorMsg = nil
       }
+      .buttonStyle(.borderedProminent)
     } message: { _ in
       Text(viewModel.errorMsg!)
     }
@@ -610,7 +612,8 @@ class InputDialog: ObservableObject {
           }
           self.presented = false
         }
-        Button(LocalizedStringKey("Cancel")) {
+        .buttonStyle(.borderedProminent)
+        Button(LocalizedStringKey("Cancel"), role: .cancel) {
           self.presented = false
         }
       }
