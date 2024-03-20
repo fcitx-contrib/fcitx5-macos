@@ -185,6 +185,7 @@ struct ExternalOptionView: OptionView {
           Button("OK") {
             viewModel.externalConfig = nil
           }
+          .buttonStyle(.borderedProminent)
         }
       }
       .padding()
@@ -200,6 +201,7 @@ struct ExternalOptionView: OptionView {
       } label: {
         Text("OK")
       }
+      .buttonStyle(.borderedProminent)
     } message: { _ in
       Text(viewModel.errorMsg!)
     }
