@@ -8,7 +8,7 @@ struct AboutView: View {
   }
 }
 
-class FcitxAbout: NSWindowController {
+class FcitxAbout: ConfigWindowController {
   convenience init() {
     let window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
