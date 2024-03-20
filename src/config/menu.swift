@@ -76,13 +76,14 @@ class ConfigWindowController: NSWindowController, NSWindowDelegate {
         ConfigWindowController.numberOfConfigWindows += 1
       }
 
-      window.makeKeyAndOrderFront(nil)
-
       // Switch to normal activation policy so that the config windows
       // can receive key events.
       if NSApp.activationPolicy() != .regular {
         NSApp.setActivationPolicy(.regular)
       }
+
+      window.makeKeyAndOrderFront(nil)
+      NSApp.activate(ignoringOtherApps: true)
     }
   }
 
