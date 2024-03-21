@@ -38,16 +38,16 @@ struct AboutView: View {
       Text("Fcitx5 macOS")
         .font(.title)
 
-      Spacer().frame(height: 10)
+      Spacer().frame(height: gapSize)
       Text(getArch())
 
-      Spacer().frame(height: 10)
+      Spacer().frame(height: gapSize)
       urlButton(String(commit.prefix(7)), sourceRepo + "/commit/" + commit)
 
-      Spacer().frame(height: 10)
+      Spacer().frame(height: gapSize)
       Text(getDate())
 
-      Spacer().frame(height: 10)
+      Spacer().frame(height: gapSize)
       HStack {
         Text(NSLocalizedString("Originally made by", comment: ""))
         urlButton("Qijia Liu", "https://github.com/eagleoflqj")
@@ -55,13 +55,13 @@ struct AboutView: View {
         urlButton("ksqsf", "https://github.com/ksqsf")
       }
 
-      Spacer().frame(height: 10)
+      Spacer().frame(height: gapSize)
       HStack {
         Text("Licensed under")
         urlButton("GPLv3", sourceRepo + "/blob/master/LICENSE")
       }
 
-      Spacer().frame(height: 10)
+      Spacer().frame(height: gapSize)
       urlButton(
         NSLocalizedString("3rd-party source code", comment: ""),
         sourceRepo + "/blob/master/README.md#credits")
