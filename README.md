@@ -60,6 +60,10 @@ cmake --build build --target GenerateStrings
 This will, e.g., update assets/zh-Hans/Localizable.strings, and then the translator can work on it.
 
 ## Credits
+* [fcitx5](https://github.com/fcitx/fcitx5): LGPL-2.1-or-later
 * [fcitx5-android](https://github.com/fcitx5-android/fcitx5-android): LGPL-2.1-or-later
 * [squirrel](https://github.com/rime/squirrel): GPL-3.0-only
 * [swift-cmake-examples](https://github.com/apple/swift-cmake-examples): Apache-2.0
+* [SwiftyJSON](https://github.com/SwiftyJSON/SwiftyJSON): MIT
+* [pugixml](https://github.com/zeux/pugixml): MIT
+* [webview](https://github.com/webview/webview): MIT

@@ -1,0 +1,2 @@
+let commit = "@COMMIT@"
+let unixTime = @UNIX_TIME@

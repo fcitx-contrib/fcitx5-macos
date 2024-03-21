@@ -1,3 +1,13 @@
+execute_process(COMMAND git rev-parse HEAD
+    OUTPUT_VARIABLE COMMIT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+execute_process(COMMAND git show --no-patch --format=%ct
+    OUTPUT_VARIABLE UNIX_TIME
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+configure_file(config/meta.swift.in ${CMAKE_CURRENT_SOURCE_DIR}/config/meta.swift @ONLY)
+
 file(GLOB CONFIG_UI_FILES CONFIGURE_DEPENDS config/*.swift)
 
 add_library(Fcitx5Objs STATIC
@@ -5,6 +15,7 @@ add_library(Fcitx5Objs STATIC
     config/config.cpp
     controller.swift
     ${CONFIG_UI_FILES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/config/meta.swift
 )
 
 target_include_directories(Fcitx5Objs PUBLIC
