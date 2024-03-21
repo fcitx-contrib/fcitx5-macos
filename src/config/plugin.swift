@@ -3,7 +3,7 @@ import Logging
 import SwiftUI
 import SwiftyJSON
 
-private func getArch() -> String {
+func getArch() -> String {
   #if arch(x86_64)
     return "x86_64"
   #else
