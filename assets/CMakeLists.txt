@@ -2,6 +2,11 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/fcitx.icns"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
 
+# Preserve execution permission
+install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/uninstall.sh"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
+)
+
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Base.lproj"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
