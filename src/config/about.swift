@@ -153,6 +153,8 @@ struct AboutView: View {
 
   func uninstall() {
     confirmUninstall = false
+    // It's necessary to disable not only for cleaning up.
+    // Without this, if user cancels sudo prompt and try again, UI will hang.
     disableInputMethod()
     if !sudo("uninstall", removeUserData ? "true" : "false", uninstallLog) {
       uninstallFailed = true
