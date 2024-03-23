@@ -48,8 +48,6 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: SwiftyLab/setup-swift@latest
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20.x
