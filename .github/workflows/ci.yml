@@ -48,7 +48,7 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: SwiftyLab/setup-swift@latest
+      - uses: swift-actions/setup-swift@v2
 
       - uses: actions/setup-node@v4
         with:
