@@ -48,8 +48,6 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: swift-actions/setup-swift@v2
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20.x
