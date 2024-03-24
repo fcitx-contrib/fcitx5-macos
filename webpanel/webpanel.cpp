@@ -17,10 +17,29 @@ WebPanel::WebPanel(Instance *instance)
             if (!list)
                 return;
             try {
+                // Engine is responsible for updating UI
                 list->candidate(index).select(ic);
             } catch (const std::invalid_argument &e) {
                 FCITX_ERROR() << "select candidate index out of range";
             }
+        });
+    });
+    window_->set_page_callback([this](bool next) {
+        with_fcitx([&](Fcitx &fcitx) {
+            auto ic = instance_->mostRecentInputContext();
+            const auto &list = ic->inputPanel().candidateList();
+            if (!list)
+                return;
+            auto *pageableList = list->toPageable();
+            if (!pageableList)
+                return;
+            if (next) {
+                pageableList->next();
+            } else {
+                pageableList->prev();
+            }
+            // UI is responsible for updating UI
+            ic->updateUserInterface(UserInterfaceComponent::InputPanel);
         });
     });
     window_->set_init_callback([this]() { reloadConfig(); });
