@@ -21,7 +21,7 @@ let fcitxDirectory = FileManager.default.homeDirectoryForCurrentUser
   .appendingPathComponent("Library")
   .appendingPathComponent("fcitx5")
 private let pluginDirectory = fcitxDirectory.appendingPathComponent("plugin")
-private let cacheDirectory = fcitxDirectory.appendingPathComponent("cache")
+let cacheDirectory = fcitxDirectory.appendingPathComponent("cache")
 
 struct Plugin: Identifiable, Hashable {
   let id: String
