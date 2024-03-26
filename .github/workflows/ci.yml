@@ -20,7 +20,7 @@ jobs:
       - name: Lint
         run: |
           find macosfrontend macosnotifications webpanel src -name '*.cpp' -o -name '*.h' | xargs clang-format -Werror --dry-run -style=file:fcitx5/.clang-format
-          swift-format lint --configuration .swift-format.json -rs macosfrontend macosnotifications src
+          swift-format lint --configuration .swift-format.json -rs macosfrontend macosnotifications src assets
           for file in $(git ls-files | grep '\.swift$'); do
             if grep 'NSLog(' $file; then
               echo "Please use Logging module instead of NSLog"

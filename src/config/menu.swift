@@ -9,8 +9,8 @@ func restartAndReconnect() {
 }
 
 extension FcitxInputController {
-  static var fcitxAbout: NSWindowController = {
-    return FcitxAbout()
+  static var fcitxAbout: FcitxAboutController = {
+    return FcitxAboutController()
   }()
   static var pluginManager: PluginManager = {
     return PluginManager()
@@ -35,6 +35,7 @@ extension FcitxInputController {
   }
 
   @objc func about(_: Any? = nil) {
+    FcitxInputController.fcitxAbout.refresh()
     FcitxInputController.fcitxAbout.showWindow(nil)
   }
 
