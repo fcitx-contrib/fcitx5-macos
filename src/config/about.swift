@@ -184,6 +184,7 @@ struct AboutView: View {
           .sheet(
             isPresented: $viewModel.showAvailable,
             onDismiss: {
+              // Clicking "Update now" will also dismiss this sheet, and it happens before this.
               if viewModel.state == .availableSheet {
                 viewModel.state = .available
               }
