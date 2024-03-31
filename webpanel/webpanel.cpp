@@ -46,7 +46,7 @@ WebPanel::WebPanel(Instance *instance)
 }
 
 void WebPanel::updateConfig() {
-    window_->set_layout(config_.layout.value());
+    window_->set_layout(config_.typography->layout.value());
     window_->set_theme(config_.theme.value());
     window_->set_cursor_text(config_.cursor->style.value() == CursorStyle::Text
                                  ? config_.cursor->text.value()
@@ -81,10 +81,13 @@ void WebPanel::update(UserInterfaceComponent component,
             instance_->outputFilter(inputContext, inputPanel.preedit()),
             instance_->outputFilter(inputContext, inputPanel.auxUp()),
             instance_->outputFilter(inputContext, inputPanel.auxDown()));
+        bool pageable = false;
+        bool hasPrev = false;
+        bool hasNext = false;
         std::vector<std::string> candidates;
         std::vector<std::string> labels;
         int size = 0;
-        candidate_window::layout_t layout = config_.layout.value();
+        candidate_window::layout_t layout = config_.typography->layout.value();
         if (const auto &list = inputPanel.candidateList()) {
             /*  Do not delete; kept for scroll mode.
             const auto &bulk = list->toBulk();
@@ -124,10 +127,17 @@ void WebPanel::update(UserInterfaceComponent component,
                 layout = candidate_window::layout_t::horizontal;
                 break;
             default:
-                layout = config_.layout.value();
                 break;
             }
+            auto *pageableList = list->toPageable();
+            pageable =
+                pageableList && config_.typography->showPagingButtons.value();
+            if (pageable) {
+                hasPrev = pageableList->hasPrev();
+                hasNext = pageableList->hasNext();
+            }
         }
+        window_->set_paging_buttons(pageable, hasPrev, hasNext);
         window_->set_candidates(candidates, labels, highlighted);
         window_->set_layout(layout);
         updatePanelShowFlags(!candidates.empty(), PanelShowFlag::HasCandidates);
