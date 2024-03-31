@@ -64,13 +64,18 @@ FCITX_CONFIGURATION(
                             Color(0, 0, 0, 255)};
     Option<Color> labelColor{this, "LabelColor", _("Label color"),
                              Color(0, 0, 0, 255)};
+    Option<Color> pagingButtonColor{this, "PagingButtonColor",
+                                    _("Paging button color"),
+                                    Color(0, 0, 0, 255)};
+    Option<Color> disabledPagingButtonColor{this, "DisabledPagingButtonColor",
+                                            _("Disabled paging button color"),
+                                            Color(127, 127, 127, 255)};
     Option<Color> preeditColor{this, "PreeditColor", _("Preedit color"),
                                Color(0, 0, 0, 255)};
     Option<Color> borderColor{this, "BorderColor", _("Border color"),
                               Color(0, 0, 0, 255)};
-    Option<Color> horizontalDividerColor{this, "HorizontalDividerColor",
-                                         _("Horizontal divider color"),
-                                         Color(0, 0, 0, 255)};);
+    Option<Color> dividerColor{this, "DividerColor", _("Divider color"),
+                               Color(0, 0, 0, 255)};);
 
 FCITX_CONFIGURATION(
     DarkModeConfig, Option<bool> overrideDefault{this, "OverrideDefault",
@@ -100,13 +105,26 @@ FCITX_CONFIGURATION(
                             Color(255, 255, 255, 255)};
     Option<Color> labelColor{this, "LabelColor", _("Label color"),
                              Color(255, 255, 255, 255)};
+    Option<Color> pagingButtonColor{this, "PagingButtonColor",
+                                    _("Paging button color"),
+                                    Color(255, 255, 255, 255)};
+    Option<Color> disabledPagingButtonColor{this, "DisabledPagingButtonColor",
+                                            _("Disabled paging button color"),
+                                            Color(127, 127, 127, 255)};
     Option<Color> preeditColor{this, "PreeditColor", _("Preedit color"),
                                Color(255, 255, 255, 255)};
     Option<Color> borderColor{this, "BorderColor", "Border color",
                               Color(255, 255, 255, 255)};
-    Option<Color> horizontalDividerColor{this, "HorizontalDividerColor",
-                                         "Horizontal divider color",
-                                         Color(0, 0, 0, 255)};);
+    Option<Color> dividerColor{this, "DividerColor", "Divider color",
+                               Color(255, 255, 255, 255)};);
+
+FCITX_CONFIGURATION(TypographyConfig,
+                    Option<candidate_window::layout_t> layout{
+                        this, "Layout", _("Layout"),
+                        candidate_window::layout_t::horizontal};
+                    Option<bool> showPagingButtons{this, "ShowPagingButtons",
+                                                   _("Show paging buttons"),
+                                                   false};);
 
 FCITX_CONFIGURATION(BackgroundConfig,
                     Option<std::string> imageUrl{this, "ImageUrl",
@@ -190,8 +208,7 @@ FCITX_CONFIGURATION(
                                             candidate_window::theme_t::system};
     Option<LightModeConfig> lightMode{this, "LightMode", _("Light mode")};
     Option<DarkModeConfig> darkMode{this, "DarkMode", _("Dark mode")};
-    Option<candidate_window::layout_t> layout{
-        this, "Layout", _("Layout"), candidate_window::layout_t::horizontal};
+    Option<TypographyConfig> typography{this, "Typography", _("Typography")};
     Option<BackgroundConfig> background{this, "Background", _("Background")};
     Option<FontConfig> font{this, "Font", _("Font")};
     Option<CursorConfig> cursor{this, "Cursor", _("Cursor")};
