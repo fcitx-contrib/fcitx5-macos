@@ -115,7 +115,14 @@ void WebPanel::update(UserInterfaceComponent component,
                     instance_
                         ->outputFilter(inputContext, list->candidate(i).text())
                         .toString());
-                labels.emplace_back(list->label(i).toString());
+                auto label = list->label(i).toString();
+                // HACK: fcitx5's Linux UI concatenates label and text and
+                // expects engine to append a ' ' to label.
+                auto length = label.length();
+                if (length && label[length - 1] == ' ') {
+                    label = label.substr(0, length - 1);
+                }
+                labels.emplace_back(label);
             }
             highlighted = list->cursorIndex();
             // }
