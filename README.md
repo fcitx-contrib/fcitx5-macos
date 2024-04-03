@@ -52,12 +52,33 @@ Fcitx5 only packges keyboard engine.
 To install other engines, see [fcitx5-macos-plugins](https://github.com/fcitx-contrib/fcitx5-macos-plugins).
 
 ## Translation
+
+### Swift sources
 To update .strings files for each supported locale, run
 ```sh
 cmake --build build --target GenerateStrings
 ```
 
 This will, e.g., update assets/zh-Hans/Localizable.strings, and then the translator can work on it.
+
+### C++ sources
+First, create assets/po/base.pot file:
+```sh
+cmake --build build --target pot
+```
+
+To add a new language, do
+```sh
+cd assets/po && msginit
+```
+and then add this locale to assets/CMakeLists.txt.
+
+Then, use a PO file editor to translate strings.
+
+Finally, to merge new strings into PO files, do
+```sh
+cd assets/po && msgmerge -U <locale>.po base.pot
+```
 
 ## Credits
 * [fcitx5](https://github.com/fcitx/fcitx5): LGPL-2.1-or-later
