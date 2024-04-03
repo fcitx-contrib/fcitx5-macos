@@ -95,10 +95,23 @@ void Fcitx::setupEnv() {
     std::string libime_model_dirs = join_paths({
         user_prefix / "lib" / "libime" // ~/Library/fcitx5/lib/libime
     });
-    setenv("LANGUAGE", "en", 1); // Needed by libintl-lite
     setenv("FCITX_ADDON_DIRS", fcitx_addon_dirs.c_str(), 1);
     setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
     setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
+
+    // libintl-lite only recognizes LANGUAGE, which is not set by
+    // macOS, so we do it using LANG.
+    if (const char *lang = getenv("LANG")) {
+        std::string val = lang;
+        size_t dot_pos = val.find('.');
+        if (dot_pos != std::string::npos) {
+            val = val.substr(0, dot_pos);
+        }
+        val += ":C";
+        setenv("LANGUAGE", val.c_str(), 0);
+    } else {
+        setenv("LANGUAGE", "en_US:C", 1);
+    }
 }
 
 void Fcitx::setupInstance() {
