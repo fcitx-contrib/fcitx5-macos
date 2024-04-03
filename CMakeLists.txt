@@ -66,6 +66,9 @@ include_directories(
     fcitx5-webview/webview
     "${HOMEBREW_PATH}/include" # nlohmann-json
 )
+
+add_definitions(-DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\")
+
 add_subdirectory(macosfrontend)
 add_subdirectory(macosnotifications)
 add_subdirectory(webpanel)

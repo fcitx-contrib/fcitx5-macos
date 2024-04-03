@@ -5,6 +5,7 @@
 #include <sstream>
 #include <thread>
 
+#include <fcitx-utils/i18n.h>
 #include <fcitx/action.h>
 #include <fcitx/menu.h>
 #include <fcitx/statusarea.h>
@@ -112,6 +113,9 @@ void Fcitx::setupEnv() {
     } else {
         setenv("LANGUAGE", "en_US:C", 1);
     }
+
+    fcitx::registerDomain(FCITX_GETTEXT_DOMAIN,
+                          (app_contents_path / "share" / "locale").c_str());
 }
 
 void Fcitx::setupInstance() {
