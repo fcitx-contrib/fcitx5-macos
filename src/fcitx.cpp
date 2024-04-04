@@ -100,19 +100,16 @@ void Fcitx::setupEnv() {
     setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
     setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
 
-    // libintl-lite only recognizes LANGUAGE, which is not set by
-    // macOS, so we do it using LANG.
-    if (const char *lang = getenv("LANG")) {
-        std::string val = lang;
-        size_t dot_pos = val.find('.');
-        if (dot_pos != std::string::npos) {
-            val = val.substr(0, dot_pos);
-        }
-        val += ":C";
-        setenv("LANGUAGE", val.c_str(), 0);
-    } else {
-        setenv("LANGUAGE", "en_US:C", 1);
+    // Set LANGUAGE for libintl-lite.
+    setlocale(LC_ALL, "");
+    const char *current_locale = setlocale(LC_MESSAGES, NULL);
+    std::string val = current_locale;
+    size_t dot_pos = val.find('.');
+    if (dot_pos != std::string::npos) {
+        val = val.substr(0, dot_pos);
     }
+    val += ":C";
+    setenv("LANGUAGE", val.c_str(), 0);
 
     fcitx::registerDomain(FCITX_GETTEXT_DOMAIN,
                           (app_contents_path / "share" / "locale").c_str());
