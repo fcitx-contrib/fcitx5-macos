@@ -112,6 +112,15 @@ void Fcitx::setupEnv() {
 
     fcitx::registerDomain(FCITX_GETTEXT_DOMAIN,
                           (app_contents_path / "share" / "locale").c_str());
+
+    // Register text domains of well-known addons.
+    fs::path localedir = user_prefix / "share" / "locale";
+    fcitx::registerDomain("fcitx5-anthy", localedir.c_str());
+    fcitx::registerDomain("fcitx5-chinese-addons", localedir.c_str());
+    fcitx::registerDomain("fcitx5-hallelujah", localedir.c_str());
+    fcitx::registerDomain("fcitx5-libthai", localedir.c_str());
+    fcitx::registerDomain("fcitx5-lua", localedir.c_str());
+    fcitx::registerDomain("fcitx5-rime", localedir.c_str());
 }
 
 void Fcitx::setupInstance() {
