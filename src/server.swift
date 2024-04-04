@@ -1,5 +1,6 @@
 import Cocoa
 import Fcitx
+import Foundation
 import InputMethodKit
 import SwiftNotify
 
@@ -29,7 +30,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // Initialize notifications.
     AppDelegate.notificationDelegate.requestAuthorization()
 
-    start_fcitx_thread()
+    let locale = Locale.current
+    let languageCode = locale.language.languageCode?.identifier ?? "C"
+    let localeIdent =
+      if let r = locale.region?.identifier {
+        languageCode + "_" + r
+      } else {
+        languageCode
+      }
+    start_fcitx_thread(localeIdent)
   }
 
   func applicationWillTerminate(_ notification: Notification) {

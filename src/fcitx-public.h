@@ -8,7 +8,7 @@
 // Identical to fcitx::ICUUID. Replicated for Swift interop.
 typedef std::array<uint8_t, 16> ICUUID;
 
-void start_fcitx_thread() noexcept;
+void start_fcitx_thread(const char *locale) noexcept;
 void stop_fcitx_thread() noexcept;
 void restart_fcitx_thread() noexcept;
 

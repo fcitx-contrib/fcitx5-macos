@@ -41,6 +41,7 @@ static std::string join_paths(const std::vector<fs::path> &paths,
 
 static std::thread fcitx_thread;
 static std::atomic<bool> fcitx_thread_started;
+static std::string current_locale;
 
 Fcitx &Fcitx::shared() {
     static Fcitx fcitx;
@@ -101,8 +102,6 @@ void Fcitx::setupEnv() {
     setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
 
     // Set LANGUAGE for libintl-lite.
-    setlocale(LC_ALL, "");
-    const char *current_locale = setlocale(LC_MESSAGES, NULL);
     std::string val = current_locale;
     size_t dot_pos = val.find('.');
     if (dot_pos != std::string::npos) {
@@ -166,13 +165,15 @@ bool in_fcitx_thread() noexcept {
     return std::this_thread::get_id() == fcitx_thread.get_id();
 }
 
-void start_fcitx_thread() noexcept {
+void start_fcitx_thread(const char *locale) noexcept {
     bool expected = false;
     if (!fcitx_thread_started.compare_exchange_strong(expected, true)) {
         FCITX_FATAL()
             << "Trying to start multiple fcitx threads, which is forbidden";
         std::terminate();
     }
+    std::string locale_str = locale;
+    std::swap(current_locale, locale_str);
     auto &fcitx = Fcitx::shared();
     fcitx.setup();
     // Start the event loop in another thread.
@@ -191,7 +192,7 @@ void stop_fcitx_thread() noexcept {
 
 void restart_fcitx_thread() noexcept {
     stop_fcitx_thread();
-    start_fcitx_thread();
+    start_fcitx_thread(current_locale.c_str());
 }
 
 std::string imGetGroupNames() noexcept {

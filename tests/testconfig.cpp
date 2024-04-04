@@ -5,7 +5,7 @@
 #include "config/config-public.h"
 
 int main() {
-    start_fcitx_thread();
+    start_fcitx_thread("C");
     sleep(1);
 
     // Can get information about input methods.
