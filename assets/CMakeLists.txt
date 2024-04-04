@@ -57,20 +57,20 @@ add_custom_target(GenerateStrings
 # Use 'pot' to generate the POT file.
 #
 set(TRANSLATABLE_CXX_SOURCES
-    ${CMAKE_SOURCE_DIR}/src/*.cpp
-    ${CMAKE_SOURCE_DIR}/src/*.h
-    ${CMAKE_SOURCE_DIR}/macosfrontend/*.cpp
-    ${CMAKE_SOURCE_DIR}/macosfrontend/*.h
-    ${CMAKE_SOURCE_DIR}/macosnotifications/*.cpp
-    ${CMAKE_SOURCE_DIR}/macosnotifications/*.h
-    ${CMAKE_SOURCE_DIR}/webpanel/*.cpp
-    ${CMAKE_SOURCE_DIR}/webpanel/*.h
+    src/*.cpp
+    src/*.h
+    macosfrontend/*.cpp
+    macosfrontend/*.h
+    macosnotifications/*.cpp
+    macosnotifications/*.h
+    webpanel/*.cpp
+    webpanel/*.h
 )
 add_custom_command(
     OUTPUT ${CMAKE_SOURCE_DIR}/assets/po/base.pot
-    COMMAND xgettext --c++ --keyword=_ ${TRANSLATABLE_CXX_SOURCES} -o po/base.pot
+    COMMAND xgettext --c++ --keyword=_ ${TRANSLATABLE_CXX_SOURCES} -o ${CMAKE_SOURCE_DIR}/assets/po/base.pot
     DEPENDS ${LOCALIZABLE_CXX_SOURCES}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Generating base.pot..."
 )
 add_custom_target(pot

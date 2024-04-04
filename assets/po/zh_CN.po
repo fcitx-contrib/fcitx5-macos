@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fcitx 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-04 00:25+0800\n"
+"POT-Creation-Date: 2024-04-04 13:49+0800\n"
 "PO-Revision-Date: 2024-04-04 00:50+0800\n"
 "Last-Translator: ksqsf <i@ksqsf.moe>\n"
 "Language-Team: \n"
@@ -16,253 +16,242 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: /Users/kaima/src/fcitx5/macos/macosfrontend/macosfrontend.h:42
+#: macosfrontend/macosfrontend.h:42
 msgid "App default IM"
 msgstr "应用默认输入法"
 
-#: /Users/kaima/src/fcitx5/macos/macosfrontend/macosfrontend.h:44
+#: macosfrontend/macosfrontend.h:44
 msgid "Simulate key release"
 msgstr "模拟按键释放"
 
-#: /Users/kaima/src/fcitx5/macos/macosfrontend/macosfrontend.h:47
+#: macosfrontend/macosfrontend.h:47
 msgid "Delay of simulated key release in milliseconds"
 msgstr "模拟按键释放延迟毫秒数"
 
-#: /Users/kaima/src/fcitx5/macos/macosnotifications/macosnotifications.h:20
+#: macosnotifications/macosnotifications.h:20
 msgid "Hidden Notifications"
 msgstr "隐藏通知"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:43
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:82
+#: webpanel/webpanel.h:43 webpanel/webpanel.h:82
 msgid "Override default"
 msgstr "覆盖默认值"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:44
+#: webpanel/webpanel.h:44
 msgid "Highlight color"
 msgstr "高亮颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:47
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:88
+#: webpanel/webpanel.h:47 webpanel/webpanel.h:88
 msgid "Highlight color on hover"
 msgstr "悬停时高亮颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:50
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:91
+#: webpanel/webpanel.h:50 webpanel/webpanel.h:91
 msgid "Highlight text color"
 msgstr "高亮文本颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:53
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:94
+#: webpanel/webpanel.h:53 webpanel/webpanel.h:94
 msgid "Highlight text color on press"
 msgstr "按下时高亮文本颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:56
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:97
+#: webpanel/webpanel.h:56 webpanel/webpanel.h:97
 msgid "Highlight label color"
 msgstr "高亮标签颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:59
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:100
+#: webpanel/webpanel.h:59 webpanel/webpanel.h:100
 msgid "Highlight mark color"
 msgstr "高亮标记颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:61
+#: webpanel/webpanel.h:61
 msgid "Panel color"
 msgstr "面板颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:63
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:104
+#: webpanel/webpanel.h:63 webpanel/webpanel.h:104
 msgid "Text color"
 msgstr "文本颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:65
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:106
+#: webpanel/webpanel.h:65 webpanel/webpanel.h:106
 msgid "Label color"
 msgstr "标签颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:68
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:109
+#: webpanel/webpanel.h:68 webpanel/webpanel.h:109
 msgid "Paging button color"
 msgstr "翻页按钮颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:71
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:112
+#: webpanel/webpanel.h:71 webpanel/webpanel.h:112
 msgid "Disabled paging button color"
 msgstr "禁用的翻页按钮颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:73
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:114
+#: webpanel/webpanel.h:73 webpanel/webpanel.h:114
 msgid "Preedit color"
 msgstr "预编辑颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:75
+#: webpanel/webpanel.h:75
 msgid "Border color"
 msgstr "边框颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:77
+#: webpanel/webpanel.h:77
 msgid "Divider color"
 msgstr "分隔线颜色"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:84
+#: webpanel/webpanel.h:84
 msgid "Same with light mode"
 msgstr "与浅色模式相同"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:123
+#: webpanel/webpanel.h:123
 msgid "Layout"
 msgstr "布局"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:126
+#: webpanel/webpanel.h:126
 msgid "Show paging buttons"
 msgstr "显示翻页按钮"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:131
+#: webpanel/webpanel.h:131
 msgid "Image URL"
 msgstr "图片 URL"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:132
+#: webpanel/webpanel.h:132
 msgid "Blur"
 msgstr "模糊"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:134
+#: webpanel/webpanel.h:134
 msgid "Radius of blur (px)"
 msgstr "模糊半径（px）"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:136
+#: webpanel/webpanel.h:136
 msgid "Shadow"
 msgstr "阴影"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:144
+#: webpanel/webpanel.h:144
 msgid "Text font family"
 msgstr "文本字体族"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:146
+#: webpanel/webpanel.h:146
 msgid "Text font size"
 msgstr "文本字号"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:148
+#: webpanel/webpanel.h:148
 msgid "Label font family"
 msgstr "标签字体族"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:150
+#: webpanel/webpanel.h:150
 msgid "Label font size"
 msgstr "标签字号"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:152
+#: webpanel/webpanel.h:152
 msgid "Preedit font family"
 msgstr "预编辑字体族"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:154
+#: webpanel/webpanel.h:154
 msgid "Preedit font size"
 msgstr "预编辑字号"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:156
+#: webpanel/webpanel.h:156
 msgid "User font dir"
 msgstr "用户字体目录"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:157
+#: webpanel/webpanel.h:157
 msgid "System font dir"
 msgstr "系统字体目录"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:161
+#: webpanel/webpanel.h:161
 msgid "Style"
 msgstr "样式"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:163
+#: webpanel/webpanel.h:163
 msgid "Text"
 msgstr "文本"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:167
+#: webpanel/webpanel.h:167
 msgid "Mark style"
 msgstr "标记样式"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:169
+#: webpanel/webpanel.h:169
 msgid "Mark text"
 msgstr "标记文本"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:171
+#: webpanel/webpanel.h:171
 msgid "Hover behavior"
 msgstr "悬停行为"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:176
+#: webpanel/webpanel.h:176
 msgid "Border width (px)"
 msgstr "边框宽度（px）"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:179
+#: webpanel/webpanel.h:179
 msgid "Border radius (px)"
 msgstr "边框半径（px）"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:180
+#: webpanel/webpanel.h:180
 msgid "Margin (px)"
 msgstr "外边距（px）"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:183
+#: webpanel/webpanel.h:183
 msgid "Highlight radius (px)"
 msgstr "高亮半径（px）"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:186
+#: webpanel/webpanel.h:186
 msgid "Top padding (px)"
 msgstr "顶填充（px）"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:188
+#: webpanel/webpanel.h:188
 msgid "Right padding (px)"
 msgstr "右填充（px）"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:190
+#: webpanel/webpanel.h:190
 msgid "Bottom padding (px)"
 msgstr "底填充（px）"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:193
+#: webpanel/webpanel.h:193
 msgid "Left padding (px)"
 msgstr "左填充（px）"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:195
+#: webpanel/webpanel.h:195
 msgid "Gap between label and text (px)"
 msgstr "标签与文本间隔（px）"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:198
+#: webpanel/webpanel.h:198
 msgid "Horizontal divider width (px)"
 msgstr "水平分隔线宽度（px）"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:205
+#: webpanel/webpanel.h:205
 msgid "Type here to preview style"
 msgstr "在这里输入以预览样式"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:206
+#: webpanel/webpanel.h:206
 msgid "Follow cursor"
 msgstr "跟随光标"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:207
+#: webpanel/webpanel.h:207
 msgid "Theme"
 msgstr "主题"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:209
+#: webpanel/webpanel.h:209
 msgid "Light mode"
 msgstr "浅色模式"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:210
+#: webpanel/webpanel.h:210
 msgid "Dark mode"
 msgstr "深色模式"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:211
+#: webpanel/webpanel.h:211
 msgid "Typography"
 msgstr "版式"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:212
+#: webpanel/webpanel.h:212
 msgid "Background"
 msgstr "背景"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:213
+#: webpanel/webpanel.h:213
 msgid "Font"
 msgstr "字体"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:214
+#: webpanel/webpanel.h:214
 msgid "Cursor"
 msgstr "鼠标"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:215
+#: webpanel/webpanel.h:215
 msgid "Highlight"
 msgstr "高亮"
 
-#: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:216
+#: webpanel/webpanel.h:216
 msgid "Size"
 msgstr "尺寸"
