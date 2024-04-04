@@ -35,7 +35,7 @@ msgstr "隐藏通知"
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:43
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:82
 msgid "Override default"
-msgstr "重载默认值"
+msgstr "覆盖默认值"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:44
 msgid "Highlight color"
@@ -88,7 +88,7 @@ msgstr "翻页按钮颜色"
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:71
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:112
 msgid "Disabled paging button color"
-msgstr "失效翻页按钮颜色"
+msgstr "禁用的翻页按钮颜色"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:73
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:114
@@ -101,7 +101,7 @@ msgstr "边框颜色"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:77
 msgid "Divider color"
-msgstr "分隔符颜色"
+msgstr "分隔线颜色"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:84
 msgid "Same with light mode"
@@ -137,7 +137,7 @@ msgstr "文本字体族"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:146
 msgid "Text font size"
-msgstr "文本字体大小"
+msgstr "文本字号"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:148
 msgid "Label font family"
@@ -145,7 +145,7 @@ msgstr "标签字体族"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:150
 msgid "Label font size"
-msgstr "标签字体大小"
+msgstr "标签字号"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:152
 msgid "Preedit font family"
@@ -153,7 +153,7 @@ msgstr "预编辑字体族"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:154
 msgid "Preedit font size"
-msgstr "预编辑字体大小"
+msgstr "预编辑字号"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:156
 msgid "User font dir"
@@ -165,7 +165,7 @@ msgstr "系统字体目录"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:161
 msgid "Style"
-msgstr "风格"
+msgstr "样式"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:163
 msgid "Text"
@@ -173,7 +173,7 @@ msgstr "文本"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:167
 msgid "Mark style"
-msgstr "标记风格"
+msgstr "标记样式"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:169
 msgid "Mark text"
@@ -221,7 +221,7 @@ msgstr "标签与文本间隔（px）"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:198
 msgid "Horizontal divider width (px)"
-msgstr "水平分隔符宽度（px）"
+msgstr "水平分隔线宽度（px）"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:205
 msgid "Type here to preview style"
@@ -241,11 +241,11 @@ msgstr "浅色模式"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:210
 msgid "Dark mode"
-msgstr "暗色模式"
+msgstr "深色模式"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:211
 msgid "Typography"
-msgstr "字体"
+msgstr "版式"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:212
 msgid "Background"
@@ -265,4 +265,4 @@ msgstr "高亮"
 
 #: /Users/kaima/src/fcitx5/macos/webpanel/webpanel.h:216
 msgid "Size"
-msgstr "大小"
+msgstr "尺寸"
