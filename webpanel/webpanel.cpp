@@ -86,6 +86,7 @@ void WebPanel::update(UserInterfaceComponent component,
         bool hasNext = false;
         std::vector<std::string> candidates;
         std::vector<std::string> labels;
+        std::vector<std::string> comments;
         int size = 0;
         candidate_window::layout_t layout = config_.typography->layout.value();
         if (const auto &list = inputPanel.candidateList()) {
@@ -114,6 +115,11 @@ void WebPanel::update(UserInterfaceComponent component,
                 candidates.emplace_back(
                     instance_
                         ->outputFilter(inputContext, list->candidate(i).text())
+                        .toString());
+                comments.emplace_back(
+                    instance_
+                        ->outputFilter(inputContext,
+                                       list->candidate(i).comment())
                         .toString());
                 auto label = list->label(i).toString();
                 // HACK: fcitx5's Linux UI concatenates label and text and
@@ -145,7 +151,7 @@ void WebPanel::update(UserInterfaceComponent component,
             }
         }
         window_->set_paging_buttons(pageable, hasPrev, hasNext);
-        window_->set_candidates(candidates, labels, highlighted);
+        window_->set_candidates(candidates, labels, comments, highlighted);
         window_->set_layout(layout);
         updatePanelShowFlags(!candidates.empty(), PanelShowFlag::HasCandidates);
         if (auto macosIC = dynamic_cast<MacosInputContext *>(inputContext)) {
