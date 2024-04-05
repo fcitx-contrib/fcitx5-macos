@@ -55,6 +55,9 @@ FCITX_CONFIGURATION(
     Option<Color> highlightLabelColor{this, "HighlightLabelColor",
                                       _("Highlight label color"),
                                       Color(255, 255, 255, 255)};
+    Option<Color> highlightCommentColor{this, "HighlightCommentColor",
+                                        _("Highlight comment color"),
+                                        Color(255, 255, 255, 255)};
     Option<Color> highlightMarkColor{this, "HighlightMarkColor",
                                      _("Highlight mark color"),
                                      Color(255, 255, 255, 255)};
@@ -64,6 +67,8 @@ FCITX_CONFIGURATION(
                             Color(0, 0, 0, 255)};
     Option<Color> labelColor{this, "LabelColor", _("Label color"),
                              Color(0, 0, 0, 255)};
+    Option<Color> commentColor{this, "CommentColor", _("Comment color"),
+                               Color(0, 0, 0, 255)};
     Option<Color> pagingButtonColor{this, "PagingButtonColor",
                                     _("Paging button color"),
                                     Color(0, 0, 0, 255)};
@@ -96,6 +101,9 @@ FCITX_CONFIGURATION(
     Option<Color> highlightLabelColor{this, "HighlightLabelColor",
                                       _("Highlight label color"),
                                       Color(255, 255, 255, 255)};
+    Option<Color> highlightCommentColor{this, "HighlightCommentColor",
+                                        _("Highlight comment color"),
+                                        Color(255, 255, 255, 255)};
     Option<Color> highlightMarkColor{this, "HighlightMarkColor",
                                      _("Highlight mark color"),
                                      Color(255, 255, 255, 255)};
@@ -105,6 +113,8 @@ FCITX_CONFIGURATION(
                             Color(255, 255, 255, 255)};
     Option<Color> labelColor{this, "LabelColor", _("Label color"),
                              Color(255, 255, 255, 255)};
+    Option<Color> commentColor{this, "CommentColor", _("Comment color"),
+                               Color(255, 255, 255, 255)};
     Option<Color> pagingButtonColor{this, "PagingButtonColor",
                                     _("Paging button color"),
                                     Color(255, 255, 255, 255)};
@@ -147,7 +157,12 @@ FCITX_CONFIGURATION(
     FontFamilyOption labelFontFamily{
         this, "LabelFontFamily", _("Label font family"), {""}};
     Option<int, IntConstrain> labelFontSize{
-        this, "LabelFontSize", _("Label font size"), 16, IntConstrain(4, 100)};
+        this, "LabelFontSize", _("Label font size"), 12, IntConstrain(4, 100)};
+    FontFamilyOption commentFontFamily{
+        this, "CommentFontFamily", _("Comment font family"), {""}};
+    Option<int, IntConstrain> commentFontSize{this, "CommentFontSize",
+                                              _("Comment font size"), 12,
+                                              IntConstrain(4, 100)};
     FontFamilyOption preeditFontFamily{
         this, "PreeditFontFamily", _("Preedit font family"), {""}};
     Option<int, IntConstrain> preeditFontSize{this, "PreeditFontSize",
