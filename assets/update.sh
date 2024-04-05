@@ -12,12 +12,18 @@ ICON_PATH="$RESOURCES_DIR/$ICON_FILE"
 ICON_BAKUP="/tmp/$ICON_FILE"
 
 # Backup maybe user-defined icon
-[[ -f "$ICON_PATH" ]] && mv "$ICON_PATH" "$ICON_BAKUP"
+if [[ -f "$ICON_PATH" ]]; then
+  mv "$ICON_PATH" "$ICON_BAKUP"
+fi
+
 rm -rf "$APP_DIR/Contents/*"
 
 tar xjvf "$tar_ball" -C "$INSTALL_DIR"
 rm -f "$tar_ball"
-[[ -f "$ICON_BAKUP" ]] && mv "$ICON_BAKUP" "$ICON_PATH"
+
+if [[ -f "$ICON_BAKUP" ]]; then
+  mv "$ICON_BAKUP" "$ICON_PATH"
+fi
 
 xattr -dr com.apple.quarantine "$APP_DIR"
 codesign --force --sign - --deep "$APP_DIR"
