@@ -87,7 +87,7 @@ FCITX_CONFIGURATION(
                                                  _("Override default"), false};
     Option<bool> sameWithLightMode{this, "SameWithLightMode",
                                    _("Same with light mode"), false};
-    Option<Color> highlightColor{this, "HighlightColor", "Highlight color",
+    Option<Color> highlightColor{this, "HighlightColor", _("Highlight color"),
                                  Color(0, 0, 255, 255)};
     Option<Color> highlightHoverColor{this, "HighlightHoverColor",
                                       _("Highlight color on hover"),
