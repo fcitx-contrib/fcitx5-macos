@@ -1,8 +1,6 @@
 import Cocoa
 import Fcitx
-import Foundation
 import InputMethodKit
-import Logging
 import SwiftNotify
 
 class NSManualApplication: NSApplication {
