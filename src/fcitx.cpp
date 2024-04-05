@@ -108,7 +108,8 @@ void Fcitx::setupEnv() {
         val = val.substr(0, dot_pos);
     }
     val += ":C";
-    setenv("LANGUAGE", val.c_str(), 0);
+    setenv("LANGUAGE", val.c_str(), 1);
+    FCITX_DEBUG() << "Fcitx LANGUAGE " << val.c_str();
 
     fcitx::registerDomain(FCITX_GETTEXT_DOMAIN,
                           (app_contents_path / "share" / "locale").c_str());

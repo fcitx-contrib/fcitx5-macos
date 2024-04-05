@@ -2,6 +2,7 @@ import Cocoa
 import Fcitx
 import Foundation
 import InputMethodKit
+import Logging
 import SwiftNotify
 
 class NSManualApplication: NSApplication {
@@ -38,6 +39,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       } else {
         languageCode
       }
+    FCITX_DEBUG("System locale = \(locale.identifier), localeIdent = \(localeIdent)")
     start_fcitx_thread(localeIdent)
   }
 
