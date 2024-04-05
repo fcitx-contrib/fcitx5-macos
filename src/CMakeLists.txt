@@ -41,6 +41,7 @@ target_link_libraries(Fcitx5Objs
 add_executable(Fcitx5
     MACOSX_BUNDLE
     server.swift
+    locale.swift
     controller.swift
     ${CONFIG_UI_FILES}
 )

@@ -31,16 +31,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // Initialize notifications.
     AppDelegate.notificationDelegate.requestAuthorization()
 
-    let locale = Locale.current
-    let languageCode = locale.language.languageCode?.identifier ?? "C"
-    let localeIdent =
-      if let r = locale.region?.identifier {
-        languageCode + "_" + r
-      } else {
-        languageCode
-      }
-    FCITX_DEBUG("System locale = \(locale.identifier), localeIdent = \(localeIdent)")
-    start_fcitx_thread(localeIdent)
+    let locale = getLocale()
+    start_fcitx_thread(locale)
   }
 
   func applicationWillTerminate(_ notification: Notification) {
