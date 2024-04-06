@@ -16,6 +16,9 @@
   <string>org.fcitx.inputmethod.Fcitx5_Connection</string>
   <key>InputMethodServerControllerClass</key>
   <string>Fcitx5.FcitxInputController</string>
+  <!-- enable using CapsLock to switch to ABC, since it can't be properly handled by fcitx anyway -->
+  <key>TICapsLockLanguageSwitchCapable</key>
+  <true/>
   <key>LSBackgroundOnly</key>
   <true/>
   <key>tsInputMethodCharacterRepertoireKey</key>
