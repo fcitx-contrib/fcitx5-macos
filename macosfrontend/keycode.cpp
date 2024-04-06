@@ -178,7 +178,10 @@ fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode, uint16_t osxKeycode,
             return pair.sym;
         }
     }
-    // send capital keysym when shift is pressed (bug #101)
+    // Send capital keysym when shift is pressed (bug #101)
+    // This is for Squirrel compatibility:
+    // Squirrel recognizes Control+Shift+F and Control+Shift+0
+    // but not Control+Shift+f and Control+Shift+parenright
     if ((unicode >= 'a') && (unicode <= 'z') &&
         (osxModifiers & OSX_MODIFIER_SHIFT)) {
         unicode = unicode - 'a' + 'A';
