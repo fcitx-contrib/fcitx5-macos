@@ -29,7 +29,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // Initialize notifications.
     AppDelegate.notificationDelegate.requestAuthorization()
 
-    start_fcitx_thread()
+    let locale = getLocale()
+    start_fcitx_thread(locale)
   }
 
   func applicationWillTerminate(_ notification: Notification) {

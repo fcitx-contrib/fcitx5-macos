@@ -1,5 +1,3 @@
-add_definitions(-DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\")
-
 _swift_generate_cxx_header_target(
     macosfrontend_swift_h
     SwiftFrontend

@@ -5,6 +5,7 @@
 #include <sstream>
 #include <thread>
 
+#include <fcitx-utils/i18n.h>
 #include <fcitx/action.h>
 #include <fcitx/menu.h>
 #include <fcitx/statusarea.h>
@@ -40,6 +41,7 @@ static std::string join_paths(const std::vector<fs::path> &paths,
 
 static std::thread fcitx_thread;
 static std::atomic<bool> fcitx_thread_started;
+static std::string current_locale;
 
 Fcitx &Fcitx::shared() {
     static Fcitx fcitx;
@@ -95,10 +97,31 @@ void Fcitx::setupEnv() {
     std::string libime_model_dirs = join_paths({
         user_prefix / "lib" / "libime" // ~/Library/fcitx5/lib/libime
     });
-    setenv("LANGUAGE", "en", 1); // Needed by libintl-lite
     setenv("FCITX_ADDON_DIRS", fcitx_addon_dirs.c_str(), 1);
     setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
     setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
+
+    // Set LANGUAGE for libintl-lite.
+    std::string val = current_locale;
+    size_t dot_pos = val.find('.');
+    if (dot_pos != std::string::npos) {
+        val = val.substr(0, dot_pos);
+    }
+    val += ":C";
+    setenv("LANGUAGE", val.c_str(), 1);
+    FCITX_DEBUG() << "Fcitx LANGUAGE " << val.c_str();
+
+    fcitx::registerDomain(FCITX_GETTEXT_DOMAIN,
+                          (app_contents_path / "share" / "locale").c_str());
+
+    // Register text domains of well-known addons.
+    fs::path localedir = user_prefix / "share" / "locale";
+    fcitx::registerDomain("fcitx5-chinese-addons", localedir.c_str());
+    fcitx::registerDomain("fcitx5-hallelujah", localedir.c_str());
+    fcitx::registerDomain("fcitx5-libthai", localedir.c_str());
+    fcitx::registerDomain("fcitx5-lua", localedir.c_str());
+    fcitx::registerDomain("fcitx5-rime", localedir.c_str());
+    fcitx::registerDomain("fcitx5-skk", localedir.c_str());
 }
 
 void Fcitx::setupInstance() {
@@ -152,13 +175,15 @@ bool in_fcitx_thread() noexcept {
     return std::this_thread::get_id() == fcitx_thread.get_id();
 }
 
-void start_fcitx_thread() noexcept {
+void start_fcitx_thread(const char *locale) noexcept {
     bool expected = false;
     if (!fcitx_thread_started.compare_exchange_strong(expected, true)) {
         FCITX_FATAL()
             << "Trying to start multiple fcitx threads, which is forbidden";
         std::terminate();
     }
+    std::string locale_str = locale;
+    std::swap(current_locale, locale_str);
     auto &fcitx = Fcitx::shared();
     fcitx.setup();
     // Start the event loop in another thread.
@@ -177,7 +202,7 @@ void stop_fcitx_thread() noexcept {
 
 void restart_fcitx_thread() noexcept {
     stop_fcitx_thread();
-    start_fcitx_thread();
+    start_fcitx_thread(current_locale.c_str());
 }
 
 std::string imGetGroupNames() noexcept {

@@ -1,0 +1,273 @@
+# Chinese translations for fcitx5-macos package
+# fcitx 软件包的简体中文翻译.
+# Copyright (C) 2024 fcitx5-macos's contributors
+# This file is distributed under the same license as the fcitx5-macos package.
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: fcitx 5\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-04-05 19:11-0400\n"
+"PO-Revision-Date: 2024-04-04 00:50+0800\n"
+"Last-Translator: ksqsf <i@ksqsf.moe>\n"
+"Language-Team: \n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: macosfrontend/macosfrontend.h:42
+msgid "App default IM"
+msgstr "应用默认输入法"
+
+#: macosfrontend/macosfrontend.h:44
+msgid "Simulate key release"
+msgstr "模拟按键释放"
+
+#: macosfrontend/macosfrontend.h:47
+msgid "Delay of simulated key release in milliseconds"
+msgstr "模拟按键释放延迟毫秒数"
+
+#: macosnotifications/macosnotifications.h:20
+msgid "Hidden Notifications"
+msgstr "隐藏通知"
+
+#: webpanel/webpanel.h:43 webpanel/webpanel.h:87
+msgid "Override default"
+msgstr "覆盖默认值"
+
+#: webpanel/webpanel.h:44
+msgid "Highlight color"
+msgstr "高亮颜色"
+
+#: webpanel/webpanel.h:47 webpanel/webpanel.h:93
+msgid "Highlight color on hover"
+msgstr "悬停时高亮颜色"
+
+#: webpanel/webpanel.h:50 webpanel/webpanel.h:96
+msgid "Highlight text color"
+msgstr "高亮文本颜色"
+
+#: webpanel/webpanel.h:53 webpanel/webpanel.h:99
+msgid "Highlight text color on press"
+msgstr "按下时高亮文本颜色"
+
+#: webpanel/webpanel.h:56 webpanel/webpanel.h:102
+msgid "Highlight label color"
+msgstr "高亮标签颜色"
+
+#: webpanel/webpanel.h:59 webpanel/webpanel.h:105
+msgid "Highlight comment color"
+msgstr "高亮注释颜色"
+
+#: webpanel/webpanel.h:62 webpanel/webpanel.h:108
+msgid "Highlight mark color"
+msgstr "高亮标记颜色"
+
+#: webpanel/webpanel.h:64
+msgid "Panel color"
+msgstr "面板颜色"
+
+#: webpanel/webpanel.h:66 webpanel/webpanel.h:112
+msgid "Text color"
+msgstr "文本颜色"
+
+#: webpanel/webpanel.h:68 webpanel/webpanel.h:114
+msgid "Label color"
+msgstr "标签颜色"
+
+#: webpanel/webpanel.h:70 webpanel/webpanel.h:116
+msgid "Comment color"
+msgstr "注释颜色"
+
+#: webpanel/webpanel.h:73 webpanel/webpanel.h:119
+msgid "Paging button color"
+msgstr "翻页按钮颜色"
+
+#: webpanel/webpanel.h:76 webpanel/webpanel.h:122
+msgid "Disabled paging button color"
+msgstr "禁用的翻页按钮颜色"
+
+#: webpanel/webpanel.h:78 webpanel/webpanel.h:124
+msgid "Preedit color"
+msgstr "预编辑颜色"
+
+#: webpanel/webpanel.h:80
+msgid "Border color"
+msgstr "边框颜色"
+
+#: webpanel/webpanel.h:82
+msgid "Divider color"
+msgstr "分隔线颜色"
+
+#: webpanel/webpanel.h:89
+msgid "Same with light mode"
+msgstr "与浅色模式相同"
+
+#: webpanel/webpanel.h:133
+msgid "Layout"
+msgstr "布局"
+
+#: webpanel/webpanel.h:136
+msgid "Show paging buttons"
+msgstr "显示翻页按钮"
+
+#: webpanel/webpanel.h:141
+msgid "Image URL"
+msgstr "图片 URL"
+
+#: webpanel/webpanel.h:142
+msgid "Blur"
+msgstr "模糊"
+
+#: webpanel/webpanel.h:144
+msgid "Radius of blur (px)"
+msgstr "模糊半径（px）"
+
+#: webpanel/webpanel.h:146
+msgid "Shadow"
+msgstr "阴影"
+
+#: webpanel/webpanel.h:154
+msgid "Text font family"
+msgstr "文本字体族"
+
+#: webpanel/webpanel.h:156
+msgid "Text font size"
+msgstr "文本字号"
+
+#: webpanel/webpanel.h:158
+msgid "Label font family"
+msgstr "标签字体族"
+
+#: webpanel/webpanel.h:160
+msgid "Label font size"
+msgstr "标签字号"
+
+#: webpanel/webpanel.h:162
+msgid "Comment font family"
+msgstr "注释字体族"
+
+#: webpanel/webpanel.h:164
+msgid "Comment font size"
+msgstr "注释字号"
+
+#: webpanel/webpanel.h:167
+msgid "Preedit font family"
+msgstr "预编辑字体族"
+
+#: webpanel/webpanel.h:169
+msgid "Preedit font size"
+msgstr "预编辑字号"
+
+#: webpanel/webpanel.h:171
+msgid "User font dir"
+msgstr "用户字体目录"
+
+#: webpanel/webpanel.h:172
+msgid "System font dir"
+msgstr "系统字体目录"
+
+#: webpanel/webpanel.h:176
+msgid "Style"
+msgstr "样式"
+
+#: webpanel/webpanel.h:178
+msgid "Text"
+msgstr "文本"
+
+#: webpanel/webpanel.h:182
+msgid "Mark style"
+msgstr "标记样式"
+
+#: webpanel/webpanel.h:184
+msgid "Mark text"
+msgstr "标记文本"
+
+#: webpanel/webpanel.h:186
+msgid "Hover behavior"
+msgstr "悬停行为"
+
+#: webpanel/webpanel.h:191
+msgid "Border width (px)"
+msgstr "边框宽度（px）"
+
+#: webpanel/webpanel.h:194
+msgid "Border radius (px)"
+msgstr "边框半径（px）"
+
+#: webpanel/webpanel.h:195
+msgid "Margin (px)"
+msgstr "外边距（px）"
+
+#: webpanel/webpanel.h:198
+msgid "Highlight radius (px)"
+msgstr "高亮半径（px）"
+
+#: webpanel/webpanel.h:201
+msgid "Top padding (px)"
+msgstr "顶填充（px）"
+
+#: webpanel/webpanel.h:203
+msgid "Right padding (px)"
+msgstr "右填充（px）"
+
+#: webpanel/webpanel.h:205
+msgid "Bottom padding (px)"
+msgstr "底填充（px）"
+
+#: webpanel/webpanel.h:208
+msgid "Left padding (px)"
+msgstr "左填充（px）"
+
+#: webpanel/webpanel.h:210
+msgid "Gap between label and text (px)"
+msgstr "标签与文本间隔（px）"
+
+#: webpanel/webpanel.h:213
+msgid "Horizontal divider width (px)"
+msgstr "水平分隔线宽度（px）"
+
+#: webpanel/webpanel.h:220
+msgid "Type here to preview style"
+msgstr "在这里输入以预览样式"
+
+#: webpanel/webpanel.h:221
+msgid "Follow cursor"
+msgstr "跟随光标"
+
+#: webpanel/webpanel.h:222
+msgid "Theme"
+msgstr "主题"
+
+#: webpanel/webpanel.h:224
+msgid "Light mode"
+msgstr "浅色模式"
+
+#: webpanel/webpanel.h:225
+msgid "Dark mode"
+msgstr "深色模式"
+
+#: webpanel/webpanel.h:226
+msgid "Typography"
+msgstr "版式"
+
+#: webpanel/webpanel.h:227
+msgid "Background"
+msgstr "背景"
+
+#: webpanel/webpanel.h:228
+msgid "Font"
+msgstr "字体"
+
+#: webpanel/webpanel.h:229
+msgid "Cursor"
+msgstr "鼠标"
+
+#: webpanel/webpanel.h:230
+msgid "Highlight"
+msgstr "高亮"
+
+#: webpanel/webpanel.h:231
+msgid "Size"
+msgstr "尺寸"

@@ -5,7 +5,7 @@ import SwiftyJSON
 
 @_cdecl("main")
 func main() -> Int {
-  start_fcitx_thread()
+  start_fcitx_thread("C")
   Thread.sleep(forTimeInterval: 1)
   try! testGetConfigFromFcitx()
   try! testDecode()
