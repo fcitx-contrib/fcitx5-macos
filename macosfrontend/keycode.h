@@ -253,8 +253,8 @@
 #define OSX_MODIFIER_FUNCTION   (1 << 23)
 // clang-format on
 
-fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode,
-                                          uint16_t osxKeycode);
+fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode, uint16_t osxKeycode,
+                                          uint32_t osxModifiers);
 uint16_t osx_keycode_to_fcitx_keycode(uint16_t osxKeycode);
 fcitx::KeyStates osx_modifiers_to_fcitx_keystates(uint32_t osxModifiers);
 
