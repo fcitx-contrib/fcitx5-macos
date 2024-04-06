@@ -171,12 +171,17 @@ static struct {
     {OSX_VK_SHIFT_R, 54},
 };
 
-fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode,
-                                          uint16_t osxKeycode) {
+fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode, uint16_t osxKeycode,
+                                          uint32_t osxModifiers) {
     for (const auto &pair : sym_mappings) {
         if (pair.osxKeycode == osxKeycode) {
             return pair.sym;
         }
+    }
+    // send capital keysym when shift is pressed (bug #101)
+    if ((unicode >= 'a') && (unicode <= 'z') &&
+        (osxModifiers & OSX_MODIFIER_SHIFT)) {
+        unicode = unicode - 'a' + 'A';
     }
     return fcitx::Key::keySymFromUnicode(unicode);
 }

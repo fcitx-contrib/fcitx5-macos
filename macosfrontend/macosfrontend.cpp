@@ -177,7 +177,7 @@ MacosInputContext::getCursorCoordinates(bool followCursor) {
 bool process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
                  uint16_t osxKeycode, bool isRelease) noexcept {
     const fcitx::Key parsedKey{
-        osx_unicode_to_fcitx_keysym(unicode, osxKeycode),
+        osx_unicode_to_fcitx_keysym(unicode, osxKeycode, osxModifiers),
         osx_modifiers_to_fcitx_keystates(osxModifiers),
         osx_keycode_to_fcitx_keycode(osxKeycode),
     };
