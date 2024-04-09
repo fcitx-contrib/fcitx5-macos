@@ -65,7 +65,7 @@ public:
 
     ICUUID createInputContext(const std::string &appId, id client);
     void destroyInputContext(ICUUID);
-    bool keyEvent(ICUUID, const Key &key, bool isRelease);
+    std::string keyEvent(ICUUID, const Key &key, bool isRelease);
     void focusIn(ICUUID);
     void focusOut(ICUUID);
 
@@ -86,6 +86,12 @@ private:
     void useAppDefaultIM(const std::string &appId);
 };
 
+struct InputContextState {
+    std::string commit;
+    std::string preedit;
+    int cursorPos;
+};
+
 class MacosInputContext : public InputContext {
 public:
     MacosInputContext(MacosFrontend *frontend,
@@ -103,9 +109,17 @@ public:
     std::pair<double, double> getCursorCoordinates(bool followCursor);
     id client() { return client_; }
 
+    void resetState() {
+        state_.commit.clear();
+        state_.preedit.clear();
+        state_.cursorPos = -1;
+    }
+    std::string getState(bool accepted);
+
 private:
     MacosFrontend *frontend_;
     id client_;
+    InputContextState state_;
     bool preeditEmpty = true; // the fake preedit doesn't count here
 };
 

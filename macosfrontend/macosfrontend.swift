@@ -3,8 +3,7 @@ import InputMethodKit
 private var u16pos = 0
 private var currentPreedit = ""
 
-public func commit(_ clientPtr: UnsafeMutableRawPointer, _ string: String) {
-  let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
+public func commit(_ client: Any!, _ string: String) {
   if let client = client as? IMKTextInput {
     client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
   }
@@ -12,9 +11,7 @@ public func commit(_ clientPtr: UnsafeMutableRawPointer, _ string: String) {
 
 // Executed in fcitx thread, so before process_key returns, no UI update
 // will happen. That means we can't get coordinates in this function.
-public func setPreedit(_ clientPtr: UnsafeMutableRawPointer, _ preedit: String, _ caretPosUtf8: Int)
-{
-  let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
+public func setPreedit(_ client: Any!, _ preedit: String, _ caretPosUtf8: Int) {
   if let client = client as? IMKTextInput {
     currentPreedit = preedit
     // The caretPos argument is specified in UTF-8 bytes.
