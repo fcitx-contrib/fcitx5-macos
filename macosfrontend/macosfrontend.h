@@ -90,6 +90,7 @@ struct InputContextState {
     std::string commit;
     std::string preedit;
     int cursorPos;
+    bool dummyPreedit;
 };
 
 class MacosInputContext : public InputContext {
@@ -104,7 +105,6 @@ public:
     void deleteSurroundingTextImpl(int offset, unsigned int size) override {}
     void forwardKeyImpl(const ForwardKeyEvent &key) override {}
     void updatePreeditImpl() override;
-    void forcePreedit(bool show);
 
     std::pair<double, double> getCursorCoordinates(bool followCursor);
     id client() { return client_; }
@@ -112,7 +112,11 @@ public:
     void resetState() {
         state_.commit.clear();
         state_.preedit.clear();
-        state_.cursorPos = -1;
+        state_.cursorPos = 0;
+        state_.dummyPreedit = false;
+    }
+    void setDummyPreedit(bool dummyPreedit) {
+        state_.dummyPreedit = dummyPreedit;
     }
     std::string getState(bool accepted);
 
@@ -120,7 +124,6 @@ private:
     MacosFrontend *frontend_;
     id client_;
     InputContextState state_;
-    bool preeditEmpty = true; // the fake preedit doesn't count here
 };
 
 class MacosFrontendFactory : public AddonFactory {

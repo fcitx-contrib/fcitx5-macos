@@ -51,11 +51,17 @@ class FcitxInputController: IMKInputController {
         let commit = try String?.decode(json: json["commit"]) ?? ""
         let preedit = try String?.decode(json: json["preedit"]) ?? ""
         let cursorPos = try Int?.decode(json: json["cursorPos"]) ?? -1
+        let dummyPreedit = (try Int?.decode(json: json["dummyPreedit"]) ?? 0) == 1
         let accepted = (try Int?.decode(json: json["accepted"]) ?? 0) == 1
         if !commit.isEmpty {
           SwiftFrontend.commit(client, commit)
         }
-        if cursorPos >= 0 {
+        // Without client preedit, Backspace bypasses IM in Terminal, every key
+        // is both processed by IM and passed to client in iTerm, so we force a
+        // dummy client preedit here.
+        if preedit.isEmpty && dummyPreedit {
+          SwiftFrontend.setPreedit(client, " ", 0)
+        } else {
           SwiftFrontend.setPreedit(client, preedit, cursorPos)
         }
         return accepted

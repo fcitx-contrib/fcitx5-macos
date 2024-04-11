@@ -154,7 +154,6 @@ void MacosInputContext::commitStringImpl(const std::string &text) {
 void MacosInputContext::updatePreeditImpl() {
     auto preedit =
         frontend_->instance()->outputFilter(this, inputPanel().clientPreedit());
-    preeditEmpty = preedit.empty();
     state_.preedit = preedit.toString();
     state_.cursorPos = preedit.cursor();
 }
@@ -164,17 +163,9 @@ std::string MacosInputContext::getState(bool accepted) {
     j["commit"] = state_.commit;
     j["preedit"] = state_.preedit;
     j["cursorPos"] = state_.cursorPos;
+    j["dummyPreedit"] = int(state_.dummyPreedit);
     j["accepted"] = int(accepted);
     return j.dump();
-}
-
-void MacosInputContext::forcePreedit(bool show) {
-    if (preeditEmpty) {
-        // Without client preedit, Backspace bypasses IM in Terminal, every key
-        // is both processed by IM and passed to client in iTerm, so we force a
-        // dummy client preedit here.
-        // SwiftFrontend::setPreedit(client_, show ? " " : "", 0);
-    }
 }
 
 std::pair<double, double>
