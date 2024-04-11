@@ -41,11 +41,13 @@ void MacosFrontend::save() {
     safeSaveAsIni(config_, ConfPath);
 }
 
-bool MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
+std::string MacosFrontend::keyEvent(ICUUID uuid, const Key &key,
+                                    bool isRelease) {
     auto *ic = this->findIC(uuid);
     if (!ic) {
-        return false;
+        return "{}";
     }
+    ic->resetState();
     ic->focusIn();
     KeyEvent keyEvent(ic, key, isRelease);
     ic->keyEvent(keyEvent);
@@ -67,7 +69,7 @@ bool MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease) {
         auto timeEventPtr = timeEvent.release();
     }
 
-    return keyEvent.accepted();
+    return ic->getState(keyEvent.accepted());
 }
 
 MacosInputContext *MacosFrontend::findIC(ICUUID uuid) {
@@ -117,7 +119,9 @@ void MacosFrontend::focusIn(ICUUID uuid) {
     if (!ic)
         return;
     ic->focusIn();
-    useAppDefaultIM(ic->program());
+    auto program = ic->program();
+    FCITX_INFO() << "Focus in " << program;
+    useAppDefaultIM(program);
 }
 
 void MacosFrontend::focusOut(ICUUID uuid) {
@@ -144,23 +148,24 @@ MacosInputContext::~MacosInputContext() {
 }
 
 void MacosInputContext::commitStringImpl(const std::string &text) {
-    SwiftFrontend::commit(client_, text);
+    state_.commit += text;
 }
 
 void MacosInputContext::updatePreeditImpl() {
     auto preedit =
         frontend_->instance()->outputFilter(this, inputPanel().clientPreedit());
-    preeditEmpty = preedit.empty();
-    SwiftFrontend::setPreedit(client_, preedit.toString(), preedit.cursor());
+    state_.preedit = preedit.toString();
+    state_.cursorPos = preedit.cursor();
 }
 
-void MacosInputContext::forcePreedit(bool show) {
-    if (preeditEmpty) {
-        // Without client preedit, Backspace bypasses IM in Terminal, every key
-        // is both processed by IM and passed to client in iTerm, so we force a
-        // dummy client preedit here.
-        SwiftFrontend::setPreedit(client_, show ? " " : "", 0);
-    }
+std::string MacosInputContext::getState(bool accepted) {
+    nlohmann::json j;
+    j["commit"] = state_.commit;
+    j["preedit"] = state_.preedit;
+    j["cursorPos"] = state_.cursorPos;
+    j["dummyPreedit"] = int(state_.dummyPreedit);
+    j["accepted"] = int(accepted);
+    return j.dump();
 }
 
 std::pair<double, double>
@@ -174,8 +179,8 @@ MacosInputContext::getCursorCoordinates(bool followCursor) {
 
 } // namespace fcitx
 
-bool process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
-                 uint16_t osxKeycode, bool isRelease) noexcept {
+std::string process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
+                        uint16_t osxKeycode, bool isRelease) noexcept {
     const fcitx::Key parsedKey{
         osx_unicode_to_fcitx_keysym(unicode, osxKeycode, osxModifiers),
         osx_modifiers_to_fcitx_keystates(osxModifiers),

@@ -155,8 +155,9 @@ void WebPanel::update(UserInterfaceComponent component,
         window_->set_layout(layout);
         updatePanelShowFlags(!candidates.empty(), PanelShowFlag::HasCandidates);
         if (auto macosIC = dynamic_cast<MacosInputContext *>(inputContext)) {
-            macosIC->forcePreedit((panelShow_ & PanelShowFlag::HasPreedit) |
-                                  (panelShow_ & PanelShowFlag::HasCandidates));
+            macosIC->setDummyPreedit(
+                (panelShow_ & PanelShowFlag::HasPreedit) |
+                (panelShow_ & PanelShowFlag::HasCandidates));
         }
         showAsync(panelShow_);
         break;

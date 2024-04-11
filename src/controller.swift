@@ -2,6 +2,7 @@ import CxxFrontend
 import Fcitx
 import InputMethodKit
 import Logging
+import SwiftFrontend
 import SwiftyJSON
 
 class FcitxInputController: IMKInputController {
@@ -42,6 +43,37 @@ class FcitxInputController: IMKInputController {
     uuid = create_input_context(appId, client)
   }
 
+  func processKey(_ unicode: UInt32, _ modsVal: UInt32, _ code: UInt16, _ isRelease: Bool) -> Bool {
+    let res = String(process_key(uuid, unicode, modsVal, code, isRelease))
+    do {
+      if let data = res.data(using: .utf8) {
+        let json = try JSON(data: data)
+        let commit = try String?.decode(json: json["commit"]) ?? ""
+        let preedit = try String?.decode(json: json["preedit"]) ?? ""
+        // Bool?.decode doesn't work so use int for all bool fields.
+        let cursorPos = try Int?.decode(json: json["cursorPos"]) ?? -1
+        let dummyPreedit = (try Int?.decode(json: json["dummyPreedit"]) ?? 0) == 1
+        let accepted = (try Int?.decode(json: json["accepted"]) ?? 0) == 1
+        if !commit.isEmpty {
+          SwiftFrontend.commit(client, commit)
+        }
+        // Without client preedit, Backspace bypasses IM in Terminal, every key
+        // is both processed by IM and passed to client in iTerm, so we force a
+        // dummy client preedit here.
+        if preedit.isEmpty && dummyPreedit {
+          SwiftFrontend.setPreedit(client, " ", 0)
+        } else {
+          SwiftFrontend.setPreedit(client, preedit, cursorPos)
+        }
+        return accepted
+      } else {
+        return false
+      }
+    } catch {
+      return false
+    }
+  }
+
   // Default behavior is to recognize keyDown only
   override func recognizedEvents(_ sender: Any!) -> Int {
     let events: NSEvent.EventTypeMask = [.keyDown, .flagsChanged]
@@ -66,7 +98,7 @@ class FcitxInputController: IMKInputController {
         // Send x[state:ctrl] instead of ^X[state:ctrl] to fcitx.
         unicode = removeCtrl(char: unicode)
       }
-      let handled = process_key(uuid, unicode, modsVal, code, false)
+      let handled = processKey(unicode, modsVal, code, false)
       return handled
     case .flagsChanged:
       let change = NSEvent.ModifierFlags(rawValue: mods.rawValue ^ lastModifiers.rawValue)
@@ -75,7 +107,7 @@ class FcitxInputController: IMKInputController {
       if change.contains(.shift) || change.contains(.control) || change.contains(.command)
         || change.contains(.option) || change.contains(.capsLock)
       {
-        handled = process_key(uuid, 0, modsVal, code, isRelease)
+        handled = processKey(0, modsVal, code, isRelease)
       }
       lastModifiers = mods
       return handled
