@@ -50,6 +50,7 @@ class FcitxInputController: IMKInputController {
         let json = try JSON(data: data)
         let commit = try String?.decode(json: json["commit"]) ?? ""
         let preedit = try String?.decode(json: json["preedit"]) ?? ""
+        // Bool?.decode doesn't work so use int for all bool fields.
         let cursorPos = try Int?.decode(json: json["cursorPos"]) ?? -1
         let dummyPreedit = (try Int?.decode(json: json["dummyPreedit"]) ?? 0) == 1
         let accepted = (try Int?.decode(json: json["accepted"]) ?? 0) == 1
