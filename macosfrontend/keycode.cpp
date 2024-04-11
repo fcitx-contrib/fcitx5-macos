@@ -23,6 +23,10 @@ static struct {
     {OSX_VK_ESCAPE, FcitxKey_Escape},
     {OSX_VK_PC_DEL, FcitxKey_Delete},
     {OSX_VK_PC_INSERT, FcitxKey_Insert},
+    {OSX_VK_PAGEUP, FcitxKey_Page_Up},
+    {OSX_VK_PAGEDOWN, FcitxKey_Page_Down},
+    {OSX_VK_HOME, FcitxKey_Home},
+    {OSX_VK_END, FcitxKey_End},
 
     // arrow keys
     {OSX_VK_CURSOR_UP, FcitxKey_Up},
