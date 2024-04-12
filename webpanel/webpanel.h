@@ -206,9 +206,9 @@ FCITX_CONFIGURATION(
                                             IntConstrain(0, 16)};
     Option<int, IntConstrain> leftPadding{
         this, "LeftPadding", _("Left padding (px)"), 7, IntConstrain(0, 16)};
-    Option<int, IntConstrain> labelTextGap{this, "LabelTextGap",
-                                           _("Gap between label and text (px)"),
-                                           6, IntConstrain(0, 16)};
+    Option<int, IntConstrain> labelTextGap{
+        this, "LabelTextGap", _("Gap between label, text and comment (px)"), 6,
+        IntConstrain(0, 16)};
     Option<int, IntConstrain> horizontalDividerWidth{
         this, "HorizontalDividerWidth", _("Horizontal divider width (px)"), 1,
         IntConstrain(0, BORDER_WIDTH_MAX)};);
