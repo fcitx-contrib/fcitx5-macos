@@ -112,7 +112,6 @@ public:
     void resetState() {
         state_.commit.clear();
         // Don't clear preedit as fcitx may not update it when it's not changed.
-        state_.dummyPreedit = false;
     }
     void setDummyPreedit(bool dummyPreedit) {
         state_.dummyPreedit = dummyPreedit;
