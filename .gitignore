@@ -8,4 +8,5 @@ build
 assets/en.lproj/Localizable.strings
 assets/po/base.pot
 meta.swift
+debug.swift
 *~

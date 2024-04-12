@@ -1,0 +1,1 @@
+let isDebug = @IS_DEBUG@
