@@ -44,6 +44,9 @@ class FcitxInputController: IMKInputController {
   }
 
   func processKey(_ unicode: UInt32, _ modsVal: UInt32, _ code: UInt16, _ isRelease: Bool) -> Bool {
+    guard let client = client as? IMKTextInput else {
+      return false
+    }
     let res = String(process_key(uuid, unicode, modsVal, code, isRelease))
     do {
       if let data = res.data(using: .utf8) {
@@ -54,24 +57,12 @@ class FcitxInputController: IMKInputController {
         let cursorPos = try Int?.decode(json: json["cursorPos"]) ?? -1
         let dummyPreedit = (try Int?.decode(json: json["dummyPreedit"]) ?? 0) == 1
         let accepted = (try Int?.decode(json: json["accepted"]) ?? 0) == 1
-        if !commit.isEmpty {
-          SwiftFrontend.commit(client, commit)
-        }
-        // Without client preedit, Backspace bypasses IM in Terminal, every key
-        // is both processed by IM and passed to client in iTerm, so we force a
-        // dummy client preedit here.
-        if preedit.isEmpty && dummyPreedit {
-          SwiftFrontend.setPreedit(client, " ", 0)
-        } else {
-          SwiftFrontend.setPreedit(client, preedit, cursorPos)
-        }
+        commitAndSetPreeditImpl(client, commit, preedit, cursorPos, dummyPreedit)
         return accepted
-      } else {
-        return false
       }
     } catch {
-      return false
     }
+    return false
   }
 
   // Default behavior is to recognize keyDown only

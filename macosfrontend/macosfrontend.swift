@@ -3,37 +3,58 @@ import InputMethodKit
 private var u16pos = 0
 private var currentPreedit = ""
 
-public func commit(_ client: Any!, _ string: String) {
-  if let client = client as? IMKTextInput {
-    client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
-  }
+private func commitString(_ client: IMKTextInput, _ string: String) {
+  client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
 }
 
-// Executed in fcitx thread, so before process_key returns, no UI update
-// will happen. That means we can't get coordinates in this function.
-public func setPreedit(_ client: Any!, _ preedit: String, _ caretPosUtf8: Int) {
-  if let client = client as? IMKTextInput {
-    currentPreedit = preedit
-    // The caretPos argument is specified in UTF-8 bytes.
-    // Convert it to UTF-16.
-    var u8pos = 0
-    u16pos = 0
-    for ch in preedit {
-      if u8pos == caretPosUtf8 {
-        break
-      }
-      u8pos += ch.utf8.count
-      u16pos += 1
+private func setPreedit(_ client: IMKTextInput, _ preedit: String, _ caretPosUtf8: Int) {
+  currentPreedit = preedit
+  // The caretPos argument is specified in UTF-8 bytes.
+  // Convert it to UTF-16.
+  var u8pos = 0
+  u16pos = 0
+  for ch in preedit {
+    if u8pos == caretPosUtf8 {
+      break
     }
-    client.setMarkedText(
-      NSMutableAttributedString(string: preedit),
-      selectionRange: NSRange(location: u16pos, length: 0),
-      replacementRange: NSRange(location: NSNotFound, length: 0)
-    )
+    u8pos += ch.utf8.count
+    u16pos += 1
+  }
+  client.setMarkedText(
+    NSMutableAttributedString(string: preedit),
+    selectionRange: NSRange(location: u16pos, length: 0),
+    replacementRange: NSRange(location: NSNotFound, length: 0)
+  )
+}
+
+public func commitAndSetPreeditImpl(
+  _ client: IMKTextInput, _ commit: String, _ preedit: String, _ cursorPos: Int,
+  _ dummyPreedit: Bool
+) {
+  if !commit.isEmpty {
+    commitString(client, commit)
+  }
+  // Without client preedit, Backspace bypasses IM in Terminal, every key
+  // is both processed by IM and passed to client in iTerm, so we force a
+  // dummy client preedit here.
+  if preedit.isEmpty && dummyPreedit {
+    setPreedit(client, " ", 0)
+  } else {
+    setPreedit(client, preedit, cursorPos)
   }
 }
 
-// Must be executed after actual preedit UI update, i.e. not simply setPreedit.
+public func commitAndSetPreedit(
+  _ clientPtr: UnsafeMutableRawPointer, _ commit: String, _ preedit: String, _ cursorPos: Int,
+  _ dummyPreedit: Bool
+) {
+  let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
+  guard let client = client as? IMKTextInput else {
+    return
+  }
+  commitAndSetPreeditImpl(client, commit, preedit, cursorPos, dummyPreedit)
+}
+
 public func getCursorCoordinates(
   _ clientPtr: UnsafeMutableRawPointer,
   _ followCursor: Bool,

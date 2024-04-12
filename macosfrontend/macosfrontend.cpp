@@ -47,10 +47,11 @@ std::string MacosFrontend::keyEvent(ICUUID uuid, const Key &key,
     if (!ic) {
         return "{}";
     }
-    ic->resetState();
     ic->focusIn();
     KeyEvent keyEvent(ic, key, isRelease);
+    ic->isSyncEvent = true;
     ic->keyEvent(keyEvent);
+    ic->isSyncEvent = false;
 
     if (simulateKeyRelease_ && !isRelease && !key.isModifier() &&
         keyEvent.accepted()) {
@@ -69,7 +70,9 @@ std::string MacosFrontend::keyEvent(ICUUID uuid, const Key &key,
         auto timeEventPtr = timeEvent.release();
     }
 
-    return ic->getState(keyEvent.accepted());
+    auto state = ic->getState(keyEvent.accepted());
+    ic->resetState();
+    return state;
 }
 
 MacosInputContext *MacosFrontend::findIC(ICUUID uuid) {
@@ -166,6 +169,15 @@ std::string MacosInputContext::getState(bool accepted) {
     j["dummyPreedit"] = int(state_.dummyPreedit);
     j["accepted"] = int(accepted);
     return j.dump();
+}
+
+void MacosInputContext::commitAndSetPreeditAsync() {
+    auto state = state_;
+    resetState();
+    dispatch_async(dispatch_get_main_queue(), ^void() {
+      SwiftFrontend::commitAndSetPreedit(client_, state.commit, state.preedit,
+                                         state.cursorPos, state.dummyPreedit);
+    });
 }
 
 std::pair<double, double>

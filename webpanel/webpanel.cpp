@@ -158,6 +158,9 @@ void WebPanel::update(UserInterfaceComponent component,
             macosIC->setDummyPreedit(
                 (panelShow_ & PanelShowFlag::HasPreedit) |
                 (panelShow_ & PanelShowFlag::HasCandidates));
+            if (!macosIC->isSyncEvent) {
+                macosIC->commitAndSetPreeditAsync();
+            }
         }
         showAsync(panelShow_);
         break;

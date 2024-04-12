@@ -111,14 +111,19 @@ public:
 
     void resetState() {
         state_.commit.clear();
-        state_.preedit.clear();
-        state_.cursorPos = 0;
+        // Don't clear preedit as fcitx may not update it when it's not changed.
         state_.dummyPreedit = false;
     }
     void setDummyPreedit(bool dummyPreedit) {
         state_.dummyPreedit = dummyPreedit;
     }
     std::string getState(bool accepted);
+    // Shows whether we are processing a sync event (mainly key down) that needs
+    // to return a bool to indicate if it's handled. In this case, commit and
+    // preedit need to be set in batch synchronously before returning. Otherwise
+    // set them in batch asynchronously.
+    bool isSyncEvent = false;
+    void commitAndSetPreeditAsync();
 
 private:
     MacosFrontend *frontend_;
