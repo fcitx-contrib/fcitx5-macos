@@ -11,11 +11,15 @@ Public beta: please download [installer](https://github.com/fcitx-contrib/fcitx5
 ## Build
 Native build on Intel and Apple Silicon is supported.
 
+This is NOT an Xcode project,
+but Xcode is needed for Swift compiler.
+
 ### Install dependencies
 You may use [nvm](https://github.com/nvm-sh/nvm)
 to install node, then
 
 ```sh
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 brew install cmake ninja extra-cmake-modules gettext iso-codes xkeyboardconfig nlohmann-json
 ./install-deps.sh
 npm i -g pnpm
@@ -40,6 +44,10 @@ sudo /usr/bin/codesign --force --sign - --deep /Library/Input\ Methods/Fcitx5.ap
 * Check `Include Info Messages` and `Include Debug Messages` in `Action` menu.
 * Put `FcitxLog` in `Search`.
 
+### Log
+`/tmp/Fcitx5.log` contains all log in Console.app,
+plus those written to stderr by engines, e.g. rime.
+
 ### lldb
 SSH into the mac from another device, then
 ```sh
@@ -48,8 +56,9 @@ $ /usr/bin/lldb
 ```
 
 ## Plugins
-Fcitx5 only packges keyboard engine.
-To install other engines, see [fcitx5-macos-plugins](https://github.com/fcitx-contrib/fcitx5-macos-plugins).
+Fcitx5 only packages keyboard engine.
+To install other [engines](https://github.com/fcitx-contrib/fcitx5-macos-plugins),
+use the built-in Plugin Manager.
 
 ## Translation
 

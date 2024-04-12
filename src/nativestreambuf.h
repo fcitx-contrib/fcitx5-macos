@@ -9,6 +9,7 @@
 #define FCITX5_MACOS_NATIVESTREAMBUF_H
 
 #include <array>
+#include <iostream>
 #include <streambuf>
 #include <os/log.h>
 
@@ -103,8 +104,15 @@ private:
     }
 
     void write_log(const char_type *text) const {
+#ifdef NDEBUG
+        if (prio != OS_LOG_TYPE_DEBUG) {
+            std::cerr << text;
+        }
+#else
         os_log_with_type(logger, prio, "%{public}s",
                          text + (should_offset ? 1 : 0));
+        std::cerr << text;
+#endif
     }
 };
 
