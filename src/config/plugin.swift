@@ -32,6 +32,7 @@ private let officialPlugins = [
   "skk",
   "hallelujah",
   "rime",
+  "unikey",
   "thai",
   "lua",
 ].map { Plugin(id: $0) }
