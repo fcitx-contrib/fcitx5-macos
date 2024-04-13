@@ -57,7 +57,7 @@ class FcitxInputController: IMKInputController {
         let cursorPos = try Int?.decode(json: json["cursorPos"]) ?? -1
         let dummyPreedit = (try Int?.decode(json: json["dummyPreedit"]) ?? 0) == 1
         let accepted = (try Int?.decode(json: json["accepted"]) ?? 0) == 1
-        commitAndSetPreeditImpl(client, commit, preedit, cursorPos, dummyPreedit)
+        commitAndSetPreeditSync(client, commit, preedit, cursorPos, dummyPreedit)
         return accepted
       }
     } catch {

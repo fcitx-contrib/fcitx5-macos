@@ -27,7 +27,7 @@ private func setPreedit(_ client: IMKTextInput, _ preedit: String, _ caretPosUtf
   )
 }
 
-public func commitAndSetPreeditImpl(
+public func commitAndSetPreeditSync(
   _ client: IMKTextInput, _ commit: String, _ preedit: String, _ cursorPos: Int,
   _ dummyPreedit: Bool
 ) {
@@ -44,7 +44,7 @@ public func commitAndSetPreeditImpl(
   }
 }
 
-public func commitAndSetPreedit(
+public func commitAndSetPreeditAsync(
   _ clientPtr: UnsafeMutableRawPointer, _ commit: String, _ preedit: String, _ cursorPos: Int,
   _ dummyPreedit: Bool
 ) {
@@ -52,7 +52,9 @@ public func commitAndSetPreedit(
   guard let client = client as? IMKTextInput else {
     return
   }
-  commitAndSetPreeditImpl(client, commit, preedit, cursorPos, dummyPreedit)
+  DispatchQueue.main.async {
+    commitAndSetPreeditSync(client, commit, preedit, cursorPos, dummyPreedit)
+  }
 }
 
 public func getCursorCoordinates(

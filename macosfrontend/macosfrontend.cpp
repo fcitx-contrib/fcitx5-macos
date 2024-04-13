@@ -174,10 +174,9 @@ std::string MacosInputContext::getState(bool accepted) {
 void MacosInputContext::commitAndSetPreeditAsync() {
     auto state = state_;
     resetState();
-    dispatch_async(dispatch_get_main_queue(), ^void() {
-      SwiftFrontend::commitAndSetPreedit(client_, state.commit, state.preedit,
-                                         state.cursorPos, state.dummyPreedit);
-    });
+    SwiftFrontend::commitAndSetPreeditAsync(client_, state.commit,
+                                            state.preedit, state.cursorPos,
+                                            state.dummyPreedit);
 }
 
 std::pair<double, double>
