@@ -89,6 +89,19 @@ jobs:
       - name: Check validity
         run: ./check-validity.sh
 
+      - name: Generate meta.json
+        if: ${{ matrix.os == 'macos-14' }}
+        run: |
+          echo "{\"object\": {\"sha\": \"$(git rev-parse HEAD)\"}}" > meta.json
+
+      - name: Upload meta.json
+        if: ${{ matrix.os == 'macos-14' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: meta.json
+          path: |
+            meta.json
+
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
@@ -113,3 +126,4 @@ jobs:
           files: |
             Fcitx5-x86_64.tar.bz2
             Fcitx5-arm64.tar.bz2
+            meta.json

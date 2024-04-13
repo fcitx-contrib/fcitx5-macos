@@ -321,8 +321,10 @@ struct AboutView: View {
 
   func checkUpdate() {
     guard
+      // https://api.github.com/repos/fcitx-contrib/fcitx5-macos/git/ref/tags/latest
+      // GitHub API may be blocked in China and is unstable in general.
       let url = URL(
-        string: "https://api.github.com/repos/fcitx-contrib/fcitx5-macos/git/ref/tags/latest")
+        string: "https://github.com/fcitx-contrib/fcitx5-macos/releases/download/latest/meta.json")
     else {
       return
     }
