@@ -8,6 +8,11 @@ func restartAndReconnect() {
   }
 }
 
+// Don't call it synchronously in SwiftUI as it will make IM temporarily unavailable in focused client.
+func restartProcess() {
+  NSApp.terminate(nil)
+}
+
 extension FcitxInputController {
   static var fcitxAbout: FcitxAboutController = {
     return FcitxAboutController()
@@ -31,7 +36,7 @@ extension FcitxInputController {
   }
 
   @objc func restart(_: Any? = nil) {
-    restartAndReconnect()
+    restartProcess()
   }
 
   @objc func about(_: Any? = nil) {
