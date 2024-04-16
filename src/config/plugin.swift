@@ -37,6 +37,10 @@ private let officialPlugins = [
   "lua",
 ].map { Plugin(id: $0) }
 
+// fcitx5 doesn't unload addons from memory, so once loaded, we have to restart process to use an updated version.
+private var inMemoryPlugins: [String] = []
+private var needsRestart = false
+
 private func getInstalledPlugins() -> [Plugin] {
   let suffix = ".json"
   do {
@@ -85,9 +89,9 @@ private func extractPlugin(_ plugin: String) -> Bool {
   let output = String(data: data, encoding: .utf8) ?? "Unknown Error"
 
   task.waitUntilExit()
+  removeFile(url)
   if task.terminationStatus != 0 {
     FCITX_ERROR("Fail to extract \(path): \(output)")
-    removeFile(url)  // might be invalid so do not use in the future
     return false
   }
   return true
@@ -137,6 +141,11 @@ class PluginVM: ObservableObject {
         availablePlugins.append(plugin)
       }
     }
+    for plugin in installedPlugins {
+      if !inMemoryPlugins.contains(plugin.id) {
+        inMemoryPlugins.append(plugin.id)
+      }
+    }
   }
 }
 
@@ -145,6 +154,7 @@ struct PluginView: View {
   @State private var selectedAvailable = Set<String>()
   @State private var installResults: [String: Result<Void, Error>] = [:]
   @State private var processing = false
+  @State private var promptRestart = false
 
   @State private var observers: [NSKeyValueObservation] = []
   @State private var downloadedBytes: [Int64] = []
@@ -186,7 +196,7 @@ struct PluginView: View {
     processing = false
   }
 
-  private func install() {
+  private func install(_ autoRestart: Bool) {
     processing = true
     mkdirP(cacheDirectory.path())
     let downloadGroup = DispatchGroup()
@@ -256,6 +266,9 @@ struct PluginView: View {
             for im in getAutoAddIms(plugin) {
               inputMethods.append(im)
             }
+            if inMemoryPlugins.contains(plugin) {
+              needsRestart = true
+            }
           } else {
             FCITX_ERROR("Failed to install \(plugin)")
           }
@@ -273,6 +286,16 @@ struct PluginView: View {
         }
       }
       processing = false
+      if needsRestart {
+        if autoRestart {
+          FcitxInputController.pluginManager.window?.performClose(_: nil)
+          DispatchQueue.main.async {
+            restartProcess()
+          }
+        } else {
+          promptRestart = true
+        }
+      }
     }
   }
 
@@ -302,12 +325,46 @@ struct PluginView: View {
         }.contextMenu(forSelectionType: String.self) { items in
         } primaryAction: { items in
           // Double click
-          install()
+          install(false)
         }
-        Button("Install", action: install).disabled(selectedAvailable.isEmpty || processing)
-          .buttonStyle(.borderedProminent)
+        HStack {
+          Button(
+            action: {
+              install(false)
+            },
+            label: {
+              Text("Install")
+            }
+          ).disabled(selectedAvailable.isEmpty || processing)
+            .buttonStyle(.borderedProminent)
+          Button(
+            action: {
+              install(true)
+            },
+            label: {
+              Text("Install silently").tooltip(
+                NSLocalizedString(
+                  "Upgrading a plugin needs to restart IM. Click it to auto restart on demand.",
+                  comment: ""))
+            }
+          ).disabled(selectedAvailable.isEmpty || processing)
+            .buttonStyle(.borderedProminent)
+        }
       }
     }.padding()
+      .sheet(isPresented: $promptRestart) {
+        VStack {
+          Text("Please restart Fcitx5 in IM menu")
+          Button(
+            action: {
+              promptRestart = false
+            },
+            label: {
+              Text("OK")
+            }
+          ).buttonStyle(.borderedProminent)
+        }.padding()
+      }
   }
 }
 
