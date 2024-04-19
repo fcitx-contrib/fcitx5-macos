@@ -145,6 +145,7 @@ struct ExternalOptionView: OptionView {
   let overrideLabel: String? = ""
 
   @StateObject private var viewModel = ExternalConfigViewModel()
+  @State private var showDictManager = false
 
   var body: some View {
     Button(label) {
@@ -165,9 +166,14 @@ struct ExternalOptionView: OptionView {
           .appendingPathComponent("rime")
         mkdirP(rimeUserDir.path())
         NSWorkspace.shared.open(rimeUserDir)
+      case "DictManager":
+        showDictManager = true
       default:
         viewModel.showConfig(model.external)
       }
+    }
+    .sheet(isPresented: $showDictManager) {
+      DictManagerView()
     }
     .sheet(isPresented: $viewModel.hasConfig) {
       VStack {
