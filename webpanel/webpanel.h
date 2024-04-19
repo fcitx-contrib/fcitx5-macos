@@ -256,7 +256,7 @@ public:
 
 private:
     Instance *instance_;
-    std::unique_ptr<candidate_window::CandidateWindow> window_;
+    std::shared_ptr<candidate_window::CandidateWindow> window_;
 
     static const inline std::string ConfPath = "conf/webpanel.conf";
     WebPanelConfig config_;
