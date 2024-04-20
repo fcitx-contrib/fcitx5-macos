@@ -9,7 +9,7 @@ namespace fcitx {
 
 WebPanel::WebPanel(Instance *instance)
     : instance_(instance),
-      window_(std::make_unique<candidate_window::WebviewCandidateWindow>()) {
+      window_(std::make_shared<candidate_window::WebviewCandidateWindow>()) {
     window_->set_select_callback([this](size_t index) {
         with_fcitx([&](Fcitx &fcitx) {
             auto ic = instance_->mostRecentInputContext();
@@ -192,19 +192,22 @@ void WebPanel::updateInputPanel(const Text &preedit, const Text &auxUp,
 /// Before calling this, the panel states must already be initialized
 /// synchronously, by using set_candidates, etc.
 void WebPanel::showAsync(bool show) {
+    std::weak_ptr<candidate_window::CandidateWindow> weakWindow = window_;
     dispatch_async(dispatch_get_main_queue(), ^void() {
-      if (show) {
-          if (auto ic = dynamic_cast<MacosInputContext *>(
-                  instance_->mostRecentInputContext())) {
-              // MacosInputContext::updatePreeditImpl is executed before
-              // WebPanel::update, so in main thread preedit UI update happens
-              // before here.
-              auto [x, y] =
-                  ic->getCursorCoordinates(config_.followCursor.value());
-              window_->show(x, y);
+      if (auto window = weakWindow.lock()) {
+          if (show) {
+              if (auto ic = dynamic_cast<MacosInputContext *>(
+                      instance_->mostRecentInputContext())) {
+                  // MacosInputContext::updatePreeditImpl is executed before
+                  // WebPanel::update, so in main thread preedit UI update
+                  // happens before here.
+                  auto [x, y] =
+                      ic->getCursorCoordinates(config_.followCursor.value());
+                  window->show(x, y);
+              }
+          } else {
+              window->hide();
           }
-      } else {
-          window_->hide();
       }
     });
 }
