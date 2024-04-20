@@ -42,26 +42,8 @@ private var inMemoryPlugins: [String] = []
 private var needsRestart = false
 
 private func getInstalledPlugins() -> [Plugin] {
-  let suffix = ".json"
-  do {
-    let fileNames = try FileManager.default.contentsOfDirectory(atPath: pluginDirectory.path)
-    var plugins: [Plugin] = []
-    for fileName in fileNames {
-      if fileName.hasSuffix(suffix) {
-        plugins.append(Plugin(id: String(fileName.prefix(fileName.count - suffix.count))))
-      }
-    }
-    return plugins
-  } catch {
-    return []
-  }
-}
-
-func mkdirP(_ path: String) {
-  do {
-    try FileManager.default.createDirectory(
-      atPath: path, withIntermediateDirectories: true, attributes: nil)
-  } catch {}
+  let names = getFileNamesWithExtension(pluginDirectory.path, ".json")
+  return names.map { Plugin(id: $0) }
 }
 
 private func getFileName(_ plugin: String) -> String {

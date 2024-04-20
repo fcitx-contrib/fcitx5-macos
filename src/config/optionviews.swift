@@ -173,7 +173,9 @@ struct ExternalOptionView: OptionView {
       }
     }
     .sheet(isPresented: $showDictManager) {
-      DictManagerView()
+      let view = DictManagerView()
+      view.refreshDicts()
+      return view
     }
     .sheet(isPresented: $viewModel.hasConfig) {
       VStack {
