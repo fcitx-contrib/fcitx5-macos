@@ -26,8 +26,9 @@ struct DictManagerView: View {
   @AppStorage("DictManagerSelectedDirectory") var dictManagerSelectedDirectory: String?
   @ObservedObject private var dictVM = DictVM()
 
-  func refreshDicts() {
+  func refreshDicts() -> some View {
     dictVM.refreshDicts()
+    return self
   }
 
   private func reloadDicts() {
