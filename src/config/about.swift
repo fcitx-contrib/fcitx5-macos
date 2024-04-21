@@ -346,11 +346,11 @@ struct AboutView: View {
 
   func update() {
     let fileName = "Fcitx5-\(getArch()).tar.bz2"
-    mkdirP(cacheDirectory.path())
+    mkdirP(cacheDirectory.localPath())
     let destinationURL = cacheDirectory.appendingPathComponent(fileName)
-    if FileManager.default.fileExists(atPath: destinationURL.path()) {
+    if FileManager.default.fileExists(atPath: destinationURL.localPath()) {
       FCITX_INFO("Using cached \(fileName)")
-      return install(destinationURL.path())
+      return install(destinationURL.localPath())
     }
     viewModel.state = .downloading
     guard let url = URL(string: "\(sourceRepo)/releases/download/latest/\(fileName)") else {
@@ -365,7 +365,7 @@ struct AboutView: View {
         do {
           try FileManager.default.moveItem(at: localURL, to: destinationURL)
           DispatchQueue.main.async {
-            install(destinationURL.path())
+            install(destinationURL.localPath())
           }
           return
         } catch {

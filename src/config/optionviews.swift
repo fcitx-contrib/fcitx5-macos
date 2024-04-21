@@ -164,7 +164,7 @@ struct ExternalOptionView: OptionView {
           .appendingPathComponent("share")
           .appendingPathComponent("fcitx5")
           .appendingPathComponent("rime")
-        mkdirP(rimeUserDir.path())
+        mkdirP(rimeUserDir.localPath())
         NSWorkspace.shared.open(rimeUserDir)
       case "DictManager":
         showDictManager = true
@@ -443,10 +443,11 @@ struct AppIMOptionView: OptionView {
       if response == .OK {
         let selectedApp = openPanel.urls.first
         if let appURL = selectedApp {
-          model.appId = bundleIdentifier(appURL.path())
+          let path = appURL.localPath()
+          model.appId = bundleIdentifier(path)
           let name = appURL.lastPathComponent
           model.appName = name.hasSuffix(".app") ? String(name.dropLast(4)) : name
-          model.appPath = appURL.path()
+          model.appPath = path
         }
       }
     }
