@@ -81,6 +81,9 @@ private func jsonToOption(_ json: JSON, _ type: String) throws -> any Option {
   } else if type == "Boolean" {
     return try BooleanOption.decode(json: json)
   } else if type == "String" {
+    if let isEnum = json["IsEnum"].string, isEnum == "True" {
+      return try EnumOption.decode(json: json)
+    }
     return try StringOption.decode(json: json)
   } else if type == "Enum" {
     return try EnumOption.decode(json: json)
