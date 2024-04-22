@@ -183,6 +183,7 @@ struct ExternalOptionView: OptionView {
             viewModel.saveExternalConfig(model.external)
           }
           Button("OK") {
+            viewModel.saveExternalConfig(model.external)
             viewModel.externalConfig = nil
           }
           .buttonStyle(.borderedProminent)
