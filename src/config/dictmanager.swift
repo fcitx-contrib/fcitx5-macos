@@ -60,7 +60,9 @@ class DictVM: ObservableObject {
 }
 
 struct DictManagerView: View {
+  let openPanel = NSOpenPanel()
   @AppStorage("DictManagerSelectedDirectory") var dictManagerSelectedDirectory: String?
+  @State private var selectedDicts = Set<String>()
   @ObservedObject private var dictVM = DictVM()
 
   func refreshDicts() -> some View {
@@ -75,14 +77,13 @@ struct DictManagerView: View {
 
   var body: some View {
     HStack {
-      List {
+      List(selection: $selectedDicts) {
         ForEach(dictVM.dicts) { dict in
           Text(dict.id)
         }
       }
       VStack {
-        Button("Import dictionary") {
-          let openPanel = NSOpenPanel()
+        Button("Import dictionaries") {
           openPanel.allowsMultipleSelection = true
           openPanel.canChooseDirectories = false
           openPanel.allowedContentTypes = ["dict", "scel", "txt"].map {
@@ -110,8 +111,18 @@ struct DictManagerView: View {
             dictManagerSelectedDirectory = openPanel.directoryURL?.localPath()
           }
         }
+
         urlButton(
           NSLocalizedString("Sogou Cell Dictionary", comment: ""), "https://pinyin.sogou.com/dict/")
+
+        Button("Remove dictionaries") {
+          for dict in selectedDicts {
+            removeFile(dictDir.appendingPathComponent(dict + ".dict"))
+          }
+          selectedDicts.removeAll()
+          reloadDicts()
+        }.disabled(selectedDicts.isEmpty)
+
         Button("Open dictionary directory") {
           mkdirP(dictDir.localPath())
           NSWorkspace.shared.open(dictDir)

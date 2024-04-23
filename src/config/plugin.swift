@@ -76,14 +76,6 @@ private func getFiles(_ descriptor: URL) -> [String] {
   }
 }
 
-private func removeFile(_ file: URL) {
-  do {
-    try FileManager.default.removeItem(at: file)
-  } catch {
-    FCITX_ERROR("Error removing \(file.localPath()): \(error.localizedDescription)")
-  }
-}
-
 private func getAutoAddIms(_ plugin: String) -> [String] {
   let descriptor = pluginDirectory.appendingPathComponent(plugin + ".json")
   do {

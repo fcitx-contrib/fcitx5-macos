@@ -35,6 +35,14 @@ func mkdirP(_ path: String) {
   } catch {}
 }
 
+func removeFile(_ file: URL) {
+  do {
+    try FileManager.default.removeItem(at: file)
+  } catch {
+    FCITX_ERROR("Error removing \(file.localPath()): \(error.localizedDescription)")
+  }
+}
+
 func exec(_ command: String, _ args: [String]) -> Bool {
   let process = Process()
   process.launchPath = command
