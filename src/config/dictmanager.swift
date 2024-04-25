@@ -107,7 +107,7 @@ struct DictManagerView: View {
         }
       }
       VStack {
-        Button("Import dictionaries") {
+        Button {
           openPanel.allowsMultipleSelection = true
           openPanel.canChooseDirectories = false
           openPanel.allowedContentTypes = ["dict", "scel", "txt"].map {
@@ -134,22 +134,40 @@ struct DictManagerView: View {
             reloadDicts()
             dictManagerSelectedDirectory = openPanel.directoryURL?.localPath()
           }
+        } label: {
+          Text("Import dictionaries")
         }
 
         urlButton(
           NSLocalizedString("Sogou Cell Dictionary", comment: ""), "https://pinyin.sogou.com/dict/")
 
-        Button("Remove dictionaries") {
+        Button {
           for dict in selectedDicts {
             removeFile(dictDir.appendingPathComponent(dict + ".dict"))
           }
           selectedDicts.removeAll()
           reloadDicts()
+        } label: {
+          Text("Remove dictionaries")
         }.disabled(selectedDicts.isEmpty)
 
-        Button("Open dictionary directory") {
+        Button {
+          Fcitx.setConfig("fcitx://config/addon/pinyin/clearuserdict", "{}")
+        } label: {
+          Text("Clear user data")
+        }
+
+        Button {
+          Fcitx.setConfig("fcitx://config/addon/pinyin/clearalldict", "{}")
+        } label: {
+          Text("Clear all data")
+        }
+
+        Button {
           mkdirP(dictPath)
           NSWorkspace.shared.open(dictDir)
+        } label: {
+          Text("Open dictionary directory")
         }
       }
     }.padding()
