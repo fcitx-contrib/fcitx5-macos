@@ -145,6 +145,7 @@ struct ExternalOptionView: OptionView {
   let overrideLabel: String? = ""
 
   @StateObject private var viewModel = ExternalConfigViewModel()
+  @State private var showDictManager = false
 
   var body: some View {
     Button(label) {
@@ -163,11 +164,16 @@ struct ExternalOptionView: OptionView {
           .appendingPathComponent("share")
           .appendingPathComponent("fcitx5")
           .appendingPathComponent("rime")
-        mkdirP(rimeUserDir.path())
+        mkdirP(rimeUserDir.localPath())
         NSWorkspace.shared.open(rimeUserDir)
+      case "DictManager":
+        showDictManager = true
       default:
         viewModel.showConfig(model.external)
       }
+    }
+    .sheet(isPresented: $showDictManager) {
+      DictManagerView().refreshDicts()
     }
     .sheet(isPresented: $viewModel.hasConfig) {
       VStack {
@@ -394,6 +400,7 @@ func bundleIdentifier(_ appPath: String) -> String {
 struct AppIMOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
+  let openPanel = NSOpenPanel()
   @ObservedObject var model: AppIMOption
   @State private var appIcon: NSImage? = nil
   @State private var imNameMap: [String: String] = [:]
@@ -429,7 +436,6 @@ struct AppIMOptionView: OptionView {
   }
 
   private func openSelector() {
-    let openPanel = NSOpenPanel()
     openPanel.allowsMultipleSelection = false
     openPanel.canChooseDirectories = false
     openPanel.allowedContentTypes = [.application]
@@ -438,10 +444,11 @@ struct AppIMOptionView: OptionView {
       if response == .OK {
         let selectedApp = openPanel.urls.first
         if let appURL = selectedApp {
-          model.appId = bundleIdentifier(appURL.path())
+          let path = appURL.localPath()
+          model.appId = bundleIdentifier(path)
           let name = appURL.lastPathComponent
           model.appName = name.hasSuffix(".app") ? String(name.dropLast(4)) : name
-          model.appPath = appURL.path()
+          model.appPath = path
         }
       }
     }

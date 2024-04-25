@@ -42,26 +42,8 @@ private var inMemoryPlugins: [String] = []
 private var needsRestart = false
 
 private func getInstalledPlugins() -> [Plugin] {
-  let suffix = ".json"
-  do {
-    let fileNames = try FileManager.default.contentsOfDirectory(atPath: pluginDirectory.path)
-    var plugins: [Plugin] = []
-    for fileName in fileNames {
-      if fileName.hasSuffix(suffix) {
-        plugins.append(Plugin(id: String(fileName.prefix(fileName.count - suffix.count))))
-      }
-    }
-    return plugins
-  } catch {
-    return []
-  }
-}
-
-func mkdirP(_ path: String) {
-  do {
-    try FileManager.default.createDirectory(
-      atPath: path, withIntermediateDirectories: true, attributes: nil)
-  } catch {}
+  let names = getFileNamesWithExtension(pluginDirectory.localPath(), ".json")
+  return names.map { Plugin(id: $0) }
 }
 
 private func getFileName(_ plugin: String) -> String {
@@ -74,27 +56,12 @@ private func getCacheURL(_ plugin: String) -> URL {
 }
 
 private func extractPlugin(_ plugin: String) -> Bool {
-  mkdirP(fcitxDirectory.path())
+  mkdirP(fcitxDirectory.localPath())
   let url = getCacheURL(plugin)
-  let path = url.path()
-  let task = Process()
-  task.launchPath = "/usr/bin/tar"
-  task.arguments = ["-xjf", path, "-C", fcitxDirectory.path()]
-  let pipe = Pipe()
-  task.standardOutput = pipe
-  task.standardError = pipe
-
-  task.launch()
-  let data = pipe.fileHandleForReading.readDataToEndOfFile()
-  let output = String(data: data, encoding: .utf8) ?? "Unknown Error"
-
-  task.waitUntilExit()
+  let path = url.localPath()
+  let ret = exec("/usr/bin/tar", ["-xjf", path, "-C", fcitxDirectory.localPath()])
   removeFile(url)
-  if task.terminationStatus != 0 {
-    FCITX_ERROR("Fail to extract \(path): \(output)")
-    return false
-  }
-  return true
+  return ret
 }
 
 private func getFiles(_ descriptor: URL) -> [String] {
@@ -104,16 +71,8 @@ private func getFiles(_ descriptor: URL) -> [String] {
     let json = try JSON(data: data)
     return json["files"].arrayValue.map { $0.stringValue }
   } catch {
-    FCITX_WARN("Skipped invalid JSON \(descriptor.path())")
+    FCITX_WARN("Skipped invalid JSON \(descriptor.localPath())")
     return []
-  }
-}
-
-private func removeFile(_ file: URL) {
-  do {
-    try FileManager.default.removeItem(at: file)
-  } catch {
-    FCITX_ERROR("Error removing \(file.path()): \(error.localizedDescription)")
   }
 }
 
@@ -198,7 +157,7 @@ struct PluginView: View {
 
   private func install(_ autoRestart: Bool) {
     processing = true
-    mkdirP(cacheDirectory.path())
+    mkdirP(cacheDirectory.localPath())
     let downloadGroup = DispatchGroup()
     observers.removeAll()
     downloadedBytes.removeAll()
@@ -207,7 +166,7 @@ struct PluginView: View {
     for (i, selectedPlugin) in selectedAvailable.enumerated() {
       let fileName = getFileName(selectedPlugin)
       let destinationURL = getCacheURL(selectedPlugin)
-      if FileManager.default.fileExists(atPath: destinationURL.path()) {
+      if FileManager.default.fileExists(atPath: destinationURL.localPath()) {
         FCITX_INFO("Using cached \(fileName)")
         installResults[selectedPlugin] = .success(())
         continue
@@ -236,12 +195,9 @@ struct PluginView: View {
         }
 
         if let localURL = localURL {
-          do {
-            try FileManager.default.moveItem(at: localURL, to: destinationURL)
-            installResults[selectedPlugin] = .success(())
-          } catch {
-            installResults[selectedPlugin] = .failure(error)
-          }
+          installResults[selectedPlugin] =
+            moveFile(localURL, destinationURL)
+            ? .success(()) : .failure(NSError(domain: errorDomain, code: 0, userInfo: nil))
         }
       }
       let observer = task.progress.observe(\.fractionCompleted) { progress, _ in

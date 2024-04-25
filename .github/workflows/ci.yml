@@ -48,6 +48,10 @@ jobs:
         with:
           submodules: recursive
 
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20.x
