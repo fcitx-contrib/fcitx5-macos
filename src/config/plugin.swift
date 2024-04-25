@@ -195,12 +195,9 @@ struct PluginView: View {
         }
 
         if let localURL = localURL {
-          do {
-            try FileManager.default.moveItem(at: localURL, to: destinationURL)
-            installResults[selectedPlugin] = .success(())
-          } catch {
-            installResults[selectedPlugin] = .failure(error)
-          }
+          installResults[selectedPlugin] =
+            moveFile(localURL, destinationURL)
+            ? .success(()) : .failure(NSError(domain: errorDomain, code: 0, userInfo: nil))
         }
       }
       let observer = task.progress.observe(\.fractionCompleted) { progress, _ in

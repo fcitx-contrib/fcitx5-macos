@@ -10,7 +10,7 @@ func getFileNamesWithExtension(_ path: String, _ suffix: String) -> [String] {
         names.append(String(fileName.prefix(fileName.count - suffix.count)))
       }
     }
-    return names
+    return names.sorted()
   } catch {
     return []
   }
@@ -33,6 +33,28 @@ func mkdirP(_ path: String) {
     try FileManager.default.createDirectory(
       atPath: path, withIntermediateDirectories: true, attributes: nil)
   } catch {}
+}
+
+func copyFile(_ src: URL, _ dest: URL) -> Bool {
+  do {
+    try FileManager.default.copyItem(at: src, to: dest)
+    return true
+  } catch {
+    FCITX_ERROR(
+      "Error copying \(src.localPath()) to \(dest.localPath()): \(error.localizedDescription)")
+    return false
+  }
+}
+
+func moveFile(_ src: URL, _ dest: URL) -> Bool {
+  do {
+    try FileManager.default.moveItem(at: src, to: dest)
+    return true
+  } catch {
+    FCITX_ERROR(
+      "Error moving \(src.localPath()) to \(dest.localPath()): \(error.localizedDescription)")
+    return false
+  }
 }
 
 func removeFile(_ file: URL) {

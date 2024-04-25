@@ -10,20 +10,15 @@ private let dictDir = FileManager.default.homeDirectoryForCurrentUser
   .appendingPathComponent("pinyin")
   .appendingPathComponent("dictionaries")
 
+private let dictPath = dictDir.localPath()
+
 private let binDir = FileManager.default.homeDirectoryForCurrentUser
   .appendingPathComponent("Library")
   .appendingPathComponent("fcitx5")
   .appendingPathComponent("bin")
 
 func importDict(_ file: URL) -> Bool {
-  do {
-    try FileManager.default.copyItem(
-      at: file, to: dictDir.appendingPathComponent(file.lastPathComponent))
-    return true
-  } catch {
-    FCITX_ERROR(error.localizedDescription)
-    return false
-  }
+  return copyFile(file, dictDir.appendingPathComponent(file.lastPathComponent))
 }
 
 func importTxtDict(_ file: URL) -> Bool {
@@ -52,10 +47,20 @@ struct Dict: Identifiable, Hashable {
 }
 
 class DictVM: ObservableObject {
+  @Published var isEnabled: [String: Bool] = [:]
   @Published private(set) var dicts: [Dict] = []
 
   func refreshDicts() {
-    dicts = getFileNamesWithExtension(dictDir.localPath(), ".dict").map { Dict(id: $0) }
+    let enabled = getFileNamesWithExtension(dictPath, ".dict")
+    let disabled = getFileNamesWithExtension(dictPath, ".dict.disable")
+    dicts = (enabled + disabled).sorted().map { Dict(id: $0) }
+    isEnabled = [:]
+    for d in enabled {
+      isEnabled[d] = true
+    }
+    for d in disabled {
+      isEnabled[d] = false
+    }
   }
 }
 
@@ -79,7 +84,26 @@ struct DictManagerView: View {
     HStack {
       List(selection: $selectedDicts) {
         ForEach(dictVM.dicts) { dict in
-          Text(dict.id)
+          // Separate so clicking text doesn't toggle checkbox.
+          HStack(alignment: .center) {
+            Toggle(
+              "",
+              isOn: Binding(
+                get: { dictVM.isEnabled[dict.id]! },
+                set: {
+                  dictVM.isEnabled[dict.id] = $0
+                  let enabledPath = dictDir.appendingPathComponent(dict.id + ".dict")
+                  let disabledPath = dictDir.appendingPathComponent(dict.id + ".dict.disable")
+                  if $0 {
+                    moveFile(disabledPath, enabledPath)
+                  } else {
+                    moveFile(enabledPath, disabledPath)
+                  }
+                  reloadDicts()
+                }
+              ))
+            Text(dict.id)
+          }
         }
       }
       VStack {
@@ -94,7 +118,7 @@ struct DictManagerView: View {
               .homeDirectoryForCurrentUser.localPath() + "/Downloads")
           openPanel.begin { response in
             if response == .OK {
-              mkdirP(dictDir.localPath())
+              mkdirP(dictPath)
               for file in openPanel.urls {
                 switch file.pathExtension {
                 case "dict":
@@ -124,7 +148,7 @@ struct DictManagerView: View {
         }.disabled(selectedDicts.isEmpty)
 
         Button("Open dictionary directory") {
-          mkdirP(dictDir.localPath())
+          mkdirP(dictPath)
           NSWorkspace.shared.open(dictDir)
         }
       }
