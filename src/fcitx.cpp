@@ -118,10 +118,10 @@ void Fcitx::setupEnv() {
     fs::path localedir = user_prefix / "share" / "locale";
 
     const char *addon_names[] = {
-        "fcitx5-chinese-addons", "fcitx5-hallelujah",
-        "fcitx5-libthai",        "fcitx5-lua",
-        "fcitx5-rime",           "fcitx5-skk",
-        "fcitx5-unikey",
+        "fcitx5-anthy",      "fcitx5-chinese-addons",
+        "fcitx5-hallelujah", "fcitx5-libthai",
+        "fcitx5-lua",        "fcitx5-rime",
+        "fcitx5-skk",        "fcitx5-unikey",
     };
     for (const auto addon : addon_names) {
         fcitx::registerDomain(addon, localedir.c_str());
