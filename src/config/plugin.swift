@@ -28,6 +28,7 @@ struct Plugin: Identifiable, Hashable {
 }
 
 private let officialPlugins = [
+  "anthy",
   "chinese-addons",
   "skk",
   "hallelujah",
