@@ -66,27 +66,19 @@ private func extractPlugin(_ plugin: String) -> Bool {
 }
 
 private func getFiles(_ descriptor: URL) -> [String] {
-  do {
-    let content = try String(contentsOf: descriptor, encoding: .utf8)
-    let data = content.data(using: .utf8, allowLossyConversion: false)!
-    let json = try JSON(data: data)
-    return json["files"].arrayValue.map { $0.stringValue }
-  } catch {
+  guard let json = readJSON(descriptor) else {
     FCITX_WARN("Skipped invalid JSON \(descriptor.localPath())")
     return []
   }
+  return json["files"].arrayValue.map { $0.stringValue }
 }
 
 private func getAutoAddIms(_ plugin: String) -> [String] {
   let descriptor = pluginDirectory.appendingPathComponent(plugin + ".json")
-  do {
-    let content = try String(contentsOf: descriptor, encoding: .utf8)
-    let data = content.data(using: .utf8, allowLossyConversion: false)!
-    let json = try JSON(data: data)
-    return json["input_methods"].arrayValue.map { $0.stringValue }
-  } catch {
+  guard let json = readJSON(descriptor) else {
     return []
   }
+  return json["input_methods"].arrayValue.map { $0.stringValue }
 }
 
 class PluginVM: ObservableObject {

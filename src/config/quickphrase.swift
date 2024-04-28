@@ -2,6 +2,7 @@ import SwiftUI
 
 private let globalQuickphrasePath =
   "/Library/Input Methods/Fcitx5.app/Contents/share/fcitx5/data/quickphrase.d"
+private let globalQuickphraseDir = URL(fileURLWithPath: globalQuickphrasePath)
 private let localQuickphraseDir = FileManager.default.homeDirectoryForCurrentUser
   .appendingPathComponent(".local")
   .appendingPathComponent("share")
@@ -14,8 +15,24 @@ private let minKeywordColumnWidth: CGFloat = 100
 private let minPhraseColumnWidth: CGFloat = 200
 
 class QuickPhraseVM: ObservableObject {
-  @Published var current = ""
+  @Published var current = "" {
+    didSet {
+      guard !current.isEmpty else { return }
+      var content: String? = nil
+      let name = current + ".mb"
+      let localURL = localQuickphraseDir.appendingPathComponent(name)
+      if FileManager.default.fileExists(atPath: localURL.localPath()) {
+        content = readUTF8(localURL)
+      } else {
+        content = readUTF8(globalQuickphraseDir.appendingPathComponent(name))
+      }
+      if content != nil {
+        quickPhrases = stringToQuickPhrases(content!)
+      }
+    }
+  }
   @Published private(set) var files: [String] = []
+  @Published var quickPhrases: [QuickPhrase] = []
 
   func refreshFiles() {
     files = getFileNamesWithExtension(globalQuickphrasePath, ".mb")
@@ -33,11 +50,26 @@ struct QuickPhrase: Identifiable {
   var phrase: String
 }
 
+private func parseLine(_ s: String) -> QuickPhrase? {
+  let regex = try! NSRegularExpression(pattern: "(\\S+)\\s+(\\S.*)", options: [])
+  let matches = regex.matches(
+    in: s, options: [], range: NSRange(location: 0, length: s.utf16.count))
+
+  if let match = matches.first {
+    let keyword = String(s[Range(match.range(at: 1), in: s)!])
+    let phrase = String(s[Range(match.range(at: 2), in: s)!])
+    return QuickPhrase(keyword: keyword, phrase: phrase)
+  }
+  return nil
+}
+
+private func stringToQuickPhrases(_ s: String) -> [QuickPhrase] {
+  return s.split(separator: "\n").compactMap { line in
+    parseLine(String(line))
+  }
+}
+
 struct QuickPhraseView: View {
-  @State private var quickPhrases = [
-    QuickPhrase(keyword: "Hello", phrase: "Hi there"),
-    QuickPhrase(keyword: "Goodbye", phrase: "See you later"),
-  ]
   @State private var selectedRows = Set<UUID>()
   @ObservedObject private var quickphraseVM = QuickPhraseVM()
 
@@ -63,7 +95,7 @@ struct QuickPhraseView: View {
           }
           .font(.headline)
 
-          ForEach($quickPhrases) { $quickPhrase in
+          ForEach($quickphraseVM.quickPhrases) { $quickPhrase in
             HStack {
               TextField("Keyword", text: $quickPhrase.keyword).frame(
                 minWidth: minKeywordColumnWidth, maxWidth: .infinity, alignment: .leading)

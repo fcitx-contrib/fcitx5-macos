@@ -1,5 +1,6 @@
 import Foundation
 import Logging
+import SwiftyJSON
 
 func getFileNamesWithExtension(_ path: String, _ suffix: String) -> [String] {
   do {
@@ -63,6 +64,26 @@ func removeFile(_ file: URL) {
   } catch {
     FCITX_ERROR("Error removing \(file.localPath()): \(error.localizedDescription)")
   }
+}
+
+func readUTF8(_ file: URL) -> String? {
+  do {
+    return try String(contentsOf: file, encoding: .utf8)
+  } catch {
+    FCITX_ERROR("Error reading \(file.localPath()): \(error.localizedDescription)")
+    return nil
+  }
+}
+
+func readJSON(_ file: URL) -> JSON? {
+  if let content = readUTF8(file),
+    let data = content.data(using: .utf8, allowLossyConversion: false)
+  {
+    do {
+      return try JSON(data: data)
+    } catch {}
+  }
+  return nil
 }
 
 func exec(_ command: String, _ args: [String]) -> Bool {
