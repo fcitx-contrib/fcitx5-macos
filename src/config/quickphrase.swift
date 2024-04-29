@@ -16,30 +16,24 @@ private let minKeywordColumnWidth: CGFloat = 100
 private let minPhraseColumnWidth: CGFloat = 200
 
 class QuickPhraseVM: ObservableObject {
-  @Published var current = "" {
-    didSet {
-      guard !current.isEmpty else { return }
-      var content: String? = nil
-      let name = current + ".mb"
-      let localURL = localQuickphraseDir.appendingPathComponent(name)
-      if FileManager.default.fileExists(atPath: localURL.localPath()) {
-        content = readUTF8(localURL)
-      } else {
-        content = readUTF8(globalQuickphraseDir.appendingPathComponent(name))
-      }
-      if content != nil {
-        quickPhrases = stringToQuickPhrases(content!)
-      }
-    }
-  }
+  @Published var current = ""
+  @Published private(set) var userFiles: [String] = []
   @Published private(set) var files: [String] = []
-  @Published var quickPhrases: [QuickPhrase] = []
+  @Published var quickPhrases: [String: [QuickPhrase]] = [:]
 
   func refreshFiles() {
-    files = getFileNamesWithExtension(localQuickphrasePath, ".mb")
+    quickPhrases = [:]
+    userFiles = getFileNamesWithExtension(localQuickphrasePath, ".mb")
+    for file in userFiles {
+      quickPhrases[file] = stringToQuickPhrases(
+        readUTF8(localQuickphraseDir.appendingPathComponent(file + ".mb")) ?? "")
+    }
+    files = userFiles
     for file in getFileNamesWithExtension(globalQuickphrasePath, ".mb") {
-      if !files.contains(file) {
+      if !userFiles.contains(file) {
         files.append(file)
+        quickPhrases[file] = stringToQuickPhrases(
+          readUTF8(globalQuickphraseDir.appendingPathComponent(file + ".mb")) ?? "")
       }
     }
     if files.isEmpty {
@@ -112,7 +106,12 @@ struct QuickPhraseView: View {
           }
           .font(.headline)
 
-          ForEach($quickphraseVM.quickPhrases) { $quickPhrase in
+          ForEach(
+            Binding(
+              get: { quickphraseVM.quickPhrases[quickphraseVM.current] ?? [] },
+              set: { quickphraseVM.quickPhrases[quickphraseVM.current] = $0 }
+            )
+          ) { $quickPhrase in
             HStack {
               TextField("Keyword", text: $quickPhrase.keyword).frame(
                 minWidth: minKeywordColumnWidth, maxWidth: .infinity, alignment: .leading)
@@ -127,11 +126,26 @@ struct QuickPhraseView: View {
           mkdirP(localQuickphrasePath)
           writeUTF8(
             localQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb"),
-            quickPhrasesToString(quickphraseVM.quickPhrases) + "\n")
+            quickPhrasesToString(quickphraseVM.quickPhrases[quickphraseVM.current] ?? []) + "\n")
           reloadQuickPhrase()
         } label: {
           Text("Save")
         }.disabled(quickphraseVM.current.isEmpty)
+
+        Button {
+          let localURL = localQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb")
+          if quickphraseVM.userFiles.contains(quickphraseVM.current) {
+            removeFile(localURL)
+          } else {
+            // Create an empty file to disable the global one
+            mkdirP(localQuickphrasePath)
+            writeUTF8(localURL, "")
+          }
+          reloadQuickPhrase()
+        } label: {
+          Text("Remove")
+        }.disabled(quickphraseVM.current.isEmpty)
+
         Button {
           mkdirP(localQuickphrasePath)
           NSWorkspace.shared.open(localQuickphraseDir)
