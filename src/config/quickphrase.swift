@@ -1,3 +1,4 @@
+import Fcitx
 import SwiftUI
 
 private let globalQuickphrasePath =
@@ -35,7 +36,12 @@ class QuickPhraseVM: ObservableObject {
   @Published var quickPhrases: [QuickPhrase] = []
 
   func refreshFiles() {
-    files = getFileNamesWithExtension(globalQuickphrasePath, ".mb")
+    files = getFileNamesWithExtension(localQuickphrasePath, ".mb")
+    for file in getFileNamesWithExtension(globalQuickphrasePath, ".mb") {
+      if !files.contains(file) {
+        files.append(file)
+      }
+    }
     if files.isEmpty {
       current = ""
     } else if current.isEmpty || !files.contains(current) {
@@ -69,6 +75,12 @@ private func stringToQuickPhrases(_ s: String) -> [QuickPhrase] {
   }
 }
 
+private func quickPhrasesToString(_ quickPhrases: [QuickPhrase]) -> String {
+  return quickPhrases.map { quickPhrase in
+    "\(quickPhrase.keyword) \(quickPhrase.phrase)"
+  }.joined(separator: "\n")
+}
+
 struct QuickPhraseView: View {
   @State private var selectedRows = Set<UUID>()
   @ObservedObject private var quickphraseVM = QuickPhraseVM()
@@ -76,6 +88,11 @@ struct QuickPhraseView: View {
   func refreshFiles() -> some View {
     quickphraseVM.refreshFiles()
     return self
+  }
+
+  func reloadQuickPhrase() {
+    _ = refreshFiles()
+    Fcitx.setConfig("fcitx://config/addon/quickphrase/editor", "{}")
   }
 
   var body: some View {
@@ -106,6 +123,15 @@ struct QuickPhraseView: View {
         }
       }
       VStack {
+        Button {
+          mkdirP(localQuickphrasePath)
+          writeUTF8(
+            localQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb"),
+            quickPhrasesToString(quickphraseVM.quickPhrases) + "\n")
+          reloadQuickPhrase()
+        } label: {
+          Text("Save")
+        }.disabled(quickphraseVM.current.isEmpty)
         Button {
           mkdirP(localQuickphrasePath)
           NSWorkspace.shared.open(localQuickphraseDir)

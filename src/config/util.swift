@@ -75,6 +75,16 @@ func readUTF8(_ file: URL) -> String? {
   }
 }
 
+func writeUTF8(_ file: URL, _ s: String) -> Bool {
+  do {
+    try s.write(to: file, atomically: true, encoding: .utf8)
+    return true
+  } catch {
+    FCITX_ERROR("Error writing \(file.localPath()): \(error.localizedDescription)")
+    return false
+  }
+}
+
 func readJSON(_ file: URL) -> JSON? {
   if let content = readUTF8(file),
     let data = content.data(using: .utf8, allowLossyConversion: false)
