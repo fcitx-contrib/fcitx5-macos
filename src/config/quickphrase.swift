@@ -76,6 +76,8 @@ private func quickPhrasesToString(_ quickPhrases: [QuickPhrase]) -> String {
 }
 
 struct QuickPhraseView: View {
+  @State private var showNewFile = false
+  @State private var newFileName = ""
   @State private var selectedRows = Set<UUID>()
   @ObservedObject private var quickphraseVM = QuickPhraseVM()
 
@@ -122,6 +124,18 @@ struct QuickPhraseView: View {
         }
       }
       VStack {
+        Button {
+          reloadQuickPhrase()
+        } label: {
+          Text("Reload")
+        }
+
+        Button {
+          showNewFile = true
+        } label: {
+          Text("New file")
+        }
+
         Button {
           mkdirP(localQuickphrasePath)
           writeUTF8(
@@ -173,6 +187,27 @@ struct QuickPhraseView: View {
         } label: {
           Text("Open directory")
         }
+      }
+      .sheet(isPresented: $showNewFile) {
+        VStack {
+          HStack {
+            Text("Name")
+            TextField("", text: $newFileName)
+          }
+          Button {
+            if !newFileName.isEmpty && !quickphraseVM.userFiles.contains(newFileName) {
+              let localURL = localQuickphraseDir.appendingPathComponent(newFileName + ".mb")
+              writeUTF8(localURL, "")
+              showNewFile = false
+              refreshFiles()
+              quickphraseVM.current = newFileName
+              newFileName = ""
+            }
+          } label: {
+            Text("Create")
+          }
+        }.padding()
+          .frame(minWidth: 200)
       }
     }.padding()
       .frame(minWidth: 500, minHeight: 300)
