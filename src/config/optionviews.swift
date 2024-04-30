@@ -146,6 +146,7 @@ struct ExternalOptionView: OptionView {
 
   @StateObject private var viewModel = ExternalConfigViewModel()
   @State private var showDictManager = false
+  @State private var showQuickPhrase = false
 
   var body: some View {
     Button(label) {
@@ -168,12 +169,17 @@ struct ExternalOptionView: OptionView {
         NSWorkspace.shared.open(rimeUserDir)
       case "DictManager":
         showDictManager = true
+      case "QuickPhrase":
+        showQuickPhrase = true
       default:
         viewModel.showConfig(model.external)
       }
     }
     .sheet(isPresented: $showDictManager) {
       DictManagerView().refreshDicts()
+    }
+    .sheet(isPresented: $showQuickPhrase) {
+      QuickPhraseView().refreshFiles()
     }
     .sheet(isPresented: $viewModel.hasConfig) {
       VStack {

@@ -171,5 +171,6 @@ struct DictManagerView: View {
         }
       }
     }.padding()
+      .frame(minWidth: 300)
   }
 }
