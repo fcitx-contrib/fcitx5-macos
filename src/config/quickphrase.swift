@@ -141,6 +141,14 @@ struct QuickPhraseView: View {
         }
 
         Button {
+          let newItem = QuickPhrase(keyword: "", phrase: "")
+          quickphraseVM.quickPhrases[quickphraseVM.current]?.append(newItem)
+          quickphraseVM.selectedRows = [newItem.id]
+        } label: {
+          Text("Add item")
+        }
+
+        Button {
           quickphraseVM.quickPhrases[quickphraseVM.current]?.removeAll {
             quickphraseVM.selectedRows.contains($0.id)
           }
@@ -158,6 +166,7 @@ struct QuickPhraseView: View {
         } label: {
           Text("Save")
         }.disabled(quickphraseVM.current.isEmpty)
+          .buttonStyle(.borderedProminent)
 
         Button {
           let localURL = localQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb")
@@ -218,7 +227,7 @@ struct QuickPhraseView: View {
             }
           } label: {
             Text("Create")
-          }
+          }.buttonStyle(.borderedProminent)
         }.padding()
           .frame(minWidth: 200)
       }
