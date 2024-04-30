@@ -16,7 +16,12 @@ private let minKeywordColumnWidth: CGFloat = 100
 private let minPhraseColumnWidth: CGFloat = 200
 
 class QuickPhraseVM: ObservableObject {
-  @Published var current = ""
+  @Published var selectedRows = Set<UUID>()
+  @Published var current = "" {
+    didSet {
+      selectedRows.removeAll()
+    }
+  }
   @Published private(set) var userFiles: [String] = []
   @Published private(set) var files: [String] = []
   @Published var quickPhrases: [String: [QuickPhrase]] = [:]
@@ -78,7 +83,6 @@ private func quickPhrasesToString(_ quickPhrases: [QuickPhrase]) -> String {
 struct QuickPhraseView: View {
   @State private var showNewFile = false
   @State private var newFileName = ""
-  @State private var selectedRows = Set<UUID>()
   @ObservedObject private var quickphraseVM = QuickPhraseVM()
 
   func refreshFiles() -> some View {
@@ -99,7 +103,7 @@ struct QuickPhraseView: View {
             Text(file)
           }
         }
-        List(selection: $selectedRows) {
+        List(selection: $quickphraseVM.selectedRows) {
           HStack {
             Text("Keyword").frame(
               minWidth: minKeywordColumnWidth, maxWidth: .infinity, alignment: .leading)
@@ -135,6 +139,15 @@ struct QuickPhraseView: View {
         } label: {
           Text("New file")
         }
+
+        Button {
+          quickphraseVM.quickPhrases[quickphraseVM.current]?.removeAll {
+            quickphraseVM.selectedRows.contains($0.id)
+          }
+          quickphraseVM.selectedRows.removeAll()
+        } label: {
+          Text("Remove items")
+        }.disabled(quickphraseVM.selectedRows.isEmpty)
 
         Button {
           mkdirP(localQuickphrasePath)
