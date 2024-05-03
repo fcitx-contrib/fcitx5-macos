@@ -351,6 +351,35 @@ class AppIMOption: Option, ObservableObject, EmptyConstructible {
   }
 }
 
+class PunctuationMapOption: Option, ObservableObject, EmptyConstructible {
+  typealias Storage = [String: String]
+  let defaultValue: [String: String]
+  var value: [String: String]
+
+  required init(defaultValue: Storage, value: Storage?) {
+    self.defaultValue = defaultValue
+    self.value = value ?? defaultValue
+  }
+
+  static func decode(json: JSON) throws -> Self {
+    return Self(
+      defaultValue: try Storage.decode(json: json["DefaultValue"]),
+      value: try Storage?.decode(json: json["Value"])
+    )
+  }
+
+  func encodeValueJSON() -> JSON {
+    return value.encodeValueJSON()
+  }
+
+  func resetToDefault() {
+  }
+
+  static func empty(json: JSON) throws -> Self {
+    return Self(defaultValue: [:], value: [:])
+  }
+}
+
 class ListOption<T: Option & EmptyConstructible>: Option, ObservableObject {
   let defaultValue: [T]
   @Published var value: [Identified<T>]
@@ -366,10 +395,10 @@ class ListOption<T: Option & EmptyConstructible>: Option, ObservableObject {
 
   static func decode(json: JSON) throws -> Self {
     let defaultOptions = try [T.Storage].decode(json: json["DefaultValue"]).map {
-      try T.decode(json: try json.merged(with: ["DefaultValue": $0, "Value": $0]))
+      return try T.decode(json: ["DefaultValue": $0, "Value": $0])
     }
     let options = try [T.Storage].decode(json: json["Value"]).map {
-      try T.decode(json: try json.merged(with: ["DefaultValue": $0, "Value": $0]))
+      try T.decode(json: ["DefaultValue": $0, "Value": $0])
     }
     return Self(
       defaultValue: defaultOptions,

@@ -253,12 +253,6 @@ struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
           .disabled(index == 0)
           .buttonStyle(BorderlessButtonStyle())
 
-          Button(action: { moveDown(index: index) }) {
-            Image(systemName: "arrow.down")
-          }
-          .disabled(index == model.value.count - 1)
-          .buttonStyle(BorderlessButtonStyle())
-
           Button(action: { remove(at: index) }) {
             Image(systemName: "minus")
           }
@@ -308,12 +302,6 @@ struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
   private func moveUp(index: Int) {
     if index > 0 {
       model.value.swapAt(index, index - 1)
-    }
-  }
-
-  private func moveDown(index: Int) {
-    if index < model.value.count - 1 {
-      model.value.swapAt(index, index + 1)
     }
   }
 }
@@ -461,6 +449,35 @@ struct AppIMOptionView: OptionView {
   }
 }
 
+struct PunctuationMapOptionView: OptionView {
+  let label: String
+  let overrideLabel: String? = nil
+  @ObservedObject var model: PunctuationMapOption
+
+  var body: some View {
+    HStack {
+      TextField(
+        NSLocalizedString("Key", comment: ""),
+        text: Binding(
+          get: { model.value["Key"] ?? "" },
+          set: { model.value["Key"] = $0 }
+        ))
+      TextField(
+        NSLocalizedString("Mapping", comment: ""),
+        text: Binding(
+          get: { model.value["Mapping"] ?? "" },
+          set: { model.value["Mapping"] = $0 }
+        ))
+      TextField(
+        NSLocalizedString("Alternative Mapping", comment: ""),
+        text: Binding(
+          get: { model.value["AltMapping"] ?? "" },
+          set: { model.value["AltMapping"] = $0 }
+        ))
+    }
+  }
+}
+
 struct GroupOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
@@ -525,6 +542,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return IntegerOptionView(label: label, model: option)
   } else if let option = option as? ColorOption {
     return ColorOptionView(label: label, model: option)
+  } else if let option = option as? PunctuationMapOption {
+    return PunctuationMapOptionView(label: label, model: option)
   } else if let option = option as? ListOption<FontOption> {
     return ListOptionView<FontOption>(label: label, model: option)
   } else if let option = option as? ListOption<AppIMOption> {
@@ -533,6 +552,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return ListOptionView<StringOption>(label: label, model: option)
   } else if let option = option as? ListOption<EnumOption> {
     return ListOptionView<EnumOption>(label: label, model: option)
+  } else if let option = option as? ListOption<PunctuationMapOption> {
+    return ListOptionView<PunctuationMapOption>(label: label, model: option)
   } else {
     return UnsupportedOptionView(model: option)
   }

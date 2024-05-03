@@ -50,7 +50,7 @@ func jsonToConfig(_ json: JSON, _ pathPrefix: String) throws -> Config {
   let description = json["Description"].stringValue
   // Option
   if let type = json["Type"].string,
-    !type.contains("$")
+    !type.contains("$") || type.hasPrefix("List|")
   {
     do {
       let option = try jsonToOption(json, type)
@@ -104,6 +104,8 @@ private func jsonToOption(_ json: JSON, _ type: String) throws -> any Option {
     return try ListOption<StringOption>.decode(json: json)
   } else if type == "List|Enum" {
     return try ListOption<EnumOption>.decode(json: json)
+  } else if type == "List|Entries$PunctuationMapEntryConfig" {
+    return try ListOption<PunctuationMapOption>.decode(json: json)
   } else if type == "External" {
     return try ExternalOption.decode(json: json)
   } else {
@@ -209,6 +211,23 @@ extension Array: FcitxCodable where Element: FcitxCodable {
     var json = JSON()
     for (idx, element) in self.enumerated() {
       json[String(idx)] = element.encodeValueJSON()
+    }
+    return json
+  }
+}
+
+extension Dictionary: FcitxCodable where Key == String, Value: FcitxCodable {
+  static func decode(json: JSON) throws -> Self {
+    var result: [Key: Value] = [:]
+    for (key, subJson): (String, JSON) in json {
+      result[key] = try Value.decode(json: subJson)
+    }
+    return result
+  }
+  func encodeValueJSON() -> JSON {
+    var json = JSON()
+    for (key, value) in self {
+      json[key] = value.encodeValueJSON()
     }
     return json
   }
