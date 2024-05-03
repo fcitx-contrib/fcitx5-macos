@@ -34,9 +34,9 @@ sudo cmake --install build
 ```
 
 ### Code sign
-Some features (e.g. notifications) require the app bundle be code-signed after installation:
-```
-sudo /usr/bin/codesign --force --sign - --deep /Library/Input\ Methods/Fcitx5.app
+Some features (e.g. notifications, core dump) require the app bundle be code-signed after installation:
+```sh
+sudo /usr/bin/codesign --force --sign - --entitlements assets/core.entitlements --deep /Library/Input\ Methods/Fcitx5.app
 ```
 
 ## Debug
@@ -53,6 +53,20 @@ SSH into the mac from another device, then
 ```sh
 $ /usr/bin/lldb
 (lldb) process attach --name Fcitx5
+```
+
+### Core dump
+```sh
+sudo chmod 1777 /cores
+sudo sysctl kern.coredump=1
+ulimit -c unlimited  # only works for current shell
+pkill Fcitx5; /Library/Input\ Methods/Fcitx5.app/Contents/MacOS/Fcitx5
+```
+
+When Fcitx5 crashes, it creates a ~10GB core file under `/cores`.
+```sh
+/usr/bin/lldb -c /cores/core.XXXX
+(lldb) bt
 ```
 
 ## Plugins
