@@ -25,6 +25,16 @@ private func redirectStderr() {
   }
 }
 
+private func signalHandler(signal: Int32) {
+  // The signal can be raised on any thread. So we must make sure it's
+  // routed back to the main thread.
+  DispatchQueue.main.async {
+    if signal == SIGTERM {
+      NSApplication.shared.terminate(nil)
+    }
+  }
+}
+
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
   static var server = IMKServer()
@@ -32,6 +42,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     redirectStderr()
+
+    signal(SIGTERM, signalHandler)
 
     AppDelegate.server = IMKServer(
       name: Bundle.main.infoDictionary?["InputMethodConnectionName"] as? String,
