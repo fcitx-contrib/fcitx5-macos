@@ -253,12 +253,6 @@ struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
           .disabled(index == 0)
           .buttonStyle(BorderlessButtonStyle())
 
-          Button(action: { moveDown(index: index) }) {
-            Image(systemName: "arrow.down")
-          }
-          .disabled(index == model.value.count - 1)
-          .buttonStyle(BorderlessButtonStyle())
-
           Button(action: { remove(at: index) }) {
             Image(systemName: "minus")
           }
@@ -308,12 +302,6 @@ struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
   private func moveUp(index: Int) {
     if index > 0 {
       model.value.swapAt(index, index - 1)
-    }
-  }
-
-  private func moveDown(index: Int) {
-    if index < model.value.count - 1 {
-      model.value.swapAt(index, index + 1)
     }
   }
 }
@@ -469,19 +457,19 @@ struct PunctuationMapOptionView: OptionView {
   var body: some View {
     HStack {
       TextField(
-        "",
+        NSLocalizedString("Key", comment: ""),
         text: Binding(
           get: { model.value["Key"] ?? "" },
           set: { model.value["Key"] = $0 }
         ))
       TextField(
-        "",
+        NSLocalizedString("Mapping", comment: ""),
         text: Binding(
           get: { model.value["Mapping"] ?? "" },
           set: { model.value["Mapping"] = $0 }
         ))
       TextField(
-        "",
+        NSLocalizedString("Alternative Mapping", comment: ""),
         text: Binding(
           get: { model.value["AltMapping"] ?? "" },
           set: { model.value["AltMapping"] = $0 }
