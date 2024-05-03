@@ -59,7 +59,7 @@ $ /usr/bin/lldb
 ```sh
 sudo chmod 1777 /cores
 sudo sysctl kern.coredump=1
-ulimit -c # only works for current shell
+ulimit -c unlimited  # only works for current shell
 pkill Fcitx5; /Library/Input\ Methods/Fcitx5.app/Contents/MacOS/Fcitx5
 ```
 
