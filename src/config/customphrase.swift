@@ -36,6 +36,12 @@ private func stringToCustomPhrases(_ s: String) -> [(CustomPhrase, Bool)] {
   }
 }
 
+private func customPhrasesToString(_ customphraseVM: CustomPhraseVM) -> String {
+  return customphraseVM.customPhrases.map { customPhrase in
+    "\(customPhrase.keyword),\(customphraseVM.isEnabled[customPhrase.id]! ? "" : "-")\(customPhrase.order)=\(customPhrase.phrase)"
+  }.joined(separator: "\n")
+}
+
 class CustomPhraseVM: ObservableObject {
   @Published var customPhrases: [CustomPhrase] = []
   @Published var isEnabled: [UUID: Bool] = [:]
@@ -105,6 +111,16 @@ struct CustomPhraseView: View {
         } label: {
           Text("Reload")
         }
+
+        Button {
+          mkdirP(customphraseDir.localPath())
+          writeUTF8(
+            customphrase,
+            customPhrasesToString(customphraseVM) + "\n")
+          reloadCustomPhrase()
+        } label: {
+          Text("Save")
+        }.buttonStyle(.borderedProminent)
       }
     }.padding()
       .frame(minWidth: 600, minHeight: 300)
