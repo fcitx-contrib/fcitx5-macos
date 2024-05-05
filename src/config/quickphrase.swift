@@ -12,9 +12,6 @@ private let localQuickphraseDir = FileManager.default.homeDirectoryForCurrentUse
   .appendingPathComponent("quickphrase.d")
 private let localQuickphrasePath = localQuickphraseDir.localPath()
 
-let minKeywordColumnWidth: CGFloat = 100
-let minPhraseColumnWidth: CGFloat = 200
-
 class QuickPhraseVM: ObservableObject {
   @Published var selectedRows = Set<UUID>()
   @Published var current = "" {

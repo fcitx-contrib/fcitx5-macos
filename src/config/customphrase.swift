@@ -137,7 +137,10 @@ struct CustomPhraseView: View {
             customPhraseSelectedDirectory = openPanel.directoryURL?.localPath()
           }
         } label: {
-          Text("Import from .plist")
+          Text("Import native custom phrases").tooltip(
+            NSLocalizedString(
+              "In IM menu → Edit Text Substitutions…, select all and drag them to desktop, then import the .plist file.",
+              comment: ""))
         }
 
         Button {
