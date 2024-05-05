@@ -14,10 +14,9 @@ struct CustomPhrase: Identifiable {
   var keyword: String
   var phrase: String
   var order: Int
-  var enabled: Bool
 }
 
-private func parseLine(_ s: String) -> CustomPhrase? {
+private func parseLine(_ s: String) -> (CustomPhrase, Bool)? {
   let regex = try! NSRegularExpression(pattern: "(\\S+),(-?\\d+)=(.+)", options: [])
   let matches = regex.matches(
     in: s, options: [], range: NSRange(location: 0, length: s.utf16.count))
@@ -26,12 +25,12 @@ private func parseLine(_ s: String) -> CustomPhrase? {
     let keyword = String(s[Range(match.range(at: 1), in: s)!])
     let order = Int(String(s[Range(match.range(at: 2), in: s)!])) ?? 0
     let phrase = String(s[Range(match.range(at: 3), in: s)!])
-    return CustomPhrase(keyword: keyword, phrase: phrase, order: abs(order), enabled: order > 0)
+    return (CustomPhrase(keyword: keyword, phrase: phrase, order: abs(order)), order > 0)
   }
   return nil
 }
 
-private func stringToCustomPhrases(_ s: String) -> [CustomPhrase] {
+private func stringToCustomPhrases(_ s: String) -> [(CustomPhrase, Bool)] {
   return s.split(separator: "\n").compactMap { line in
     parseLine(String(line))
   }
@@ -39,9 +38,15 @@ private func stringToCustomPhrases(_ s: String) -> [CustomPhrase] {
 
 class CustomPhraseVM: ObservableObject {
   @Published var customPhrases: [CustomPhrase] = []
+  @Published var isEnabled: [UUID: Bool] = [:]
 
   func refreshItems() {
-    customPhrases = stringToCustomPhrases(readUTF8(customphrase) ?? "")
+    customPhrases = []
+    isEnabled = [:]
+    for (customPhrase, enabled) in stringToCustomPhrases(readUTF8(customphrase) ?? "") {
+      customPhrases.append(customPhrase)
+      isEnabled[customPhrase.id] = enabled
+    }
   }
 }
 
@@ -64,6 +69,7 @@ struct CustomPhraseView: View {
     HStack {
       List(selection: $selectedRows) {
         HStack {
+          Text("").frame(width: checkboxColumnWidth)
           Text("Keyword").frame(
             minWidth: minKeywordColumnWidth, maxWidth: .infinity, alignment: .leading)
           Text("Phrase").frame(
@@ -74,6 +80,15 @@ struct CustomPhraseView: View {
         .font(.headline)
         ForEach($customphraseVM.customPhrases) { $customPhrase in
           HStack(alignment: .center) {
+            Toggle(
+              "",
+              isOn: Binding(
+                get: { customphraseVM.isEnabled[customPhrase.id]! },
+                set: {
+                  customphraseVM.isEnabled[customPhrase.id] = $0
+                }
+              )
+            ).frame(width: checkboxColumnWidth)
             TextField("Keyword", text: $customPhrase.keyword).frame(
               minWidth: minKeywordColumnWidth, maxWidth: .infinity, alignment: .leading)
             TextField("Phrase", text: $customPhrase.phrase).frame(
