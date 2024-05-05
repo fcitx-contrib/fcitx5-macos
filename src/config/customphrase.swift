@@ -89,7 +89,7 @@ struct CustomPhraseView: View {
             Toggle(
               "",
               isOn: Binding(
-                get: { customphraseVM.isEnabled[customPhrase.id]! },
+                get: { customphraseVM.isEnabled[customPhrase.id] ?? true },
                 set: {
                   customphraseVM.isEnabled[customPhrase.id] = $0
                 }
@@ -111,6 +111,27 @@ struct CustomPhraseView: View {
         } label: {
           Text("Reload")
         }
+
+        Button {
+          let newItem = CustomPhrase(keyword: "", phrase: "", order: 1)
+          customphraseVM.isEnabled[newItem.id] = true
+          customphraseVM.customPhrases.append(newItem)
+          selectedRows = [newItem.id]
+        } label: {
+          Text("Add item")
+        }
+
+        Button {
+          customphraseVM.customPhrases.removeAll {
+            selectedRows.contains($0.id)
+          }
+          customphraseVM.isEnabled = customphraseVM.isEnabled.filter { id, _ in
+            !selectedRows.contains(id)
+          }
+          selectedRows.removeAll()
+        } label: {
+          Text("Remove items")
+        }.disabled(selectedRows.isEmpty)
 
         Button {
           mkdirP(customphraseDir.localPath())
