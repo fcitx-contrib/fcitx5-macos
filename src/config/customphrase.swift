@@ -1,5 +1,6 @@
 import Fcitx
 import SwiftUI
+import UniformTypeIdentifiers
 
 private let customphraseDir = FileManager.default.homeDirectoryForCurrentUser
   .appendingPathComponent(".local")
@@ -39,7 +40,7 @@ private func stringToCustomPhrases(_ s: String) -> [(CustomPhrase, Bool)] {
 
 private func customPhrasesToString(_ customphraseVM: CustomPhraseVM) -> String {
   return customphraseVM.customPhrases.map { customPhrase in
-    "\(customPhrase.keyword),\(customphraseVM.isEnabled[customPhrase.id]! ? "" : "-")\(customPhrase.order)=\(customPhrase.phrase)"
+    "\(customPhrase.keyword),\(customphraseVM.isEnabled[customPhrase.id] ?? true ? "" : "-")\(customPhrase.order)=\(customPhrase.phrase)"
   }.joined(separator: "\n")
 }
 
@@ -58,6 +59,8 @@ class CustomPhraseVM: ObservableObject {
 }
 
 struct CustomPhraseView: View {
+  let openPanel = NSOpenPanel()
+  @AppStorage("CustomPhraseSelectedDirectory") var customPhraseSelectedDirectory: String?
   @State private var selectedRows = Set<UUID>()
   @ObservedObject private var customphraseVM = CustomPhraseVM()
 
@@ -111,6 +114,30 @@ struct CustomPhraseView: View {
           reloadCustomPhrase()
         } label: {
           Text("Reload")
+        }
+
+        Button {
+          openPanel.allowsMultipleSelection = true
+          openPanel.canChooseDirectories = false
+          openPanel.allowedContentTypes = [UTType.init(filenameExtension: "plist")!]
+          openPanel.directoryURL = URL(
+            fileURLWithPath: customPhraseSelectedDirectory ?? FileManager.default
+              .homeDirectoryForCurrentUser.localPath() + "/Desktop")
+          openPanel.begin { response in
+            if response == .OK {
+              mkdirP(customphrasePath)
+              for file in openPanel.urls {
+                for (shortcut, phrase) in parseCustomPhraseXML(file) {
+                  let newItem = CustomPhrase(keyword: shortcut, phrase: phrase, order: 1)
+                  customphraseVM.isEnabled[newItem.id] = true
+                  customphraseVM.customPhrases.append(newItem)
+                }
+              }
+            }
+            customPhraseSelectedDirectory = openPanel.directoryURL?.localPath()
+          }
+        } label: {
+          Text("Import from .plist")
         }
 
         Button {
