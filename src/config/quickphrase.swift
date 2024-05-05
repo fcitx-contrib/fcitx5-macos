@@ -183,6 +183,7 @@ struct QuickPhraseView: View {
         }.disabled(quickphraseVM.current.isEmpty)
 
         Button {
+          mkdirP(localQuickphrasePath)
           let localURL = localQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb")
           let path = localURL.localPath()
           if !FileManager.default.fileExists(atPath: path) {
@@ -190,15 +191,7 @@ struct QuickPhraseView: View {
               globalQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb"),
               localURL)
           }
-          let apps = ["VSCodium", "Visual Studio Code"]
-          for app in apps {
-            let appURL = URL(fileURLWithPath: "/Applications/\(app).app")
-            if FileManager.default.fileExists(atPath: appURL.localPath()) {
-              NSWorkspace.shared.openFile(path, withApplication: app)
-              return
-            }
-          }
-          NSWorkspace.shared.openFile(path, withApplication: "TextEdit")
+          openInEditor(path)
         } label: {
           Text("Open in editor")
         }.disabled(quickphraseVM.current.isEmpty)

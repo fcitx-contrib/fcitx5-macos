@@ -6,6 +6,7 @@ private let customphraseDir = FileManager.default.homeDirectoryForCurrentUser
   .appendingPathComponent("share")
   .appendingPathComponent("fcitx5")
   .appendingPathComponent("pinyin")
+private let customphrasePath = customphraseDir.localPath()
 
 private let customphrase = customphraseDir.appendingPathComponent("customphrase")
 
@@ -134,7 +135,7 @@ struct CustomPhraseView: View {
         }.disabled(selectedRows.isEmpty)
 
         Button {
-          mkdirP(customphraseDir.localPath())
+          mkdirP(customphrasePath)
           writeUTF8(
             customphrase,
             customPhrasesToString(customphraseVM) + "\n")
@@ -142,6 +143,17 @@ struct CustomPhraseView: View {
         } label: {
           Text("Save")
         }.buttonStyle(.borderedProminent)
+
+        Button {
+          mkdirP(customphrasePath)
+          let path = customphrase.localPath()
+          if !FileManager.default.fileExists(atPath: path) {
+            writeUTF8(customphrase, "")
+          }
+          openInEditor(path)
+        } label: {
+          Text("Open in editor")
+        }
       }
     }.padding()
       .frame(minWidth: 600, minHeight: 300)
