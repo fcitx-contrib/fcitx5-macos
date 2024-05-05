@@ -17,7 +17,7 @@ endif()
 set(CMAKE_OSX_DEPLOYMENT_TARGET 13)
 add_definitions(-target "${CMAKE_OSX_ARCHITECTURES}-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET}")
 
-# Need HOMEBREW_PATH for iso-codes and xkeyboardconfig
+# Need HOMEBREW_PATH for nlohmann-json
 if(CMAKE_OSX_ARCHITECTURES STREQUAL arm64)
     set(HOMEBREW_PATH "/opt/homebrew")
 else()
@@ -26,7 +26,7 @@ endif()
 
 set(PREBUILT_INSTALL_PATH "/tmp/fcitx5")
 
-set(ENV{PKG_CONFIG_PATH} "${PREBUILT_INSTALL_PATH}/lib/pkgconfig:${HOMEBREW_PATH}/share/pkgconfig")
+set(ENV{PKG_CONFIG_PATH} "${PREBUILT_INSTALL_PATH}/lib/pkgconfig:${PREBUILT_INSTALL_PATH}/share/pkgconfig")
 
 # For dependencies not to be find via pkg-config
 set(LibIntl_DIR "${PREBUILT_INSTALL_PATH}/lib/cmake")
@@ -56,6 +56,12 @@ set(APP_INSTALL_PATH "/Library/Input Methods")
 set(CMAKE_INSTALL_PREFIX "${APP_INSTALL_PATH}/Fcitx5.app/Contents")
 # Reproducible
 set(CMAKE_INSTALL_LIBDATADIR "${CMAKE_INSTALL_PREFIX}/lib")
+
+# Override iso-codes paths
+set(ISOCODES_ISO3166_JSON "${CMAKE_INSTALL_PREFIX}/share/iso-codes/json/iso_3166-1.json")
+set(ISOCODES_ISO639_JSON "${CMAKE_INSTALL_PREFIX}/share/iso-codes/json/iso_639-3.json")
+mark_as_advanced(FORCE ISOCODES_ISO639_JSON ISOCODES_ISO3166_JSON)
+
 add_subdirectory(fcitx5)
 add_subdirectory(deps)
 
