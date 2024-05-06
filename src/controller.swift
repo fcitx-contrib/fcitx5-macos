@@ -187,6 +187,9 @@ class FcitxInputController: IMKInputController {
       withTitle: NSLocalizedString("Plugin Manager", comment: ""), action: #selector(plugin(_:)),
       keyEquivalent: "")
     menu.addItem(
+      withTitle: NSLocalizedString("Advanced", comment: ""), action: #selector(advanced(_:)),
+      keyEquivalent: "")
+    menu.addItem(
       withTitle: NSLocalizedString("Restart", comment: ""), action: #selector(restart(_:)),
       keyEquivalent: "")
     menu.addItem(

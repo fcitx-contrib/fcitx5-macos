@@ -29,6 +29,9 @@ extension FcitxInputController {
   static var addonConfigController: AddonConfigController = {
     return AddonConfigController()
   }()
+  static var advancedController: AdvancedController = {
+    return AdvancedController()
+  }()
 
   @objc func plugin(_: Any? = nil) {
     FcitxInputController.pluginManager.refreshPlugins()
@@ -56,6 +59,10 @@ extension FcitxInputController {
   @objc func addonConfig(_: Any? = nil) {
     FcitxInputController.addonConfigController.refresh()
     FcitxInputController.addonConfigController.showWindow(nil)
+  }
+
+  @objc func advanced(_: Any? = nil) {
+    FcitxInputController.advancedController.showWindow(nil)
   }
 }
 
