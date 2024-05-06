@@ -31,6 +31,14 @@ install(DIRECTORY "${PREBUILT_INSTALL_PATH}/share/icons"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/share"
 )
 
+install(DIRECTORY "${PREBUILT_INSTALL_PATH}/share/iso-codes"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share"
+)
+
+install(DIRECTORY "${PREBUILT_INSTALL_PATH}/share/X11"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share"
+)
+
 #
 # Swift i18n through Localizable.strings
 # Use 'GenerateStrings' to update .strings files.
