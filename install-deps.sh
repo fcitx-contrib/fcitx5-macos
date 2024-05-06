@@ -27,7 +27,3 @@ for dep in "${deps[@]}"; do
   [[ -f cache/$file ]] || wget -P cache https://github.com/fcitx-contrib/fcitx5-macos-prebuilder/releases/download/latest/$file
   tar xjvf cache/$file -C $INSTALL_PREFIX
 done
-
-# HACK: make xkb rules discoverable
-mkdir -p "/Library/Input Methods/Fcitx5.app/Contents/share"
-cp -a /tmp/fcitx5/share/X11 "/Library/Input Methods/Fcitx5.app/Contents/share"

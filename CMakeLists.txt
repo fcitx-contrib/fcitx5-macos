@@ -57,10 +57,11 @@ set(CMAKE_INSTALL_PREFIX "${APP_INSTALL_PATH}/Fcitx5.app/Contents")
 # Reproducible
 set(CMAKE_INSTALL_LIBDATADIR "${CMAKE_INSTALL_PREFIX}/lib")
 
-# Override iso-codes paths
+# Override iso-codes paths and xkb default rules file
 set(ISOCODES_ISO3166_JSON "${CMAKE_INSTALL_PREFIX}/share/iso-codes/json/iso_3166-1.json")
 set(ISOCODES_ISO639_JSON "${CMAKE_INSTALL_PREFIX}/share/iso-codes/json/iso_639-3.json")
-mark_as_advanced(FORCE ISOCODES_ISO639_JSON ISOCODES_ISO3166_JSON)
+set(XKEYBOARDCONFIG_XKBBASE "${CMAKE_INSTALL_PREFIX}/share/X11/xkb")
+set(XKEYBOARDCONFIG_DATADIR "${CMAKE_INSTALL_PREFIX}/share")
 
 add_subdirectory(fcitx5)
 add_subdirectory(deps)
