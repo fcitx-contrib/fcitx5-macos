@@ -1,4 +1,4 @@
-import Foundation
+import Cocoa
 import Logging
 import SwiftyJSON
 
@@ -94,6 +94,18 @@ func readJSON(_ file: URL) -> JSON? {
     } catch {}
   }
   return nil
+}
+
+func openInEditor(_ path: String) {
+  let apps = ["VSCodium", "Visual Studio Code"]
+  for app in apps {
+    let appURL = URL(fileURLWithPath: "/Applications/\(app).app")
+    if FileManager.default.fileExists(atPath: appURL.localPath()) {
+      NSWorkspace.shared.openFile(path, withApplication: app)
+      return
+    }
+  }
+  NSWorkspace.shared.openFile(path, withApplication: "TextEdit")
 }
 
 func exec(_ command: String, _ args: [String]) -> Bool {
