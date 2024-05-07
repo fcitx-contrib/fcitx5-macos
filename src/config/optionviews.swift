@@ -145,6 +145,7 @@ struct ExternalOptionView: OptionView {
   let overrideLabel: String? = ""
 
   @StateObject private var viewModel = ExternalConfigViewModel()
+  @State private var showCustomPhrase = false
   @State private var showDictManager = false
   @State private var showQuickPhrase = false
 
@@ -167,6 +168,8 @@ struct ExternalOptionView: OptionView {
           .appendingPathComponent("rime")
         mkdirP(rimeUserDir.localPath())
         NSWorkspace.shared.open(rimeUserDir)
+      case "CustomPhrase":
+        showCustomPhrase = true
       case "DictManager":
         showDictManager = true
       case "QuickPhrase":
@@ -174,6 +177,9 @@ struct ExternalOptionView: OptionView {
       default:
         viewModel.showConfig(model.external)
       }
+    }
+    .sheet(isPresented: $showCustomPhrase) {
+      CustomPhraseView().refreshItems()
     }
     .sheet(isPresented: $showDictManager) {
       DictManagerView().refreshDicts()

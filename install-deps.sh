@@ -18,6 +18,8 @@ deps=(
   json-c
   libuv
   libxkbcommon
+  iso-codes
+  xkeyboard-config
 )
 
 for dep in "${deps[@]}"; do
