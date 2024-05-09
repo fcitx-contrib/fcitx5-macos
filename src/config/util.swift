@@ -2,6 +2,12 @@ import Cocoa
 import Logging
 import SwiftyJSON
 
+let homeDir = FileManager.default.homeDirectoryForCurrentUser
+let libraryDir = homeDir.appendingPathComponent("Library/fcitx5")
+let cacheDir = libraryDir.appendingPathComponent("cache")
+let configDir = homeDir.appendingPathComponent(".config/fcitx5")
+let localDir = homeDir.appendingPathComponent(".local/share/fcitx5")
+
 func getFileNamesWithExtension(_ path: String, _ suffix: String) -> [String] {
   do {
     let fileNames = try FileManager.default.contentsOfDirectory(atPath: path)
@@ -18,6 +24,10 @@ func getFileNamesWithExtension(_ path: String, _ suffix: String) -> [String] {
 }
 
 extension URL {
+  var isDirectory: Bool {
+    (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
+  }
+
   // Local file name is %-encoded with path()
   func localPath() -> String {
     let path = self.path()
@@ -26,6 +36,10 @@ extension URL {
       return path
     }
     return decoded
+  }
+
+  func exists() -> Bool {
+    return FileManager.default.fileExists(atPath: self.localPath())
   }
 }
 
@@ -58,11 +72,46 @@ func moveFile(_ src: URL, _ dest: URL) -> Bool {
   }
 }
 
-func removeFile(_ file: URL) {
+func moveAndMerge(_ src: URL, _ dest: URL) -> Bool {
+  if !src.exists() {
+    return false
+  }
+  if !dest.exists() {
+    return moveFile(src, dest)
+  }
+  if src.isDirectory {
+    if !dest.isDirectory {
+      return false
+    }
+    do {
+      var success = true
+      let fileNames = try FileManager.default.contentsOfDirectory(atPath: src.localPath())
+      for fileName in fileNames {
+        if !moveAndMerge(
+          src.appendingPathComponent(fileName), dest.appendingPathComponent(fileName))
+        {
+          success = false
+        }
+      }
+      return success
+    } catch {
+      return false
+    }
+  } else {
+    if dest.isDirectory {
+      return false
+    }
+    return removeFile(dest) && moveFile(src, dest)
+  }
+}
+
+func removeFile(_ file: URL) -> Bool {
   do {
     try FileManager.default.removeItem(at: file)
+    return true
   } catch {
     FCITX_ERROR("Error removing \(file.localPath()): \(error.localizedDescription)")
+    return false
   }
 }
 

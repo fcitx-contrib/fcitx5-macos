@@ -3,19 +3,10 @@ import Logging
 import SwiftUI
 import UniformTypeIdentifiers
 
-private let dictDir = FileManager.default.homeDirectoryForCurrentUser
-  .appendingPathComponent(".local")
-  .appendingPathComponent("share")
-  .appendingPathComponent("fcitx5")
-  .appendingPathComponent("pinyin")
-  .appendingPathComponent("dictionaries")
-
+private let dictDir = localDir.appendingPathComponent("pinyin/dictionaries")
 private let dictPath = dictDir.localPath()
 
-private let binDir = FileManager.default.homeDirectoryForCurrentUser
-  .appendingPathComponent("Library")
-  .appendingPathComponent("fcitx5")
-  .appendingPathComponent("bin")
+private let binDir = libraryDir.appendingPathComponent("bin")
 
 func importDict(_ file: URL) -> Bool {
   return copyFile(file, dictDir.appendingPathComponent(file.lastPathComponent))
@@ -114,8 +105,8 @@ struct DictManagerView: View {
             UTType.init(filenameExtension: $0)!
           }
           openPanel.directoryURL = URL(
-            fileURLWithPath: dictManagerSelectedDirectory ?? FileManager.default
-              .homeDirectoryForCurrentUser.localPath() + "/Downloads")
+            fileURLWithPath: dictManagerSelectedDirectory
+              ?? homeDir.appendingPathComponent("Downloads").localPath())
           openPanel.begin { response in
             if response == .OK {
               mkdirP(dictPath)

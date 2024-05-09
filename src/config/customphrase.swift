@@ -2,11 +2,7 @@ import Fcitx
 import SwiftUI
 import UniformTypeIdentifiers
 
-private let customphraseDir = FileManager.default.homeDirectoryForCurrentUser
-  .appendingPathComponent(".local")
-  .appendingPathComponent("share")
-  .appendingPathComponent("fcitx5")
-  .appendingPathComponent("pinyin")
+private let customphraseDir = localDir.appendingPathComponent("pinyin")
 private let customphrasePath = customphraseDir.localPath()
 
 private let customphrase = customphraseDir.appendingPathComponent("customphrase")
@@ -121,8 +117,8 @@ struct CustomPhraseView: View {
           openPanel.canChooseDirectories = false
           openPanel.allowedContentTypes = [UTType.init(filenameExtension: "plist")!]
           openPanel.directoryURL = URL(
-            fileURLWithPath: customPhraseSelectedDirectory ?? FileManager.default
-              .homeDirectoryForCurrentUser.localPath() + "/Desktop")
+            fileURLWithPath: customPhraseSelectedDirectory
+              ?? homeDir.appendingPathComponent("Desktop").localPath())
           openPanel.begin { response in
             if response == .OK {
               mkdirP(customphrasePath)
@@ -176,11 +172,10 @@ struct CustomPhraseView: View {
 
         Button {
           mkdirP(customphrasePath)
-          let path = customphrase.localPath()
-          if !FileManager.default.fileExists(atPath: path) {
+          if !customphrase.exists() {
             writeUTF8(customphrase, "")
           }
-          openInEditor(path)
+          openInEditor(customphrase.localPath())
         } label: {
           Text("Open in editor")
         }

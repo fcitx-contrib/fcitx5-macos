@@ -346,9 +346,9 @@ struct AboutView: View {
 
   func update() {
     let fileName = "Fcitx5-\(getArch()).tar.bz2"
-    mkdirP(cacheDirectory.localPath())
-    let destinationURL = cacheDirectory.appendingPathComponent(fileName)
-    if FileManager.default.fileExists(atPath: destinationURL.localPath()) {
+    mkdirP(cacheDir.localPath())
+    let destinationURL = cacheDir.appendingPathComponent(fileName)
+    if destinationURL.exists() {
       FCITX_INFO("Using cached \(fileName)")
       return install(destinationURL.localPath())
     }

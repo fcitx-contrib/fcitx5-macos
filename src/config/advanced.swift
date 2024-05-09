@@ -2,7 +2,7 @@ import Logging
 import SwiftUI
 import UniformTypeIdentifiers
 
-let extractDir = cacheDirectory.appendingPathComponent("import")
+let extractDir = cacheDir.appendingPathComponent("import")
 let extractPath = extractDir.localPath()
 
 class AdvancedController: ConfigWindowController {
@@ -25,8 +25,7 @@ private func extractZip(_ file: URL) -> Bool {
   if !exec("/usr/bin/ditto", ["-xk", file.localPath(), extractPath]) {
     return false
   }
-  return FileManager.default.fileExists(
-    atPath: extractDir.appendingPathComponent("metadata.json").localPath())
+  return extractDir.appendingPathComponent("metadata.json").exists()
 }
 
 struct AdvancedView: View {
@@ -40,8 +39,8 @@ struct AdvancedView: View {
       openPanel.canChooseDirectories = false
       openPanel.allowedContentTypes = [UTType.init(filenameExtension: "zip")!]
       openPanel.directoryURL = URL(
-        fileURLWithPath: importDataSelectedDirectory ?? FileManager.default
-          .homeDirectoryForCurrentUser.localPath() + "/Downloads")
+        fileURLWithPath: importDataSelectedDirectory
+          ?? homeDir.appendingPathComponent("Downloads").localPath())
       openPanel.begin { response in
         if response == .OK {
           removeFile(extractDir)
