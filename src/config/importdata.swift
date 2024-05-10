@@ -14,13 +14,32 @@ private let importableItems = [
   ImportableItem(
     name: NSLocalizedString("Global Config", comment: ""), enabled: false,
     exists: {
-      return dataDir.appendingPathComponent("config/config").exists()
+      dataDir.appendingPathComponent("config/config").exists()
     },
     doImport: {
-      return moveAndMerge(
+      moveAndMerge(
         dataDir.appendingPathComponent("config/config"),
         configDir.appendingPathComponent("config"))
-    })
+    }),
+  ImportableItem(
+    name: NSLocalizedString("Addon Config", comment: ""), enabled: true,
+    exists: {
+      getFileNamesWithExtension(dataDir.appendingPathComponent("config/conf").localPath(), ".conf")
+        .filter { !$0.hasPrefix("android") }
+        .count > 0
+    },
+    doImport: {
+      // Don't import android-specific config
+      for fileName in getFileNamesWithExtension(
+        dataDir.appendingPathComponent("config/conf").localPath(), ".conf"
+      )
+      .filter({ $0.hasPrefix("android") }) {
+        removeFile(dataDir.appendingPathComponent("config/conf/\(fileName).conf"))
+      }
+      return moveAndMerge(
+        dataDir.appendingPathComponent("config/conf"),
+        configDir.appendingPathComponent("conf"))
+    }),
 ]
 
 struct ImportDataView: View {
@@ -32,7 +51,7 @@ struct ImportDataView: View {
         ForEach($items) { $item in
           Toggle(item.name, isOn: $item.enabled)
         }
-      }
+      }.frame(minHeight: 200)
       Button {
         for item in items {
           if item.enabled {
