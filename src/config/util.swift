@@ -72,6 +72,7 @@ func moveFile(_ src: URL, _ dest: URL) -> Bool {
   }
 }
 
+// Caller should ensure parent directory of dest exists.
 func moveAndMerge(_ src: URL, _ dest: URL) -> Bool {
   if !src.exists() {
     return false

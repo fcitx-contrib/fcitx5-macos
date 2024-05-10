@@ -17,7 +17,8 @@ private let importableItems = [
       dataDir.appendingPathComponent("config/config").exists()
     },
     doImport: {
-      moveAndMerge(
+      mkdirP(configDir.localPath())
+      return moveAndMerge(
         dataDir.appendingPathComponent("config/config"),
         configDir.appendingPathComponent("config"))
     }),
@@ -36,9 +37,23 @@ private let importableItems = [
       .filter({ $0.hasPrefix("android") }) {
         removeFile(dataDir.appendingPathComponent("config/conf/\(fileName).conf"))
       }
+      mkdirP(configDir.localPath())
       return moveAndMerge(
         dataDir.appendingPathComponent("config/conf"),
         configDir.appendingPathComponent("conf"))
+    }),
+  ImportableItem(
+    name: NSLocalizedString("Quick Phrase", comment: ""), enabled: true,
+    exists: {
+      getFileNamesWithExtension(
+        dataDir.appendingPathComponent("data/data/quickphrase.d").localPath(), ".mb"
+      ).count > 0
+    },
+    doImport: {
+      mkdirP(localQuickphrasePath)
+      return moveAndMerge(
+        dataDir.appendingPathComponent("data/data/quickphrase.d"),
+        localQuickphraseDir)
     }),
 ]
 
@@ -60,7 +75,7 @@ struct ImportDataView: View {
         }
       } label: {
         Text("Import")
-      }
+      }.buttonStyle(.borderedProminent)
     }.padding()
   }
 }

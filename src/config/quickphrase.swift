@@ -4,8 +4,8 @@ import SwiftUI
 private let globalQuickphrasePath =
   "/Library/Input Methods/Fcitx5.app/Contents/share/fcitx5/data/quickphrase.d"
 private let globalQuickphraseDir = URL(fileURLWithPath: globalQuickphrasePath)
-private let localQuickphraseDir = localDir.appendingPathComponent("data/quickphrase.d")
-private let localQuickphrasePath = localQuickphraseDir.localPath()
+let localQuickphraseDir = localDir.appendingPathComponent("data/quickphrase.d")
+let localQuickphrasePath = localQuickphraseDir.localPath()
 
 class QuickPhraseVM: ObservableObject {
   @Published var selectedRows = Set<UUID>()
