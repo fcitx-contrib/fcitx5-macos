@@ -3,7 +3,7 @@ import Logging
 import SwiftUI
 import UniformTypeIdentifiers
 
-let dictDir = localDir.appendingPathComponent("pinyin/dictionaries")
+let dictDir = pinyinLocalDir.appendingPathComponent("dictionaries")
 let dictPath = dictDir.localPath()
 
 private let binDir = libraryDir.appendingPathComponent("bin")
@@ -144,12 +144,14 @@ struct DictManagerView: View {
 
         Button {
           Fcitx.setConfig("fcitx://config/addon/pinyin/clearuserdict", "{}")
+          restartAndReconnect()
         } label: {
           Text("Clear user data")
         }
 
         Button {
           Fcitx.setConfig("fcitx://config/addon/pinyin/clearalldict", "{}")
+          restartAndReconnect()
         } label: {
           Text("Clear all data")
         }

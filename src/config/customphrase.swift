@@ -2,10 +2,9 @@ import Fcitx
 import SwiftUI
 import UniformTypeIdentifiers
 
-private let customphraseDir = localDir.appendingPathComponent("pinyin")
-let customphrasePath = customphraseDir.localPath()
+let pinyinPath = pinyinLocalDir.localPath()
 
-let customphrase = customphraseDir.appendingPathComponent("customphrase")
+let customphrase = pinyinLocalDir.appendingPathComponent("customphrase")
 
 struct CustomPhrase: Identifiable {
   let id = UUID()
@@ -121,7 +120,7 @@ struct CustomPhraseView: View {
               ?? homeDir.appendingPathComponent("Desktop").localPath())
           openPanel.begin { response in
             if response == .OK {
-              mkdirP(customphrasePath)
+              mkdirP(pinyinPath)
               for file in openPanel.urls {
                 for (shortcut, phrase) in parseCustomPhraseXML(file) {
                   let newItem = CustomPhrase(keyword: shortcut, phrase: phrase, order: 1)
@@ -161,7 +160,7 @@ struct CustomPhraseView: View {
         }.disabled(selectedRows.isEmpty)
 
         Button {
-          mkdirP(customphrasePath)
+          mkdirP(pinyinPath)
           writeUTF8(
             customphrase,
             customPhrasesToString(customphraseVM) + "\n")
@@ -171,7 +170,7 @@ struct CustomPhraseView: View {
         }.buttonStyle(.borderedProminent)
 
         Button {
-          mkdirP(customphrasePath)
+          mkdirP(pinyinPath)
           if !customphrase.exists() {
             writeUTF8(customphrase, "")
           }

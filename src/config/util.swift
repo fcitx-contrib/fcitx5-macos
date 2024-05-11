@@ -7,6 +7,7 @@ let libraryDir = homeDir.appendingPathComponent("Library/fcitx5")
 let cacheDir = libraryDir.appendingPathComponent("cache")
 let configDir = homeDir.appendingPathComponent(".config/fcitx5")
 let localDir = homeDir.appendingPathComponent(".local/share/fcitx5")
+let pinyinLocalDir = localDir.appendingPathComponent("pinyin")
 let rimeLocalDir = localDir.appendingPathComponent("rime")
 
 func getFileNamesWithExtension(_ path: String, _ suffix: String, _ full: Bool = false) -> [String] {
@@ -151,7 +152,7 @@ func openInEditor(_ path: String) {
   let apps = ["VSCodium", "Visual Studio Code"]
   for app in apps {
     let appURL = URL(fileURLWithPath: "/Applications/\(app).app")
-    if FileManager.default.fileExists(atPath: appURL.localPath()) {
+    if appURL.exists() {
       NSWorkspace.shared.openFile(path, withApplication: app)
       return
     }

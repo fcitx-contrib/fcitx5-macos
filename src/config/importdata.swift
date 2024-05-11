@@ -1,6 +1,7 @@
 import SwiftUI
 
 private let dataDir = extractDir.appendingPathComponent("external")
+private let pinyinDir = dataDir.appendingPathComponent("data/pinyin")
 private let rimeDir = dataDir.appendingPathComponent("data/rime")
 
 struct ImportableItem: Identifiable {
@@ -40,7 +41,7 @@ private func rimeConfig() -> [String] {
   }
 }
 
-func importRime(_ getter: () -> [String]) -> Bool {
+private func importRime(_ getter: () -> [String]) -> Bool {
   mkdirP(rimeLocalDir.localPath())
   return getter().map { fileName in
     moveAndMerge(
@@ -98,26 +99,40 @@ private let importableItems = [
   ImportableItem(
     name: NSLocalizedString("Custom Phrase", comment: ""), enabled: true,
     exists: {
-      dataDir.appendingPathComponent("data/pinyin/customphrase").exists()
+      pinyinDir.appendingPathComponent("customphrase").exists()
     },
     doImport: {
-      mkdirP(customphrasePath)
+      mkdirP(pinyinDir.localPath())
       return moveAndMerge(
-        dataDir.appendingPathComponent("data/pinyin/customphrase"),
+        pinyinDir.appendingPathComponent("customphrase"),
         customphrase)
     }),
   ImportableItem(
-    name: NSLocalizedString("Dictionaries", comment: ""), enabled: true,
+    name: NSLocalizedString("Pinyin Dictionaries", comment: ""), enabled: true,
     exists: {
       getFileNamesWithExtension(
-        dataDir.appendingPathComponent("data/pinyin/dictionaries").localPath(), ".dict"
+        pinyinDir.appendingPathComponent("dictionaries").localPath(), ".dict"
       ).count > 0
     },
     doImport: {
       mkdirP(dictPath)
       return moveAndMerge(
-        dataDir.appendingPathComponent("data/pinyin/dictionaries"),
+        pinyinDir.appendingPathComponent("dictionaries"),
         dictDir)
+    }),
+  ImportableItem(
+    name: NSLocalizedString("Pinyin user data", comment: ""), enabled: false,
+    exists: {
+      ["user.dict", "user.history"].contains { fileName in
+        pinyinDir.appendingPathComponent(fileName).exists()
+      }
+    },
+    doImport: {
+      mkdirP(pinyinLocalDir.localPath())
+      return ["user.dict", "user.history"].map { fileName in
+        let url = pinyinDir.appendingPathComponent(fileName)
+        return !url.exists() || moveAndMerge(url, pinyinLocalDir.appendingPathComponent(fileName))
+      }.allSatisfy { $0 }
     }),
   ImportableItem(
     name: NSLocalizedString("Rime config", comment: ""), enabled: true,
