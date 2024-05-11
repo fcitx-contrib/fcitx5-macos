@@ -1,6 +1,7 @@
 import SwiftUI
 
 private let dataDir = extractDir.appendingPathComponent("external")
+private let rimeDir = dataDir.appendingPathComponent("data/rime")
 
 struct ImportableItem: Identifiable {
   let id = UUID()
@@ -8,6 +9,45 @@ struct ImportableItem: Identifiable {
   var enabled: Bool
   var exists: () -> Bool
   var doImport: () -> Bool
+}
+
+private func rimeExcluded() -> [String] {
+  ["installation.yaml", "sync"]
+}
+
+private func rimeBin() -> [String] {
+  if rimeDir.appendingPathComponent("build").exists() {
+    return ["build"]
+  }
+  return []
+}
+
+private func rimeUser() -> [String] {
+  var userFiles = getFileNamesWithExtension(rimeDir.localPath(), ".userdb", true)
+  if rimeDir.appendingPathComponent("user.yaml").exists() {
+    userFiles.append("user.yaml")
+  }
+  return userFiles
+}
+
+private func rimeConfig() -> [String] {
+  do {
+    let allFiles = try FileManager.default.contentsOfDirectory(atPath: rimeDir.localPath())
+    let otherFiles = [rimeExcluded, rimeBin, rimeUser].flatMap { $0() }
+    return allFiles.filter { !otherFiles.contains($0) }
+  } catch {
+    return []
+  }
+}
+
+func importRime(_ getter: () -> [String]) -> Bool {
+  mkdirP(rimeLocalDir.localPath())
+  return getter().map { fileName in
+    moveAndMerge(
+      rimeDir.appendingPathComponent(fileName),
+      rimeLocalDir.appendingPathComponent(fileName)
+    )
+  }.allSatisfy { $0 }
 }
 
 private let importableItems = [
@@ -78,6 +118,30 @@ private let importableItems = [
       return moveAndMerge(
         dataDir.appendingPathComponent("data/pinyin/dictionaries"),
         dictDir)
+    }),
+  ImportableItem(
+    name: NSLocalizedString("Rime config", comment: ""), enabled: true,
+    exists: {
+      rimeConfig().count > 0
+    },
+    doImport: {
+      importRime(rimeConfig)
+    }),
+  ImportableItem(
+    name: NSLocalizedString("Rime binaries", comment: ""), enabled: false,
+    exists: {
+      rimeBin().count > 0
+    },
+    doImport: {
+      importRime(rimeBin)
+    }),
+  ImportableItem(
+    name: NSLocalizedString("Rime user data", comment: ""), enabled: false,
+    exists: {
+      rimeUser().count > 0
+    },
+    doImport: {
+      importRime(rimeUser)
     }),
 ]
 

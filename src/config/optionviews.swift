@@ -159,9 +159,8 @@ struct ExternalOptionView: OptionView {
         let fontDir = URL(fileURLWithPath: "/Library/Fonts")
         NSWorkspace.shared.open(fontDir)
       case "UserDataDir":
-        let rimeUserDir = localDir.appendingPathComponent("rime")
-        mkdirP(rimeUserDir.localPath())
-        NSWorkspace.shared.open(rimeUserDir)
+        mkdirP(rimeLocalDir.localPath())
+        NSWorkspace.shared.open(rimeLocalDir)
       case "CustomPhrase":
         showCustomPhrase = true
       case "DictManager":
