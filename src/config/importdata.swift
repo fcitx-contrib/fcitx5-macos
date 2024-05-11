@@ -66,6 +66,19 @@ private let importableItems = [
         dataDir.appendingPathComponent("data/pinyin/customphrase"),
         customphrase)
     }),
+  ImportableItem(
+    name: NSLocalizedString("Dictionaries", comment: ""), enabled: true,
+    exists: {
+      getFileNamesWithExtension(
+        dataDir.appendingPathComponent("data/pinyin/dictionaries").localPath(), ".dict"
+      ).count > 0
+    },
+    doImport: {
+      mkdirP(dictPath)
+      return moveAndMerge(
+        dataDir.appendingPathComponent("data/pinyin/dictionaries"),
+        dictDir)
+    }),
 ]
 
 struct ImportDataView: View {

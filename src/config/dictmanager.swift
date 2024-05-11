@@ -3,8 +3,8 @@ import Logging
 import SwiftUI
 import UniformTypeIdentifiers
 
-private let dictDir = localDir.appendingPathComponent("pinyin/dictionaries")
-private let dictPath = dictDir.localPath()
+let dictDir = localDir.appendingPathComponent("pinyin/dictionaries")
+let dictPath = dictDir.localPath()
 
 private let binDir = libraryDir.appendingPathComponent("bin")
 
