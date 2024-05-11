@@ -175,6 +175,9 @@ private let importableItems = [
 
 struct ImportDataView: View {
   @State private var items = importableItems.filter { $0.exists() }
+  @State private var failedItems = [String]()
+  @State private var showAlert = false
+
   var body: some View {
     VStack {
       Text("Files with the same name will be overridden.")
@@ -184,17 +187,40 @@ struct ImportDataView: View {
         }
       }.frame(minHeight: 200)
       Button {
+        failedItems = [String]()
         restartAndReconnect({
           for item in items {
             if item.enabled {
-              item.doImport()
+              if !item.doImport() {
+                failedItems.append(item.name)
+              }
             }
           }
         })
+        items = importableItems.filter { $0.exists() }
+        showAlert = true
       } label: {
         Text("Import")
       }.buttonStyle(.borderedProminent)
         .disabled(items.allSatisfy { !$0.enabled })
+        .alert(
+          failedItems.count > 0 ? Text("Error") : Text("Import succeeded"),
+          isPresented: $showAlert,
+          presenting: ()
+        ) { _ in
+          Button {
+            showAlert = false
+          } label: {
+            Text("OK")
+          }
+          .buttonStyle(.borderedProminent)
+        } message: { _ in
+          if failedItems.count > 0 {
+            Text(
+              NSLocalizedString("Items failed to import:", comment: "")
+                + failedItems.joined(separator: ", "))
+          }
+        }
     }.padding()
   }
 }
