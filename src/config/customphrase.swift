@@ -3,9 +3,9 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 private let customphraseDir = localDir.appendingPathComponent("pinyin")
-private let customphrasePath = customphraseDir.localPath()
+let customphrasePath = customphraseDir.localPath()
 
-private let customphrase = customphraseDir.appendingPathComponent("customphrase")
+let customphrase = customphraseDir.appendingPathComponent("customphrase")
 
 struct CustomPhrase: Identifiable {
   let id = UUID()

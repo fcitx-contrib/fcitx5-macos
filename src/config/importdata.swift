@@ -55,6 +55,17 @@ private let importableItems = [
         dataDir.appendingPathComponent("data/data/quickphrase.d"),
         localQuickphraseDir)
     }),
+  ImportableItem(
+    name: NSLocalizedString("Custom Phrase", comment: ""), enabled: true,
+    exists: {
+      dataDir.appendingPathComponent("data/pinyin/customphrase").exists()
+    },
+    doImport: {
+      mkdirP(customphrasePath)
+      return moveAndMerge(
+        dataDir.appendingPathComponent("data/pinyin/customphrase"),
+        customphrase)
+    }),
 ]
 
 struct ImportDataView: View {
@@ -68,14 +79,17 @@ struct ImportDataView: View {
         }
       }.frame(minHeight: 200)
       Button {
-        for item in items {
-          if item.enabled {
-            item.doImport()
+        restartAndReconnect({
+          for item in items {
+            if item.enabled {
+              item.doImport()
+            }
           }
-        }
+        })
       } label: {
         Text("Import")
       }.buttonStyle(.borderedProminent)
+        .disabled(items.allSatisfy { !$0.enabled })
     }.padding()
   }
 }

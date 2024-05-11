@@ -1,8 +1,10 @@
 import Cocoa
 import Fcitx
 
-func restartAndReconnect() {
-  restart_fcitx_thread()
+func restartAndReconnect(_ actionBetween: (() -> Void)? = nil) {
+  stop_fcitx_thread()
+  actionBetween?()
+  start_fcitx_thread(nil)
   for controller in FcitxInputController.registry.allObjects {
     controller.reconnectToFcitx()
   }
