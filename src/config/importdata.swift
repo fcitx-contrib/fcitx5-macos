@@ -1,7 +1,9 @@
 import SwiftUI
 
 private let dataDir = extractDir.appendingPathComponent("external")
+private let imDir = dataDir.appendingPathComponent("data/inputmethod")
 private let pinyinDir = dataDir.appendingPathComponent("data/pinyin")
+private let tableDir = dataDir.appendingPathComponent("data/table")
 private let rimeDir = dataDir.appendingPathComponent("data/rime")
 
 struct ImportableItem: Identifiable {
@@ -32,13 +34,9 @@ private func rimeUser() -> [String] {
 }
 
 private func rimeConfig() -> [String] {
-  do {
-    let allFiles = try FileManager.default.contentsOfDirectory(atPath: rimeDir.localPath())
-    let otherFiles = [rimeExcluded, rimeBin, rimeUser].flatMap { $0() }
-    return allFiles.filter { !otherFiles.contains($0) }
-  } catch {
-    return []
-  }
+  let allFiles = getFileNamesWithExtension(rimeDir.localPath())
+  let otherFiles = [rimeExcluded, rimeBin, rimeUser].flatMap { $0() }
+  return allFiles.filter { !otherFiles.contains($0) }
 }
 
 private func importRime(_ getter: () -> [String]) -> Bool {
@@ -134,6 +132,21 @@ private let importableItems = [
         return !url.exists() || moveAndMerge(url, pinyinLocalDir.appendingPathComponent(fileName))
       }.allSatisfy { $0 }
     }),
+  ImportableItem(
+    name: NSLocalizedString("Table", comment: ""), enabled: true,
+    exists: {
+      getFileNamesWithExtension(tableDir.localPath()).count > 0
+    },
+    doImport: {
+      mkdirP(imLocalDir.localPath())
+      mkdirP(tableLocalDir.localPath())
+      return [
+        moveAndMerge(tableDir, tableLocalDir),
+        !imDir.exists() || moveAndMerge(imDir, imLocalDir),
+      ]
+      .allSatisfy { $0 }
+    }
+  ),
   ImportableItem(
     name: NSLocalizedString("Rime config", comment: ""), enabled: true,
     exists: {
