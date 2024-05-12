@@ -17,11 +17,7 @@ let baseURL = "https://github.com/fcitx-contrib/fcitx5-macos-plugins/releases/do
 
 let errorDomain = "org.fcitx.inputmethod.Fcitx5"
 
-let fcitxDirectory = FileManager.default.homeDirectoryForCurrentUser
-  .appendingPathComponent("Library")
-  .appendingPathComponent("fcitx5")
-private let pluginDirectory = fcitxDirectory.appendingPathComponent("plugin")
-let cacheDirectory = fcitxDirectory.appendingPathComponent("cache")
+private let pluginDirectory = libraryDir.appendingPathComponent("plugin")
 
 struct Plugin: Identifiable, Hashable {
   let id: String
@@ -53,14 +49,14 @@ private func getFileName(_ plugin: String) -> String {
 
 private func getCacheURL(_ plugin: String) -> URL {
   let fileName = getFileName(plugin)
-  return cacheDirectory.appendingPathComponent(fileName)
+  return cacheDir.appendingPathComponent(fileName)
 }
 
 private func extractPlugin(_ plugin: String) -> Bool {
-  mkdirP(fcitxDirectory.localPath())
+  mkdirP(libraryDir.localPath())
   let url = getCacheURL(plugin)
   let path = url.localPath()
-  let ret = exec("/usr/bin/tar", ["-xjf", path, "-C", fcitxDirectory.localPath()])
+  let ret = exec("/usr/bin/tar", ["-xjf", path, "-C", libraryDir.localPath()])
   removeFile(url)
   return ret
 }
@@ -137,7 +133,7 @@ struct PluginView: View {
         if keptFiles.contains(file) {
           continue
         }
-        removeFile(fcitxDirectory.appendingPathComponent(file))
+        removeFile(libraryDir.appendingPathComponent(file))
       }
       removeFile(descriptor)
       FCITX_INFO("Uninstalled \(selectedPlugin)")
@@ -150,7 +146,7 @@ struct PluginView: View {
 
   private func install(_ autoRestart: Bool) {
     processing = true
-    mkdirP(cacheDirectory.localPath())
+    mkdirP(cacheDir.localPath())
     let downloadGroup = DispatchGroup()
     observers.removeAll()
     downloadedBytes.removeAll()
@@ -159,7 +155,7 @@ struct PluginView: View {
     for (i, selectedPlugin) in selectedAvailable.enumerated() {
       let fileName = getFileName(selectedPlugin)
       let destinationURL = getCacheURL(selectedPlugin)
-      if FileManager.default.fileExists(atPath: destinationURL.localPath()) {
+      if destinationURL.exists() {
         FCITX_INFO("Using cached \(fileName)")
         installResults[selectedPlugin] = .success(())
         continue

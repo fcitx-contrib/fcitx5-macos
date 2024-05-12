@@ -2,14 +2,9 @@ import Fcitx
 import SwiftUI
 import UniformTypeIdentifiers
 
-private let customphraseDir = FileManager.default.homeDirectoryForCurrentUser
-  .appendingPathComponent(".local")
-  .appendingPathComponent("share")
-  .appendingPathComponent("fcitx5")
-  .appendingPathComponent("pinyin")
-private let customphrasePath = customphraseDir.localPath()
+let pinyinPath = pinyinLocalDir.localPath()
 
-private let customphrase = customphraseDir.appendingPathComponent("customphrase")
+let customphrase = pinyinLocalDir.appendingPathComponent("customphrase")
 
 struct CustomPhrase: Identifiable {
   let id = UUID()
@@ -121,11 +116,11 @@ struct CustomPhraseView: View {
           openPanel.canChooseDirectories = false
           openPanel.allowedContentTypes = [UTType.init(filenameExtension: "plist")!]
           openPanel.directoryURL = URL(
-            fileURLWithPath: customPhraseSelectedDirectory ?? FileManager.default
-              .homeDirectoryForCurrentUser.localPath() + "/Desktop")
+            fileURLWithPath: customPhraseSelectedDirectory
+              ?? homeDir.appendingPathComponent("Desktop").localPath())
           openPanel.begin { response in
             if response == .OK {
-              mkdirP(customphrasePath)
+              mkdirP(pinyinPath)
               for file in openPanel.urls {
                 for (shortcut, phrase) in parseCustomPhraseXML(file) {
                   let newItem = CustomPhrase(keyword: shortcut, phrase: phrase, order: 1)
@@ -165,7 +160,7 @@ struct CustomPhraseView: View {
         }.disabled(selectedRows.isEmpty)
 
         Button {
-          mkdirP(customphrasePath)
+          mkdirP(pinyinPath)
           writeUTF8(
             customphrase,
             customPhrasesToString(customphraseVM) + "\n")
@@ -175,12 +170,11 @@ struct CustomPhraseView: View {
         }.buttonStyle(.borderedProminent)
 
         Button {
-          mkdirP(customphrasePath)
-          let path = customphrase.localPath()
-          if !FileManager.default.fileExists(atPath: path) {
+          mkdirP(pinyinPath)
+          if !customphrase.exists() {
             writeUTF8(customphrase, "")
           }
-          openInEditor(path)
+          openInEditor(customphrase.localPath())
         } label: {
           Text("Open in editor")
         }

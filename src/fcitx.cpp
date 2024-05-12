@@ -186,8 +186,10 @@ void start_fcitx_thread(const char *locale) noexcept {
             << "Trying to start multiple fcitx threads, which is forbidden";
         std::terminate();
     }
-    std::string locale_str = locale;
-    std::swap(current_locale, locale_str);
+    if (locale) {
+        std::string locale_str = locale;
+        std::swap(current_locale, locale_str);
+    }
     auto &fcitx = Fcitx::shared();
     fcitx.setup();
     // Start the event loop in another thread.

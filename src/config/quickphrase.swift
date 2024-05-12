@@ -4,13 +4,8 @@ import SwiftUI
 private let globalQuickphrasePath =
   "/Library/Input Methods/Fcitx5.app/Contents/share/fcitx5/data/quickphrase.d"
 private let globalQuickphraseDir = URL(fileURLWithPath: globalQuickphrasePath)
-private let localQuickphraseDir = FileManager.default.homeDirectoryForCurrentUser
-  .appendingPathComponent(".local")
-  .appendingPathComponent("share")
-  .appendingPathComponent("fcitx5")
-  .appendingPathComponent("data")
-  .appendingPathComponent("quickphrase.d")
-private let localQuickphrasePath = localQuickphraseDir.localPath()
+let localQuickphraseDir = localDir.appendingPathComponent("data/quickphrase.d")
+let localQuickphrasePath = localQuickphraseDir.localPath()
 
 class QuickPhraseVM: ObservableObject {
   @Published var selectedRows = Set<UUID>()
@@ -183,7 +178,7 @@ struct QuickPhraseView: View {
           mkdirP(localQuickphrasePath)
           let localURL = localQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb")
           let path = localURL.localPath()
-          if !FileManager.default.fileExists(atPath: path) {
+          if !localURL.exists() {
             copyFile(
               globalQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb"),
               localURL)

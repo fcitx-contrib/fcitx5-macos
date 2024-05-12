@@ -1,8 +1,10 @@
 import Cocoa
 import Fcitx
 
-func restartAndReconnect() {
-  restart_fcitx_thread()
+func restartAndReconnect(_ actionBetween: (() -> Void)? = nil) {
+  stop_fcitx_thread()
+  actionBetween?()
+  start_fcitx_thread(nil)
   for controller in FcitxInputController.registry.allObjects {
     controller.reconnectToFcitx()
   }
@@ -28,6 +30,9 @@ extension FcitxInputController {
   }()
   static var addonConfigController: AddonConfigController = {
     return AddonConfigController()
+  }()
+  static var advancedController: AdvancedController = {
+    return AdvancedController()
   }()
 
   @objc func plugin(_: Any? = nil) {
@@ -56,6 +61,10 @@ extension FcitxInputController {
   @objc func addonConfig(_: Any? = nil) {
     FcitxInputController.addonConfigController.refresh()
     FcitxInputController.addonConfigController.showWindow(nil)
+  }
+
+  @objc func advanced(_: Any? = nil) {
+    FcitxInputController.advancedController.showWindow(nil)
   }
 }
 

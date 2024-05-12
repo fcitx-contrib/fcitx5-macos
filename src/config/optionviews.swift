@@ -153,21 +153,14 @@ struct ExternalOptionView: OptionView {
     Button(label) {
       switch model.option {
       case "UserFontDir":
-        let fontDir = FileManager.default.homeDirectoryForCurrentUser
-          .appendingPathComponent("Library")
-          .appendingPathComponent("Fonts")
+        let fontDir = homeDir.appendingPathComponent("Library/Fonts")
         NSWorkspace.shared.open(fontDir)
       case "SystemFontDir":
         let fontDir = URL(fileURLWithPath: "/Library/Fonts")
         NSWorkspace.shared.open(fontDir)
       case "UserDataDir":
-        let rimeUserDir = FileManager.default.homeDirectoryForCurrentUser
-          .appendingPathComponent(".local")
-          .appendingPathComponent("share")
-          .appendingPathComponent("fcitx5")
-          .appendingPathComponent("rime")
-        mkdirP(rimeUserDir.localPath())
-        NSWorkspace.shared.open(rimeUserDir)
+        mkdirP(rimeLocalDir.localPath())
+        NSWorkspace.shared.open(rimeLocalDir)
       case "CustomPhrase":
         showCustomPhrase = true
       case "DictManager":

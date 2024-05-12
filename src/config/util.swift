@@ -2,13 +2,25 @@ import Cocoa
 import Logging
 import SwiftyJSON
 
-func getFileNamesWithExtension(_ path: String, _ suffix: String) -> [String] {
+let homeDir = FileManager.default.homeDirectoryForCurrentUser
+let libraryDir = homeDir.appendingPathComponent("Library/fcitx5")
+let cacheDir = libraryDir.appendingPathComponent("cache")
+let configDir = homeDir.appendingPathComponent(".config/fcitx5")
+let localDir = homeDir.appendingPathComponent(".local/share/fcitx5")
+let imLocalDir = localDir.appendingPathComponent("inputmethod")
+let pinyinLocalDir = localDir.appendingPathComponent("pinyin")
+let tableLocalDir = localDir.appendingPathComponent("table")
+let rimeLocalDir = localDir.appendingPathComponent("rime")
+
+func getFileNamesWithExtension(_ path: String, _ suffix: String = "", _ full: Bool = false)
+  -> [String]
+{
   do {
     let fileNames = try FileManager.default.contentsOfDirectory(atPath: path)
     var names: [String] = []
     for fileName in fileNames {
       if fileName.hasSuffix(suffix) {
-        names.append(String(fileName.prefix(fileName.count - suffix.count)))
+        names.append(full ? fileName : String(fileName.prefix(fileName.count - suffix.count)))
       }
     }
     return names.sorted()
@@ -18,6 +30,10 @@ func getFileNamesWithExtension(_ path: String, _ suffix: String) -> [String] {
 }
 
 extension URL {
+  var isDirectory: Bool {
+    (try? resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true
+  }
+
   // Local file name is %-encoded with path()
   func localPath() -> String {
     let path = self.path()
@@ -26,6 +42,10 @@ extension URL {
       return path
     }
     return decoded
+  }
+
+  func exists() -> Bool {
+    return FileManager.default.fileExists(atPath: self.localPath())
   }
 }
 
@@ -58,11 +78,47 @@ func moveFile(_ src: URL, _ dest: URL) -> Bool {
   }
 }
 
-func removeFile(_ file: URL) {
+// Caller should ensure parent directory of dest exists.
+func moveAndMerge(_ src: URL, _ dest: URL) -> Bool {
+  if !src.exists() {
+    return false
+  }
+  if !dest.exists() {
+    return moveFile(src, dest)
+  }
+  if src.isDirectory {
+    if !dest.isDirectory {
+      return false
+    }
+    do {
+      var success = true
+      let fileNames = try FileManager.default.contentsOfDirectory(atPath: src.localPath())
+      for fileName in fileNames {
+        if !moveAndMerge(
+          src.appendingPathComponent(fileName), dest.appendingPathComponent(fileName))
+        {
+          success = false
+        }
+      }
+      return success
+    } catch {
+      return false
+    }
+  } else {
+    if dest.isDirectory {
+      return false
+    }
+    return removeFile(dest) && moveFile(src, dest)
+  }
+}
+
+func removeFile(_ file: URL) -> Bool {
   do {
     try FileManager.default.removeItem(at: file)
+    return true
   } catch {
     FCITX_ERROR("Error removing \(file.localPath()): \(error.localizedDescription)")
+    return false
   }
 }
 
@@ -100,7 +156,7 @@ func openInEditor(_ path: String) {
   let apps = ["VSCodium", "Visual Studio Code"]
   for app in apps {
     let appURL = URL(fileURLWithPath: "/Applications/\(app).app")
-    if FileManager.default.fileExists(atPath: appURL.localPath()) {
+    if appURL.exists() {
       NSWorkspace.shared.openFile(path, withApplication: app)
       return
     }
