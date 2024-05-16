@@ -1,7 +1,7 @@
 #!/bin/zsh
 set -eu
 
-if [[ $# -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
+if [[ $# -eq 0 || $# -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
   echo "Usage: fcitx5-curl path [curl options]"
   echo "Example: fcitx5-curl /config/addon/rime/deploy -X POST -d '{}'"
   exit 0
