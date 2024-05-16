@@ -86,5 +86,8 @@ add_subdirectory(assets)
 option(BUILD_PREVIEW "" OFF)
 add_subdirectory(fcitx5-webview)
 
+add_subdirectory(fcitx5-beast/src)
+target_include_directories(beast PRIVATE "${PREBUILT_INSTALL_PATH}/include")
+
 enable_testing()
 add_subdirectory(tests)

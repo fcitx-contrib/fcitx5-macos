@@ -7,3 +7,6 @@
 [submodule "deps/SwiftyJSON"]
 	path = deps/SwiftyJSON
 	url = https://github.com/SwiftyJSON/SwiftyJSON
+[submodule "fcitx5-beast"]
+	path = fcitx5-beast
+	url = https://github.com/fcitx-contrib/fcitx5-beast

@@ -32,6 +32,7 @@ target_link_libraries(Fcitx5Objs
     Fcitx5::Core
     keyboard
     webpanel
+    beast
     macosfrontend
     macosnotifications
     WebviewCandidateWindow
