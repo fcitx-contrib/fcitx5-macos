@@ -12,6 +12,7 @@ mkdir -p $INSTALL_PREFIX
 
 deps=(
   default-icon-theme
+  boost
   expat
   fmt
   libintl

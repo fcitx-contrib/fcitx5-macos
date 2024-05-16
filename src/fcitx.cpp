@@ -14,8 +14,10 @@
 #include <nlohmann/json.hpp>
 
 #include "fcitx.h"
+#include "../fcitx5-beast/src/beast.h"
 #include "../macosnotifications/macosnotifications.h"
 #include "../webpanel/webpanel.h"
+#include "config/config-public.h"
 #include "nativestreambuf.h"
 
 namespace fs = std::filesystem;
@@ -26,6 +28,7 @@ fcitx::KeyboardEngineFactory keyboardFactory;
 fcitx::MacosFrontendFactory macosFrontendFactory;
 fcitx::WebPanelFactory webpanelFactory;
 fcitx::MacosNotificationsFactory macosNotificationsFactory;
+fcitx::BeastFactory beastFactory;
 fcitx::StaticAddonRegistry staticAddons = {
     std::make_pair<std::string, fcitx::AddonFactory *>("keyboard",
                                                        &keyboardFactory),
@@ -33,6 +36,7 @@ fcitx::StaticAddonRegistry staticAddons = {
                                                        &macosFrontendFactory),
     std::make_pair<std::string, fcitx::AddonFactory *>("webpanel",
                                                        &webpanelFactory),
+    std::make_pair<std::string, fcitx::AddonFactory *>("beast", &beastFactory),
     std::make_pair<std::string, fcitx::AddonFactory *>(
         "notifications", &macosNotificationsFactory)};
 
@@ -62,6 +66,9 @@ void Fcitx::setup() {
     setupInstance();
     frontend_ =
         dynamic_cast<fcitx::MacosFrontend *>(addonMgr().addon("macosfrontend"));
+    auto beast_ = dynamic_cast<fcitx::Beast *>(addonMgr().addon("beast"));
+    beast_->setConfigGetter(getConfig);
+    beast_->setConfigSetter(setConfig);
 }
 
 void Fcitx::teardown() {

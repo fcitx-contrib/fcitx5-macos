@@ -86,5 +86,7 @@ add_subdirectory(assets)
 option(BUILD_PREVIEW "" OFF)
 add_subdirectory(fcitx5-webview)
 
+add_subdirectory(fcitx5-beast/src)
+
 enable_testing()
 add_subdirectory(tests)
