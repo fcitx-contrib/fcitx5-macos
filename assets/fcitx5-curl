@@ -1,0 +1,13 @@
+#!/bin/zsh
+set -eu
+
+if [[ $# -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
+  echo "Usage: fcitx5-curl path [curl options]"
+  echo "Example: fcitx5-curl /config/addon/rime/deploy -X POST -d '{}'"
+  exit 0
+fi
+
+source ~/.config/fcitx5/conf/beast.conf || Port=32489
+url="http://127.0.0.1:$Port$1"
+shift
+curl "$url" "$@"
