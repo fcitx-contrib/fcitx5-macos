@@ -364,9 +364,9 @@ struct FontOptionView: OptionView {
           Button {
             select()
           } label: {
-            Text("Select").buttonStyle(.borderedProminent)
-          }
-          .disabled(selectedFontFamily == nil)
+            Text("Select")
+          }.buttonStyle(.borderedProminent)
+            .disabled(selectedFontFamily == nil)
         }
       }
       .padding()
