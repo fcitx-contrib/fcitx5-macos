@@ -339,7 +339,8 @@ struct FontOptionView: OptionView {
       VStack {
         TextField(NSLocalizedString("Search", comment: ""), text: $searchInput)
         TextField(NSLocalizedString("Preview", comment: ""), text: $previewInput)
-        Text(previewInput).font(Font.custom(selectedFontFamily ?? model.value, size: 32)).frame(height: 64)
+        Text(previewInput).font(Font.custom(selectedFontFamily ?? model.value, size: 32)).frame(
+          height: 64)
         List(selection: $selectedFontFamily) {
           ForEach(filteredFontFamilies, id: \.self) { family in
             HStack {
