@@ -311,6 +311,7 @@ struct FontOptionView: OptionView {
   @ObservedObject var model: FontOption
   @State private var selectorIsOpen = false
   @State var searchInput = ""
+  @State var previewInput = NSLocalizedString("Preview", comment: "")
 
   // If initialize [], the sheet will list nothing on first open.
   @State var availableFontFamilies = NSFontManager.shared.availableFontFamilies
@@ -337,9 +338,15 @@ struct FontOptionView: OptionView {
     .sheet(isPresented: $selectorIsOpen) {
       VStack {
         TextField(NSLocalizedString("Search", comment: ""), text: $searchInput)
+        TextField(NSLocalizedString("Preview", comment: ""), text: $previewInput)
+        Text(previewInput).font(Font.custom(selectedFontFamily ?? model.value, size: 32)).frame(height: 64)
         List(selection: $selectedFontFamily) {
           ForEach(filteredFontFamilies, id: \.self) { family in
-            Text(localize(family))
+            HStack {
+              Text(localize(family)).font(Font.custom(family, size: 14))
+              Spacer()
+              Text(localize(family))
+            }
           }
         }.contextMenu(forSelectionType: String.self) { items in
         } primaryAction: { items in
@@ -356,13 +363,13 @@ struct FontOptionView: OptionView {
           Button {
             select()
           } label: {
-            Text("Select")
+            Text("Select").buttonStyle(.borderedProminent)
           }
           .disabled(selectedFontFamily == nil)
         }
       }
       .padding()
-      .frame(minWidth: 400, minHeight: 400)
+      .frame(minWidth: 500, minHeight: 600)
     }
   }
 
