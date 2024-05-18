@@ -31,6 +31,7 @@ jobs:
               exit 1
             fi
           done
+          file assets/zh-Hans.lproj/Localizable.strings | grep UTF-16
 
   build:
     needs: lint
