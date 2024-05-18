@@ -12,6 +12,8 @@ let pinyinLocalDir = localDir.appendingPathComponent("pinyin")
 let tableLocalDir = localDir.appendingPathComponent("table")
 let rimeLocalDir = localDir.appendingPathComponent("rime")
 
+let squirrelDir = homeDir.appendingPathComponent("Library/Rime")
+
 func getFileNamesWithExtension(_ path: String, _ suffix: String = "", _ full: Bool = false)
   -> [String]
 {
