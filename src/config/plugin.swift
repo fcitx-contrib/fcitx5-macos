@@ -21,18 +21,34 @@ private let pluginDirectory = libraryDir.appendingPathComponent("plugin")
 
 struct Plugin: Identifiable, Hashable {
   let id: String
+  let category: String
+  let github: String?
 }
 
 private let officialPlugins = [
-  "anthy",
-  "chinese-addons",
-  "skk",
-  "hallelujah",
-  "rime",
-  "unikey",
-  "thai",
-  "lua",
-].map { Plugin(id: $0) }
+  Plugin(
+    id: "anthy", category: NSLocalizedString("Japanese", comment: ""), github: "fcitx/fcitx5-anthy"),
+  Plugin(
+    id: "chinese-addons", category: NSLocalizedString("Chinese", comment: ""),
+    github: "fcitx/fcitx5-chinese-addons"),
+  Plugin(
+    id: "skk", category: NSLocalizedString("Japanese", comment: ""), github: "fcitx/fcitx5-skk"),
+  Plugin(
+    id: "hallelujah", category: NSLocalizedString("English", comment: ""),
+    github: "fcitx-contrib/fcitx5-hallelujah"),
+  Plugin(
+    id: "rime", category: NSLocalizedString("Generic", comment: ""), github: "fcitx/fcitx5-rime"),
+  Plugin(
+    id: "unikey", category: NSLocalizedString("Vietnamese", comment: ""),
+    github: "fcitx/fcitx5-unikey"),
+  Plugin(
+    id: "thai", category: NSLocalizedString("Thai", comment: ""), github: "fcitx/fcitx5-libthai"),
+  Plugin(id: "lua", category: NSLocalizedString("Other", comment: ""), github: "fcitx/fcitx5-lua"),
+]
+
+private var pluginMap = officialPlugins.reduce(into: [String: Plugin]()) { result, plugin in
+  result[plugin.id] = plugin
+}
 
 // fcitx5 doesn't unload addons from memory, so once loaded, we have to restart process to use an updated version.
 private var inMemoryPlugins: [String] = []
@@ -40,7 +56,9 @@ private var needsRestart = false
 
 private func getInstalledPlugins() -> [Plugin] {
   let names = getFileNamesWithExtension(pluginDirectory.localPath(), ".json")
-  return names.map { Plugin(id: $0) }
+  return names.map {
+    pluginMap[$0] ?? Plugin(id: $0, category: NSLocalizedString("Other", comment: ""), github: nil)
+  }
 }
 
 private func getFileName(_ plugin: String) -> String {
@@ -142,6 +160,33 @@ struct PluginView: View {
     refreshPlugins()
     restartAndReconnect()
     processing = false
+  }
+
+  private func categorizePlugins(_ plugins: [Plugin]) -> some View {
+    let categorizedPlugins = plugins.reduce(into: [String: [Plugin]]()) { result, plugin in
+      result[plugin.category, default: []].append(plugin)
+    }
+    return ForEach(categorizedPlugins.keys.sorted(), id: \.self) { category in
+      Section(header: Text(category)) {
+        ForEach(categorizedPlugins[category]!) { plugin in
+          HStack {
+            Text(plugin.id)
+            if plugin.github != nil,
+              let url = URL(string: "https://github.com/\(plugin.github!)")
+            {
+              Button(
+                action: {
+                  NSWorkspace.shared.open(url)
+                },
+                label: {
+                  Image(systemName: "arrow.up.forward.app.fill")
+                }
+              ).buttonStyle(.plain).help("\(url)")
+            }
+          }
+        }
+      }
+    }
   }
 
   private func install(_ autoRestart: Bool) {
@@ -253,9 +298,7 @@ struct PluginView: View {
         Text("Installed").font(.system(size: sectionHeaderSize)).frame(
           maxWidth: .infinity, alignment: .leading)
         List(selection: $selectedInstalled) {
-          ForEach(pluginVM.installedPlugins) { plugin in
-            Text(plugin.id)
-          }
+          categorizePlugins(pluginVM.installedPlugins)
         }
         Button("Uninstall", role: .destructive, action: uninstall).disabled(
           selectedInstalled.isEmpty || processing)
@@ -264,9 +307,7 @@ struct PluginView: View {
         Text("Available").font(.system(size: sectionHeaderSize)).frame(
           maxWidth: .infinity, alignment: .leading)
         List(selection: $selectedAvailable) {
-          ForEach(pluginVM.availablePlugins) { plugin in
-            Text(plugin.id)
-          }
+          categorizePlugins(pluginVM.availablePlugins)
         }.contextMenu(forSelectionType: String.self) { items in
         } primaryAction: { items in
           // Double click
