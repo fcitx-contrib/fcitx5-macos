@@ -5,6 +5,7 @@ private let imDir = dataDir.appendingPathComponent("data/inputmethod")
 private let pinyinDir = dataDir.appendingPathComponent("data/pinyin")
 private let tableDir = dataDir.appendingPathComponent("data/table")
 private let f5aRimeDir = dataDir.appendingPathComponent("data/rime")
+let hamsterRimeDir = extractDir.appendingPathComponent("HamsterBackup/RIME/Rime")
 
 struct ImportableItem: Identifiable {
   let id = UUID()
@@ -86,6 +87,12 @@ let squirrelItems = [
   importableRimeConfig(extractDir),
   importableRimeBin(extractDir),
   importableRimeUser(extractDir),
+]
+
+let hamsterItems = [
+  importableRimeConfig(hamsterRimeDir),
+  importableRimeBin(hamsterRimeDir),
+  importableRimeUser(hamsterRimeDir),
 ]
 
 let f5aItems = [
