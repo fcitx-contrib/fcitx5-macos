@@ -87,6 +87,14 @@ private func getFiles(_ descriptor: URL) -> [String] {
   return json["files"].arrayValue.map { $0.stringValue }
 }
 
+private func getVersion(_ plugin: String) -> String {
+  let descriptor = pluginDirectory.appendingPathComponent(plugin + ".json")
+  guard let json = readJSON(descriptor) else {
+    return ""
+  }
+  return json["version"].stringValue
+}
+
 private func getAutoAddIms(_ plugin: String) -> [String] {
   let descriptor = pluginDirectory.appendingPathComponent(plugin + ".json")
   guard let json = readJSON(descriptor) else {
@@ -115,6 +123,36 @@ class PluginVM: ObservableObject {
   }
 }
 
+private struct Meta: Codable {
+  struct Plugin: Codable {
+    let name: String
+    let version: String
+  }
+  let plugins: [Plugin]
+}
+
+func checkPluginUpdate(_ callback: @escaping ([String]) -> Void) {
+  guard let url = URL(string: baseURL + "meta-\(arch).json") else {
+    return callback([])
+  }
+  URLSession.shared.dataTask(with: url) { data, response, error in
+    var plugins = [String]()
+    if let data = data,
+      let meta = try? JSONDecoder().decode(Meta.self, from: data)
+    {
+      let pluginVersionMap = meta.plugins.reduce(into: [String: String]()) { result, plugin in
+        result[plugin.name] = plugin.version
+      }
+      for plugin in getInstalledPlugins() {
+        if let version = pluginVersionMap[plugin.id], version != getVersion(plugin.id) {
+          plugins.append(plugin.id)
+        }
+      }
+    }
+    callback(plugins)
+  }.resume()
+}
+
 struct PluginView: View {
   @State private var selectedInstalled = Set<String>()
   @State private var selectedAvailable = Set<String>()
@@ -122,15 +160,29 @@ struct PluginView: View {
   @State private var processing = false
   @State private var promptRestart = false
 
-  @State private var observers: [NSKeyValueObservation] = []
-  @State private var downloadedBytes: [Int64] = []
-  @State private var totalBytes: [Int64] = []
+  @State private var observers = [String: NSKeyValueObservation]()
+  @State private var downloadedBytes = [String: Int64]()
+  @State private var totalBytes = [String: Int64]()
   @State private var downloadProgress = 0.0
+
+  @State private var showUpToDate = false
+  @State private var showUpdateAvailable = false
 
   @ObservedObject private var pluginVM = PluginVM()
 
   func refreshPlugins() {
     pluginVM.refreshPlugins()
+  }
+
+  private func checkUpdate() {
+    checkPluginUpdate({ plugins in
+      if plugins.isEmpty {
+        showUpToDate = true
+      } else {
+        selectedAvailable = Set(plugins)
+        showUpdateAvailable = true
+      }
+    })
   }
 
   private func uninstall() {
@@ -189,7 +241,7 @@ struct PluginView: View {
     }
   }
 
-  private func install(_ autoRestart: Bool) {
+  private func install(_ autoRestart: Bool, autoAdd: Bool = true) {
     processing = true
     mkdirP(cacheDir.localPath())
     let downloadGroup = DispatchGroup()
@@ -197,7 +249,7 @@ struct PluginView: View {
     downloadedBytes.removeAll()
     totalBytes.removeAll()
 
-    for (i, selectedPlugin) in selectedAvailable.enumerated() {
+    for selectedPlugin in selectedAvailable {
       let fileName = getFileName(selectedPlugin)
       let destinationURL = getCacheURL(selectedPlugin)
       if destinationURL.exists() {
@@ -209,7 +261,7 @@ struct PluginView: View {
       guard let url = URL(string: baseURL + fileName) else { continue }
       downloadGroup.enter()
       let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
-        observers[i].invalidate()
+        observers[selectedPlugin]?.invalidate()
         defer { downloadGroup.leave() }
 
         if let error = error {
@@ -235,13 +287,14 @@ struct PluginView: View {
         }
       }
       let observer = task.progress.observe(\.fractionCompleted) { progress, _ in
-        downloadedBytes[i] = task.countOfBytesReceived
-        totalBytes[i] = task.countOfBytesExpectedToReceive
-        downloadProgress = Double(downloadedBytes.reduce(0, +)) / Double(totalBytes.reduce(0, +))
+        downloadedBytes[selectedPlugin] = task.countOfBytesReceived
+        totalBytes[selectedPlugin] = task.countOfBytesExpectedToReceive
+        downloadProgress =
+          Double(downloadedBytes.values.reduce(0, +)) / Double(totalBytes.values.reduce(0, +))
       }
-      observers.append(observer)
-      downloadedBytes.append(0)
-      totalBytes.append(0)
+      observers[selectedPlugin] = observer
+      downloadedBytes[selectedPlugin] = 0
+      totalBytes[selectedPlugin] = 0
       task.resume()
     }
     selectedAvailable.removeAll()
@@ -253,8 +306,10 @@ struct PluginView: View {
         case .success:
           if extractPlugin(plugin) {
             FCITX_INFO("Successful installed \(plugin)")
-            for im in getAutoAddIms(plugin) {
-              inputMethods.append(im)
+            if autoAdd {
+              for im in getAutoAddIms(plugin) {
+                inputMethods.append(im)
+              }
             }
             if inMemoryPlugins.contains(plugin) {
               needsRestart = true
@@ -300,8 +355,47 @@ struct PluginView: View {
         List(selection: $selectedInstalled) {
           categorizePlugins(pluginVM.installedPlugins)
         }
-        Button("Uninstall", role: .destructive, action: uninstall).disabled(
-          selectedInstalled.isEmpty || processing)
+        HStack {
+          Button {
+            checkUpdate()
+          } label: {
+            Text("Check update")
+          }.buttonStyle(.borderedProminent)
+            .disabled(processing)
+            .sheet(isPresented: $showUpToDate) {
+              VStack {
+                Text("All plugins are up to date")
+                Button {
+                  showUpToDate = false
+                } label: {
+                  Text("OK")
+                }.buttonStyle(.borderedProminent)
+              }.padding()
+            }.sheet(isPresented: $showUpdateAvailable) {
+              VStack {
+                Text("Update available")
+
+                Spacer().frame(height: gapSize)
+
+                ForEach(selectedAvailable.sorted(), id: \.self) { plugin in
+                  Text(plugin)
+                }
+
+                Spacer().frame(height: gapSize)
+
+                Text("Fcitx5 will auto restart.")
+
+                Button {
+                  showUpdateAvailable = false
+                  install(true, autoAdd: false)
+                } label: {
+                  Text("Update")
+                }.buttonStyle(.borderedProminent)
+              }.padding()
+            }
+          Button("Uninstall", role: .destructive, action: uninstall).disabled(
+            selectedInstalled.isEmpty || processing)
+        }
       }
       VStack {
         Text("Available").font(.system(size: sectionHeaderSize)).frame(
