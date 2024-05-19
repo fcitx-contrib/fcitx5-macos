@@ -4,7 +4,7 @@ private let dataDir = extractDir.appendingPathComponent("external")
 private let imDir = dataDir.appendingPathComponent("data/inputmethod")
 private let pinyinDir = dataDir.appendingPathComponent("data/pinyin")
 private let tableDir = dataDir.appendingPathComponent("data/table")
-private let rimeDir = dataDir.appendingPathComponent("data/rime")
+private let f5aRimeDir = dataDir.appendingPathComponent("data/rime")
 
 struct ImportableItem: Identifiable {
   let id = UUID()
@@ -14,18 +14,18 @@ struct ImportableItem: Identifiable {
   var doImport: () -> Bool
 }
 
-private func rimeExcluded() -> [String] {
+private func rimeExcluded(_ rimeDir: URL) -> [String] {
   ["installation.yaml", "sync"]
 }
 
-private func rimeBin() -> [String] {
+private func rimeBin(_ rimeDir: URL) -> [String] {
   if rimeDir.appendingPathComponent("build").exists() {
     return ["build"]
   }
   return []
 }
 
-private func rimeUser() -> [String] {
+private func rimeUser(_ rimeDir: URL) -> [String] {
   var userFiles = getFileNamesWithExtension(rimeDir.localPath(), ".userdb", true)
   if rimeDir.appendingPathComponent("user.yaml").exists() {
     userFiles.append("user.yaml")
@@ -33,15 +33,15 @@ private func rimeUser() -> [String] {
   return userFiles
 }
 
-private func rimeConfig() -> [String] {
+private func rimeConfig(_ rimeDir: URL) -> [String] {
   let allFiles = getFileNamesWithExtension(rimeDir.localPath())
-  let otherFiles = [rimeExcluded, rimeBin, rimeUser].flatMap { $0() }
+  let otherFiles = [rimeExcluded, rimeBin, rimeUser].flatMap { $0(rimeDir) }
   return allFiles.filter { !otherFiles.contains($0) }
 }
 
-private func importRime(_ getter: () -> [String]) -> Bool {
+private func importRime(_ getter: (URL) -> [String], _ rimeDir: URL) -> Bool {
   mkdirP(rimeLocalDir.localPath())
-  return getter().map { fileName in
+  return getter(rimeDir).map { fileName in
     moveAndMerge(
       rimeDir.appendingPathComponent(fileName),
       rimeLocalDir.appendingPathComponent(fileName)
@@ -49,7 +49,46 @@ private func importRime(_ getter: () -> [String]) -> Bool {
   }.allSatisfy { $0 }
 }
 
-private let importableItems = [
+private func importableRimeConfig(_ rimeDir: URL) -> ImportableItem {
+  return ImportableItem(
+    name: NSLocalizedString("Rime config", comment: ""), enabled: true,
+    exists: {
+      rimeConfig(rimeDir).count > 0
+    },
+    doImport: {
+      importRime(rimeConfig, rimeDir)
+    })
+}
+
+private func importableRimeBin(_ rimeDir: URL) -> ImportableItem {
+  return ImportableItem(
+    name: NSLocalizedString("Rime binaries", comment: ""), enabled: false,
+    exists: {
+      rimeBin(rimeDir).count > 0
+    },
+    doImport: {
+      importRime(rimeBin, rimeDir)
+    })
+}
+
+private func importableRimeUser(_ rimeDir: URL) -> ImportableItem {
+  return ImportableItem(
+    name: NSLocalizedString("Rime user data", comment: ""), enabled: false,
+    exists: {
+      rimeUser(rimeDir).count > 0
+    },
+    doImport: {
+      importRime(rimeUser, rimeDir)
+    })
+}
+
+let squirrelItems = [
+  importableRimeConfig(extractDir),
+  importableRimeBin(extractDir),
+  importableRimeUser(extractDir),
+]
+
+let f5aItems = [
   ImportableItem(
     name: NSLocalizedString("Global Config", comment: ""), enabled: false,
     exists: {
@@ -147,36 +186,21 @@ private let importableItems = [
       .allSatisfy { $0 }
     }
   ),
-  ImportableItem(
-    name: NSLocalizedString("Rime config", comment: ""), enabled: true,
-    exists: {
-      rimeConfig().count > 0
-    },
-    doImport: {
-      importRime(rimeConfig)
-    }),
-  ImportableItem(
-    name: NSLocalizedString("Rime binaries", comment: ""), enabled: false,
-    exists: {
-      rimeBin().count > 0
-    },
-    doImport: {
-      importRime(rimeBin)
-    }),
-  ImportableItem(
-    name: NSLocalizedString("Rime user data", comment: ""), enabled: false,
-    exists: {
-      rimeUser().count > 0
-    },
-    doImport: {
-      importRime(rimeUser)
-    }),
+  importableRimeConfig(f5aRimeDir),
+  importableRimeBin(f5aRimeDir),
+  importableRimeUser(f5aRimeDir),
 ]
 
 struct ImportDataView: View {
-  @State private var items = importableItems.filter { $0.exists() }
+  private var importableItems: [ImportableItem]
+  @State private var items: [ImportableItem]
   @State private var failedItems = [String]()
   @State private var showAlert = false
+
+  init(_ importableItems: [ImportableItem]) {
+    self.importableItems = importableItems
+    self.items = importableItems.filter { $0.exists() }
+  }
 
   var body: some View {
     VStack {

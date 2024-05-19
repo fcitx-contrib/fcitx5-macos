@@ -31,31 +31,46 @@ private func extractZip(_ file: URL) -> Bool {
 struct AdvancedView: View {
   let openPanel = NSOpenPanel()
   @AppStorage("ImportDataSelectedDirectory") var importDataSelectedDirectory: String?
-  @State private var showImport = false
+  @State private var showImportF5a = false
+  @State private var showImportSquirrel = false
 
   var body: some View {
-    Button {
-      openPanel.allowsMultipleSelection = false
-      openPanel.canChooseDirectories = false
-      openPanel.allowedContentTypes = [UTType.init(filenameExtension: "zip")!]
-      openPanel.directoryURL = URL(
-        fileURLWithPath: importDataSelectedDirectory
-          ?? homeDir.appendingPathComponent("Downloads").localPath())
-      openPanel.begin { response in
-        if response == .OK {
-          removeFile(extractDir)
-          mkdirP(extractPath)
-          if let file = openPanel.urls.first, extractZip(file) {
-            showImport = true
-          }
+    VStack {
+      Text("Import data from …")
+
+      Button {
+        removeFile(extractDir)
+        if copyFile(squirrelDir, extractDir) {
+          showImportSquirrel = true
         }
-        importDataSelectedDirectory = openPanel.directoryURL?.localPath()
+      } label: {
+        Text("Local Squirrel")
+      }.sheet(isPresented: $showImportSquirrel) {
+        ImportDataView(squirrelItems)
+      }.disabled(!FileManager.default.fileExists(atPath: squirrelDir.localPath()))
+
+      Button {
+        openPanel.allowsMultipleSelection = false
+        openPanel.canChooseDirectories = false
+        openPanel.allowedContentTypes = [UTType.init(filenameExtension: "zip")!]
+        openPanel.directoryURL = URL(
+          fileURLWithPath: importDataSelectedDirectory
+            ?? homeDir.appendingPathComponent("Downloads").localPath())
+        openPanel.begin { response in
+          if response == .OK {
+            removeFile(extractDir)
+            mkdirP(extractPath)
+            if let file = openPanel.urls.first, extractZip(file) {
+              showImportF5a = true
+            }
+          }
+          importDataSelectedDirectory = openPanel.directoryURL?.localPath()
+        }
+      } label: {
+        Text("Fcitx5 Android")
+      }.sheet(isPresented: $showImportF5a) {
+        ImportDataView(f5aItems)
       }
-    } label: {
-      Text("Import data from Fcitx5 Android")
-    }.sheet(isPresented: $showImport) {
-      ImportDataView()
-    }
-    .padding()
+    }.padding()
   }
 }
