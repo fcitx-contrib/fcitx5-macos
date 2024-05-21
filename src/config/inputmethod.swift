@@ -123,7 +123,7 @@ struct InputMethodConfigView: View {
               Image(systemName: "plus.circle")
             }
             .buttonStyle(BorderlessButtonStyle())
-            .help(LocalizedStringKey("Add input methods to '\(group.name)'"))
+            .help(NSLocalizedString("Add input methods to", comment: "") + " '\(group.name)'")
 
             Button {
               renameGroupDialog.show { input in
@@ -133,12 +133,12 @@ struct InputMethodConfigView: View {
               Image(systemName: "pencil")
             }
             .buttonStyle(BorderlessButtonStyle())
-            .help(LocalizedStringKey("Rename '\(group.name)'"))
+            .help(NSLocalizedString("Rename", comment: "") + " '\(group.name)'")
           }
           .frame(maxWidth: .infinity, alignment: .leading)
           .contentShape(Rectangle())
           .contextMenu {
-            Button(LocalizedStringKey("Remove '\(group.name)'")) {
+            Button(NSLocalizedString("Remove", comment: "") + " '\(group.name)'") {
               viewModel.removeGroup(group.name)
             }
           }
@@ -170,12 +170,12 @@ struct InputMethodConfigView: View {
         }
       }
       .contextMenu {
-        Button(LocalizedStringKey("Add group")) {
+        Button(NSLocalizedString("Add group", comment: "")) {
           addGroupDialog.show { input in
             viewModel.addGroup(input)
           }
         }
-        Button(LocalizedStringKey("Refresh")) {
+        Button(NSLocalizedString("Refresh", comment: "")) {
           viewModel.load()
         }
       }
@@ -192,14 +192,14 @@ struct InputMethodConfigView: View {
               scrollView
             }
             HStack {
-              Button(LocalizedStringKey("Reset to default")) {
+              Button(NSLocalizedString("Reset to default", comment: "")) {
                 configModel.resetToDefault()
               }
               Spacer()
-              Button(LocalizedStringKey("Apply")) {
+              Button(NSLocalizedString("Apply", comment: "")) {
                 save(configModel)
               }
-              Button(LocalizedStringKey("OK")) {
+              Button(NSLocalizedString("OK", comment: "")) {
                 save(configModel)
                 FcitxInputController.inputMethodConfigController.window?.performClose(_: nil)
               }
@@ -226,15 +226,19 @@ struct InputMethodConfigView: View {
           addToGroup: $addToGroup,
           onDoubleClick: add)
         HStack {
-          Button(LocalizedStringKey("Add")) {
-            add()
-            addingInputMethod = false
-          }
-          .disabled(inputMethodsToAdd.count == 0)
-          Button(LocalizedStringKey("Cancel"), role: .cancel) {
+          Button {
             addingInputMethod = false
             inputMethodsToAdd = Set()
+          } label: {
+            Text("Cancel")
           }
+          Button {
+            add()
+            addingInputMethod = false
+          } label: {
+            Text("Add")
+          }.buttonStyle(.borderedProminent)
+            .disabled(inputMethodsToAdd.count == 0)
         }
       }.padding()
     }
@@ -456,14 +460,15 @@ struct AvailableInputMethodView: View {
       viewModel.refresh(enabledIMs)
     }
     .alert(
-      LocalizedStringKey("Error"),
+      NSLocalizedString("Error", comment: ""),
       isPresented: $viewModel.hasError,
       presenting: ()
     ) { _ in
-      Button(LocalizedStringKey("OK")) {
+      Button {
         viewModel.errorMsg = nil
-      }
-      .buttonStyle(.borderedProminent)
+      } label: {
+        Text("OK")
+      }.buttonStyle(.borderedProminent)
     } message: { _ in
       Text(viewModel.errorMsg!)
     }
@@ -606,15 +611,19 @@ class InputDialog: ObservableObject {
     VStack {
       TextField(title, text: myBinding)
       HStack {
-        Button(LocalizedStringKey("OK")) {
+        Button {
           if let cont = self.continuation {
             cont(self.userInput)
           }
           self.presented = false
+        } label: {
+          Text("OK")
         }
         .buttonStyle(.borderedProminent)
-        Button(LocalizedStringKey("Cancel"), role: .cancel) {
+        Button {
           self.presented = false
+        } label: {
+          Text("Cancel")
         }
       }
     }.padding()
