@@ -21,16 +21,7 @@ jobs:
         run: |
           find macosfrontend macosnotifications webpanel src -name '*.cpp' -o -name '*.h' | xargs clang-format -Werror --dry-run -style=file:fcitx5/.clang-format
           swift-format lint --configuration .swift-format.json -rs macosfrontend macosnotifications src assets
-          for file in $(git ls-files | grep '\.swift$'); do
-            if grep 'NSLog(' $file; then
-              echo "Please use Logging module instead of NSLog"
-              exit 1
-            fi
-            if grep 'ScrollView.*\.horizontal' $file; then
-              echo "Please don't use horizontal scroll"
-              exit 1
-            fi
-          done
+          ./check-code-style.sh
           file assets/zh-Hans.lproj/Localizable.strings | grep UTF-16
 
   build:

@@ -455,7 +455,7 @@ class PluginManager: ConfigWindowController {
       contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
       styleMask: [.titled, .closable],
       backing: .buffered, defer: false)
-    window.title = "Plugin Manager"
+    window.title = NSLocalizedString("Plugin Manager", comment: "")
     window.center()
     self.init(window: window)
     window.contentView = NSHostingView(rootView: view)
