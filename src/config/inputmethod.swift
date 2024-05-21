@@ -422,6 +422,14 @@ struct InputMethod: Codable, Hashable {
   }
 }
 
+private func languageCodeMatch(_ code: String) -> Bool {
+  guard let languageCode = Locale.current.language.languageCode?.identifier else {
+    return true
+  }
+  // "".split throws
+  return !code.isEmpty && String(code.split(separator: "_")[0]) == languageCode
+}
+
 struct AvailableInputMethodView: View {
   @Binding var selection: Set<InputMethod>
   @Binding fileprivate var addToGroup: Group?
@@ -436,6 +444,13 @@ struct AvailableInputMethodView: View {
           Text(language.localized)
         }
       }
+      Toggle(
+        NSLocalizedString("Only show current language", comment: ""),
+        isOn: Binding(
+          get: { viewModel.addIMOnlyShowCurrentLanguage ?? false },
+          set: { viewModel.addIMOnlyShowCurrentLanguage = $0 }
+        )
+      )
     } detail: {
       // Input methods for this language
       if viewModel.selectedLanguageCode != nil {
@@ -475,6 +490,7 @@ struct AvailableInputMethodView: View {
   }
 
   private class ViewModel: ObservableObject {
+    @AppStorage("AddIMOnlyShowCurrentLanguage") var addIMOnlyShowCurrentLanguage: Bool?
     @Published var availableIMs = [String: [InputMethod]]()
     @Published var hasError = false
     @Published var selectedLanguageCode: String? {
@@ -558,6 +574,7 @@ struct AvailableInputMethodView: View {
 
     fileprivate func languages() -> [LocalizedLanguageCode] {
       return Array(availableIMs.keys)
+        .filter { !(addIMOnlyShowCurrentLanguage ?? false) || languageCodeMatch($0) }
         .map { LocalizedLanguageCode(code: $0) }
         .sorted()
     }
