@@ -1,18 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<array>
-	<dict>
-		<key>phrase</key>
-		<string>马上到！</string>
-		<key>shortcut</key>
-		<string>msd</string>
-	</dict>
-	<dict>
-		<key>phrase</key>
-		<string>On my way!</string>
-		<key>shortcut</key>
-		<string>omw</string>
-	</dict>
-</array>
+<dict>
+	<key>AppleLanguages</key>
+	<array>
+		<string>en-US</string>
+		<string>zh-Hans-US</string>
+	</array>
+	<key>NSUserDictionaryReplacementItems</key>
+	<array>
+		<dict>
+			<key>on</key>
+			<integer>1</integer>
+			<key>replace</key>
+			<string>msd</string>
+			<key>with</key>
+			<string>马上到！</string>
+		</dict>
+		<dict>
+			<key>on</key>
+			<integer>1</integer>
+			<key>replace</key>
+			<string>omw</string>
+			<key>with</key>
+			<string>On my way!</string>
+		</dict>
+	</array>
+	<key>NSUserQuotesArray</key>
+	<array>
+		<string>“</string>
+		<string>”</string>
+		<string>‘</string>
+		<string>’</string>
+	</array>
+</dict>
 </plist>

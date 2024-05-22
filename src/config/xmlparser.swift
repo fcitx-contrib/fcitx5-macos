@@ -2,6 +2,8 @@ import Foundation
 
 class CustomPhraseParserDelegate: NSObject, XMLParserDelegate {
   var currentKey: String = ""
+  var expectArray: Bool = false
+  var expectDict: Bool = false
   var expectPhrase: Bool = false
   var expectShortcut: Bool = false
   var shortcut: String?
@@ -12,7 +14,9 @@ class CustomPhraseParserDelegate: NSObject, XMLParserDelegate {
     _ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?,
     qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]
   ) {
-    if elementName == "dict" {
+    if expectArray && elementName == "array" {
+      expectDict = true
+    } else if expectDict && elementName == "dict" {
       expectPhrase = false
       expectShortcut = false
       shortcut = nil
@@ -23,9 +27,11 @@ class CustomPhraseParserDelegate: NSObject, XMLParserDelegate {
 
   func parser(_ parser: XMLParser, foundCharacters string: String) {
     if currentKey == "key" {
-      if string == "phrase" {
+      if string == "NSUserDictionaryReplacementItems" {
+        expectArray = true
+      } else if string == "with" {
         expectPhrase = true
-      } else if string == "shortcut" {
+      } else if string == "replace" {
         expectShortcut = true
       }
     } else if currentKey == "string" {
@@ -43,7 +49,10 @@ class CustomPhraseParserDelegate: NSObject, XMLParserDelegate {
     _ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?,
     qualifiedName qName: String?
   ) {
-    if elementName == "dict" {
+    if expectArray && elementName == "array" {
+      expectDict = false
+      expectArray = false
+    } else if expectDict && elementName == "dict" {
       if let shortcut = shortcut, let phrase = phrase {
         result.append((shortcut, phrase))
       }

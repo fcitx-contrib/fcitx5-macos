@@ -5,9 +5,15 @@ import UniformTypeIdentifiers
 let pinyinPath = pinyinLocalDir.localPath()
 
 let customphrase = pinyinLocalDir.appendingPathComponent("customphrase")
+let nativeCustomPhrase = cacheDir.appendingPathComponent("customphrase.plist")
 
-struct CustomPhrase: Identifiable {
-  let id = UUID()
+struct CustomPhrase: Identifiable, Hashable {
+  var id: Int {
+    var hasher = Hasher()
+    hasher.combine(keyword)
+    hasher.combine(phrase)
+    return hasher.finalize()
+  }
   var keyword: String
   var phrase: String
   var order: Int
@@ -41,7 +47,7 @@ private func customPhrasesToString(_ customphraseVM: CustomPhraseVM) -> String {
 
 class CustomPhraseVM: ObservableObject {
   @Published var customPhrases: [CustomPhrase] = []
-  @Published var isEnabled: [UUID: Bool] = [:]
+  @Published var isEnabled: [Int: Bool] = [:]
 
   func refreshItems() {
     customPhrases = []
@@ -54,9 +60,7 @@ class CustomPhraseVM: ObservableObject {
 }
 
 struct CustomPhraseView: View {
-  let openPanel = NSOpenPanel()
-  @AppStorage("CustomPhraseSelectedDirectory") var customPhraseSelectedDirectory: String?
-  @State private var selectedRows = Set<UUID>()
+  @State private var selectedRows = Set<Int>()
   @ObservedObject private var customphraseVM = CustomPhraseVM()
 
   func refreshItems() -> some View {
@@ -68,6 +72,12 @@ struct CustomPhraseView: View {
   func reloadCustomPhrase() {
     _ = refreshItems()
     Fcitx.setConfig("fcitx://config/addon/pinyin/customphrase", "{}")
+  }
+
+  private func save() {
+    mkdirP(pinyinPath)
+    writeUTF8(customphrase, customPhrasesToString(customphraseVM) + "\n")
+    reloadCustomPhrase()
   }
 
   var body: some View {
@@ -112,30 +122,24 @@ struct CustomPhraseView: View {
         }
 
         Button {
-          openPanel.allowsMultipleSelection = true
-          openPanel.canChooseDirectories = false
-          openPanel.allowedContentTypes = [UTType.init(filenameExtension: "plist")!]
-          openPanel.directoryURL = URL(
-            fileURLWithPath: customPhraseSelectedDirectory
-              ?? homeDir.appendingPathComponent("Desktop").localPath())
-          openPanel.begin { response in
-            if response == .OK {
-              mkdirP(pinyinPath)
-              for file in openPanel.urls {
-                for (shortcut, phrase) in parseCustomPhraseXML(file) {
-                  let newItem = CustomPhrase(keyword: shortcut, phrase: phrase, order: 1)
-                  customphraseVM.isEnabled[newItem.id] = true
-                  customphraseVM.customPhrases.append(newItem)
-                }
+          mkdirP(cacheDir.localPath())
+          if exec(
+            "/bin/zsh",
+            ["-c", "/usr/bin/defaults export -g - > \(quote(nativeCustomPhrase.localPath()))"])
+          {
+            let phrases = Set(customphraseVM.customPhrases)
+            for (shortcut, phrase) in parseCustomPhraseXML(nativeCustomPhrase) {
+              let newItem = CustomPhrase(keyword: shortcut, phrase: phrase, order: 1)
+              if !phrases.contains(newItem) {
+                customphraseVM.isEnabled[newItem.id] = true
+                customphraseVM.customPhrases.append(newItem)
               }
             }
-            customPhraseSelectedDirectory = openPanel.directoryURL?.localPath()
+            save()
+            removeFile(nativeCustomPhrase)
           }
         } label: {
-          Text("Import native custom phrases").tooltip(
-            NSLocalizedString(
-              "In IM menu → Edit Text Substitutions…, select all and drag them to desktop, then import the .plist file.",
-              comment: ""))
+          Text("Import native custom phrases")
         }
 
         Button {
@@ -160,11 +164,7 @@ struct CustomPhraseView: View {
         }.disabled(selectedRows.isEmpty)
 
         Button {
-          mkdirP(pinyinPath)
-          writeUTF8(
-            customphrase,
-            customPhrasesToString(customphraseVM) + "\n")
-          reloadCustomPhrase()
+          save()
         } label: {
           Text("Save")
         }.buttonStyle(.borderedProminent)
