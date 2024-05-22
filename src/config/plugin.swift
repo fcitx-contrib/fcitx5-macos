@@ -15,8 +15,6 @@ let arch = getArch()
 let baseURL = "https://github.com/fcitx-contrib/fcitx5-macos-plugins/releases/download/latest/"
 // let baseURL = "http://localhost:8080/" // For local debug with nginx
 
-let errorDomain = "org.fcitx.inputmethod.Fcitx5"
-
 private let pluginDirectory = libraryDir.appendingPathComponent("plugin")
 
 struct Plugin: Identifiable, Hashable {
@@ -156,13 +154,9 @@ func checkPluginUpdate(_ callback: @escaping ([String]) -> Void) {
 struct PluginView: View {
   @State private var selectedInstalled = Set<String>()
   @State private var selectedAvailable = Set<String>()
-  @State private var installResults: [String: Result<Void, Error>] = [:]
   @State private var processing = false
   @State private var promptRestart = false
 
-  @State private var observers = [String: NSKeyValueObservation]()
-  @State private var downloadedBytes = [String: Int64]()
-  @State private var totalBytes = [String: Int64]()
   @State private var downloadProgress = 0.0
 
   @State private var showUpToDate = false
@@ -175,6 +169,7 @@ struct PluginView: View {
   }
 
   private func checkUpdate() {
+    processing = true
     checkPluginUpdate({ plugins in
       if plugins.isEmpty {
         showUpToDate = true
@@ -182,6 +177,7 @@ struct PluginView: View {
         selectedAvailable = Set(plugins)
         showUpdateAvailable = true
       }
+      processing = false
     })
   }
 
@@ -243,105 +239,60 @@ struct PluginView: View {
 
   private func install(_ autoRestart: Bool, autoAdd: Bool = true) {
     processing = true
-    mkdirP(cacheDir.localPath())
-    let downloadGroup = DispatchGroup()
-    observers.removeAll()
-    downloadedBytes.removeAll()
-    totalBytes.removeAll()
 
-    for selectedPlugin in selectedAvailable {
-      let fileName = getFileName(selectedPlugin)
-      let destinationURL = getCacheURL(selectedPlugin)
-      if destinationURL.exists() {
-        FCITX_INFO("Using cached \(fileName)")
-        installResults[selectedPlugin] = .success(())
-        continue
-      }
-
-      guard let url = URL(string: baseURL + fileName) else { continue }
-      downloadGroup.enter()
-      let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
-        observers[selectedPlugin]?.invalidate()
-        defer { downloadGroup.leave() }
-
-        if let error = error {
-          installResults[selectedPlugin] = .failure(error)
-          return
-        }
-        guard let httpResponse = response as? HTTPURLResponse else {
-          installResults[selectedPlugin] = .failure(
-            NSError(domain: errorDomain, code: 0, userInfo: nil))
-          return
-        }
-        if !(200..<300).contains(httpResponse.statusCode) {
-          installResults[selectedPlugin] = .failure(
-            NSError(
-              domain: errorDomain, code: httpResponse.statusCode, userInfo: nil))
-          return
-        }
-
-        if let localURL = localURL {
-          installResults[selectedPlugin] =
-            moveFile(localURL, destinationURL)
-            ? .success(()) : .failure(NSError(domain: errorDomain, code: 0, userInfo: nil))
-        }
-      }
-      let observer = task.progress.observe(\.fractionCompleted) { progress, _ in
-        downloadedBytes[selectedPlugin] = task.countOfBytesReceived
-        totalBytes[selectedPlugin] = task.countOfBytesExpectedToReceive
-        downloadProgress =
-          Double(downloadedBytes.values.reduce(0, +)) / Double(totalBytes.values.reduce(0, +))
-      }
-      observers[selectedPlugin] = observer
-      downloadedBytes[selectedPlugin] = 0
-      totalBytes[selectedPlugin] = 0
-      task.resume()
-    }
+    let plugins = selectedAvailable
     selectedAvailable.removeAll()
+    let pluginUrlMap = plugins.reduce(into: [String: String]()) { result, plugin in
+      result[plugin] = baseURL + getFileName(plugin)
+    }
 
-    downloadGroup.notify(queue: .main) {
-      var inputMethods: [String] = []
-      for (plugin, result) in installResults {
-        switch result {
-        case .success:
-          if extractPlugin(plugin) {
-            FCITX_INFO("Successful installed \(plugin)")
-            if autoAdd {
-              for im in getAutoAddIms(plugin) {
-                inputMethods.append(im)
+    let downloader = Downloader(Array(pluginUrlMap.values))
+    downloader.download(
+      onFinish: { results in
+        var inputMethods: [String] = []
+        for plugin in plugins {
+          let result = results[pluginUrlMap[plugin]!]!
+          if result {
+            if extractPlugin(plugin) {
+              FCITX_INFO("Successful installed \(plugin)")
+              if autoAdd {
+                for im in getAutoAddIms(plugin) {
+                  inputMethods.append(im)
+                }
               }
-            }
-            if inMemoryPlugins.contains(plugin) {
-              needsRestart = true
+              if inMemoryPlugins.contains(plugin) {
+                needsRestart = true
+              }
+            } else {
+              FCITX_ERROR("Failed to install \(plugin)")
             }
           } else {
-            FCITX_ERROR("Failed to install \(plugin)")
+            FCITX_ERROR("Failed to download \(plugin)")
           }
-        case .failure(let error):
-          FCITX_ERROR("Failed to download \(plugin): \(error.localizedDescription)")
         }
-      }
-      installResults.removeAll()
-      refreshPlugins()
-      restartAndReconnect()
-      if Fcitx.imGroupCount() == 1 {
-        // Otherwise user knows how to play with it, don't mess it up.
-        for im in inputMethods {
-          Fcitx.imAddToCurrentGroup(im)
-        }
-      }
-      processing = false
-      if needsRestart {
-        if autoRestart {
-          FcitxInputController.pluginManager.window?.performClose(_: nil)
-          DispatchQueue.main.async {
-            restartProcess()
+        refreshPlugins()
+        restartAndReconnect()
+        if Fcitx.imGroupCount() == 1 {
+          // Otherwise user knows how to play with it, don't mess it up.
+          for im in inputMethods {
+            Fcitx.imAddToCurrentGroup(im)
           }
-        } else {
-          promptRestart = true
         }
-      }
-    }
+        processing = false
+        if needsRestart {
+          if autoRestart {
+            FcitxInputController.pluginManager.window?.performClose(_: nil)
+            DispatchQueue.main.async {
+              restartProcess()
+            }
+          } else {
+            promptRestart = true
+          }
+        }
+      },
+      onProgress: { progress in
+        downloadProgress = progress
+      })
   }
 
   var body: some View {
