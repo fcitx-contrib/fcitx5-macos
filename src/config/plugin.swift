@@ -63,12 +63,16 @@ private func getFileName(_ plugin: String) -> String {
   return plugin + "-" + arch + ".tar.bz2"
 }
 
+func getPluginAddress(_ plugin: String) -> String {
+  return baseURL + getFileName(plugin)
+}
+
 private func getCacheURL(_ plugin: String) -> URL {
   let fileName = getFileName(plugin)
   return cacheDir.appendingPathComponent(fileName)
 }
 
-private func extractPlugin(_ plugin: String) -> Bool {
+func extractPlugin(_ plugin: String) -> Bool {
   mkdirP(libraryDir.localPath())
   let url = getCacheURL(plugin)
   let path = url.localPath()
@@ -104,6 +108,7 @@ private func getAutoAddIms(_ plugin: String) -> [String] {
 class PluginVM: ObservableObject {
   @Published private(set) var installedPlugins: [Plugin] = []
   @Published private(set) var availablePlugins: [Plugin] = []
+  @Published var upToDate = false
 
   func refreshPlugins() {
     installedPlugins = getInstalledPlugins()
@@ -118,6 +123,8 @@ class PluginVM: ObservableObject {
         inMemoryPlugins.append(plugin.id)
       }
     }
+    // Allow recheck update on reopen plugin manager.
+    upToDate = false
   }
 }
 
@@ -172,6 +179,7 @@ struct PluginView: View {
     processing = true
     checkPluginUpdate({ plugins in
       if plugins.isEmpty {
+        pluginVM.upToDate = true
         showUpToDate = true
       } else {
         selectedAvailable = Set(plugins)
@@ -243,7 +251,7 @@ struct PluginView: View {
     let plugins = selectedAvailable
     selectedAvailable.removeAll()
     let pluginUrlMap = plugins.reduce(into: [String: String]()) { result, plugin in
-      result[plugin] = baseURL + getFileName(plugin)
+      result[plugin] = getPluginAddress(plugin)
     }
 
     let downloader = Downloader(Array(pluginUrlMap.values))
@@ -312,7 +320,7 @@ struct PluginView: View {
           } label: {
             Text("Check update")
           }.buttonStyle(.borderedProminent)
-            .disabled(processing)
+            .disabled(processing || pluginVM.upToDate)
             .sheet(isPresented: $showUpToDate) {
               VStack {
                 Text("All plugins are up to date")
