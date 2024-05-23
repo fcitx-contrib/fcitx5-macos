@@ -72,7 +72,6 @@ enum UpdateState {
 struct AboutView: View {
   // @State won't work as it doesn't update view when the value is changed in refresh().
   @ObservedObject private var viewModel = ViewModel()
-  @State private var observer: NSKeyValueObservation? = nil
   @State private var downloadProgress = 0.0
 
   @State private var confirmUninstall = false
@@ -92,7 +91,7 @@ struct AboutView: View {
         .font(.title)
 
       Spacer().frame(height: gapSize)
-      Text(getArch())
+      Text(arch)
 
       Spacer().frame(height: gapSize)
       urlButton(String(commit.prefix(7)), sourceRepo + "/commit/" + commit)
@@ -324,7 +323,7 @@ struct AboutView: View {
       // https://api.github.com/repos/fcitx-contrib/fcitx5-macos/git/ref/tags/latest
       // GitHub API may be blocked in China and is unstable in general.
       let url = URL(
-        string: "https://github.com/fcitx-contrib/fcitx5-macos/releases/download/latest/meta.json")
+        string: "\(sourceRepo)/releases/download/latest/meta.json")
     else {
       return
     }
@@ -345,41 +344,34 @@ struct AboutView: View {
   }
 
   func update() {
-    let fileName = "Fcitx5-\(getArch()).tar.bz2"
-    mkdirP(cacheDir.localPath())
-    let destinationURL = cacheDir.appendingPathComponent(fileName)
-    if destinationURL.exists() {
-      FCITX_INFO("Using cached \(fileName)")
-      return install(destinationURL.localPath())
-    }
     viewModel.state = .downloading
-    guard let url = URL(string: "\(sourceRepo)/releases/download/latest/\(fileName)") else {
-      return
-    }
-    let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
-      observer?.invalidate()
-      if let localURL = localURL,
-        let httpResponse = response as? HTTPURLResponse,
-        httpResponse.statusCode == 200
-      {
-        do {
-          try FileManager.default.moveItem(at: localURL, to: destinationURL)
-          DispatchQueue.main.async {
-            install(destinationURL.localPath())
+    checkPluginUpdate({ plugins in
+      let pluginUrlMap = plugins.reduce(into: [String: String]()) { result, plugin in
+        result[plugin] = getPluginAddress(plugin)
+      }
+      let fileName = "Fcitx5-\(arch).tar.bz2"
+      let address = "\(sourceRepo)/releases/download/latest/\(fileName)"
+      let downloader = Downloader(Array(pluginUrlMap.values) + [address])
+      downloader.download(
+        onFinish: { results in
+          // Install plugin in a best-effort manner. No need to over-engineering.
+          for plugin in plugins {
+            let result = results[pluginUrlMap[plugin]!]!
+            if result {
+              extractPlugin(plugin)
+            }
           }
-          return
-        } catch {
-          FCITX_ERROR("Error moving file: \(error)")
-        }
-      }
-      DispatchQueue.main.async {
-        viewModel.state = .downloadFailedSheet
-      }
-    }
-    observer = task.progress.observe(\.fractionCompleted) { progress, _ in
-      downloadProgress = progress.fractionCompleted
-    }
-    task.resume()
+          // Install main
+          if results[address]! {
+            install(cacheDir.appendingPathComponent(fileName).localPath())
+          } else {
+            viewModel.state = .downloadFailedSheet
+          }
+        },
+        onProgress: { progress in
+          downloadProgress = progress
+        })
+    })
   }
 
   func install(_ path: String) {
@@ -435,6 +427,7 @@ struct AboutView: View {
     @Published var showInstallFailed: Bool = false
 
     func refresh() {
+      // Allow recheck update on reopen about.
       if state == .upToDate {
         state = .notChecked
       }
