@@ -65,6 +65,7 @@ struct AdvancedView: View {
 
       Button {
         removeFile(extractDir)
+        mkdirP(cacheDir.localPath())
         if copyFile(squirrelDir, extractDir) {
           showImportSquirrel = true
         }
