@@ -14,6 +14,17 @@ let rimeLocalDir = localDir.appendingPathComponent("rime")
 
 let squirrelDir = homeDir.appendingPathComponent("Library/Rime")
 
+let sourceRepo = "https://github.com/fcitx-contrib/fcitx5-macos"
+
+func getArch() -> String {
+  #if arch(x86_64)
+    return "x86_64"
+  #else
+    return "arm64"
+  #endif
+}
+let arch = getArch()
+
 func getFileNamesWithExtension(_ path: String, _ suffix: String = "", _ full: Bool = false)
   -> [String]
 {
