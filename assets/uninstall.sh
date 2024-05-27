@@ -16,4 +16,5 @@ if [ "$remove_user_data" = "true" ]; then
   rm -rf "$LOCAL_DIR"
 fi
 
-killall Fcitx5
+# sigterm will save user data but we just removed
+killall -9 Fcitx5
