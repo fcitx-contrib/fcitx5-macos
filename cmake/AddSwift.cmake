@@ -5,14 +5,29 @@
 #
 # See https://swift.org/LICENSE.txt for license information
 
-include(CheckCompilerFlag)
 
-# Generate bridging header from Swift to C++
-# NOTE: This logic will eventually be upstreamed into CMake
-function(_swift_generate_cxx_header_target target module header)
-  cmake_parse_arguments(ARG "" "" "SOURCES;SEARCH_PATHS;DEPENDS" ${ARGN})
-  if(NOT ARG_SOURCES)
-    message(FATAL_ERROR "No sources provided to 'swift_generate_cxx_header_target'")
+# Generate the bridging header from Swift to C++
+#
+# target: the name of the target to generate headers for.
+#         This target must build swift source files.
+# header: the name of the header file to generate.
+#
+# NOTE: This logic will eventually be unstreamed into CMake.
+function(_swift_generate_cxx_header target header)
+  if(NOT TARGET ${target})
+    message(FATAL_ERROR "Target ${target} not defined.")
+  endif()
+
+  if(NOT DEFINED CMAKE_Swift_COMPILER)
+    message(WARNING "Swift not enabled in project. Cannot generate headers for Swift files.")
+    return()
+  endif()
+
+  cmake_parse_arguments(ARG "" "" "SEARCH_PATHS;MODULE_NAME" ${ARGN})
+
+  if(NOT ARG_MODULE_NAME)
+    set(target_module_name $<TARGET_PROPERTY:${target},Swift_MODULE_NAME>)
+    set(ARG_MODULE_NAME $<IF:$<BOOL:${target_module_name}>,${target_module_name},${target}>)
   endif()
 
   if(ARG_SEARCH_PATHS)
@@ -23,35 +38,36 @@ function(_swift_generate_cxx_header_target target module header)
     set(SDK_FLAGS "-sdk" "${CMAKE_OSX_SYSROOT}")
   elseif(WIN32)
     set(SDK_FLAGS "-sdk" "$ENV{SDKROOT}")
+  elseif(DEFINED ${CMAKE_SYSROOT})
+    set(SDK_FLAGS "-sdk" "${CMAKE_SYSROOT}")
   endif()
 
-  # swiftc requires imported modules have the same target when
-  # cross-compiling.  This check only considers macOS.
-  if(CMAKE_OSX_ARCHITECTURES STREQUAL "arm64")
-    set(TARGET_FLAGS "-target" "arm64-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET}")
-  endif()
+  cmake_path(APPEND CMAKE_CURRENT_BINARY_DIR include
+    OUTPUT_VARIABLE base_path)
 
-  add_custom_command(
-    OUTPUT
-      "${header}"
+  cmake_path(APPEND base_path ${header}
+    OUTPUT_VARIABLE header_path)
+
+  set(_AllSources $<TARGET_PROPERTY:${target},SOURCES>)
+  set(_SwiftSources $<FILTER:${_AllSources},INCLUDE,\\.swift$>)
+  add_custom_command(OUTPUT ${header_path}
+    DEPENDS ${_SwiftSources}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMAND
       ${CMAKE_Swift_COMPILER} -frontend -typecheck
       ${ARG_SEARCH_PATHS}
-      ${ARG_SOURCES}
+      ${_SwiftSources}
       ${SDK_FLAGS}
-      ${TARGET_FLAGS}
-      -module-name "${module}"
+      -module-name "${ARG_MODULE_NAME}"
       -cxx-interoperability-mode=default
-      -emit-clang-header-path "${header}"
-    DEPENDS
-      ${ARG_DEPENDS}
-      ${ARG_SOURCES}
+      -emit-clang-header-path ${header_path}
     COMMENT
-      "Generating '${header}'"
-  )
+      "Generating '${header_path}'"
+    COMMAND_EXPAND_LISTS)
 
-  add_custom_target("${target}"
-    DEPENDS
-      "${header}"
-  )
+  # Added to public interface for dependees to find.
+  target_include_directories(${target} PUBLIC ${base_path})
+  # Added to the target to ensure target rebuilds if header changes and is used
+  # by sources in the target.
+  target_sources(${target} PRIVATE ${header_path})
 endfunction()
