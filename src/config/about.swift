@@ -2,7 +2,6 @@ import Carbon
 import Logging
 import SwiftUI
 
-let sourceRepo = "https://github.com/fcitx-contrib/fcitx5-macos"
 let updateLog = "/tmp/Fcitx5Update.log"
 let uninstallLog = "/tmp/Fcitx5Uninstall.log"
 
@@ -345,25 +344,13 @@ struct AboutView: View {
 
   func update() {
     viewModel.state = .downloading
-    checkPluginUpdate({ plugins in
-      let pluginUrlMap = plugins.reduce(into: [String: String]()) { result, plugin in
-        result[plugin] = getPluginAddress(plugin)
-      }
-      let fileName = "Fcitx5-\(arch).tar.bz2"
-      let address = "\(sourceRepo)/releases/download/latest/\(fileName)"
-      let downloader = Downloader(Array(pluginUrlMap.values) + [address])
-      downloader.download(
-        onFinish: { results in
-          // Install plugin in a best-effort manner. No need to over-engineering.
-          for plugin in plugins {
-            let result = results[pluginUrlMap[plugin]!]!
-            if result {
-              extractPlugin(plugin)
-            }
-          }
-          // Install main
-          if results[address]! {
-            install(cacheDir.appendingPathComponent(fileName).localPath())
+    checkPluginUpdate({ success, nativePlugins, dataPlugins in
+      let updater = Updater(main: true, nativePlugins: nativePlugins, dataPlugins: dataPlugins)
+      updater.update(
+        // Install plugin in a best-effort manner. No need to check plugin status.
+        onFinish: { result, _, _ in
+          if result {
+            install()
           } else {
             viewModel.state = .downloadFailedSheet
           }
@@ -374,7 +361,7 @@ struct AboutView: View {
     })
   }
 
-  func install(_ path: String) {
+  func install() {
     viewModel.state = .installing
     let conditions = NSMutableDictionary()
     conditions.setValue("com.apple.keylayout.ABC", forKey: kTISPropertyInputSourceID as String)
@@ -385,6 +372,7 @@ struct AboutView: View {
         TISSelectInputSource(inputSource)
       }
     }
+    let path = cacheDir.appendingPathComponent(mainFileName).localPath()
     // Necessary to put it in background, otherwise sudo UI will hang if it has been canceled once.
     DispatchQueue.global().async {
       if !sudo("update", path, updateLog) {

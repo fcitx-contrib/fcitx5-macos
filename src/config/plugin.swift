@@ -3,46 +3,14 @@ import Logging
 import SwiftUI
 import SwiftyJSON
 
-func getArch() -> String {
-  #if arch(x86_64)
-    return "x86_64"
-  #else
-    return "arm64"
-  #endif
-}
-let arch = getArch()
-
-let baseURL = "https://github.com/fcitx-contrib/fcitx5-macos-plugins/releases/download/latest/"
-// let baseURL = "http://localhost:8080/" // For local debug with nginx
-
 private let pluginDirectory = libraryDir.appendingPathComponent("plugin")
 
 struct Plugin: Identifiable, Hashable {
   let id: String
   let category: String
+  let native: Bool
   let github: String?
 }
-
-private let officialPlugins = [
-  Plugin(
-    id: "anthy", category: NSLocalizedString("Japanese", comment: ""), github: "fcitx/fcitx5-anthy"),
-  Plugin(
-    id: "chinese-addons", category: NSLocalizedString("Chinese", comment: ""),
-    github: "fcitx/fcitx5-chinese-addons"),
-  Plugin(
-    id: "skk", category: NSLocalizedString("Japanese", comment: ""), github: "fcitx/fcitx5-skk"),
-  Plugin(
-    id: "hallelujah", category: NSLocalizedString("English", comment: ""),
-    github: "fcitx-contrib/fcitx5-hallelujah"),
-  Plugin(
-    id: "rime", category: NSLocalizedString("Generic", comment: ""), github: "fcitx/fcitx5-rime"),
-  Plugin(
-    id: "unikey", category: NSLocalizedString("Vietnamese", comment: ""),
-    github: "fcitx/fcitx5-unikey"),
-  Plugin(
-    id: "thai", category: NSLocalizedString("Thai", comment: ""), github: "fcitx/fcitx5-libthai"),
-  Plugin(id: "lua", category: NSLocalizedString("Other", comment: ""), github: "fcitx/fcitx5-lua"),
-]
 
 private var pluginMap = officialPlugins.reduce(into: [String: Plugin]()) { result, plugin in
   result[plugin.id] = plugin
@@ -55,30 +23,10 @@ private var needsRestart = false
 private func getInstalledPlugins() -> [Plugin] {
   let names = getFileNamesWithExtension(pluginDirectory.localPath(), ".json")
   return names.map {
-    pluginMap[$0] ?? Plugin(id: $0, category: NSLocalizedString("Other", comment: ""), github: nil)
+    pluginMap[$0]
+      ?? Plugin(
+        id: $0, category: NSLocalizedString("Other", comment: ""), native: true, github: nil)
   }
-}
-
-private func getFileName(_ plugin: String) -> String {
-  return plugin + "-" + arch + ".tar.bz2"
-}
-
-func getPluginAddress(_ plugin: String) -> String {
-  return baseURL + getFileName(plugin)
-}
-
-private func getCacheURL(_ plugin: String) -> URL {
-  let fileName = getFileName(plugin)
-  return cacheDir.appendingPathComponent(fileName)
-}
-
-func extractPlugin(_ plugin: String) -> Bool {
-  mkdirP(libraryDir.localPath())
-  let url = getCacheURL(plugin)
-  let path = url.localPath()
-  let ret = exec("/usr/bin/tar", ["-xjf", path, "-C", libraryDir.localPath()])
-  removeFile(url)
-  return ret
 }
 
 private func getFiles(_ descriptor: URL) -> [String] {
@@ -89,12 +37,12 @@ private func getFiles(_ descriptor: URL) -> [String] {
   return json["files"].arrayValue.map { $0.stringValue }
 }
 
-private func getVersion(_ plugin: String) -> String {
+private func getVersion(_ plugin: String, native: Bool) -> String {
   let descriptor = pluginDirectory.appendingPathComponent(plugin + ".json")
   guard let json = readJSON(descriptor) else {
     return ""
   }
-  return json["version"].stringValue
+  return native ? json["version"].stringValue : json["data_version"].stringValue
 }
 
 private func getAutoAddIms(_ plugin: String) -> [String] {
@@ -131,36 +79,54 @@ class PluginVM: ObservableObject {
 private struct Meta: Codable {
   struct Plugin: Codable {
     let name: String
-    let version: String
+    // swift-format-ignore: AlwaysUseLowerCamelCase
+    let data_version: String
+    let version: String?
   }
   let plugins: [Plugin]
 }
 
-func checkPluginUpdate(_ callback: @escaping ([String]) -> Void) {
-  guard let url = URL(string: baseURL + "meta-\(arch).json") else {
-    return callback([])
+func checkPluginUpdate(_ callback: @escaping (Bool, [String], [String]) -> Void) {
+  guard let url = URL(string: pluginBaseAddress + "meta-\(arch).json") else {
+    return callback(false, [], [])
   }
   URLSession.shared.dataTask(with: url) { data, response, error in
-    var plugins = [String]()
+    var nativePlugins = [String]()
+    var dataPlugins = [String]()
     if let data = data,
       let meta = try? JSONDecoder().decode(Meta.self, from: data)
     {
-      let pluginVersionMap = meta.plugins.reduce(into: [String: String]()) { result, plugin in
+      let nativeVersionMap = meta.plugins.reduce(into: [String: String]()) { result, plugin in
         result[plugin.name] = plugin.version
       }
+      let dataVersionMap = meta.plugins.reduce(into: [String: String]()) { result, plugin in
+        result[plugin.name] = plugin.data_version
+      }
       for plugin in getInstalledPlugins() {
-        if let version = pluginVersionMap[plugin.id], version != getVersion(plugin.id) {
-          plugins.append(plugin.id)
+        if let version = nativeVersionMap[plugin.id], version != getVersion(plugin.id, native: true)
+        {
+          nativePlugins.append(plugin.id)
+        }
+        if let dataVersion = dataVersionMap[plugin.id],
+          dataVersion != getVersion(plugin.id, native: false)
+        {
+          dataPlugins.append(plugin.id)
         }
       }
+      callback(true, nativePlugins, dataPlugins)
+    } else {
+      callback(false, [], [])
     }
-    callback(plugins)
   }.resume()
 }
 
 struct PluginView: View {
   @State private var selectedInstalled = Set<String>()
   @State private var selectedAvailable = Set<String>()
+
+  @State private var nativeAvailable = [String]()
+  @State private var dataAvailable = [String]()
+
   @State private var processing = false
   @State private var promptRestart = false
 
@@ -177,12 +143,14 @@ struct PluginView: View {
 
   private func checkUpdate() {
     processing = true
-    checkPluginUpdate({ plugins in
-      if plugins.isEmpty {
+    checkPluginUpdate({ success, nativePlugins, dataPlugins in
+      nativeAvailable = nativePlugins
+      dataAvailable = dataPlugins
+      // TODO: check success and show toast; convert up to date to a toast
+      if nativePlugins.isEmpty && dataPlugins.isEmpty {
         pluginVM.upToDate = true
         showUpToDate = true
       } else {
-        selectedAvailable = Set(plugins)
         showUpdateAvailable = true
       }
       processing = false
@@ -245,38 +213,39 @@ struct PluginView: View {
     }
   }
 
-  private func install(_ autoRestart: Bool, autoAdd: Bool = true) {
+  private func install(_ autoRestart: Bool, isUpdate: Bool = false) {
     processing = true
 
-    let plugins = selectedAvailable
-    selectedAvailable.removeAll()
-    let pluginUrlMap = plugins.reduce(into: [String: String]()) { result, plugin in
-      result[plugin] = getPluginAddress(plugin)
+    if !isUpdate {
+      nativeAvailable.removeAll()
+      dataAvailable.removeAll()
+      for plugin in selectedAvailable {
+        if pluginMap[plugin]!.native {
+          nativeAvailable.append(plugin)
+        } else {
+          dataAvailable.append(plugin)
+        }
+      }
     }
+    selectedAvailable.removeAll()
 
-    let downloader = Downloader(Array(pluginUrlMap.values))
-    downloader.download(
-      onFinish: { results in
-        var inputMethods: [String] = []
-        for plugin in plugins {
-          let result = results[pluginUrlMap[plugin]!]!
-          if result {
-            if extractPlugin(plugin) {
-              FCITX_INFO("Successful installed \(plugin)")
-              if autoAdd {
-                for im in getAutoAddIms(plugin) {
-                  inputMethods.append(im)
-                }
+    let updater = Updater(main: false, nativePlugins: nativeAvailable, dataPlugins: dataAvailable)
+    updater.update(
+      onFinish: { _, nativeResults, dataResults in
+        var inputMethods = [String]()
+        if !isUpdate {
+          for plugin in Set(nativeResults.keys).union(dataResults.keys) {
+            if (nativeResults[plugin] ?? true) && (dataResults[plugin] ?? true) {
+              for im in getAutoAddIms(plugin) {
+                inputMethods.append(im)
               }
-              if inMemoryPlugins.contains(plugin) {
-                needsRestart = true
-              }
-            } else {
-              FCITX_ERROR("Failed to install \(plugin)")
             }
-          } else {
-            FCITX_ERROR("Failed to download \(plugin)")
           }
+        }
+        if !Set(nativeResults.filter({ _, success in success }).keys).intersection(inMemoryPlugins)
+          .isEmpty
+        {
+          needsRestart = true
         }
         refreshPlugins()
         restartAndReconnect()
@@ -336,17 +305,18 @@ struct PluginView: View {
 
                 Spacer().frame(height: gapSize)
 
-                ForEach(selectedAvailable.sorted(), id: \.self) { plugin in
+                ForEach(Set(nativeAvailable).union(dataAvailable).sorted(), id: \.self) {
+                  plugin in
                   Text(plugin)
                 }
 
                 Spacer().frame(height: gapSize)
 
-                Text("Fcitx5 will auto restart.")
+                Text("Fcitx5 will auto restart if needed.")
 
                 Button {
                   showUpdateAvailable = false
-                  install(true, autoAdd: false)
+                  install(true, isUpdate: true)
                 } label: {
                   Text("Update")
                 }.buttonStyle(.borderedProminent)
