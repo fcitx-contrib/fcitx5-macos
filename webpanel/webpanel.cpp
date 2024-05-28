@@ -42,6 +42,23 @@ WebPanel::WebPanel(Instance *instance)
             ic->updateUserInterface(UserInterfaceComponent::InputPanel);
         });
     });
+    window_->set_action_callback([this](size_t index, int id) {
+        with_fcitx([&](Fcitx &fcitx) {
+            auto ic = instance_->mostRecentInputContext();
+            const auto &list = ic->inputPanel().candidateList();
+            if (!list)
+                return;
+            try {
+                const auto &candidate = list->candidate(index);
+                auto *actionableList = list->toActionable();
+                if (actionableList && actionableList->hasAction(candidate)) {
+                    actionableList->triggerAction(candidate, id);
+                }
+            } catch (const std::invalid_argument &e) {
+                FCITX_ERROR() << "action candidate index out of range";
+            }
+        });
+    });
     window_->set_init_callback([this]() { reloadConfig(); });
 }
 
