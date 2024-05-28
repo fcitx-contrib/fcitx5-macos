@@ -12,7 +12,7 @@ private let Other = NSLocalizedString("Other", comment: "")
 
 private let tableExtra = "fcitx/fcitx5-table-extra"
 
-// NOTE: Currently, It is that all official plugins contain an arch-independent data part,
+// NOTE: Currently, It is assumed that all official plugins contain an arch-independent data part,
 // which is named as plugin-any.tar.bz2.
 // Should this assumption change in the future, please update install() in plugin.swift.
 let officialPlugins = [
