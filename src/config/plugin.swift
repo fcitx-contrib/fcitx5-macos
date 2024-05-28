@@ -220,9 +220,11 @@ struct PluginView: View {
       nativeAvailable.removeAll()
       dataAvailable.removeAll()
       for plugin in selectedAvailable {
-        if pluginMap[plugin]!.native {
-          nativeAvailable.append(plugin)
-        } else {
+        if let info = pluginMap[plugin] {
+          if info.native {
+            nativeAvailable.append(plugin)
+          }
+          // Assumption: all official plugins contains a data tarball.
           dataAvailable.append(plugin)
         }
       }
