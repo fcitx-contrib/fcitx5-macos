@@ -108,6 +108,7 @@ void WebPanel::update(UserInterfaceComponent component,
                 }
             } else {
             */
+            auto *actionableList = list->toActionable();
             size = list->size();
             for (int i = 0; i < size; i++) {
                 auto label = list->label(i).toString();
@@ -117,15 +118,21 @@ void WebPanel::update(UserInterfaceComponent component,
                 if (length && label[length - 1] == ' ') {
                     label = label.substr(0, length - 1);
                 }
+                const auto &candidate = list->candidate(i);
+                std::vector<candidate_window::CandidateAction> actions;
+                if (actionableList && actionableList->hasAction(candidate)) {
+                    for (const auto &action :
+                         actionableList->candidateActions(candidate)) {
+                        actions.push_back({action.id(), action.text()});
+                    }
+                }
                 candidates.push_back(
-                    {instance_
-                         ->outputFilter(inputContext, list->candidate(i).text())
+                    {instance_->outputFilter(inputContext, candidate.text())
                          .toString(),
                      label,
-                     instance_
-                         ->outputFilter(inputContext,
-                                        list->candidate(i).comment())
-                         .toString()});
+                     instance_->outputFilter(inputContext, candidate.comment())
+                         .toString(),
+                     actions});
             }
             highlighted = list->cursorIndex();
             // }
