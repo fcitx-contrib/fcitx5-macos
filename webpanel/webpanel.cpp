@@ -42,6 +42,23 @@ WebPanel::WebPanel(Instance *instance)
             ic->updateUserInterface(UserInterfaceComponent::InputPanel);
         });
     });
+    window_->set_action_callback([this](size_t index, int id) {
+        with_fcitx([&](Fcitx &fcitx) {
+            auto ic = instance_->mostRecentInputContext();
+            const auto &list = ic->inputPanel().candidateList();
+            if (!list)
+                return;
+            try {
+                const auto &candidate = list->candidate(index);
+                auto *actionableList = list->toActionable();
+                if (actionableList && actionableList->hasAction(candidate)) {
+                    actionableList->triggerAction(candidate, id);
+                }
+            } catch (const std::invalid_argument &e) {
+                FCITX_ERROR() << "action candidate index out of range";
+            }
+        });
+    });
     window_->set_init_callback([this]() { reloadConfig(); });
 }
 
@@ -84,9 +101,7 @@ void WebPanel::update(UserInterfaceComponent component,
         bool pageable = false;
         bool hasPrev = false;
         bool hasNext = false;
-        std::vector<std::string> candidates;
-        std::vector<std::string> labels;
-        std::vector<std::string> comments;
+        std::vector<candidate_window::Candidate> candidates;
         int size = 0;
         candidate_window::layout_t layout = config_.typography->layout.value();
         if (const auto &list = inputPanel.candidateList()) {
@@ -110,17 +125,9 @@ void WebPanel::update(UserInterfaceComponent component,
                 }
             } else {
             */
+            auto *actionableList = list->toActionable();
             size = list->size();
             for (int i = 0; i < size; i++) {
-                candidates.emplace_back(
-                    instance_
-                        ->outputFilter(inputContext, list->candidate(i).text())
-                        .toString());
-                comments.emplace_back(
-                    instance_
-                        ->outputFilter(inputContext,
-                                       list->candidate(i).comment())
-                        .toString());
                 auto label = list->label(i).toString();
                 // HACK: fcitx5's Linux UI concatenates label and text and
                 // expects engine to append a ' ' to label.
@@ -128,7 +135,21 @@ void WebPanel::update(UserInterfaceComponent component,
                 if (length && label[length - 1] == ' ') {
                     label = label.substr(0, length - 1);
                 }
-                labels.emplace_back(label);
+                const auto &candidate = list->candidate(i);
+                std::vector<candidate_window::CandidateAction> actions;
+                if (actionableList && actionableList->hasAction(candidate)) {
+                    for (const auto &action :
+                         actionableList->candidateActions(candidate)) {
+                        actions.push_back({action.id(), action.text()});
+                    }
+                }
+                candidates.push_back(
+                    {instance_->outputFilter(inputContext, candidate.text())
+                         .toString(),
+                     label,
+                     instance_->outputFilter(inputContext, candidate.comment())
+                         .toString(),
+                     actions});
             }
             highlighted = list->cursorIndex();
             // }
@@ -151,7 +172,7 @@ void WebPanel::update(UserInterfaceComponent component,
             }
         }
         window_->set_paging_buttons(pageable, hasPrev, hasNext);
-        window_->set_candidates(candidates, labels, comments, highlighted);
+        window_->set_candidates(candidates, highlighted);
         window_->set_layout(layout);
         updatePanelShowFlags(!candidates.empty(), PanelShowFlag::HasCandidates);
         if (auto macosIC = dynamic_cast<MacosInputContext *>(inputContext)) {
