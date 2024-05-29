@@ -26,7 +26,7 @@ struct GlobalConfigView: View {
   var body: some View {
     VStack {
       ScrollView {
-        buildView(config: model)
+        buildView(config: model).padding([.top, .leading, .trailing])
       }
       HStack {
         Button {
@@ -47,8 +47,8 @@ struct GlobalConfigView: View {
           Text("OK")
         }
         .buttonStyle(.borderedProminent)
-      }
-    }.padding()
+      }.padding()
+    }
   }
 
   private func save() {

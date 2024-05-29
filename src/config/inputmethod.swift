@@ -184,7 +184,7 @@ struct InputMethodConfigView: View {
         if let configModel = viewModel.configModel {
           VStack {
             let scrollView = ScrollView([.vertical]) {
-              buildView(config: configModel).padding()
+              buildView(config: configModel).padding([.leading, .trailing])
             }
             if #available(macOS 14.0, *) {
               scrollView.defaultScrollAnchor(.topTrailing)
@@ -204,8 +204,8 @@ struct InputMethodConfigView: View {
                 FcitxInputController.inputMethodConfigController.window?.performClose(_: nil)
               }
               .buttonStyle(.borderedProminent)
-            }
-          }.padding()
+            }.padding()
+          }.padding([.top], 1)  // Cannot be 0 otherwise content overlaps with title bar.
         } else if let errorMsg = viewModel.errorMsg {
           Text("Cannot show config for \(selectedItem): \(errorMsg)")
         }
@@ -224,7 +224,8 @@ struct InputMethodConfigView: View {
         AvailableInputMethodView(
           selection: $inputMethodsToAdd,
           addToGroup: $addToGroup,
-          onDoubleClick: add)
+          onDoubleClick: add
+        ).padding([.leading])
         HStack {
           Button {
             addingInputMethod = false
@@ -239,8 +240,8 @@ struct InputMethodConfigView: View {
             Text("Add")
           }.buttonStyle(.borderedProminent)
             .disabled(inputMethodsToAdd.count == 0)
-        }
-      }.padding()
+        }.padding()
+      }.padding([.top])
     }
   }
 

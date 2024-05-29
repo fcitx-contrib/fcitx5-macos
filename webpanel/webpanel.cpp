@@ -64,7 +64,7 @@ WebPanel::WebPanel(Instance *instance)
 
 void WebPanel::updateConfig() {
     window_->set_layout(config_.typography->layout.value());
-    window_->set_theme(config_.theme.value());
+    window_->set_theme(config_.basic->theme.value());
     window_->set_cursor_text(config_.cursor->style.value() == CursorStyle::Text
                                  ? config_.cursor->text.value()
                                  : "");
@@ -72,7 +72,6 @@ void WebPanel::updateConfig() {
                                              HighlightMarkStyle::Text
                                          ? config_.highlight->markText.value()
                                          : "");
-    config_.preview.setValue("");
     auto style = configValueToJson(config_).dump();
     window_->set_style(style.c_str());
 }
@@ -222,8 +221,8 @@ void WebPanel::showAsync(bool show) {
                   // MacosInputContext::updatePreeditImpl is executed before
                   // WebPanel::update, so in main thread preedit UI update
                   // happens before here.
-                  auto [x, y] =
-                      ic->getCursorCoordinates(config_.followCursor.value());
+                  auto [x, y] = ic->getCursorCoordinates(
+                      config_.basic->followCursor.value());
                   window->show(x, y);
               }
           } else {

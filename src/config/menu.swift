@@ -28,6 +28,9 @@ extension FcitxInputController {
   static var inputMethodConfigController: InputMethodConfigController = {
     return InputMethodConfigController()
   }()
+  static var themeEditorController: ThemeEditorController = {
+    return ThemeEditorController()
+  }()
   static var addonConfigController: AddonConfigController = {
     return AddonConfigController()
   }()
@@ -56,6 +59,11 @@ extension FcitxInputController {
   @objc func inputMethod(_: Any? = nil) {
     FcitxInputController.inputMethodConfigController.refresh()
     FcitxInputController.inputMethodConfigController.showWindow(nil)
+  }
+
+  @objc func themeEditor(_: Any? = nil) {
+    FcitxInputController.themeEditorController.refresh()
+    FcitxInputController.themeEditorController.showWindow(nil)
   }
 
   @objc func addonConfig(_: Any? = nil) {
