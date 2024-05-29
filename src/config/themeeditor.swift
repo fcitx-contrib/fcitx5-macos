@@ -6,7 +6,7 @@ class ThemeEditorController: ConfigWindowController {
 
   convenience init() {
     let window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
+      contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
       styleMask: [.titled, .closable, .resizable, .fullSizeContentView],
       backing: .buffered, defer: false)
     window.title = NSLocalizedString("Theme Editor", comment: "")
@@ -14,7 +14,7 @@ class ThemeEditorController: ConfigWindowController {
     self.init(window: window)
     window.contentView = NSHostingView(rootView: view)
     window.titlebarAppearsTransparent = true
-    window.toolbarStyle = .unified
+    attachToolbar(window)
   }
 
   func refresh() {
