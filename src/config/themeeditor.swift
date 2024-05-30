@@ -6,7 +6,7 @@ class ThemeEditorController: ConfigWindowController {
 
   convenience init() {
     let window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
+      contentRect: NSRect(x: 0, y: 0, width: configWindowWidth, height: configWindowHeight),
       styleMask: [.titled, .closable, .resizable, .fullSizeContentView],
       backing: .buffered, defer: false)
     window.title = NSLocalizedString("Theme Editor", comment: "")
@@ -51,9 +51,7 @@ class ThemeEditorViewModel: ObservableObject {
   @Published var selectedConfig: Config?
   @Published var selectedConfigIndex: Int? = 0 {
     didSet {
-      if let index = selectedConfigIndex {
-        selectedConfig = configs[index]
-      }
+      updateConfig()
     }
   }
 
@@ -68,6 +66,13 @@ class ThemeEditorViewModel: ObservableObject {
       }
     } catch {
       FCITX_ERROR("Error loading theme editor config: \(error)")
+    }
+    updateConfig()
+  }
+
+  private func updateConfig() {
+    if let index = selectedConfigIndex {
+      selectedConfig = configs[index]
     }
   }
 }

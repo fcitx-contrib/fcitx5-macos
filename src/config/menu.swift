@@ -53,6 +53,7 @@ extension FcitxInputController {
   }
 
   @objc func globalConfig(_: Any? = nil) {
+    FcitxInputController.globalConfigController.refresh()
     FcitxInputController.globalConfigController.showWindow(nil)
   }
 

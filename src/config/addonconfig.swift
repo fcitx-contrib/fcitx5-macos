@@ -7,7 +7,7 @@ class AddonConfigController: ConfigWindowController {
 
   convenience init() {
     let window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
+      contentRect: NSRect(x: 0, y: 0, width: configWindowWidth, height: configWindowHeight),
       styleMask: [.titled, .closable],
       backing: .buffered, defer: false)
     window.title = NSLocalizedString("Addon Config", comment: "")
@@ -52,26 +52,13 @@ private struct AddonRowView: View {
                 ScrollView([.vertical]) {
                   buildView(config: viewModel.externalConfig!)
                 }
-                HStack {
-                  Button {
+                footer(
+                  reset: {
                     viewModel.externalConfig?.resetToDefault()
-                  } label: {
-                    Text("Reset to default")
-                  }
-                  Spacer()
-                  Button {
-                    save()
-                  } label: {
-                    Text("Apply")
-                  }
-                  Button {
-                    save()
+                  }, apply: save,
+                  close: {
                     viewModel.externalConfig = nil
-                  } label: {
-                    Text("OK")
-                  }
-                  .buttonStyle(.borderedProminent)
-                }
+                  })
               }
               .padding()
               .frame(minWidth: 400)

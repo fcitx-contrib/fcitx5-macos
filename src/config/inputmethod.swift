@@ -6,7 +6,7 @@ class InputMethodConfigController: ConfigWindowController {
   let view = InputMethodConfigView()
   convenience init() {
     let window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
+      contentRect: NSRect(x: 0, y: 0, width: configWindowWidth, height: configWindowHeight),
       styleMask: [.titled, .closable, .resizable, .fullSizeContentView],
       backing: .buffered, defer: false)
     window.title = NSLocalizedString("Input Methods", comment: "")
@@ -151,20 +151,16 @@ struct InputMethodConfigView: View {
             } else {
               scrollView
             }
-            HStack {
-              Button(NSLocalizedString("Reset to default", comment: "")) {
+            footer(
+              reset: {
                 configModel.resetToDefault()
-              }
-              Spacer()
-              Button(NSLocalizedString("Apply", comment: "")) {
+              },
+              apply: {
                 save(configModel)
-              }
-              Button(NSLocalizedString("OK", comment: "")) {
-                save(configModel)
+              },
+              close: {
                 FcitxInputController.inputMethodConfigController.window?.performClose(_: nil)
-              }
-              .buttonStyle(.borderedProminent)
-            }.padding()
+              })
           }.padding([.top], 1)  // Cannot be 0 otherwise content overlaps with title bar.
         } else if let errorMsg = viewModel.errorMsg {
           Text("Cannot show config for \(selectedItem): \(errorMsg)")
