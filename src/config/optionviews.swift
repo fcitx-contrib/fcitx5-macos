@@ -183,8 +183,8 @@ struct ExternalOptionView: OptionView {
     .sheet(isPresented: $viewModel.hasConfig) {
       VStack {
         ScrollView([.vertical]) {
-          buildView(config: viewModel.externalConfig!)
-        }
+          buildView(config: viewModel.externalConfig!).padding([.leading, .trailing])
+        }.padding([.top])
         footer(
           reset: {
             model.resetToDefault()
@@ -196,7 +196,6 @@ struct ExternalOptionView: OptionView {
             viewModel.externalConfig = nil
           })
       }
-      .padding()
       .frame(minWidth: 400)
     }
     .alert(

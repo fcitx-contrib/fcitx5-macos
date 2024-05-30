@@ -25,7 +25,6 @@ private struct Addon: Codable, Identifiable {
   let name: String
   let id: String
   let comment: String
-  let isConfigurable: Bool
 }
 
 private struct Category: Codable, Identifiable {
@@ -42,28 +41,26 @@ private struct AddonRowView: View {
     VStack(alignment: .leading) {
       HStack {
         Text(addon.name).font(.headline)
-        if addon.isConfigurable {
-          Spacer()
-          Button(
-            NSLocalizedString("Setting", comment: ""), systemImage: "gearshape", action: openSetting
-          ).labelStyle(.iconOnly)
-            .sheet(isPresented: $viewModel.hasConfig) {
-              VStack {
-                ScrollView([.vertical]) {
-                  buildView(config: viewModel.externalConfig!)
-                }
-                footer(
-                  reset: {
-                    viewModel.externalConfig?.resetToDefault()
-                  }, apply: save,
-                  close: {
-                    viewModel.externalConfig = nil
-                  })
+        Spacer()
+        Button(
+          NSLocalizedString("Setting", comment: ""), systemImage: "gearshape", action: openSetting
+        ).labelStyle(.iconOnly)
+          .sheet(isPresented: $viewModel.hasConfig) {
+            VStack {
+              ScrollView([.vertical]) {
+                buildView(config: viewModel.externalConfig!)
               }
-              .padding()
-              .frame(minWidth: 400)
+              footer(
+                reset: {
+                  viewModel.externalConfig?.resetToDefault()
+                }, apply: save,
+                close: {
+                  viewModel.externalConfig = nil
+                })
             }
-        }
+            .padding()
+            .frame(minWidth: 400)
+          }
       }
       if !addon.comment.isEmpty {
         Text(addon.comment)

@@ -366,21 +366,19 @@ std::string getAddons() noexcept {
         auto instance = fcitx.instance();
         auto j = nlohmann::json::array();
         for (auto category :
-             {fcitx::AddonCategory::InputMethod, fcitx::AddonCategory::Frontend,
-              fcitx::AddonCategory::Loader, fcitx::AddonCategory::Module,
-              fcitx::AddonCategory::UI}) {
+             {fcitx::AddonCategory::Frontend, fcitx::AddonCategory::Loader,
+              fcitx::AddonCategory::Module}) {
             auto addons = nlohmann::json::array();
             auto names = instance->addonManager().addonNames(category);
             for (const auto &name : names) {
                 const auto *info = instance->addonManager().addonInfo(name);
-                if (!info) {
+                if (!info || !info->isConfigurable()) {
                     continue;
                 }
                 addons.push_back(
                     nlohmann::json{{"id", info->uniqueName()},
                                    {"name", info->name().match()},
-                                   {"comment", info->comment().match()},
-                                   {"isConfigurable", info->isConfigurable()}});
+                                   {"comment", info->comment().match()}});
             }
             if (!addons.empty()) {
                 j.push_back({{"id", category},

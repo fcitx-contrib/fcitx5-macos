@@ -1,3 +1,4 @@
+import Fcitx
 import Logging
 import SwiftUI
 
@@ -39,6 +40,16 @@ struct ThemeEditorView: View {
         }
       }.padding([.top])
     }
+    footer(
+      reset: {
+        viewModel.config?.resetToDefault()
+      },
+      apply: {
+        Fcitx.setConfig("fcitx://config/addon/webpanel/", viewModel.config?.encodeValue())
+      },
+      close: {
+        FcitxInputController.themeEditorController.window?.performClose(_: nil)
+      })
   }
 
   func refresh() {
@@ -47,6 +58,7 @@ struct ThemeEditorView: View {
 }
 
 class ThemeEditorViewModel: ObservableObject {
+  @Published var config: Config?
   @Published var configs = [Config]()
   @Published var selectedConfig: Config?
   @Published var selectedConfigIndex: Int? = 0 {
@@ -57,8 +69,8 @@ class ThemeEditorViewModel: ObservableObject {
 
   func load() {
     do {
-      let config = try getConfig(addon: "webpanel")
-      switch config.kind {
+      config = try getConfig(addon: "webpanel")
+      switch config!.kind {
       case .group(let children):
         configs = children
       case .option:
