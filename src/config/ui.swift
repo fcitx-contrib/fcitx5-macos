@@ -8,6 +8,8 @@ let minPhraseColumnWidth: CGFloat = 160
 let configWindowWidth: CGFloat = 800
 let configWindowHeight: CGFloat = 600
 
+let styleMask: NSWindow.StyleMask = [.titled, .closable, .resizable, .fullSizeContentView]
+
 extension View {
   func tooltip(_ text: String) -> some View {
     HStack {

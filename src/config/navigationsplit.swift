@@ -26,10 +26,10 @@ struct ListConfigView: View {
       }
     } detail: {
       ScrollView {
-        if viewModel.selectedConfig != nil {
-          buildView(config: viewModel.selectedConfig!).padding([.top, .leading, .trailing])
+        if let config = viewModel.selectedConfig {
+          buildView(config: config).padding([.leading, .trailing])
         }
-      }
+      }.padding([.top], 1)
     }
     footer(
       reset: {

@@ -8,7 +8,7 @@ class GlobalConfigController: ConfigWindowController {
   convenience init() {
     let window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: configWindowWidth, height: configWindowHeight),
-      styleMask: [.titled, .closable],
+      styleMask: styleMask,
       backing: .buffered, defer: false)
     window.title = NSLocalizedString("Global Config", comment: "")
     window.center()

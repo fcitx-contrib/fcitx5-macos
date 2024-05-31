@@ -184,9 +184,6 @@ class FcitxInputController: IMKInputController {
       withTitle: NSLocalizedString("Theme Editor", comment: ""), action: #selector(themeEditor(_:)),
       keyEquivalent: "")
     menu.addItem(
-      withTitle: NSLocalizedString("Addon Config", comment: ""), action: #selector(addonConfig(_:)),
-      keyEquivalent: "")
-    menu.addItem(
       withTitle: NSLocalizedString("Plugin Manager", comment: ""), action: #selector(plugin(_:)),
       keyEquivalent: "")
     menu.addItem(
