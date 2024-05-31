@@ -38,6 +38,11 @@ extension FcitxInputController {
     return AdvancedController()
   }()
 
+  static var controllers = [
+    "global": globalConfigController,
+    "theme": themeEditorController,
+  ]
+
   @objc func plugin(_: Any? = nil) {
     FcitxInputController.pluginManager.refreshPlugins()
     FcitxInputController.pluginManager.showWindow(nil)
