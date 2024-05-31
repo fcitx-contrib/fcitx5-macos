@@ -12,14 +12,7 @@
 #include <cstdint>
 #include <fcitx-utils/key.h>
 
-// masks
 // clang-format off
-
-#define OSX_CAPITAL_MASK      1 << 16
-#define OSX_SHIFT_MASK        1 << 17
-#define OSX_CTRL_MASK         1 << 18
-#define OSX_ALT_MASK          1 << 19
-#define OSX_COMMAND_MASK      1 << 20
 
 // key codes
 //

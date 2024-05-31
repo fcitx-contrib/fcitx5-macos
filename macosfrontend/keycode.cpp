@@ -18,6 +18,7 @@ static struct {
 
     // special
     {OSX_VK_DELETE, FcitxKey_BackSpace},
+    {OSX_VK_ENTER, FcitxKey_KP_Enter},
     {OSX_VK_RETURN, FcitxKey_Return},
     {OSX_VK_TAB, FcitxKey_Tab},
     {OSX_VK_ESCAPE, FcitxKey_Escape},
