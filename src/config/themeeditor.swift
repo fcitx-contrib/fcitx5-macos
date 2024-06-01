@@ -1,5 +1,3 @@
-import Fcitx
-import Logging
 import SwiftUI
 
 class ThemeEditorController: ConfigWindowController {

@@ -6,6 +6,7 @@ struct ListConfigView: View {
   private let path: String
   private let key: String
   @ObservedObject private var viewModel: ListConfigViewModel
+  @State private var dummyText = ""
 
   init(_ path: String, key: String) {
     self.path = path
@@ -25,6 +26,10 @@ struct ListConfigView: View {
         }
       }
     } detail: {
+      if key == "theme" {
+        TextField(NSLocalizedString("Type here to preview style", comment: ""), text: $dummyText)
+          .padding()
+      }
       ScrollView {
         if let config = viewModel.selectedConfig {
           buildView(config: config).padding([.leading, .trailing])

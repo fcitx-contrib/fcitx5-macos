@@ -108,7 +108,7 @@ FCITX_CONFIGURATION(
     Option<Color> highlightMarkColor{this, "HighlightMarkColor",
                                      _("Highlight mark color"),
                                      Color(255, 255, 255, 255)};
-    Option<Color> panelColor{this, "PanelColor", "Panel color",
+    Option<Color> panelColor{this, "PanelColor", _("Panel color"),
                              Color(0, 0, 0, 255)};
     Option<Color> textColor{this, "TextColor", _("Text color"),
                             Color(255, 255, 255, 255)};
@@ -124,9 +124,9 @@ FCITX_CONFIGURATION(
                                             Color(127, 127, 127, 255)};
     Option<Color> preeditColor{this, "PreeditColor", _("Preedit color"),
                                Color(255, 255, 255, 255)};
-    Option<Color> borderColor{this, "BorderColor", "Border color",
+    Option<Color> borderColor{this, "BorderColor", _("Border color"),
                               Color(255, 255, 255, 255)};
-    Option<Color> dividerColor{this, "DividerColor", "Divider color",
+    Option<Color> dividerColor{this, "DividerColor", _("Divider color"),
                                Color(255, 255, 255, 255)};);
 
 FCITX_CONFIGURATION(TypographyConfig,
