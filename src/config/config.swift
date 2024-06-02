@@ -17,10 +17,6 @@ func getConfig(uri: String) throws -> Config {
   }
 }
 
-func getGlobalConfig() throws -> Config {
-  return try getConfig(uri: "fcitx://config/global")
-}
-
 func getConfig(addon: String) throws -> Config {
   return try getConfig(uri: "fcitx://config/addon/\(addon)/")
 }

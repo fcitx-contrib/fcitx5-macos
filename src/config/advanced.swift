@@ -1,116 +1,124 @@
+import Fcitx
 import Logging
 import SwiftUI
-import UniformTypeIdentifiers
-
-let extractDir = cacheDir.appendingPathComponent("import")
-let extractPath = extractDir.localPath()
 
 class AdvancedController: ConfigWindowController {
   let view = AdvancedView()
 
   convenience init() {
     let window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
-      styleMask: [.titled, .closable],
+      contentRect: NSRect(x: 0, y: 0, width: configWindowWidth, height: configWindowHeight),
+      styleMask: styleMask,
       backing: .buffered, defer: false)
     window.title = NSLocalizedString("Advanced", comment: "")
     window.center()
     self.init(window: window)
     window.contentView = NSHostingView(rootView: view)
+    window.titlebarAppearsTransparent = true
+    attachToolbar(window)
+  }
+
+  func refresh() {
+    view.refresh()
   }
 }
 
-private func extractZip(_ file: URL) -> Bool {
-  // unzip is unfriendly with Chinese file names
-  return exec("/usr/bin/ditto", ["-xk", file.localPath(), extractPath])
+private struct Addon: Codable, Identifiable {
+  let name: String
+  let id: String
+  let comment: String
 }
+
+private struct Category: Codable, Identifiable {
+  let name: String
+  let id: Int
+  let addons: [Addon]
+}
+
+// non-addon
+private let dataManager = NSLocalizedString("Data manager", comment: "")
 
 struct AdvancedView: View {
-  @State private var openPanel = NSOpenPanel()
-  @AppStorage("ImportDataSelectedDirectory") var importDataSelectedDirectory: String?
-  @State private var showImportF5a = false
-  @State private var showImportSquirrel = false
-  @State private var showImportHamster = false
-  @State private var showAlert = false
+  @ObservedObject private var viewModel = AdvancedViewModel()
 
-  private func importZip(_ binding: Binding<Bool>, _ validator: @escaping () -> Bool) {
-    // Keep a single openPanel to avoid confusion.
-    if openPanel.isVisible {
-      openPanel.cancel(nil)
-      openPanel = NSOpenPanel()
-    }
-    openPanel.allowsMultipleSelection = false
-    openPanel.canChooseDirectories = false
-    openPanel.allowedContentTypes = [UTType.init(filenameExtension: "zip")!]
-    openPanel.directoryURL = URL(
-      fileURLWithPath: importDataSelectedDirectory
-        ?? homeDir.appendingPathComponent("Downloads").localPath())
-    openPanel.begin { response in
-      if response == .OK {
-        removeFile(extractDir)
-        mkdirP(extractPath)
-        if let file = openPanel.urls.first, extractZip(file), validator() {
-          binding.wrappedValue = true
-        } else {
-          showAlert = true
+  var body: some View {
+    NavigationSplitView {
+      List(selection: $viewModel.selected) {
+        ForEach([dataManager], id: \.self) { id in
+          Text(id)
+        }
+        ForEach(viewModel.categories) { category in
+          Section(header: Text(category.name)) {
+            ForEach(category.addons) { addon in
+              let text = Text(addon.name)
+              if !addon.comment.isEmpty {
+                text.tooltip(addon.comment)
+              } else {
+                text
+              }
+            }
+          }
         }
       }
-      importDataSelectedDirectory = openPanel.directoryURL?.localPath()
+    } detail: {
+      VStack {
+        if let selected = viewModel.selected {
+          if selected == dataManager {
+            ScrollView {
+              DataView()
+            }
+          } else if let config = viewModel.config {
+            ScrollView {
+              buildView(config: config).padding([.leading, .trailing])
+            }
+            footer(
+              reset: {
+                config.resetToDefault()
+              },
+              apply: {
+                Fcitx.setConfig("fcitx://config/addon/\(selected)", config.encodeValue())
+              },
+              close: {
+                FcitxInputController.advancedController.window?.performClose(nil)
+              })
+          }
+        }
+      }.padding([.top], 1)
     }
   }
 
-  var body: some View {
-    VStack {
-      Text("Import data from …")
+  func refresh() {
+    viewModel.load()
+  }
+}
 
-      Button {
-        removeFile(extractDir)
-        mkdirP(cacheDir.localPath())
-        if copyFile(squirrelDir, extractDir) {
-          showImportSquirrel = true
+class AdvancedViewModel: ObservableObject {
+  @Published fileprivate var categories = [Category]()
+  @Published var selected: String? = dataManager {
+    didSet {
+      if let selected = selected,
+        selected != dataManager
+      {
+        do {
+          config = try getConfig(addon: selected)
+        } catch {
+          FCITX_ERROR("Couldn't load addon config: \(error)")
         }
-      } label: {
-        Text("Local Squirrel")
-      }.sheet(isPresented: $showImportSquirrel) {
-        ImportDataView(squirrelItems)
-      }.disabled(!FileManager.default.fileExists(atPath: squirrelDir.localPath()))
+      }
+    }
+  }
+  @Published var config: Config?
 
-      Button {
-        importZip(
-          $showImportF5a,
-          {
-            extractDir.appendingPathComponent("metadata.json").exists()
-          })
-      } label: {
-        Text("Fcitx5 Android").tooltip("fcitx5-android_YYYY-MM-DD*.zip")
-      }.sheet(isPresented: $showImportF5a) {
-        ImportDataView(f5aItems)
+  func load() {
+    do {
+      let jsonStr = String(Fcitx.getAddons())
+      if let jsonData = jsonStr.data(using: .utf8) {
+        categories = try JSONDecoder().decode([Category].self, from: jsonData)
+      } else {
+        FCITX_ERROR("Couldn't decode addon config: not UTF-8")
       }
-
-      Button {
-        importZip(
-          $showImportHamster,
-          {
-            hamsterRimeDir.exists()
-          })
-      } label: {
-        Text("Hamster").tooltip("YYYYMMDD-*.zip")
-      }.sheet(isPresented: $showImportHamster) {
-        ImportDataView(hamsterItems)
-      }
-    }.alert(
-      Text("Error"),
-      isPresented: $showAlert,
-      presenting: ()
-    ) { _ in
-      Button {
-        showAlert = false
-      } label: {
-        Text("OK")
-      }
-      .buttonStyle(.borderedProminent)
-    } message: { _ in
-      Text("Invalid zip.")
-    }.padding()
+    } catch {
+      FCITX_ERROR("Couldn't load addon config: \(error)")
+    }
   }
 }

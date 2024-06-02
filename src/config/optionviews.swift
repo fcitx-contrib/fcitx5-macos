@@ -183,24 +183,19 @@ struct ExternalOptionView: OptionView {
     .sheet(isPresented: $viewModel.hasConfig) {
       VStack {
         ScrollView([.vertical]) {
-          buildView(config: viewModel.externalConfig!)
-        }
-        HStack {
-          Button("Reset to default") {
+          buildView(config: viewModel.externalConfig!).padding([.leading, .trailing])
+        }.padding([.top])
+        footer(
+          reset: {
             model.resetToDefault()
-          }
-          Spacer()
-          Button("Apply") {
+          },
+          apply: {
             viewModel.saveExternalConfig(model.external)
-          }
-          Button("OK") {
-            viewModel.saveExternalConfig(model.external)
+          },
+          close: {
             viewModel.externalConfig = nil
-          }
-          .buttonStyle(.borderedProminent)
-        }
+          })
       }
-      .padding()
       .frame(minWidth: 400)
     }
     .alert(
@@ -513,7 +508,7 @@ struct GroupOptionView: OptionView {
           // content in the right column.
           GridRow {
             subLabel
-              .frame(minWidth: 100, maxWidth: 400, alignment: .trailing)
+              .frame(minWidth: 100, maxWidth: 300, alignment: .trailing)
             AnyView(subView)
           }
         }

@@ -383,8 +383,8 @@ class PluginManager: ConfigWindowController {
   let view = PluginView()
   convenience init() {
     let window = NSWindow(
-      contentRect: NSRect(x: 0, y: 0, width: 600, height: 400),
-      styleMask: [.titled, .closable],
+      contentRect: NSRect(x: 0, y: 0, width: configWindowWidth, height: configWindowHeight),
+      styleMask: styleMask,
       backing: .buffered, defer: false)
     window.title = NSLocalizedString("Plugin Manager", comment: "")
     window.center()

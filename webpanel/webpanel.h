@@ -32,11 +32,12 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(HoverBehavior, N_("None"), N_("Move"),
 
 namespace fcitx {
 
-struct NoSaveAnnotation {
-    bool skipDescription() { return false; }
-    bool skipSave() { return true; }
-    void dumpDescription(RawConfig &config) const {}
-};
+FCITX_CONFIGURATION(BasicConfig,
+                    Option<bool> followCursor{this, "FollowCursor",
+                                              _("Follow cursor"), false};
+                    Option<candidate_window::theme_t> theme{
+                        this, "Theme", _("Theme"),
+                        candidate_window::theme_t::system};);
 
 FCITX_CONFIGURATION(
     LightModeConfig, Option<bool> overrideDefault{this, "OverrideDefault",
@@ -107,7 +108,7 @@ FCITX_CONFIGURATION(
     Option<Color> highlightMarkColor{this, "HighlightMarkColor",
                                      _("Highlight mark color"),
                                      Color(255, 255, 255, 255)};
-    Option<Color> panelColor{this, "PanelColor", "Panel color",
+    Option<Color> panelColor{this, "PanelColor", _("Panel color"),
                              Color(0, 0, 0, 255)};
     Option<Color> textColor{this, "TextColor", _("Text color"),
                             Color(255, 255, 255, 255)};
@@ -123,9 +124,9 @@ FCITX_CONFIGURATION(
                                             Color(127, 127, 127, 255)};
     Option<Color> preeditColor{this, "PreeditColor", _("Preedit color"),
                                Color(255, 255, 255, 255)};
-    Option<Color> borderColor{this, "BorderColor", "Border color",
+    Option<Color> borderColor{this, "BorderColor", _("Border color"),
                               Color(255, 255, 255, 255)};
-    Option<Color> dividerColor{this, "DividerColor", "Divider color",
+    Option<Color> dividerColor{this, "DividerColor", _("Divider color"),
                                Color(255, 255, 255, 255)};);
 
 FCITX_CONFIGURATION(TypographyConfig,
@@ -214,13 +215,7 @@ FCITX_CONFIGURATION(
         IntConstrain(0, BORDER_WIDTH_MAX)};);
 
 FCITX_CONFIGURATION(
-    WebPanelConfig,
-
-    OptionWithAnnotation<std::string, NoSaveAnnotation> preview{
-        this, "Preview", _("Type here to preview style")};
-    Option<bool> followCursor{this, "FollowCursor", _("Follow cursor"), false};
-    Option<candidate_window::theme_t> theme{this, "Theme", _("Theme"),
-                                            candidate_window::theme_t::system};
+    WebPanelConfig, Option<BasicConfig> basic{this, "Basic", _("Basic")};
     Option<LightModeConfig> lightMode{this, "LightMode", _("Light mode")};
     Option<DarkModeConfig> darkMode{this, "DarkMode", _("Dark mode")};
     Option<TypographyConfig> typography{this, "Typography", _("Typography")};
