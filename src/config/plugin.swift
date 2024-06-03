@@ -10,6 +10,7 @@ struct Plugin: Identifiable, Hashable {
   let category: String
   let native: Bool
   let github: String?
+  var dependencies: [String] = []
 }
 
 private var pluginMap = officialPlugins.reduce(into: [String: Plugin]()) { result, plugin in
@@ -219,24 +220,39 @@ struct PluginView: View {
     if !isUpdate {
       nativeAvailable.removeAll()
       dataAvailable.removeAll()
-      for plugin in selectedAvailable {
-        if let info = pluginMap[plugin] {
+
+      var countedPlugins = Set<String>()
+      func helper(_ plugin: String) {
+        if countedPlugins.contains(plugin) {
+          return
+        }
+        countedPlugins.insert(plugin)
+        // Skip installed dependencies.
+        if let info = pluginMap[plugin], !pluginVM.installedPlugins.contains(info) {
           if info.native {
             nativeAvailable.append(plugin)
           }
-          // Assumption: all official plugins contains a data tarball.
+          // Assumption: all official plugins contain a data tarball.
           dataAvailable.append(plugin)
+          for dependency in info.dependencies {
+            helper(dependency)
+          }
         }
       }
+      for plugin in selectedAvailable {
+        helper(plugin)
+      }
     }
+    let selectedPlugins = selectedAvailable
     selectedAvailable.removeAll()
 
     let updater = Updater(main: false, nativePlugins: nativeAvailable, dataPlugins: dataAvailable)
     updater.update(
       onFinish: { _, nativeResults, dataResults in
-        var inputMethods = [String]()
+        var inputMethods: [String] = [String]()
         if !isUpdate {
-          for plugin in Set(nativeResults.keys).union(dataResults.keys) {
+          // Don't add IMs for dependencies.
+          for plugin in selectedPlugins {
             if (nativeResults[plugin] ?? true) && (dataResults[plugin] ?? true) {
               for im in getAutoAddIms(plugin) {
                 inputMethods.append(im)
