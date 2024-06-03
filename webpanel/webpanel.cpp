@@ -173,6 +173,7 @@ void WebPanel::update(UserInterfaceComponent component,
         window_->set_paging_buttons(pageable, hasPrev, hasNext);
         window_->set_candidates(candidates, highlighted);
         window_->set_layout(layout);
+        window_->set_writing_mode(config_.typography->writingMode.value());
         updatePanelShowFlags(!candidates.empty(), PanelShowFlag::HasCandidates);
         if (auto macosIC = dynamic_cast<MacosInputContext *>(inputContext)) {
             macosIC->setDummyPreedit(

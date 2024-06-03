@@ -16,6 +16,9 @@
 namespace candidate_window {
 FCITX_CONFIG_ENUM_NAME_WITH_I18N(theme_t, N_("System"), N_("Light"), N_("Dark"))
 FCITX_CONFIG_ENUM_NAME_WITH_I18N(layout_t, N_("Horizontal"), N_("Vertical"))
+FCITX_CONFIG_ENUM_NAME_WITH_I18N(writing_mode_t, N_("Horizontal top-bottom"),
+                                 N_("Vertical right-left"),
+                                 N_("Vertical left-right"))
 } // namespace candidate_window
 
 enum class CursorStyle { Blink, Static, Text };
@@ -129,13 +132,15 @@ FCITX_CONFIGURATION(
     Option<Color> dividerColor{this, "DividerColor", _("Divider color"),
                                Color(255, 255, 255, 255)};);
 
-FCITX_CONFIGURATION(TypographyConfig,
-                    Option<candidate_window::layout_t> layout{
-                        this, "Layout", _("Layout"),
-                        candidate_window::layout_t::horizontal};
-                    Option<bool> showPagingButtons{this, "ShowPagingButtons",
-                                                   _("Show paging buttons"),
-                                                   false};);
+FCITX_CONFIGURATION(
+    TypographyConfig,
+    Option<candidate_window::layout_t> layout{
+        this, "Layout", _("Layout"), candidate_window::layout_t::horizontal};
+    Option<candidate_window::writing_mode_t> writingMode{
+        this, "WritingMode", _("Writing mode"),
+        candidate_window::writing_mode_t::horizontal_tb};
+    Option<bool> showPagingButtons{this, "ShowPagingButtons",
+                                   _("Show paging buttons"), false};);
 
 FCITX_CONFIGURATION(BackgroundConfig,
                     Option<std::string> imageUrl{this, "ImageUrl",
