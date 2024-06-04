@@ -201,7 +201,8 @@ private func stringToColor(_ hex: String) -> Color {
 }
 
 private func colorToString(_ color: Color) -> String {
-  let components = color.cgColor!.components!
+  let resolved = NSColor(color)
+  let components = resolved.cgColor.components!
   let red = UInt8(round(components[0] * 255.0))
   let green = UInt8(round(components[1] * 255.0))
   let blue = UInt8(round(components[2] * 255.0))
