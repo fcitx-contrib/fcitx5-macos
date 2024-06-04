@@ -26,7 +26,15 @@ func footer(reset: @escaping () -> Void, apply: @escaping () -> Void, close: @es
     Button {
       reset()
     } label: {
-      Text("Reset to default")
+      Text("Reset to default").tooltip(
+        NSLocalizedString(
+          "Reset current page. To reset a single item/group, right click on its label.", comment: ""
+        ))
+    }
+    Button {
+      close()
+    } label: {
+      Text("Cancel")
     }
     Spacer()
     Button {

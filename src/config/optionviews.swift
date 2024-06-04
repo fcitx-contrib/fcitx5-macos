@@ -497,6 +497,14 @@ struct GroupOptionView: OptionView {
             subLabel
               .font(.title3)
               .gridCellColumns(2)
+              .help(NSLocalizedString("Right click to reset this group.", comment: ""))
+              .contextMenu {
+                Button {
+                  child.resetToDefault()
+                } label: {
+                  Text("Reset to default")
+                }
+              }
           }
           GridRow {
             GroupBox {
@@ -509,6 +517,14 @@ struct GroupOptionView: OptionView {
           GridRow {
             subLabel
               .frame(minWidth: 100, maxWidth: 300, alignment: .trailing)
+              .help(NSLocalizedString("Right click to reset this item.", comment: ""))
+              .contextMenu {
+                Button {
+                  child.resetToDefault()
+                } label: {
+                  Text("Reset to default")
+                }
+              }
             AnyView(subView)
           }
         }
