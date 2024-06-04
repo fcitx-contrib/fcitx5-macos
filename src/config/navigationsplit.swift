@@ -35,17 +35,19 @@ struct ListConfigView: View {
           buildView(config: config).padding([.leading, .trailing])
         }
       }.padding([.top], 1)
+      footer(
+        reset: {
+          // Reset only current page.
+          viewModel.selectedConfig?.resetToDefault()
+        },
+        apply: {
+          // Save all pages.
+          Fcitx.setConfig("fcitx://\(path)", viewModel.config?.encodeValue())
+        },
+        close: {
+          FcitxInputController.controllers[key]?.window?.performClose(_: nil)
+        })
     }
-    footer(
-      reset: {
-        viewModel.config?.resetToDefault()
-      },
-      apply: {
-        Fcitx.setConfig("fcitx://\(path)", viewModel.config?.encodeValue())
-      },
-      close: {
-        FcitxInputController.controllers[key]?.window?.performClose(_: nil)
-      })
   }
 }
 
