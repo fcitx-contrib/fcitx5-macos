@@ -187,7 +187,7 @@ struct ExternalOptionView: OptionView {
         }.padding([.top])
         footer(
           reset: {
-            model.resetToDefault()
+            viewModel.externalConfig?.resetToDefault()
           },
           apply: {
             viewModel.saveExternalConfig(model.external)
