@@ -107,6 +107,8 @@ void Fcitx::setupEnv() {
     setenv("FCITX_ADDON_DIRS", fcitx_addon_dirs.c_str(), 1);
     setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
     setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
+    setenv("XKB_CONFIG_EXTRA_PATH", APP_CONTENTS_PATH "/etc/xkb", 1);
+    setenv("XKB_CONFIG_ROOT", APP_CONTENTS_PATH "/share/X11/xkb", 1);
 
     // Set LANGUAGE for libintl-lite.
     std::string val = current_locale;
