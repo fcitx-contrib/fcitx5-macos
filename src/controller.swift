@@ -9,6 +9,7 @@ class FcitxInputController: IMKInputController {
   var uuid: ICUUID
   var appId: String
   var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
+  var ignoreRelease: Bool = false
   let client: Any!
 
   // A registry of live FcitxInputController objects.
@@ -82,6 +83,7 @@ class FcitxInputController: IMKInputController {
 
     switch event.type {
     case .keyDown:
+      ignoreRelease = false
       var unicode: UInt32 = 0
       if let characters = event.characters {
         let usv = characters.unicodeScalars
@@ -94,8 +96,19 @@ class FcitxInputController: IMKInputController {
     case .flagsChanged:
       let change = NSEvent.ModifierFlags(rawValue: mods.rawValue ^ lastModifiers.rawValue)
       let isRelease: Bool = (lastModifiers.rawValue & change.rawValue) != 0
+      // HACK: binding a shortcut to a menu item will let system intercept the key event, and send leftover key release to fcitx.
+      // e.g. On Pinyin status, Ctrl+Shift+F changes to traditional Chinese, but the release of Ctrl+Shift is sent to fcitx, which triggers English.
+      // We ignore the release of leftover modifiers to prevent this, and reset the flag when all modifiers are released or any key is pressed.
+      if !isRelease {
+        ignoreRelease = false
+      }
       var handled = false
-      if change.contains(.shift) || change.contains(.control) || change.contains(.command)
+      if isRelease && ignoreRelease {
+        handled = true
+        if mods.rawValue == 0 {
+          ignoreRelease = false
+        }
+      } else if change.contains(.shift) || change.contains(.control) || change.contains(.command)
         || change.contains(.option) || change.contains(.capsLock)
       {
         handled = processKey(0, modsVal, code, isRelease)
@@ -211,6 +224,7 @@ class FcitxInputController: IMKInputController {
   }
 
   @objc func activateFcitxAction(sender: Any?) {
+    ignoreRelease = true
     if let action = repObjectIMK(sender) as? FcitxAction {
       Fcitx.activateActionById(Int32(action.id))
     }
@@ -243,6 +257,11 @@ private func repObjectIMK(_ sender: Any?) -> Any? {
   return nil
 }
 
+struct FcitxKey: Codable {
+  let sym: String
+  let states: UInt
+}
+
 struct FcitxAction: Codable {
   let id: Int
   let name: String
@@ -250,6 +269,7 @@ struct FcitxAction: Codable {
   let checked: Bool?
   let children: [FcitxAction]?
   let separator: Bool?
+  let hotkey: [FcitxKey]?
 
   // Returns a flattened array of the menu item and all of its children.
   // Cannot use submenus directly because IMK submenus do not work as expected.
@@ -261,7 +281,9 @@ struct FcitxAction: Codable {
 
     let item = NSMenuItem(
       title: String(repeating: "　　", count: depth) + desc,
-      action: #selector(FcitxInputController.activateFcitxAction), keyEquivalent: "")
+      action: #selector(FcitxInputController.activateFcitxAction),
+      keyEquivalent: hotkey?[0].sym ?? "")
+    item.keyEquivalentModifierMask = NSEvent.ModifierFlags(rawValue: hotkey?[0].states ?? 0)
     item.target = target
     item.representedObject = self
     if let checked = checked {

@@ -15,6 +15,7 @@
 
 #include "fcitx.h"
 #include "../fcitx5-beast/src/beast.h"
+#include "../macosfrontend/keycode.h"
 #include "../macosnotifications/macosnotifications.h"
 #include "../webpanel/webpanel.h"
 #include "config/config-public.h"
@@ -392,6 +393,26 @@ std::string getAddons() noexcept {
     });
 }
 
+uint32_t fcitx_keystates_to_osx_modifiers(fcitx::KeyStates ks) {
+    uint32_t ret{};
+    if (ks & fcitx::KeyState::CapsLock) {
+        ret |= OSX_MODIFIER_CAPSLOCK;
+    }
+    if (ks & fcitx::KeyState::Shift) {
+        ret |= OSX_MODIFIER_SHIFT;
+    }
+    if (ks & fcitx::KeyState::Ctrl) {
+        ret |= OSX_MODIFIER_CONTROL;
+    }
+    if (ks & fcitx::KeyState::Alt) {
+        ret |= OSX_MODIFIER_OPTION;
+    }
+    if (ks & fcitx::KeyState::Super) {
+        ret |= OSX_MODIFIER_COMMAND;
+    }
+    return ret;
+}
+
 static nlohmann::json actionToJson(fcitx::Action *action,
                                    fcitx::InputContext *ic) {
     nlohmann::json j;
@@ -409,6 +430,11 @@ static nlohmann::json actionToJson(fcitx::Action *action,
         for (auto *subaction : menu->actions()) {
             j["children"].emplace_back(actionToJson(subaction, ic));
         }
+    }
+    for (const auto &key : action->hotkey()) {
+        j["hotkey"].push_back(
+            {{"sym", fcitx::Key::keySymToString(key.sym())},
+             {"states", fcitx_keystates_to_osx_modifiers(key.states())}});
     }
     return j;
 }
