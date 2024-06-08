@@ -432,8 +432,13 @@ static nlohmann::json actionToJson(fcitx::Action *action,
         }
     }
     for (const auto &key : action->hotkey()) {
+        // keySymToString returns grave for `, which will be used as G by macOS.
+        auto sym = fcitx::Key::keySymToUTF8(key.sym());
+        if (sym.empty()) {
+            continue;
+        }
         j["hotkey"].push_back(
-            {{"sym", fcitx::Key::keySymToString(key.sym())},
+            {{"sym", sym},
              {"states", fcitx_keystates_to_osx_modifiers(key.states())}});
     }
     return j;
