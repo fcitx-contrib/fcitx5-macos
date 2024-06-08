@@ -108,9 +108,7 @@ class FcitxInputController: IMKInputController {
         if mods.rawValue == 0 {
           ignoreRelease = false
         }
-      } else if change.contains(.shift) || change.contains(.control) || change.contains(.command)
-        || change.contains(.option) || change.contains(.capsLock)
-      {
+      } else if !change.isDisjoint(with: [.shift, .control, .command, .option, .capsLock]) {
         handled = processKey(0, modsVal, code, isRelease)
       }
       lastModifiers = mods
