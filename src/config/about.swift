@@ -1,3 +1,4 @@
+import AlertToast
 import Carbon
 import Logging
 import SwiftUI
@@ -58,7 +59,6 @@ enum UpdateState {
   case notChecked  // Clickable "Check update"
   case checking  // Disabled "Checking"
   case checkFailedSheet  // to notChecked
-  case upToDateSheet  // to upToDate
   case upToDate  // Disabled "Check update", reset to notChecked on refresh
   case availableSheet  // to available or downloading
   case available  // Clickable "Update"
@@ -73,6 +73,7 @@ struct AboutView: View {
   @ObservedObject private var viewModel = ViewModel()
   @State private var downloadProgress = 0.0
 
+  @State private var showUpToDate = false
   @State private var confirmUninstall = false
   @State private var removeUserData = false
   @State private var uninstallFailed = false
@@ -100,7 +101,7 @@ struct AboutView: View {
 
       Spacer().frame(height: gapSize)
       HStack {
-        Text(NSLocalizedString("Originally made by", comment: ""))
+        Text("Originally made by")
         urlButton("Qijia Liu", "https://github.com/eagleoflqj")
         Text("and")
         urlButton("ksqsf", "https://github.com/ksqsf")
@@ -131,7 +132,7 @@ struct AboutView: View {
             if viewModel.state == .notChecked || viewModel.state == .upToDate {
               Text("Check update")
             } else if viewModel.state == .checking || viewModel.state == .checkFailedSheet
-              || viewModel.state == .upToDateSheet || viewModel.state == .availableSheet
+              || viewModel.state == .availableSheet
             {
               Text("Checking")
             } else {
@@ -154,24 +155,6 @@ struct AboutView: View {
               Button(
                 action: {
                   viewModel.state = .notChecked
-                },
-                label: {
-                  Text("OK")
-                }
-              ).buttonStyle(.borderedProminent)
-            }.padding()
-          }
-          .sheet(
-            isPresented: $viewModel.showUpToDate,
-            onDismiss: {
-              viewModel.state = .upToDate
-            }
-          ) {
-            VStack {
-              Text("Fcitx5 is up to date")
-              Button(
-                action: {
-                  viewModel.state = .upToDate
                 },
                 label: {
                   Text("OK")
@@ -305,6 +288,11 @@ struct AboutView: View {
         ProgressView(value: downloadProgress, total: 1)
       }
     }.padding()
+      .toast(isPresenting: $showUpToDate) {
+        AlertToast(
+          displayMode: .hud, type: .complete(Color.green),
+          title: NSLocalizedString("Fcitx5 is up to date", comment: ""))
+      }
   }
 
   func uninstall() {
@@ -332,7 +320,8 @@ struct AboutView: View {
         let tag = try? JSONDecoder().decode(Tag.self, from: data)
       {
         if tag.object.sha == commit {
-          viewModel.state = .upToDateSheet
+          viewModel.state = .upToDate
+          showUpToDate = true
         } else {
           viewModel.state = .availableSheet
         }
@@ -391,14 +380,11 @@ struct AboutView: View {
     @Published var state: UpdateState = .notChecked {
       didSet {
         showCheckFailed = false
-        showUpToDate = false
         showAvailable = false
         showDownloadFailed = false
         showInstallFailed = false
         if state == .checkFailedSheet {
           showCheckFailed = true
-        } else if state == .upToDateSheet {
-          showUpToDate = true
         } else if state == .availableSheet {
           showAvailable = true
         } else if state == .downloadFailedSheet {
@@ -409,7 +395,6 @@ struct AboutView: View {
       }
     }
     @Published var showCheckFailed: Bool = false
-    @Published var showUpToDate: Bool = false
     @Published var showAvailable: Bool = false
     @Published var showDownloadFailed: Bool = false
     @Published var showInstallFailed: Bool = false

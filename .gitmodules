@@ -10,3 +10,6 @@
 [submodule "fcitx5-beast"]
 	path = fcitx5-beast
 	url = https://github.com/fcitx-contrib/fcitx5-beast
+[submodule "deps/AlertToast"]
+	path = deps/AlertToast
+	url = https://github.com/fcitx-contrib/AlertToast
