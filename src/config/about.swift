@@ -63,7 +63,6 @@ enum UpdateState {
   case available  // Clickable "Update"
   case downloading  // Disabled "Update"
   case installing  // Disabled "Update"
-  case installFailedSheet  // to available
 }
 
 struct AboutView: View {
@@ -74,6 +73,7 @@ struct AboutView: View {
   @State private var showUpToDate = false
   @State private var showCheckFailed = false
   @State private var showDownloadFailed = false
+  @State private var showInstallFailed = false
   @State private var confirmUninstall = false
   @State private var removeUserData = false
   @State private var uninstallFailed = false
@@ -173,24 +173,6 @@ struct AboutView: View {
               )
             }.padding()
           }
-          .sheet(
-            isPresented: $viewModel.showInstallFailed,
-            onDismiss: {
-              viewModel.state = .available
-            }
-          ) {
-            VStack {
-              Text("Install failed")
-              Button(
-                action: {
-                  viewModel.state = .available
-                },
-                label: {
-                  Text("OK")
-                }
-              ).buttonStyle(.borderedProminent)
-            }.padding()
-          }
 
         Button(
           action: {
@@ -267,6 +249,11 @@ struct AboutView: View {
           displayMode: .hud, type: .error(Color.red),
           title: NSLocalizedString("Download failed", comment: ""))
       }
+      .toast(isPresenting: $showInstallFailed) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Install failed", comment: ""))
+      }
   }
 
   func uninstall() {
@@ -342,7 +329,8 @@ struct AboutView: View {
     DispatchQueue.global().async {
       if !sudo("update", path, updateLog) {
         DispatchQueue.main.async {
-          viewModel.state = .installFailedSheet
+          viewModel.state = .available
+          showInstallFailed = true
         }
       }
     }
@@ -355,17 +343,10 @@ struct AboutView: View {
   private class ViewModel: ObservableObject {
     @Published var state: UpdateState = .notChecked {
       didSet {
-        showAvailable = false
-        showInstallFailed = false
-        if state == .availableSheet {
-          showAvailable = true
-        } else if state == .installFailedSheet {
-          showInstallFailed = true
-        }
+        showAvailable = state == .availableSheet
       }
     }
     @Published var showAvailable: Bool = false
-    @Published var showInstallFailed: Bool = false
 
     func refresh() {
       // Allow recheck update on reopen about.
