@@ -62,7 +62,6 @@ enum UpdateState {
   case availableSheet  // to available or downloading
   case available  // Clickable "Update"
   case downloading  // Disabled "Update"
-  case downloadFailedSheet  // to available
   case installing  // Disabled "Update"
   case installFailedSheet  // to available
 }
@@ -74,6 +73,7 @@ struct AboutView: View {
 
   @State private var showUpToDate = false
   @State private var showCheckFailed = false
+  @State private var showDownloadFailed = false
   @State private var confirmUninstall = false
   @State private var removeUserData = false
   @State private var uninstallFailed = false
@@ -174,24 +174,6 @@ struct AboutView: View {
             }.padding()
           }
           .sheet(
-            isPresented: $viewModel.showDownloadFailed,
-            onDismiss: {
-              viewModel.state = .available
-            }
-          ) {
-            VStack {
-              Text("Download failed")
-              Button(
-                action: {
-                  viewModel.state = .available
-                },
-                label: {
-                  Text("OK")
-                }
-              ).buttonStyle(.borderedProminent)
-            }.padding()
-          }
-          .sheet(
             isPresented: $viewModel.showInstallFailed,
             onDismiss: {
               viewModel.state = .available
@@ -280,6 +262,11 @@ struct AboutView: View {
           displayMode: .hud, type: .error(Color.red),
           title: NSLocalizedString("Failed to check update", comment: ""))
       }
+      .toast(isPresenting: $showDownloadFailed) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Download failed", comment: ""))
+      }
   }
 
   func uninstall() {
@@ -329,7 +316,8 @@ struct AboutView: View {
           if result {
             install()
           } else {
-            viewModel.state = .downloadFailedSheet
+            viewModel.state = .available
+            showDownloadFailed = true
           }
         },
         onProgress: { progress in
@@ -368,19 +356,15 @@ struct AboutView: View {
     @Published var state: UpdateState = .notChecked {
       didSet {
         showAvailable = false
-        showDownloadFailed = false
         showInstallFailed = false
         if state == .availableSheet {
           showAvailable = true
-        } else if state == .downloadFailedSheet {
-          showDownloadFailed = true
         } else if state == .installFailedSheet {
           showInstallFailed = true
         }
       }
     }
     @Published var showAvailable: Bool = false
-    @Published var showDownloadFailed: Bool = false
     @Published var showInstallFailed: Bool = false
 
     func refresh() {
