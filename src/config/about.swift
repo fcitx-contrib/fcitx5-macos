@@ -58,7 +58,6 @@ struct Tag: Codable {
 enum UpdateState {
   case notChecked  // Clickable "Check update"
   case checking  // Disabled "Checking"
-  case checkFailedSheet  // to notChecked
   case upToDate  // Disabled "Check update", reset to notChecked on refresh
   case availableSheet  // to available or downloading
   case available  // Clickable "Update"
@@ -74,6 +73,7 @@ struct AboutView: View {
   @State private var downloadProgress = 0.0
 
   @State private var showUpToDate = false
+  @State private var showCheckFailed = false
   @State private var confirmUninstall = false
   @State private var removeUserData = false
   @State private var uninstallFailed = false
@@ -131,7 +131,7 @@ struct AboutView: View {
           label: {
             if viewModel.state == .notChecked || viewModel.state == .upToDate {
               Text("Check update")
-            } else if viewModel.state == .checking || viewModel.state == .checkFailedSheet
+            } else if viewModel.state == .checking
               || viewModel.state == .availableSheet
             {
               Text("Checking")
@@ -144,24 +144,6 @@ struct AboutView: View {
             viewModel.state == .checking || viewModel.state == .upToDate
               || viewModel.state == .downloading || viewModel.state == .installing
           )
-          .sheet(
-            isPresented: $viewModel.showCheckFailed,
-            onDismiss: {
-              viewModel.state = .notChecked
-            }
-          ) {
-            VStack {
-              Text("Failed to check update")
-              Button(
-                action: {
-                  viewModel.state = .notChecked
-                },
-                label: {
-                  Text("OK")
-                }
-              ).buttonStyle(.borderedProminent)
-            }.padding()
-          }
           .sheet(
             isPresented: $viewModel.showAvailable,
             onDismiss: {
@@ -293,6 +275,11 @@ struct AboutView: View {
           displayMode: .hud, type: .complete(Color.green),
           title: NSLocalizedString("Fcitx5 is up to date", comment: ""))
       }
+      .toast(isPresenting: $showCheckFailed) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Failed to check update", comment: ""))
+      }
   }
 
   func uninstall() {
@@ -326,7 +313,8 @@ struct AboutView: View {
           viewModel.state = .availableSheet
         }
       } else {
-        viewModel.state = .checkFailedSheet
+        viewModel.state = .notChecked
+        showCheckFailed = true
       }
     }.resume()
   }
@@ -379,13 +367,10 @@ struct AboutView: View {
   private class ViewModel: ObservableObject {
     @Published var state: UpdateState = .notChecked {
       didSet {
-        showCheckFailed = false
         showAvailable = false
         showDownloadFailed = false
         showInstallFailed = false
-        if state == .checkFailedSheet {
-          showCheckFailed = true
-        } else if state == .availableSheet {
+        if state == .availableSheet {
           showAvailable = true
         } else if state == .downloadFailedSheet {
           showDownloadFailed = true
@@ -394,7 +379,6 @@ struct AboutView: View {
         }
       }
     }
-    @Published var showCheckFailed: Bool = false
     @Published var showAvailable: Bool = false
     @Published var showDownloadFailed: Bool = false
     @Published var showInstallFailed: Bool = false

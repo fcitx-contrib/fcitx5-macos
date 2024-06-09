@@ -109,5 +109,6 @@ cd assets/po && msgmerge -U <locale>.po base.pot
 * [squirrel](https://github.com/rime/squirrel): GPL-3.0-only
 * [swift-cmake-examples](https://github.com/apple/swift-cmake-examples): Apache-2.0
 * [SwiftyJSON](https://github.com/SwiftyJSON/SwiftyJSON): MIT
+* [AlertToast](https://github.com/elai950/AlertToast): MIT
 * [pugixml](https://github.com/zeux/pugixml): MIT
 * [webview](https://github.com/webview/webview): MIT
