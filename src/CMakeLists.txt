@@ -26,6 +26,7 @@ target_include_directories(Fcitx5Objs PUBLIC
 )
 target_link_libraries(Fcitx5Objs
     "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
+    AlertToast
     SwiftyJSON
     SwiftFrontend
     SwiftNotify

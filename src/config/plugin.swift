@@ -1,3 +1,4 @@
+import AlertToast
 import Fcitx
 import Logging
 import SwiftUI
@@ -308,16 +309,7 @@ struct PluginView: View {
             Text("Check update")
           }.buttonStyle(.borderedProminent)
             .disabled(processing || pluginVM.upToDate)
-            .sheet(isPresented: $showUpToDate) {
-              VStack {
-                Text("All plugins are up to date")
-                Button {
-                  showUpToDate = false
-                } label: {
-                  Text("OK")
-                }.buttonStyle(.borderedProminent)
-              }.padding()
-            }.sheet(isPresented: $showUpdateAvailable) {
+            .sheet(isPresented: $showUpdateAvailable) {
               VStack {
                 Text("Update available")
 
@@ -391,6 +383,12 @@ struct PluginView: View {
             }
           ).buttonStyle(.borderedProminent)
         }.padding()
+      }
+      .toast(isPresenting: $showUpToDate) {
+        AlertToast(
+          displayMode: .hud,
+          type: .complete(Color.green),
+          title: NSLocalizedString("All plugins are up to date", comment: ""))
       }
   }
 }
