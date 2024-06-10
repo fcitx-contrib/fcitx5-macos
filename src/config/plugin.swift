@@ -148,7 +148,6 @@ struct PluginView: View {
     checkPluginUpdate({ success, nativePlugins, dataPlugins in
       nativeAvailable = nativePlugins
       dataAvailable = dataPlugins
-      // TODO: check success and show toast; convert up to date to a toast
       if nativePlugins.isEmpty && dataPlugins.isEmpty {
         pluginVM.upToDate = true
         showUpToDate = true

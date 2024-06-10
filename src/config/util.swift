@@ -113,7 +113,7 @@ func moveAndMerge(_ src: URL, _ dest: URL) -> Bool {
           success = false
         }
       }
-      return success
+      return success && removeFile(src)
     } catch {
       return false
     }

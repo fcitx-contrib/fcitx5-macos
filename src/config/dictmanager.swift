@@ -1,3 +1,4 @@
+import AlertToast
 import Fcitx
 import Logging
 import SwiftUI
@@ -60,6 +61,9 @@ struct DictManagerView: View {
   @AppStorage("DictManagerSelectedDirectory") var dictManagerSelectedDirectory: String?
   @State private var selectedDicts = Set<String>()
   @ObservedObject private var dictVM = DictVM()
+  @State private var failure = 0
+  @State private var showFailure = false
+  @State private var showCleared = false
 
   func refreshDicts() -> some View {
     dictVM.refreshDicts()
@@ -110,17 +114,22 @@ struct DictManagerView: View {
           openPanel.begin { response in
             if response == .OK {
               mkdirP(dictPath)
-              for file in openPanel.urls {
-                switch file.pathExtension {
-                case "dict":
-                  importDict(file)
-                case "scel":
-                  importScelDict(file)
-                case "txt":
-                  importTxtDict(file)
-                default: break
-                }
-              }
+              failure =
+                openPanel.urls.map({ file in
+                  switch file.pathExtension {
+                  case "dict":
+                    importDict(file)
+                  case "scel":
+                    importScelDict(file)
+                  case "txt":
+                    importTxtDict(file)
+                  default:
+                    false
+                  }
+                }).filter({ !$0 }).count
+            }
+            if failure > 0 {
+              showFailure = true
             }
             reloadDicts()
             dictManagerSelectedDirectory = openPanel.directoryURL?.localPath()
@@ -145,6 +154,7 @@ struct DictManagerView: View {
         Button {
           Fcitx.setConfig("fcitx://config/addon/pinyin/clearuserdict", "{}")
           restartAndReconnect()
+          showCleared = true
         } label: {
           Text("Clear user data")
         }
@@ -152,6 +162,7 @@ struct DictManagerView: View {
         Button {
           Fcitx.setConfig("fcitx://config/addon/pinyin/clearalldict", "{}")
           restartAndReconnect()
+          showCleared = true
         } label: {
           Text("Clear all data")
         }
@@ -165,5 +176,16 @@ struct DictManagerView: View {
       }
     }.padding()
       .frame(minWidth: 300)
+      .toast(isPresenting: $showFailure) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: String(
+            format: NSLocalizedString("Failed to import %@ dict(s)", comment: ""), String(failure)))
+      }
+      .toast(isPresenting: $showCleared) {
+        AlertToast(
+          displayMode: .hud, type: .complete(Color.green),
+          title: NSLocalizedString("Cleared", comment: ""))
+      }
   }
 }

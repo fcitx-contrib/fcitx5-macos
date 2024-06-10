@@ -1,3 +1,4 @@
+import AlertToast
 import Fcitx
 import SwiftUI
 
@@ -76,6 +77,11 @@ struct QuickPhraseView: View {
   @State private var showNewFile = false
   @State private var newFileName = ""
   @ObservedObject private var quickphraseVM = QuickPhraseVM()
+  @State private var showReloaded = false
+  @State private var showCreateFailed = false
+  @State private var showRemoveFailed = false
+  @State private var showSaved = false
+  @State private var showSavedFailure = false
 
   func refreshFiles() -> some View {
     quickphraseVM.refreshFiles()
@@ -122,6 +128,7 @@ struct QuickPhraseView: View {
       VStack {
         Button {
           reloadQuickPhrase()
+          showReloaded = true
         } label: {
           Text("Reload")
         }
@@ -151,10 +158,15 @@ struct QuickPhraseView: View {
 
         Button {
           mkdirP(localQuickphrasePath)
-          writeUTF8(
+          if writeUTF8(
             localQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb"),
             quickPhrasesToString(quickphraseVM.quickPhrases[quickphraseVM.current] ?? []) + "\n")
-          reloadQuickPhrase()
+          {
+            showSaved = true
+            reloadQuickPhrase()
+          } else {
+            showSavedFailure = true
+          }
         } label: {
           Text("Save")
         }.disabled(quickphraseVM.current.isEmpty)
@@ -162,14 +174,19 @@ struct QuickPhraseView: View {
 
         Button {
           let localURL = localQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb")
+          var ret: Bool
           if quickphraseVM.userFiles.contains(quickphraseVM.current) {
-            removeFile(localURL)
+            ret = removeFile(localURL)
           } else {
             // Create an empty file to disable the global one
             mkdirP(localQuickphrasePath)
-            writeUTF8(localURL, "")
+            ret = writeUTF8(localURL, "")
           }
-          reloadQuickPhrase()
+          if ret {
+            reloadQuickPhrase()
+          } else {
+            showRemoveFailed = true
+          }
         } label: {
           Text("Remove")
         }.disabled(quickphraseVM.current.isEmpty)
@@ -179,9 +196,13 @@ struct QuickPhraseView: View {
           let localURL = localQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb")
           let path = localURL.localPath()
           if !localURL.exists() {
-            copyFile(
+            if !copyFile(
               globalQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb"),
               localURL)
+            {
+              showCreateFailed = true
+              return
+            }
           }
           openInEditor(path)
         } label: {
@@ -202,21 +223,48 @@ struct QuickPhraseView: View {
             TextField("", text: $newFileName)
           }
           Button {
-            if !newFileName.isEmpty && !quickphraseVM.userFiles.contains(newFileName) {
-              let localURL = localQuickphraseDir.appendingPathComponent(newFileName + ".mb")
-              writeUTF8(localURL, "")
-              showNewFile = false
-              refreshFiles()
-              quickphraseVM.current = newFileName
-              newFileName = ""
+            let localURL = localQuickphraseDir.appendingPathComponent(newFileName + ".mb")
+            if !writeUTF8(localURL, "") {
+              showCreateFailed = true
+              return
             }
+            showNewFile = false
+            _ = refreshFiles()
+            quickphraseVM.current = newFileName
+            newFileName = ""
           } label: {
             Text("Create")
           }.buttonStyle(.borderedProminent)
+            .disabled(newFileName.isEmpty || quickphraseVM.userFiles.contains(newFileName))
         }.padding()
           .frame(minWidth: 200)
       }
     }.padding()
       .frame(minWidth: 500, minHeight: 300)
+      .toast(isPresenting: $showReloaded) {
+        AlertToast(
+          displayMode: .hud, type: .complete(Color.green),
+          title: NSLocalizedString("Reloaded", comment: ""))
+      }
+      .toast(isPresenting: $showSaved) {
+        AlertToast(
+          displayMode: .hud, type: .complete(Color.green),
+          title: NSLocalizedString("Saved", comment: ""))
+      }
+      .toast(isPresenting: $showSavedFailure) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Failed to save", comment: ""))
+      }
+      .toast(isPresenting: $showCreateFailed) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Failed to create", comment: ""))
+      }
+      .toast(isPresenting: $showRemoveFailed) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Failed to remove", comment: ""))
+      }
   }
 }

@@ -1,3 +1,4 @@
+import AlertToast
 import Fcitx
 import SwiftUI
 import UniformTypeIdentifiers
@@ -62,6 +63,13 @@ class CustomPhraseVM: ObservableObject {
 struct CustomPhraseView: View {
   @State private var selectedRows = Set<Int>()
   @ObservedObject private var customphraseVM = CustomPhraseVM()
+  @State private var showReloaded = false
+  @State private var importedPhrases = 0
+  @State private var showImportedPhrases = false
+  @State private var showSaved = false
+  // Test: cd ~/.local/share/fcitx5; sudo chown root pinyin
+  @State private var showSavedFailure = false
+  @State private var showCreateFailed = false
 
   func refreshItems() -> some View {
     selectedRows = []
@@ -74,10 +82,13 @@ struct CustomPhraseView: View {
     Fcitx.setConfig("fcitx://config/addon/pinyin/customphrase", "{}")
   }
 
-  private func save() {
+  private func save() -> Bool {
     mkdirP(pinyinPath)
-    writeUTF8(customphrase, customPhrasesToString(customphraseVM) + "\n")
-    reloadCustomPhrase()
+    if writeUTF8(customphrase, customPhrasesToString(customphraseVM) + "\n") {
+      reloadCustomPhrase()
+      return true
+    }
+    return false
   }
 
   var body: some View {
@@ -117,6 +128,7 @@ struct CustomPhraseView: View {
       VStack {
         Button {
           reloadCustomPhrase()
+          showReloaded = true
         } label: {
           Text("Reload")
         }
@@ -128,15 +140,21 @@ struct CustomPhraseView: View {
             ["-c", "/usr/bin/defaults export -g - > \(quote(nativeCustomPhrase.localPath()))"])
           {
             let phrases = Set(customphraseVM.customPhrases)
+            importedPhrases = 0
             for (shortcut, phrase) in parseCustomPhraseXML(nativeCustomPhrase) {
               let newItem = CustomPhrase(keyword: shortcut, phrase: phrase, order: 1)
               if !phrases.contains(newItem) {
                 customphraseVM.isEnabled[newItem.id] = true
                 customphraseVM.customPhrases.append(newItem)
+                importedPhrases += 1
               }
             }
-            save()
-            removeFile(nativeCustomPhrase)
+            if save() {
+              showImportedPhrases = true
+              _ = removeFile(nativeCustomPhrase)
+            } else {
+              showSavedFailure = true
+            }
           }
         } label: {
           Text("Import native custom phrases")
@@ -164,7 +182,11 @@ struct CustomPhraseView: View {
         }.disabled(selectedRows.isEmpty)
 
         Button {
-          save()
+          if save() {
+            showSaved = true
+          } else {
+            showSavedFailure = true
+          }
         } label: {
           Text("Save")
         }.buttonStyle(.borderedProminent)
@@ -172,7 +194,10 @@ struct CustomPhraseView: View {
         Button {
           mkdirP(pinyinPath)
           if !customphrase.exists() {
-            writeUTF8(customphrase, "")
+            if !writeUTF8(customphrase, "") {
+              showCreateFailed = true
+              return
+            }
           }
           openInEditor(customphrase.localPath())
         } label: {
@@ -181,5 +206,34 @@ struct CustomPhraseView: View {
       }
     }.padding()
       .frame(minWidth: 600, minHeight: 300)
+      .toast(isPresenting: $showReloaded) {
+        AlertToast(
+          displayMode: .hud, type: .complete(Color.green),
+          title: NSLocalizedString("Reloaded", comment: ""))
+      }
+      .toast(isPresenting: $showImportedPhrases) {
+        AlertToast(
+          displayMode: .hud, type: .complete(Color.green),
+          title: importedPhrases == 0
+            ? NSLocalizedString("All phrases are imported", comment: "")
+            : String(
+              format: NSLocalizedString("Imported %@ phrase(s)", comment: ""),
+              String(importedPhrases)))
+      }
+      .toast(isPresenting: $showSaved) {
+        AlertToast(
+          displayMode: .hud, type: .complete(Color.green),
+          title: NSLocalizedString("Saved", comment: ""))
+      }
+      .toast(isPresenting: $showSavedFailure) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Failed to save", comment: ""))
+      }
+      .toast(isPresenting: $showCreateFailed) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Failed to create", comment: ""))
+      }
   }
 }
