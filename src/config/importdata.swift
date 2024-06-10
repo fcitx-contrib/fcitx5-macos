@@ -1,3 +1,4 @@
+import AlertToast
 import SwiftUI
 
 private let dataDir = extractDir.appendingPathComponent("external")
@@ -120,7 +121,7 @@ let f5aItems = [
         dataDir.appendingPathComponent("config/conf").localPath(), ".conf"
       )
       .filter({ $0.hasPrefix("android") }) {
-        removeFile(dataDir.appendingPathComponent("config/conf/\(fileName).conf"))
+        _ = removeFile(dataDir.appendingPathComponent("config/conf/\(fileName).conf"))
       }
       mkdirP(configDir.localPath())
       return moveAndMerge(
@@ -146,7 +147,7 @@ let f5aItems = [
       pinyinDir.appendingPathComponent("customphrase").exists()
     },
     doImport: {
-      mkdirP(pinyinDir.localPath())
+      mkdirP(pinyinPath)
       return moveAndMerge(
         pinyinDir.appendingPathComponent("customphrase"),
         customphrase)
@@ -203,6 +204,7 @@ struct ImportDataView: View {
   @State private var items: [ImportableItem]
   @State private var failedItems = [String]()
   @State private var showAlert = false
+  @State private var showSuccess = false
 
   init(_ importableItems: [ImportableItem]) {
     self.importableItems = importableItems
@@ -216,7 +218,7 @@ struct ImportDataView: View {
         ForEach($items) { $item in
           Toggle(item.name, isOn: $item.enabled)
         }
-      }.frame(minHeight: 200)
+      }.frame(minWidth: 300, minHeight: 200)
       Button {
         failedItems = [String]()
         restartAndReconnect({
@@ -229,13 +231,17 @@ struct ImportDataView: View {
           }
         })
         items = importableItems.filter { $0.exists() }
-        showAlert = true
+        if failedItems.isEmpty {
+          showSuccess = true
+        } else {
+          showAlert = true
+        }
       } label: {
         Text("Import")
       }.buttonStyle(.borderedProminent)
         .disabled(items.allSatisfy { !$0.enabled })
         .alert(
-          failedItems.count > 0 ? Text("Error") : Text("Import succeeded"),
+          Text("Error"),
           isPresented: $showAlert,
           presenting: ()
         ) { _ in
@@ -246,12 +252,15 @@ struct ImportDataView: View {
           }
           .buttonStyle(.borderedProminent)
         } message: { _ in
-          if failedItems.count > 0 {
-            Text(
-              NSLocalizedString("Items failed to import:", comment: "")
-                + failedItems.joined(separator: ", "))
-          }
+          Text(
+            NSLocalizedString("Items failed to import:", comment: "")
+              + failedItems.joined(separator: ", "))
         }
     }.padding()
+      .toast(isPresenting: $showSuccess) {
+        AlertToast(
+          displayMode: .hud,
+          type: .complete(Color.green), title: NSLocalizedString("Import succeeded", comment: ""))
+      }
   }
 }

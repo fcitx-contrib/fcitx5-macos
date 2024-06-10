@@ -1,4 +1,4 @@
-import Logging
+import AlertToast
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -16,7 +16,8 @@ struct DataView: View {
   @State private var showImportF5a = false
   @State private var showImportSquirrel = false
   @State private var showImportHamster = false
-  @State private var showAlert = false
+  @State private var showSquirrelError = false
+  @State private var showInvalidZip = false
 
   private func importZip(_ binding: Binding<Bool>, _ validator: @escaping () -> Bool) {
     // Keep a single openPanel to avoid confusion.
@@ -32,12 +33,12 @@ struct DataView: View {
         ?? homeDir.appendingPathComponent("Downloads").localPath())
     openPanel.begin { response in
       if response == .OK {
-        removeFile(extractDir)
+        _ = removeFile(extractDir)
         mkdirP(extractPath)
         if let file = openPanel.urls.first, extractZip(file), validator() {
           binding.wrappedValue = true
         } else {
-          showAlert = true
+          showInvalidZip = true
         }
       }
       importDataSelectedDirectory = openPanel.directoryURL?.localPath()
@@ -49,10 +50,12 @@ struct DataView: View {
       Text("Import data from …")
 
       Button {
-        removeFile(extractDir)
+        _ = removeFile(extractDir)
         mkdirP(cacheDir.localPath())
         if copyFile(squirrelDir, extractDir) {
           showImportSquirrel = true
+        } else {
+          showSquirrelError = true
         }
       } label: {
         Text("Local Squirrel")
@@ -83,19 +86,16 @@ struct DataView: View {
       }.sheet(isPresented: $showImportHamster) {
         ImportDataView(hamsterItems)
       }
-    }.alert(
-      Text("Error"),
-      isPresented: $showAlert,
-      presenting: ()
-    ) { _ in
-      Button {
-        showAlert = false
-      } label: {
-        Text("OK")
-      }
-      .buttonStyle(.borderedProminent)
-    } message: { _ in
-      Text("Invalid zip.")
     }.padding()
+      .toast(isPresenting: $showSquirrelError) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Failed to copy Squirrel files", comment: ""))
+      }
+      .toast(isPresenting: $showInvalidZip) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Invalid zip", comment: ""))
+      }
   }
 }
