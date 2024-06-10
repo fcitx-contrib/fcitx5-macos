@@ -69,6 +69,7 @@ struct CustomPhraseView: View {
   @State private var showSaved = false
   // Test: cd ~/.local/share/fcitx5; sudo chown root pinyin
   @State private var showSavedFailure = false
+  @State private var showCreateFailed = false
 
   func refreshItems() -> some View {
     selectedRows = []
@@ -150,7 +151,7 @@ struct CustomPhraseView: View {
             }
             if save() {
               showImportedPhrases = true
-              removeFile(nativeCustomPhrase)
+              _ = removeFile(nativeCustomPhrase)
             } else {
               showSavedFailure = true
             }
@@ -193,7 +194,10 @@ struct CustomPhraseView: View {
         Button {
           mkdirP(pinyinPath)
           if !customphrase.exists() {
-            writeUTF8(customphrase, "")
+            if !writeUTF8(customphrase, "") {
+              showCreateFailed = true
+              return
+            }
           }
           openInEditor(customphrase.localPath())
         } label: {
@@ -225,6 +229,11 @@ struct CustomPhraseView: View {
         AlertToast(
           displayMode: .hud, type: .error(Color.red),
           title: NSLocalizedString("Failed to save", comment: ""))
+      }
+      .toast(isPresenting: $showCreateFailed) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Failed to create", comment: ""))
       }
   }
 }
