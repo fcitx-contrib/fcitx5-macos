@@ -76,6 +76,7 @@ struct AboutView: View {
   @State private var showInstallFailed = false
   @State private var confirmUninstall = false
   @State private var removeUserData = false
+  @State private var uninstalling = false
   @State private var uninstallFailed = false
 
   var body: some View {
@@ -254,15 +255,29 @@ struct AboutView: View {
           displayMode: .hud, type: .error(Color.red),
           title: NSLocalizedString("Install failed", comment: ""))
       }
+      .toast(
+        isPresenting: Binding(
+          get: { viewModel.state == .installing || uninstalling },
+          set: { _ in }
+        )
+      ) {
+        AlertToast(type: .loading)
+      }
   }
 
   func uninstall() {
     confirmUninstall = false
+    uninstalling = true
     // It's necessary to disable not only for cleaning up.
     // Without this, if user cancels sudo prompt and try again, UI will hang.
     disableInputMethod()
-    if !sudo("uninstall", removeUserData ? "true" : "false", uninstallLog) {
-      uninstallFailed = true
+    DispatchQueue.global().async {
+      if !sudo("uninstall", removeUserData ? "true" : "false", uninstallLog) {
+        DispatchQueue.main.async {
+          uninstalling = false
+          uninstallFailed = true
+        }
+      }
     }
   }
 
