@@ -396,10 +396,14 @@ class ListOption<T: Option & EmptyConstructible>: Option, ObservableObject {
 
   static func decode(json: JSON) throws -> Self {
     let defaultOptions = try [T.Storage].decode(json: json["DefaultValue"]).map {
-      return try T.decode(json: ["DefaultValue": $0, "Value": $0])
+      return try T.decode(json: [
+        "DefaultValue": $0.encodeValueJSON(), "Value": $0.encodeValueJSON(),
+      ])
     }
     let options = try [T.Storage].decode(json: json["Value"]).map {
-      try T.decode(json: ["DefaultValue": $0, "Value": $0])
+      return try T.decode(json: [
+        "DefaultValue": $0.encodeValueJSON(), "Value": $0.encodeValueJSON(),
+      ])
     }
     return Self(
       defaultValue: defaultOptions,
