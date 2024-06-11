@@ -3,7 +3,9 @@ import Foundation
 
 private let Chinese = NSLocalizedString("Chinese", comment: "")
 private let English = NSLocalizedString("English", comment: "")
+private let Korean = NSLocalizedString("Korean", comment: "")
 private let Japanese = NSLocalizedString("Japanese", comment: "")
+private let Sinhala = NSLocalizedString("Sinhala", comment: "")
 private let Thai = NSLocalizedString("Thai", comment: "")
 private let Vietnamese = NSLocalizedString("Vietnamese", comment: "")
 
@@ -35,4 +37,7 @@ let officialPlugins = [
   Plugin(id: "wubi86", category: Chinese, native: false, github: tableExtra, dependencies: ["chinese-addons"]),
   Plugin(id: "wubi98", category: Chinese, native: false, github: tableExtra, dependencies: ["chinese-addons"]),
   Plugin(id: "zhengma", category: Chinese, native: false, github: tableExtra, dependencies: ["chinese-addons"]),
+  Plugin(id: "chewing", category: Chinese, native: true, github: "fcitx/fcitx5-chewing"),
+  Plugin(id: "hangul", category: Korean, native: true, github: "fcitx/fcitx5-hangul"),
+  Plugin(id: "sayura", category: Sinhala, native: true, github: "fcitx/fcitx5-sayura"),
 ]
