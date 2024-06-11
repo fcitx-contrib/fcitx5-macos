@@ -57,6 +57,8 @@ class DictVM: ObservableObject {
 }
 
 struct DictManagerView: View {
+  @Environment(\.presentationMode) var presentationMode
+
   let openPanel = NSOpenPanel()
   @AppStorage("DictManagerSelectedDirectory") var dictManagerSelectedDirectory: String?
   @State private var selectedDicts = Set<String>()
@@ -172,6 +174,12 @@ struct DictManagerView: View {
           NSWorkspace.shared.open(dictDir)
         } label: {
           Text("Open dictionary directory")
+        }
+
+        Button {
+          presentationMode.wrappedValue.dismiss()
+        } label: {
+          Text("Close")
         }
       }
     }.padding()

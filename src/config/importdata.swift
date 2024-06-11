@@ -200,6 +200,8 @@ let f5aItems = [
 ]
 
 struct ImportDataView: View {
+  @Environment(\.presentationMode) var presentationMode
+
   private var importableItems: [ImportableItem]
   @State private var items: [ImportableItem]
   @State private var failedItems = [String]()
@@ -219,43 +221,50 @@ struct ImportDataView: View {
           Toggle(item.name, isOn: $item.enabled)
         }
       }.frame(minWidth: 300, minHeight: 200)
-      Button {
-        failedItems = [String]()
-        restartAndReconnect({
-          for item in items {
-            if item.enabled {
-              if !item.doImport() {
-                failedItems.append(item.name)
+      HStack {
+        Button {
+          presentationMode.wrappedValue.dismiss()
+        } label: {
+          Text("Done")
+        }
+        Button {
+          failedItems = [String]()
+          restartAndReconnect({
+            for item in items {
+              if item.enabled {
+                if !item.doImport() {
+                  failedItems.append(item.name)
+                }
               }
             }
+          })
+          items = importableItems.filter { $0.exists() }
+          if failedItems.isEmpty {
+            showSuccess = true
+          } else {
+            showAlert = true
           }
-        })
-        items = importableItems.filter { $0.exists() }
-        if failedItems.isEmpty {
-          showSuccess = true
-        } else {
-          showAlert = true
-        }
-      } label: {
-        Text("Import")
-      }.buttonStyle(.borderedProminent)
-        .disabled(items.allSatisfy { !$0.enabled })
-        .alert(
-          Text("Error"),
-          isPresented: $showAlert,
-          presenting: ()
-        ) { _ in
-          Button {
-            showAlert = false
-          } label: {
-            Text("OK")
+        } label: {
+          Text("Import")
+        }.buttonStyle(.borderedProminent)
+          .disabled(items.allSatisfy { !$0.enabled })
+          .alert(
+            Text("Error"),
+            isPresented: $showAlert,
+            presenting: ()
+          ) { _ in
+            Button {
+              showAlert = false
+            } label: {
+              Text("OK")
+            }
+            .buttonStyle(.borderedProminent)
+          } message: { _ in
+            Text(
+              NSLocalizedString("Items failed to import:", comment: "")
+                + failedItems.joined(separator: ", "))
           }
-          .buttonStyle(.borderedProminent)
-        } message: { _ in
-          Text(
-            NSLocalizedString("Items failed to import:", comment: "")
-              + failedItems.joined(separator: ", "))
-        }
+      }
     }.padding()
       .toast(isPresenting: $showSuccess) {
         AlertToast(

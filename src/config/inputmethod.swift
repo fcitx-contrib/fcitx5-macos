@@ -586,6 +586,11 @@ class InputDialog: ObservableObject {
       TextField(title, text: myBinding)
       HStack {
         Button {
+          self.presented = false
+        } label: {
+          Text("Cancel")
+        }
+        Button {
           if let cont = self.continuation {
             cont(self.userInput)
           }
@@ -594,13 +599,9 @@ class InputDialog: ObservableObject {
           Text("OK")
         }
         .buttonStyle(.borderedProminent)
-        Button {
-          self.presented = false
-        } label: {
-          Text("Cancel")
-        }
       }
     }.padding()
+      .frame(minWidth: 200)
   }
 }
 

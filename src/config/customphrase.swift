@@ -61,6 +61,8 @@ class CustomPhraseVM: ObservableObject {
 }
 
 struct CustomPhraseView: View {
+  @Environment(\.presentationMode) var presentationMode
+
   @State private var selectedRows = Set<Int>()
   @ObservedObject private var customphraseVM = CustomPhraseVM()
   @State private var showReloaded = false
@@ -202,6 +204,12 @@ struct CustomPhraseView: View {
           openInEditor(customphrase.localPath())
         } label: {
           Text("Open in editor")
+        }
+
+        Button {
+          presentationMode.wrappedValue.dismiss()
+        } label: {
+          Text("Close")
         }
       }
     }.padding()

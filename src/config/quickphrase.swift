@@ -74,6 +74,8 @@ private func quickPhrasesToString(_ quickPhrases: [QuickPhrase]) -> String {
 }
 
 struct QuickPhraseView: View {
+  @Environment(\.presentationMode) var presentationMode
+
   @State private var showNewFile = false
   @State private var newFileName = ""
   @ObservedObject private var quickphraseVM = QuickPhraseVM()
@@ -215,6 +217,12 @@ struct QuickPhraseView: View {
         } label: {
           Text("Open directory")
         }
+
+        Button {
+          presentationMode.wrappedValue.dismiss()
+        } label: {
+          Text("Close")
+        }
       }
       .sheet(isPresented: $showNewFile) {
         VStack {
@@ -222,20 +230,27 @@ struct QuickPhraseView: View {
             Text("Name")
             TextField("", text: $newFileName)
           }
-          Button {
-            let localURL = localQuickphraseDir.appendingPathComponent(newFileName + ".mb")
-            if !writeUTF8(localURL, "") {
-              showCreateFailed = true
-              return
+          HStack {
+            Button {
+              showNewFile = false
+            } label: {
+              Text("Cancel")
             }
-            showNewFile = false
-            _ = refreshFiles()
-            quickphraseVM.current = newFileName
-            newFileName = ""
-          } label: {
-            Text("Create")
-          }.buttonStyle(.borderedProminent)
-            .disabled(newFileName.isEmpty || quickphraseVM.userFiles.contains(newFileName))
+            Button {
+              let localURL = localQuickphraseDir.appendingPathComponent(newFileName + ".mb")
+              if !writeUTF8(localURL, "") {
+                showCreateFailed = true
+                return
+              }
+              showNewFile = false
+              _ = refreshFiles()
+              quickphraseVM.current = newFileName
+              newFileName = ""
+            } label: {
+              Text("Create")
+            }.buttonStyle(.borderedProminent)
+              .disabled(newFileName.isEmpty || quickphraseVM.userFiles.contains(newFileName))
+          }
         }.padding()
           .frame(minWidth: 200)
       }
