@@ -199,25 +199,34 @@ let f5aItems = [
   importableRimeUser(f5aRimeDir),
 ]
 
+class ImportDataVM: ObservableObject {
+  @Published var importableItems = [ImportableItem]()
+  @Published var items = [ImportableItem]()
+
+  func refresh(_ importableItems: [ImportableItem]) {
+    self.importableItems = importableItems
+    self.items = importableItems.filter { $0.exists() }
+  }
+}
+
 struct ImportDataView: View {
   @Environment(\.presentationMode) var presentationMode
 
-  private var importableItems: [ImportableItem]
-  @State private var items: [ImportableItem]
+  @ObservedObject private var importDataVM = ImportDataVM()
   @State private var failedItems = [String]()
   @State private var showAlert = false
   @State private var showSuccess = false
 
-  init(_ importableItems: [ImportableItem]) {
-    self.importableItems = importableItems
-    self.items = importableItems.filter { $0.exists() }
+  func load(_ importableItems: [ImportableItem]) -> some View {
+    importDataVM.refresh(importableItems)
+    return self
   }
 
   var body: some View {
     VStack {
       Text("Files with the same name will be overridden.")
       List {
-        ForEach($items) { $item in
+        ForEach($importDataVM.items) { $item in
           Toggle(item.name, isOn: $item.enabled)
         }
       }.frame(minWidth: 300, minHeight: 200)
@@ -230,7 +239,7 @@ struct ImportDataView: View {
         Button {
           failedItems = [String]()
           restartAndReconnect({
-            for item in items {
+            for item in importDataVM.items {
               if item.enabled {
                 if !item.doImport() {
                   failedItems.append(item.name)
@@ -238,7 +247,7 @@ struct ImportDataView: View {
               }
             }
           })
-          items = importableItems.filter { $0.exists() }
+          importDataVM.refresh(importDataVM.importableItems)
           if failedItems.isEmpty {
             showSuccess = true
           } else {
@@ -247,7 +256,7 @@ struct ImportDataView: View {
         } label: {
           Text("Import")
         }.buttonStyle(.borderedProminent)
-          .disabled(items.allSatisfy { !$0.enabled })
+          .disabled(importDataVM.items.allSatisfy { !$0.enabled })
           .alert(
             Text("Error"),
             isPresented: $showAlert,

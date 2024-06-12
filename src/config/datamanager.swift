@@ -60,7 +60,7 @@ struct DataView: View {
       } label: {
         Text("Local Squirrel")
       }.sheet(isPresented: $showImportSquirrel) {
-        ImportDataView(squirrelItems)
+        ImportDataView().load(squirrelItems)
       }.disabled(!FileManager.default.fileExists(atPath: squirrelDir.localPath()))
 
       Button {
@@ -72,7 +72,7 @@ struct DataView: View {
       } label: {
         Text("Fcitx5 Android").tooltip("fcitx5-android_YYYY-MM-DD*.zip")
       }.sheet(isPresented: $showImportF5a) {
-        ImportDataView(f5aItems)
+        ImportDataView().load(f5aItems)
       }
 
       Button {
@@ -84,7 +84,7 @@ struct DataView: View {
       } label: {
         Text("Hamster").tooltip("YYYYMMDD-*.zip")
       }.sheet(isPresented: $showImportHamster) {
-        ImportDataView(hamsterItems)
+        ImportDataView().load(hamsterItems)
       }
     }.padding()
       .toast(isPresenting: $showSquirrelError) {
