@@ -199,63 +199,81 @@ let f5aItems = [
   importableRimeUser(f5aRimeDir),
 ]
 
+class ImportDataVM: ObservableObject {
+  @Published var importableItems = [ImportableItem]()
+  @Published var items = [ImportableItem]()
+
+  func refresh(_ importableItems: [ImportableItem]) {
+    self.importableItems = importableItems
+    self.items = importableItems.filter { $0.exists() }
+  }
+}
+
 struct ImportDataView: View {
-  private var importableItems: [ImportableItem]
-  @State private var items: [ImportableItem]
+  @Environment(\.presentationMode) var presentationMode
+
+  @ObservedObject private var importDataVM = ImportDataVM()
   @State private var failedItems = [String]()
   @State private var showAlert = false
   @State private var showSuccess = false
 
-  init(_ importableItems: [ImportableItem]) {
-    self.importableItems = importableItems
-    self.items = importableItems.filter { $0.exists() }
+  func load(_ importableItems: [ImportableItem]) -> some View {
+    importDataVM.refresh(importableItems)
+    return self
   }
 
   var body: some View {
     VStack {
       Text("Files with the same name will be overridden.")
       List {
-        ForEach($items) { $item in
+        ForEach($importDataVM.items) { $item in
           Toggle(item.name, isOn: $item.enabled)
         }
       }.frame(minWidth: 300, minHeight: 200)
-      Button {
-        failedItems = [String]()
-        restartAndReconnect({
-          for item in items {
-            if item.enabled {
-              if !item.doImport() {
-                failedItems.append(item.name)
+      HStack {
+        Button {
+          presentationMode.wrappedValue.dismiss()
+        } label: {
+          Text("Done")
+        }
+        Button {
+          failedItems = [String]()
+          restartAndReconnect({
+            for item in importDataVM.items {
+              if item.enabled {
+                if !item.doImport() {
+                  failedItems.append(item.name)
+                }
               }
             }
+          })
+          importDataVM.refresh(importDataVM.importableItems)
+          if failedItems.isEmpty {
+            showSuccess = true
+          } else {
+            showAlert = true
           }
-        })
-        items = importableItems.filter { $0.exists() }
-        if failedItems.isEmpty {
-          showSuccess = true
-        } else {
-          showAlert = true
-        }
-      } label: {
-        Text("Import")
-      }.buttonStyle(.borderedProminent)
-        .disabled(items.allSatisfy { !$0.enabled })
-        .alert(
-          Text("Error"),
-          isPresented: $showAlert,
-          presenting: ()
-        ) { _ in
-          Button {
-            showAlert = false
-          } label: {
-            Text("OK")
+        } label: {
+          Text("Import")
+        }.buttonStyle(.borderedProminent)
+          .disabled(importDataVM.items.allSatisfy { !$0.enabled })
+          .alert(
+            Text("Error"),
+            isPresented: $showAlert,
+            presenting: ()
+          ) { _ in
+            Button {
+              showAlert = false
+            } label: {
+              Text("OK")
+            }
+            .buttonStyle(.borderedProminent)
+          } message: { _ in
+            Text(
+              NSLocalizedString("Items failed to import:", comment: "")
+                + failedItems.joined(separator: ", "))
           }
-          .buttonStyle(.borderedProminent)
-        } message: { _ in
-          Text(
-            NSLocalizedString("Items failed to import:", comment: "")
-              + failedItems.joined(separator: ", "))
-        }
+      }
     }.padding()
       .toast(isPresenting: $showSuccess) {
         AlertToast(

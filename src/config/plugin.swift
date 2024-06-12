@@ -323,12 +323,19 @@ struct PluginView: View {
 
                 Text("Fcitx5 will auto restart if needed.")
 
-                Button {
-                  showUpdateAvailable = false
-                  install(true, isUpdate: true)
-                } label: {
-                  Text("Update")
-                }.buttonStyle(.borderedProminent)
+                HStack {
+                  Button {
+                    showUpdateAvailable = false
+                  } label: {
+                    Text("Cancel")
+                  }
+                  Button {
+                    showUpdateAvailable = false
+                    install(true, isUpdate: true)
+                  } label: {
+                    Text("Update")
+                  }.buttonStyle(.borderedProminent)
+                }
               }.padding()
             }
           Button("Uninstall", role: .destructive, action: uninstall).disabled(
