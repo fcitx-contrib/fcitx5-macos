@@ -21,6 +21,40 @@ struct BooleanOptionView: OptionView {
   }
 }
 
+struct KeyOptionView: OptionView {
+  let label: String
+  let overrideLabel: String? = nil
+  @ObservedObject var model: KeyOption
+  @State private var showRecorder = false
+  @State private var recordedShortcut: String = ""
+
+  var body: some View {
+    Button {
+      showRecorder = true
+    } label: {
+      Text(model.value.isEmpty ? "●REC" : model.value).frame(minWidth: 100)
+    }.sheet(isPresented: $showRecorder) {
+      VStack {
+        Text(recordedShortcut)
+          .background(RecordingOverlay(recordedShortcut: $recordedShortcut))
+          .frame(minWidth: 200, minHeight: 50)
+        HStack {
+          Button {
+            showRecorder = false
+          } label: {
+            Text("Cancel")
+          }
+          Button {
+            showRecorder = false
+          } label: {
+            Text("OK")
+          }.buttonStyle(.borderedProminent)
+        }
+      }.padding()
+    }
+  }
+}
+
 struct StringOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
@@ -550,6 +584,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return FontOptionView(label: label, model: option)
   } else if let option = option as? AppIMOption {
     return AppIMOptionView(label: label, model: option)
+  } else if let option = option as? KeyOption {
+    return KeyOptionView(label: label, model: option)
   } else if let option = option as? StringOption {
     return StringOptionView(label: label, model: option)
   } else if let option = option as? ExternalOption {
@@ -566,6 +602,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return ListOptionView<FontOption>(label: label, model: option)
   } else if let option = option as? ListOption<AppIMOption> {
     return ListOptionView<AppIMOption>(label: label, model: option)
+  } else if let option = option as? ListOption<KeyOption> {
+    return ListOptionView<KeyOption>(label: label, model: option)
   } else if let option = option as? ListOption<StringOption> {
     return ListOptionView<StringOption>(label: label, model: option)
   } else if let option = option as? ListOption<EnumOption> {

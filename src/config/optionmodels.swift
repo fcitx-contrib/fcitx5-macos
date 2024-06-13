@@ -479,5 +479,4 @@ struct UnknownOption: Option {
   func resetToDefault() {}
 }
 
-// TODO KeyOption
-typealias KeyOption = StringOption
+class KeyOption: StringOption {}

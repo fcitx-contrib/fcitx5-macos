@@ -47,7 +47,7 @@ static struct {
     {OSX_VK_F9, FcitxKey_F9},
     {OSX_VK_F10, FcitxKey_F10},
     {OSX_VK_F11, FcitxKey_F11},
-    {OSX_VK_F12, FcitxKey_F22},
+    {OSX_VK_F12, FcitxKey_F12},
 };
 
 static struct {
