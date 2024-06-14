@@ -2,6 +2,9 @@ import SwiftUI
 
 struct RecordingOverlay: NSViewRepresentable {
   @Binding var recordedShortcut: String
+  @Binding var recordedKey: String
+  @Binding var recordedModifiers: NSEvent.ModifierFlags
+  @Binding var recordedCode: UInt16
 
   func makeNSView(context: Context) -> NSView {
     let view = KeyCaptureView()
@@ -56,12 +59,12 @@ struct RecordingOverlay: NSViewRepresentable {
       0x67: "F11",
       0x6f: "F12",
       // cursor
-      0x7e: "↑",
-      0x7d: "↓",
-      0x7b: "←",
-      0x7c: "→",
-      0x74: "⇡",
-      0x79: "⇣",
+      0x7e: "▲",
+      0x7d: "▼",
+      0x7b: "◀",
+      0x7c: "▶",
+      0x74: "⭡",
+      0x79: "⭣",
       0x73: "⇱",
       0x77: "⇲",
       // pc keyboard
@@ -72,33 +75,42 @@ struct RecordingOverlay: NSViewRepresentable {
     ]
     private var parent: RecordingOverlay
     private var key = ""
-    private var modifier = NSEvent.ModifierFlags()
+    private var keySym = ""
+    private var modifiers = NSEvent.ModifierFlags()
+    private var code: UInt16 = 0
 
     init(_ parent: RecordingOverlay) {
       self.parent = parent
     }
 
-    func handleKeyCapture(key: String, code: Int) {
-      self.key = Coordinator.codeMap[code] ?? key
-
+    func handleKeyCapture(key: String, code: UInt16) {
+      self.key = key
+      self.keySym = Coordinator.codeMap[Int(code)] ?? key
+      self.code = code
       updateParent()
     }
 
-    func handleKeyCapture(modifier: NSEvent.ModifierFlags) {
-      if modifier.isDisjoint(with: [.command, .option, .control, .shift]) {
-        self.modifier = NSEvent.ModifierFlags()
+    func handleKeyCapture(modifiers: NSEvent.ModifierFlags, code: UInt16) {
+      if modifiers.isDisjoint(with: [.command, .option, .control, .shift]) {
+        self.modifiers = NSEvent.ModifierFlags()
+        self.code = 0
       } else {
-        if modifier.isSuperset(of: self.modifier) {
+        if modifiers.isSuperset(of: self.modifiers) {
           // Don't change on release
-          self.modifier = modifier
+          self.modifiers = modifiers
           self.key = ""
+          self.keySym = ""
+          self.code = code
         }
         updateParent()
       }
     }
 
     private func updateParent() {
-      parent.recordedShortcut = modifier.description + key
+      parent.recordedKey = key
+      parent.recordedModifiers = modifiers
+      parent.recordedCode = code
+      parent.recordedShortcut = modifiers.description + keySym
     }
   }
 }
@@ -113,11 +125,11 @@ class KeyCaptureView: NSView {
 
   override func keyDown(with event: NSEvent) {
     coordinator?.handleKeyCapture(
-      key: event.charactersIgnoringModifiers ?? "", code: Int(event.keyCode))
+      key: event.charactersIgnoringModifiers ?? "", code: event.keyCode)
   }
 
   override func flagsChanged(with event: NSEvent) {
-    coordinator?.handleKeyCapture(modifier: event.modifierFlags)
+    coordinator?.handleKeyCapture(modifiers: event.modifierFlags, code: event.keyCode)
   }
 }
 

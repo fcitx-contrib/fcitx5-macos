@@ -26,7 +26,10 @@ struct KeyOptionView: OptionView {
   let overrideLabel: String? = nil
   @ObservedObject var model: KeyOption
   @State private var showRecorder = false
-  @State private var recordedShortcut: String = ""
+  @State private var recordedShortcut = ""
+  @State private var recordedKey = ""
+  @State private var recordedModifiers = NSEvent.ModifierFlags()
+  @State private var recordedCode: UInt16 = 0
 
   var body: some View {
     Button {
@@ -36,7 +39,11 @@ struct KeyOptionView: OptionView {
     }.sheet(isPresented: $showRecorder) {
       VStack {
         Text(recordedShortcut)
-          .background(RecordingOverlay(recordedShortcut: $recordedShortcut))
+          .background(
+            RecordingOverlay(
+              recordedShortcut: $recordedShortcut, recordedKey: $recordedKey,
+              recordedModifiers: $recordedModifiers, recordedCode: $recordedCode)
+          )
           .frame(minWidth: 200, minHeight: 50)
         HStack {
           Button {
@@ -45,6 +52,7 @@ struct KeyOptionView: OptionView {
             Text("Cancel")
           }
           Button {
+            model.value = macKeyToFcitxString(recordedKey, recordedModifiers, recordedCode)
             showRecorder = false
           } label: {
             Text("OK")

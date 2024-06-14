@@ -190,14 +190,24 @@ MacosInputContext::getCursorCoordinates(bool followCursor) {
 
 } // namespace fcitx
 
+fcitx::Key osx_key_to_fcitx_key(uint32_t unicode, uint32_t modifiers,
+                                uint16_t code) noexcept {
+    return fcitx::Key{
+        osx_unicode_to_fcitx_keysym(unicode, modifiers, code),
+        osx_modifiers_to_fcitx_keystates(modifiers),
+        osx_keycode_to_fcitx_keycode(code),
+    };
+}
+
+std::string osx_key_to_fcitx_string(uint32_t unicode, uint32_t modifiers,
+                                    uint16_t code) noexcept {
+    return osx_key_to_fcitx_key(unicode, modifiers, code).toString();
+}
+
 std::string process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
                         uint16_t osxKeycode, bool isRelease) noexcept {
-    const fcitx::Key parsedKey{
-        osx_unicode_to_fcitx_keysym(unicode, osxKeycode, osxModifiers),
-        osx_modifiers_to_fcitx_keystates(osxModifiers),
-        osx_keycode_to_fcitx_keycode(osxKeycode),
-    };
-
+    const fcitx::Key parsedKey =
+        osx_key_to_fcitx_key(unicode, osxModifiers, osxKeycode);
     return with_fcitx([=](Fcitx &fcitx) {
         auto that = dynamic_cast<fcitx::MacosFrontend *>(fcitx.frontend());
         return that->keyEvent(uuid, parsedKey, isRelease);

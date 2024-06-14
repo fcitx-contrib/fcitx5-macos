@@ -176,8 +176,9 @@ static struct {
     {OSX_VK_SHIFT_R, 54},
 };
 
-fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode, uint16_t osxKeycode,
-                                          uint32_t osxModifiers) {
+fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode,
+                                          uint32_t osxModifiers,
+                                          uint16_t osxKeycode) {
     for (const auto &pair : sym_mappings) {
         if (pair.osxKeycode == osxKeycode) {
             return pair.sym;
