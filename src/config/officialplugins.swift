@@ -40,4 +40,5 @@ let officialPlugins = [
   Plugin(id: "chewing", category: Chinese, native: true, github: "fcitx/fcitx5-chewing"),
   Plugin(id: "hangul", category: Korean, native: true, github: "fcitx/fcitx5-hangul"),
   Plugin(id: "sayura", category: Sinhala, native: true, github: "fcitx/fcitx5-sayura"),
+  Plugin(id: "bamboo", category: Vietnamese, native: true, github: "fcitx/fcitx5-bamboo"),
 ]
