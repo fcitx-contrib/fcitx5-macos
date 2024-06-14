@@ -168,7 +168,12 @@ struct ExternalOptionView: OptionView {
       case "QuickPhrase":
         showQuickPhrase = true
       default:
-        viewModel.showConfig(model.external)
+        switch model.external {
+        case "fcitx://config/addon/quickphrase/editor":
+          showQuickPhrase = true
+        default:
+          viewModel.showConfig(model.external)
+        }
       }
     }
     .sheet(isPresented: $showCustomPhrase) {
