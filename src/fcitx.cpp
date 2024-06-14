@@ -133,7 +133,7 @@ void Fcitx::setupEnv() {
                                  "fcitx5-lua",        "fcitx5-rime",
                                  "fcitx5-skk",        "fcitx5-unikey",
                                  "fcitx5-chewing",    "fcitx5-hangul",
-                                 "fcitx5-sayura"};
+                                 "fcitx5-sayura",     "fcitx5-bamboo"};
     for (const auto addon : addon_names) {
         fcitx::registerDomain(addon, localedir.c_str());
     }
