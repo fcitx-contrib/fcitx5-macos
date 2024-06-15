@@ -85,11 +85,8 @@ class FcitxInputController: IMKInputController {
     case .keyDown:
       ignoreRelease = false
       var unicode: UInt32 = 0
-      if let characters = event.characters {
-        let usv = characters.unicodeScalars
-        unicode = usv[usv.startIndex].value
-        // Send x[state:ctrl] instead of ^X[state:ctrl] to fcitx.
-        unicode = removeCtrl(char: unicode)
+      if let characters = event.charactersIgnoringModifiers {
+        unicode = keyToUnicode(characters)
       }
       let handled = processKey(unicode, modsVal, code, false)
       return handled
@@ -226,15 +223,6 @@ class FcitxInputController: IMKInputController {
     if let action = repObjectIMK(sender) as? FcitxAction {
       Fcitx.activateActionById(Int32(action.id))
     }
-  }
-}
-
-/// Convert a character like ^X to the corresponding lowercase letter x.
-private func removeCtrl(char: UInt32) -> UInt32 {
-  if char >= 0x00 && char <= 0x1F {
-    return char + 0x60
-  } else {
-    return char
   }
 }
 

@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <atomic>
+#include <cctype>
 #include <filesystem>
 #include <sstream>
 #include <thread>
@@ -436,6 +437,11 @@ static nlohmann::json actionToJson(fcitx::Action *action,
         auto sym = fcitx::Key::keySymToUTF8(key.sym());
         if (sym.empty()) {
             continue;
+        }
+        // Normalized fcitx key like Control+D will show and be counted as
+        // Control+Shift+D in macOS menu, so we lower it.
+        if (sym.size() == 1 && std::isupper(sym[0])) {
+            sym[0] = std::tolower(sym[0]);
         }
         j["hotkey"].push_back(
             {{"sym", sym},

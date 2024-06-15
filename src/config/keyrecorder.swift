@@ -85,7 +85,8 @@ struct RecordingOverlay: NSViewRepresentable {
 
     func handleKeyCapture(key: String, code: UInt16) {
       self.key = key
-      self.keySym = Coordinator.codeMap[Int(code)] ?? key
+      // Use uppercase to match menu.
+      self.keySym = Coordinator.codeMap[Int(code)] ?? key.uppercased()
       self.code = code
       updateParent()
     }

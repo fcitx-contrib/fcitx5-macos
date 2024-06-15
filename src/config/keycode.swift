@@ -1,7 +1,7 @@
 import Cocoa
 import CxxFrontend
 
-private func keyToUnicode(_ key: String) -> UInt32 {
+func keyToUnicode(_ key: String) -> UInt32 {
   if key.isEmpty {
     return 0
   }

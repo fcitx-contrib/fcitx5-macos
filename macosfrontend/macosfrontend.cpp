@@ -201,7 +201,12 @@ fcitx::Key osx_key_to_fcitx_key(uint32_t unicode, uint32_t modifiers,
 
 std::string osx_key_to_fcitx_string(uint32_t unicode, uint32_t modifiers,
                                     uint16_t code) noexcept {
-    return osx_key_to_fcitx_key(unicode, modifiers, code).toString();
+    // Convert captured shortcut to the format that fcitx configuration accepts.
+    // Use normalize so that we get Control+0, Control+parenright, Control+D and
+    // Control+Shift+D. Other forms either don't work or work the same way.
+    return osx_key_to_fcitx_key(unicode, modifiers, code)
+        .normalize()
+        .toString();
 }
 
 std::string process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
