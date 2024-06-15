@@ -16,10 +16,30 @@ static struct {
     {OSX_VK_COMMAND_L, FcitxKey_Super_L},
     {OSX_VK_COMMAND_R, FcitxKey_Super_R},
 
+    // keypad
+    {OSX_VK_KEYPAD_0, FcitxKey_KP_0},
+    {OSX_VK_KEYPAD_1, FcitxKey_KP_1},
+    {OSX_VK_KEYPAD_2, FcitxKey_KP_2},
+    {OSX_VK_KEYPAD_3, FcitxKey_KP_3},
+    {OSX_VK_KEYPAD_4, FcitxKey_KP_4},
+    {OSX_VK_KEYPAD_5, FcitxKey_KP_5},
+    {OSX_VK_KEYPAD_6, FcitxKey_KP_6},
+    {OSX_VK_KEYPAD_7, FcitxKey_KP_7},
+    {OSX_VK_KEYPAD_8, FcitxKey_KP_8},
+    {OSX_VK_KEYPAD_9, FcitxKey_KP_9},
+    {OSX_VK_KEYPAD_COMMA, FcitxKey_KP_Separator},
+    {OSX_VK_KEYPAD_DOT, FcitxKey_KP_Decimal},
+    {OSX_VK_KEYPAD_EQUAL, FcitxKey_KP_Equal},
+    {OSX_VK_KEYPAD_MINUS, FcitxKey_KP_Subtract},
+    {OSX_VK_KEYPAD_MULTIPLY, FcitxKey_KP_Multiply},
+    {OSX_VK_KEYPAD_PLUS, FcitxKey_KP_Add},
+    {OSX_VK_KEYPAD_SLASH, FcitxKey_KP_Divide},
+
     // special
     {OSX_VK_DELETE, FcitxKey_BackSpace},
     {OSX_VK_ENTER, FcitxKey_KP_Enter},
     {OSX_VK_RETURN, FcitxKey_Return},
+    {OSX_VK_SPACE, FcitxKey_space},
     {OSX_VK_TAB, FcitxKey_Tab},
     {OSX_VK_ESCAPE, FcitxKey_Escape},
     {OSX_VK_PC_DEL, FcitxKey_Delete},
@@ -204,6 +224,15 @@ uint16_t osx_keycode_to_fcitx_keycode(uint16_t osxKeycode) {
     return 0;
 }
 
+uint16_t fcitx_keysym_to_osx_keycode(fcitx::KeySym sym) {
+    for (const auto &pair : sym_mappings) {
+        if (pair.sym == sym) {
+            return pair.osxKeycode;
+        }
+    }
+    return 0;
+}
+
 fcitx::KeyStates osx_modifiers_to_fcitx_keystates(unsigned int osxModifiers) {
     fcitx::KeyStates ret{};
     if (osxModifiers & OSX_MODIFIER_CAPSLOCK) {
@@ -220,6 +249,37 @@ fcitx::KeyStates osx_modifiers_to_fcitx_keystates(unsigned int osxModifiers) {
     }
     if (osxModifiers & OSX_MODIFIER_COMMAND) {
         ret |= fcitx::KeyState::Super;
+    }
+    return ret;
+}
+
+std::string fcitx_keysym_to_osx_keysym(fcitx::KeySym keySym) {
+    // keySymToString returns grave for `, which will be used as G by macOS.
+    auto sym = fcitx::Key::keySymToUTF8(keySym);
+    // Normalized fcitx key like Control+D will show and be counted as
+    // Control+Shift+D in macOS menu, so we lower it.
+    if (sym.size() == 1 && std::isupper(sym[0])) {
+        sym[0] = std::tolower(sym[0]);
+    }
+    return sym;
+}
+
+uint32_t fcitx_keystates_to_osx_modifiers(fcitx::KeyStates ks) {
+    uint32_t ret{};
+    if (ks & fcitx::KeyState::CapsLock) {
+        ret |= OSX_MODIFIER_CAPSLOCK;
+    }
+    if (ks & fcitx::KeyState::Shift) {
+        ret |= OSX_MODIFIER_SHIFT;
+    }
+    if (ks & fcitx::KeyState::Ctrl) {
+        ret |= OSX_MODIFIER_CONTROL;
+    }
+    if (ks & fcitx::KeyState::Alt) {
+        ret |= OSX_MODIFIER_OPTION;
+    }
+    if (ks & fcitx::KeyState::Super) {
+        ret |= OSX_MODIFIER_COMMAND;
     }
     return ret;
 }

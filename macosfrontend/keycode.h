@@ -252,4 +252,8 @@ fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode,
 uint16_t osx_keycode_to_fcitx_keycode(uint16_t osxKeycode);
 fcitx::KeyStates osx_modifiers_to_fcitx_keystates(uint32_t osxModifiers);
 
+std::string fcitx_keysym_to_osx_keysym(fcitx::KeySym);
+uint16_t fcitx_keysym_to_osx_keycode(fcitx::KeySym);
+uint32_t fcitx_keystates_to_osx_modifiers(fcitx::KeyStates ks);
+
 #endif /* FCITX5_MACOS_KEYCODE_H */

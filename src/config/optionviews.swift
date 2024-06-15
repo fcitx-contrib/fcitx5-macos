@@ -35,7 +35,8 @@ struct KeyOptionView: OptionView {
     Button {
       showRecorder = true
     } label: {
-      Text(model.value.isEmpty ? "●REC" : model.value).frame(minWidth: 100)
+      Text(model.value.isEmpty ? "●REC" : fcitxStringToMacShortcut(model.value)).frame(
+        minWidth: 100)
     }.sheet(isPresented: $showRecorder) {
       VStack {
         Text(recordedShortcut)

@@ -394,26 +394,6 @@ std::string getAddons() noexcept {
     });
 }
 
-uint32_t fcitx_keystates_to_osx_modifiers(fcitx::KeyStates ks) {
-    uint32_t ret{};
-    if (ks & fcitx::KeyState::CapsLock) {
-        ret |= OSX_MODIFIER_CAPSLOCK;
-    }
-    if (ks & fcitx::KeyState::Shift) {
-        ret |= OSX_MODIFIER_SHIFT;
-    }
-    if (ks & fcitx::KeyState::Ctrl) {
-        ret |= OSX_MODIFIER_CONTROL;
-    }
-    if (ks & fcitx::KeyState::Alt) {
-        ret |= OSX_MODIFIER_OPTION;
-    }
-    if (ks & fcitx::KeyState::Super) {
-        ret |= OSX_MODIFIER_COMMAND;
-    }
-    return ret;
-}
-
 static nlohmann::json actionToJson(fcitx::Action *action,
                                    fcitx::InputContext *ic) {
     nlohmann::json j;
@@ -433,18 +413,12 @@ static nlohmann::json actionToJson(fcitx::Action *action,
         }
     }
     for (const auto &key : action->hotkey()) {
-        // keySymToString returns grave for `, which will be used as G by macOS.
-        auto sym = fcitx::Key::keySymToUTF8(key.sym());
+        auto sym = fcitx_keysym_to_osx_keysym(key.sym());
         if (sym.empty()) {
             continue;
         }
-        // Normalized fcitx key like Control+D will show and be counted as
-        // Control+Shift+D in macOS menu, so we lower it.
-        if (sym.size() == 1 && std::isupper(sym[0])) {
-            sym[0] = std::tolower(sym[0]);
-        }
         j["hotkey"].push_back(
-            {{"sym", sym},
+            {{"sym", std::move(sym)},
              {"states", fcitx_keystates_to_osx_modifiers(key.states())}});
     }
     return j;

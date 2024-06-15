@@ -269,6 +269,10 @@ struct FcitxAction: Codable {
       title: String(repeating: "　　", count: depth) + desc,
       action: #selector(FcitxInputController.activateFcitxAction),
       keyEquivalent: hotkey?[0].sym ?? "")
+    // static let leftArrowKeyEquivalent = NSString(format: "%C", 0x001c) as String
+    // static let rightArrowKeyEquivalent = NSString(format: "%C", 0x001d) as String
+    // static let downArrowKeyEquivalent = NSString(format: "%C", 0x001f) as String
+    // static let upArrowKeyEquivalent = NSString(format: "%C", 0x001e) as String
     item.keyEquivalentModifierMask = NSEvent.ModifierFlags(rawValue: hotkey?[0].states ?? 0)
     item.target = target
     item.representedObject = self
