@@ -21,6 +21,49 @@ struct BooleanOptionView: OptionView {
   }
 }
 
+struct KeyOptionView: OptionView {
+  let label: String
+  let overrideLabel: String? = nil
+  @ObservedObject var model: KeyOption
+  @State private var showRecorder = false
+  @State private var recordedShortcut = ""
+  @State private var recordedKey = ""
+  @State private var recordedModifiers = NSEvent.ModifierFlags()
+  @State private var recordedCode: UInt16 = 0
+
+  var body: some View {
+    Button {
+      showRecorder = true
+    } label: {
+      Text(model.value.isEmpty ? "●REC" : fcitxStringToMacShortcut(model.value)).frame(
+        minWidth: 100)
+    }.sheet(isPresented: $showRecorder) {
+      VStack {
+        Text(recordedShortcut)
+          .background(
+            RecordingOverlay(
+              recordedShortcut: $recordedShortcut, recordedKey: $recordedKey,
+              recordedModifiers: $recordedModifiers, recordedCode: $recordedCode)
+          )
+          .frame(minWidth: 200, minHeight: 50)
+        HStack {
+          Button {
+            showRecorder = false
+          } label: {
+            Text("Cancel")
+          }
+          Button {
+            model.value = macKeyToFcitxString(recordedKey, recordedModifiers, recordedCode)
+            showRecorder = false
+          } label: {
+            Text("OK")
+          }.buttonStyle(.borderedProminent)
+        }
+      }.padding()
+    }.help(model.value.isEmpty ? NSLocalizedString("Click to record", comment: "") : model.value)
+  }
+}
+
 struct StringOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
@@ -502,7 +545,7 @@ struct GroupOptionView: OptionView {
             subLabel
               .font(.title3)
               .gridCellColumns(2)
-              .help(NSLocalizedString("Right click to reset this group.", comment: ""))
+              .help(NSLocalizedString("Right click to reset this group", comment: ""))
               .contextMenu {
                 Button {
                   child.resetToDefault()
@@ -522,7 +565,7 @@ struct GroupOptionView: OptionView {
           GridRow {
             subLabel
               .frame(minWidth: 100, maxWidth: 300, alignment: .trailing)
-              .help(NSLocalizedString("Right click to reset this item.", comment: ""))
+              .help(NSLocalizedString("Right click to reset this item", comment: ""))
               .contextMenu {
                 Button {
                   child.resetToDefault()
@@ -555,6 +598,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return FontOptionView(label: label, model: option)
   } else if let option = option as? AppIMOption {
     return AppIMOptionView(label: label, model: option)
+  } else if let option = option as? KeyOption {
+    return KeyOptionView(label: label, model: option)
   } else if let option = option as? StringOption {
     return StringOptionView(label: label, model: option)
   } else if let option = option as? ExternalOption {
@@ -571,6 +616,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return ListOptionView<FontOption>(label: label, model: option)
   } else if let option = option as? ListOption<AppIMOption> {
     return ListOptionView<AppIMOption>(label: label, model: option)
+  } else if let option = option as? ListOption<KeyOption> {
+    return ListOptionView<KeyOption>(label: label, model: option)
   } else if let option = option as? ListOption<StringOption> {
     return ListOptionView<StringOption>(label: label, model: option)
   } else if let option = option as? ListOption<EnumOption> {

@@ -20,7 +20,7 @@ jobs:
 
       - name: Lint
         run: |
-          find macosfrontend macosnotifications webpanel src -name '*.cpp' -o -name '*.h' | xargs clang-format -Werror --dry-run -style=file:fcitx5/.clang-format
+          find macosfrontend macosnotifications webpanel src tests -name '*.cpp' -o -name '*.h' | xargs clang-format -Werror --dry-run -style=file:fcitx5/.clang-format
           swift-format lint --configuration .swift-format.json -rs macosfrontend macosnotifications src assets
           ./check-code-style.sh
           file assets/zh-Hans.lproj/Localizable.strings | grep UTF-16

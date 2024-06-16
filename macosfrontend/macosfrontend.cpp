@@ -190,14 +190,44 @@ MacosInputContext::getCursorCoordinates(bool followCursor) {
 
 } // namespace fcitx
 
+fcitx::Key osx_key_to_fcitx_key(uint32_t unicode, uint32_t modifiers,
+                                uint16_t code) noexcept {
+    return fcitx::Key{
+        osx_unicode_to_fcitx_keysym(unicode, modifiers, code),
+        osx_modifiers_to_fcitx_keystates(modifiers),
+        osx_keycode_to_fcitx_keycode(code),
+    };
+}
+
+std::string osx_key_to_fcitx_string(uint32_t unicode, uint32_t modifiers,
+                                    uint16_t code) noexcept {
+    // Convert captured shortcut to the format that fcitx configuration accepts.
+    // Use normalize so that we get Control+0, Control+parenright, Control+D and
+    // Control+Shift+D. Other forms either don't work or work the same way.
+    return osx_key_to_fcitx_key(unicode, modifiers, code)
+        .normalize()
+        .toString();
+}
+
+std::string fcitx_string_to_osx_keysym(const char *s) noexcept {
+    fcitx::Key key{s};
+    return fcitx_keysym_to_osx_keysym(key.sym());
+}
+
+uint32_t fcitx_string_to_osx_modifiers(const char *s) noexcept {
+    fcitx::Key key{s};
+    return fcitx_keystates_to_osx_modifiers(key.states());
+}
+
+uint16_t fcitx_string_to_osx_keycode(const char *s) noexcept {
+    fcitx::Key key{s};
+    return fcitx_keysym_to_osx_keycode(key.sym());
+}
+
 std::string process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
                         uint16_t osxKeycode, bool isRelease) noexcept {
-    const fcitx::Key parsedKey{
-        osx_unicode_to_fcitx_keysym(unicode, osxKeycode, osxModifiers),
-        osx_modifiers_to_fcitx_keystates(osxModifiers),
-        osx_keycode_to_fcitx_keycode(osxKeycode),
-    };
-
+    const fcitx::Key parsedKey =
+        osx_key_to_fcitx_key(unicode, osxModifiers, osxKeycode);
     return with_fcitx([=](Fcitx &fcitx) {
         auto that = dynamic_cast<fcitx::MacosFrontend *>(fcitx.frontend());
         return that->keyEvent(uuid, parsedKey, isRelease);
