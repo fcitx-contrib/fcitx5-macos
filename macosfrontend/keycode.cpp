@@ -196,6 +196,17 @@ static struct {
     {OSX_VK_SHIFT_R, 54},
 };
 
+static struct {
+    uint32_t osxModifier;
+    fcitx::KeyState fcitxModifier;
+} modifier_mappings[] = {
+    {OSX_MODIFIER_CAPSLOCK, fcitx::KeyState::CapsLock},
+    {OSX_MODIFIER_SHIFT, fcitx::KeyState::Shift},
+    {OSX_MODIFIER_CONTROL, fcitx::KeyState::Ctrl},
+    {OSX_MODIFIER_OPTION, fcitx::KeyState::Alt},
+    {OSX_MODIFIER_COMMAND, fcitx::KeyState::Super},
+};
+
 fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode,
                                           uint32_t osxModifiers,
                                           uint16_t osxKeycode) {
@@ -235,25 +246,34 @@ uint16_t fcitx_keysym_to_osx_keycode(fcitx::KeySym sym) {
 
 fcitx::KeyStates osx_modifiers_to_fcitx_keystates(unsigned int osxModifiers) {
     fcitx::KeyStates ret{};
-    if (osxModifiers & OSX_MODIFIER_CAPSLOCK) {
-        ret |= fcitx::KeyState::CapsLock;
-    }
-    if (osxModifiers & OSX_MODIFIER_SHIFT) {
-        ret |= fcitx::KeyState::Shift;
-    }
-    if (osxModifiers & OSX_MODIFIER_CONTROL) {
-        ret |= fcitx::KeyState::Ctrl;
-    }
-    if (osxModifiers & OSX_MODIFIER_OPTION) {
-        ret |= fcitx::KeyState::Alt;
-    }
-    if (osxModifiers & OSX_MODIFIER_COMMAND) {
-        ret |= fcitx::KeyState::Super;
+    for (const auto &pair : modifier_mappings) {
+        if (osxModifiers & pair.osxModifier) {
+            ret |= pair.fcitxModifier;
+        }
     }
     return ret;
 }
 
 std::string fcitx_keysym_to_osx_keysym(fcitx::KeySym keySym) {
+    // No way to distinguish with normal number keys for shortcut in menu.
+    if (fcitx::Key{keySym}.isKeyPad()) {
+        return "";
+    }
+    // TODO: VSCode Run has many functional key shortcuts, so we can copy
+    // implementation from electron.
+    switch (keySym) {
+    // Hack for arrow
+    case FcitxKey_Left:
+        return "\u{1c}";
+    case FcitxKey_Right:
+        return "\u{1d}";
+    case FcitxKey_Up:
+        return "\u{1e}";
+    case FcitxKey_Down:
+        return "\u{1f}";
+    default:
+        break;
+    }
     // keySymToString returns grave for `, which will be used as G by macOS.
     auto sym = fcitx::Key::keySymToUTF8(keySym);
     // Normalized fcitx key like Control+D will show and be counted as
@@ -266,20 +286,10 @@ std::string fcitx_keysym_to_osx_keysym(fcitx::KeySym keySym) {
 
 uint32_t fcitx_keystates_to_osx_modifiers(fcitx::KeyStates ks) {
     uint32_t ret{};
-    if (ks & fcitx::KeyState::CapsLock) {
-        ret |= OSX_MODIFIER_CAPSLOCK;
-    }
-    if (ks & fcitx::KeyState::Shift) {
-        ret |= OSX_MODIFIER_SHIFT;
-    }
-    if (ks & fcitx::KeyState::Ctrl) {
-        ret |= OSX_MODIFIER_CONTROL;
-    }
-    if (ks & fcitx::KeyState::Alt) {
-        ret |= OSX_MODIFIER_OPTION;
-    }
-    if (ks & fcitx::KeyState::Super) {
-        ret |= OSX_MODIFIER_COMMAND;
+    for (const auto &pair : modifier_mappings) {
+        if (ks & pair.fcitxModifier) {
+            ret |= pair.osxModifier;
+        }
     }
     return ret;
 }

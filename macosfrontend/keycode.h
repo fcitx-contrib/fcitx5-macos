@@ -252,6 +252,8 @@ fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode,
 uint16_t osx_keycode_to_fcitx_keycode(uint16_t osxKeycode);
 fcitx::KeyStates osx_modifiers_to_fcitx_keystates(uint32_t osxModifiers);
 
+// Used for showing shortcut configuration and setting shortcut for menu items.
+// No need to be complete and sometimes must be inaccurate (e.g. A -> a).
 std::string fcitx_keysym_to_osx_keysym(fcitx::KeySym);
 uint16_t fcitx_keysym_to_osx_keycode(fcitx::KeySym);
 uint32_t fcitx_keystates_to_osx_modifiers(fcitx::KeyStates ks);

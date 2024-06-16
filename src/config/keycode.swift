@@ -9,10 +9,11 @@ func keyToUnicode(_ key: String) -> UInt32 {
   return usv[usv.startIndex].value
 }
 
-func macKeyToFcitxString(_ key: String, _ modifier: NSEvent.ModifierFlags, _ code: UInt16) -> String
+func macKeyToFcitxString(_ key: String, _ modifiers: NSEvent.ModifierFlags, _ code: UInt16)
+  -> String
 {
   let unicode = keyToUnicode(key)
-  return String(osx_key_to_fcitx_string(unicode, UInt32(modifier.rawValue), code))
+  return String(osx_key_to_fcitx_string(unicode, UInt32(modifiers.rawValue), code))
 }
 
 func fcitxStringToMacShortcut(_ s: String) -> String {

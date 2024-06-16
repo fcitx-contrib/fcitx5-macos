@@ -41,8 +41,8 @@ int main() {
             if (child["Option"] == "Behavior") {
                 for (const auto &grand_child : child["Children"]) {
                     if (grand_child["Option"] == "ActiveByDefault") {
-                        assert(grand_child["Value"]
-                            .get<std::string>() == value);
+                        assert(grand_child["Value"].get<std::string>() ==
+                               value);
                         break;
                     }
                 }

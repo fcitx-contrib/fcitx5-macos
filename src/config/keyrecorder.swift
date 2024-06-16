@@ -59,7 +59,8 @@ func shortcutRepr(_ key: String, _ modifiers: NSEvent.ModifierFlags, _ code: UIn
   if modifiers.contains(.control) { desc += "⌃" }
   if modifiers.contains(.option) { desc += "⌥" }
   if modifiers.contains(.shift) {
-    if (modifiers.rawValue & 0x20104) == 0x20104 {
+    // Only when Shift is main key we distinguish L/R.
+    if code == 0x3c {
       desc += "⬆"  // Shift_R
     } else {
       desc += "⇧"  // Shift_L
