@@ -9,7 +9,6 @@
 #include <fcitx/instance.h>
 
 #include "candidate_window.hpp"
-#include "webview_candidate_window.hpp"
 
 #define BORDER_WIDTH_MAX 10
 
@@ -219,6 +218,9 @@ FCITX_CONFIGURATION(
         this, "HorizontalDividerWidth", _("Horizontal divider width (px)"), 1,
         IntConstrain(0, BORDER_WIDTH_MAX)};);
 
+FCITX_CONFIGURATION(Advanced, Option<KeyList> copyHtml{
+                                  this, "CopyHtml", _("Copy HTML"), {}};);
+
 FCITX_CONFIGURATION(
     WebPanelConfig, Option<BasicConfig> basic{this, "Basic", _("Basic")};
     Option<LightModeConfig> lightMode{this, "LightMode", _("Light mode")};
@@ -228,10 +230,11 @@ FCITX_CONFIGURATION(
     Option<FontConfig> font{this, "Font", _("Font")};
     Option<CursorConfig> cursor{this, "Cursor", _("Cursor")};
     Option<HighlightConfig> highlight{this, "Highlight", _("Highlight")};
-    Option<Size> size{this, "Size", _("Size")};);
+    Option<Size> size{this, "Size", _("Size")};
+    Option<Advanced> advanced{this, "Advanced", _("Advanced")};);
 
 enum class PanelShowFlag : int;
-using PanelShowFlags = fcitx::Flags<PanelShowFlag>;
+using PanelShowFlags = Flags<PanelShowFlag>;
 
 class WebPanel final : public UserInterface {
 public:
@@ -260,6 +263,7 @@ private:
 
     static const inline std::string ConfPath = "conf/webpanel.conf";
     WebPanelConfig config_;
+    std::unique_ptr<HandlerTableEntry<EventHandler>> eventHandler_;
 
     void showAsync(bool show);
     PanelShowFlags panelShow_;
