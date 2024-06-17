@@ -4,6 +4,7 @@
 #include "../macosfrontend/macosfrontend.h"
 #include "config/config.h"
 #include "webpanel.h"
+#include "webview_candidate_window.hpp"
 
 namespace fcitx {
 
@@ -60,6 +61,21 @@ WebPanel::WebPanel(Instance *instance)
         });
     });
     window_->set_init_callback([this]() { reloadConfig(); });
+    eventHandler_ = instance_->watchEvent(
+        EventType::InputContextKeyEvent, EventWatcherPhase::Default,
+        [this](Event &event) {
+            auto &keyEvent = static_cast<KeyEvent &>(event);
+            if (keyEvent.isRelease()) {
+                return;
+            }
+            auto *ic = keyEvent.inputContext();
+            if (keyEvent.key().checkKeyList(*config_.advanced->copyHtml)) {
+                static_cast<candidate_window::WebviewCandidateWindow *>(
+                    window_.get())
+                    ->copy_html();
+                keyEvent.filterAndAccept();
+            }
+        });
 }
 
 void WebPanel::updateConfig() {
