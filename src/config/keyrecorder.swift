@@ -139,6 +139,10 @@ class KeyCaptureView: NSView {
   }
 
   override func keyDown(with event: NSEvent) {
+    // For Control+Shift+comma, charactersIgnoringModifiers is less, characters is comma.
+    // For Shift+comma, both are less.
+    // This behavior is different with what IM gets.
+    // We need less for Control+Shift+comma, so we use charactersIgnoringModifiers.
     coordinator?.handleKeyCapture(
       key: event.charactersIgnoringModifiers ?? "", code: event.keyCode)
   }

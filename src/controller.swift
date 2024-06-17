@@ -85,8 +85,13 @@ class FcitxInputController: IMKInputController {
     case .keyDown:
       ignoreRelease = false
       var unicode: UInt32 = 0
-      if let characters = event.charactersIgnoringModifiers {
-        unicode = keyToUnicode(characters)
+      // For Shift+comma, charactersIgnoringModifiers is comma, characters is less.
+      // For Control+Shift+comma, both are comma.
+      // This behavior is different with what key recorder gets.
+      // We need less for Shift+comma, so we use characters.
+      // But then for Control+Shift+A, characters is \u{01}, so we remove the control key.
+      if let characters = event.characters {
+        unicode = removeCtrl(char: keyToUnicode(characters))
       }
       let handled = processKey(unicode, modsVal, code, false)
       return handled
@@ -223,6 +228,15 @@ class FcitxInputController: IMKInputController {
     if let action = repObjectIMK(sender) as? FcitxAction {
       Fcitx.activateActionById(Int32(action.id))
     }
+  }
+}
+
+/// Convert a character like ^X to the corresponding lowercase letter x.
+private func removeCtrl(char: UInt32) -> UInt32 {
+  if char >= 0x00 && char <= 0x1F {
+    return char + 0x60
+  } else {
+    return char
   }
 }
 
