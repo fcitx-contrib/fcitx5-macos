@@ -180,7 +180,8 @@ void WebPanel::update(UserInterfaceComponent component,
             }
             auto *pageableList = list->toPageable();
             pageable =
-                pageableList && config_.typography->showPagingButtons.value();
+                pageableList && *config_.typography->pagingButtonsStyle !=
+                                    PagingButtonsStyle::None;
             if (pageable) {
                 hasPrev = pageableList->hasPrev();
                 hasNext = pageableList->hasNext();
