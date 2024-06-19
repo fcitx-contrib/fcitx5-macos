@@ -20,6 +20,10 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(writing_mode_t, N_("Horizontal top-bottom"),
                                  N_("Vertical left-right"))
 } // namespace candidate_window
 
+enum class PagingButtonsStyle { None, Arrow, Triangle };
+FCITX_CONFIG_ENUM_NAME_WITH_I18N(PagingButtonsStyle, N_("None"), N_("Arrow"),
+                                 N_("Triangle"))
+
 enum class CursorStyle { Blink, Static, Text };
 FCITX_CONFIG_ENUM_NAME_WITH_I18N(CursorStyle, N_("Blink"), N_("Static"),
                                  N_("Text"))
@@ -138,8 +142,9 @@ FCITX_CONFIGURATION(
     Option<candidate_window::writing_mode_t> writingMode{
         this, "WritingMode", _("Writing mode"),
         candidate_window::writing_mode_t::horizontal_tb};
-    Option<bool> showPagingButtons{this, "ShowPagingButtons",
-                                   _("Show paging buttons"), false};);
+    Option<PagingButtonsStyle> pagingButtonsStyle{this, "PagingButtonsStyle",
+                                                  _("Paging buttons style"),
+                                                  PagingButtonsStyle::Arrow};);
 
 FCITX_CONFIGURATION(BackgroundConfig,
                     Option<std::string> imageUrl{this, "ImageUrl",
