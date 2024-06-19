@@ -182,7 +182,12 @@ func exec(_ command: String, _ args: [String]) -> Bool {
   process.launchPath = command
   process.arguments = args
 
-  process.launch()
-  process.waitUntilExit()
-  return process.terminationStatus == 0
+  do {
+    try process.run()
+    process.waitUntilExit()
+    return process.terminationStatus == 0
+  } catch {
+    FCITX_ERROR("Fatal error executing \(command) \(args)")
+    return false
+  }
 }

@@ -1,3 +1,4 @@
+import AlertToast
 import Fcitx
 import Logging
 import SwiftUI
@@ -68,6 +69,10 @@ struct InputMethodConfigView: View {
   @State var inputMethodsToAdd = Set<InputMethod>()
   @State fileprivate var addToGroup: Group?
   @State var mouseHoverIMID: UUID?
+
+  @State private var showImportTable = false
+  @State private var importTableErrorMsg = ""
+  @State private var showImportTableError = false
 
   var body: some View {
     NavigationSplitView {
@@ -189,15 +194,38 @@ struct InputMethodConfigView: View {
           } label: {
             Text("Cancel")
           }
+
+          Spacer()
+
+          Button {
+            showImportTable = true
+          } label: {
+            Text("Import customized table")
+          }
           Button {
             add()
             addingInputMethod = false
           } label: {
             Text("Add")
           }.buttonStyle(.borderedProminent)
-            .disabled(inputMethodsToAdd.count == 0)
+            .disabled(inputMethodsToAdd.isEmpty)
         }.padding()
       }.padding([.top])
+        .sheet(isPresented: $showImportTable) {
+          ImportTableView().load(
+            onError: { msg in
+              importTableErrorMsg = msg
+              showImportTableError = true
+            },
+            finalize: {
+              refresh()
+            })
+        }
+        .toast(isPresenting: $showImportTableError) {
+          AlertToast(
+            displayMode: .hud,
+            type: .error(Color.red), title: importTableErrorMsg)
+        }
     }
   }
 
