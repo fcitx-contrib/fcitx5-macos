@@ -199,6 +199,28 @@ let f5aItems = [
   importableRimeUser(f5aRimeDir),
 ]
 
+let f5mItems = [
+  ImportableItem(
+    name: NSLocalizedString("Config", comment: ""), enabled: true,
+    exists: {
+      dataDir.appendingPathComponent("config").exists()
+    },
+    doImport: {
+      mkdirP(configDir.localPath())
+      return moveAndMerge(dataDir.appendingPathComponent("config"), configDir)
+    }),
+  ImportableItem(
+    name: NSLocalizedString("Data", comment: ""), enabled: true,
+    exists: {
+      dataDir.appendingPathComponent("data").exists()
+    },
+    doImport: {
+      mkdirP(localDir.localPath())
+      return moveAndMerge(
+        dataDir.appendingPathComponent("data"), localDir)
+    }),
+]
+
 class ImportDataVM: ObservableObject {
   @Published var importableItems = [ImportableItem]()
   @Published var items = [ImportableItem]()
