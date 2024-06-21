@@ -88,7 +88,7 @@ struct AboutView: View {
           .resizable()
           .frame(width: 80, height: 80)
       }
-      Text("Fcitx5 macOS")
+      Text(String("Fcitx5 macOS"))  // no i18n by design
         .font(.title)
 
       Spacer().frame(height: gapSize)
