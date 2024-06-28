@@ -136,6 +136,25 @@ FCITX_CONFIGURATION(
                                Color(255, 255, 255, 255)};);
 
 FCITX_CONFIGURATION(
+    ScrollConfig,
+    Option<bool> enableScroll{this, "EnableScroll", _("Enable scroll"), true};
+    Option<KeyList> expand{this, "Expand", _("Expand"), {Key(FcitxKey_Down)}};
+    Option<KeyList> collapse{this, "Collapse", _("Collapse"), {}};
+    Option<KeyList> up{this, "Up", _("Up"), {Key(FcitxKey_Up)}};
+    Option<KeyList> down{this, "Down", _("Down"), {Key(FcitxKey_Down)}};
+    Option<KeyList> left{this, "Left", _("Left"), {Key(FcitxKey_Left)}};
+    Option<KeyList> right{this, "Right", _("Right"), {Key(FcitxKey_Right)}};
+    Option<KeyList> rowStart{
+        this, "RowStart", _("Row start"), {Key(FcitxKey_Home)}};
+    Option<KeyList> rowEnd{this, "RowEnd", _("Row end"), {Key(FcitxKey_End)}};
+    Option<KeyList> pageUp{
+        this, "PageUp", _("Page up"), {Key(FcitxKey_Page_Up)}};
+    Option<KeyList> pageDown{
+        this, "PageDown", _("Page down"), {Key(FcitxKey_Page_Down)}};
+    Option<KeyList> commit{
+        this, "Commit", _("Commit"), {Key(FcitxKey_space)}};);
+
+FCITX_CONFIGURATION(
     TypographyConfig,
     Option<candidate_window::layout_t> layout{
         this, "Layout", _("Layout"), candidate_window::layout_t::horizontal};
@@ -231,6 +250,7 @@ FCITX_CONFIGURATION(
     Option<LightModeConfig> lightMode{this, "LightMode", _("Light mode")};
     Option<DarkModeConfig> darkMode{this, "DarkMode", _("Dark mode")};
     Option<TypographyConfig> typography{this, "Typography", _("Typography")};
+    Option<ScrollConfig> scrollMode{this, "ScrollMode", _("Scroll mode")};
     Option<BackgroundConfig> background{this, "Background", _("Background")};
     Option<FontConfig> font{this, "Font", _("Font")};
     Option<CursorConfig> cursor{this, "Cursor", _("Cursor")};
@@ -270,6 +290,7 @@ private:
     WebPanelConfig config_;
     std::unique_ptr<HandlerTableEntry<EventHandler>> eventHandler_;
 
+    void updateClient(InputContext *ic);
     void showAsync(bool show);
     PanelShowFlags panelShow_;
     inline void updatePanelShowFlags(bool condition, PanelShowFlag flag) {
@@ -278,6 +299,12 @@ private:
         else
             panelShow_ = panelShow_.unset(flag);
     }
+
+    candidate_window::scroll_state_t scrollState_ =
+        candidate_window::scroll_state_t::none;
+    void scroll(int start, int count);
+    void expand();
+    void collapse();
 };
 
 class WebPanelFactory : public AddonFactory {
