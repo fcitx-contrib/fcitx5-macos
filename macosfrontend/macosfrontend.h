@@ -10,6 +10,7 @@
 
 #include <fcitx-config/configuration.h>
 #include <fcitx-config/iniparser.h>
+#include <fcitx-utils/event.h>
 #include <fcitx-utils/i18n.h>
 #include <fcitx/addonfactory.h>
 #include <fcitx/addoninstance.h>
@@ -45,7 +46,9 @@ FCITX_CONFIGURATION(
     Option<int, IntConstrain> simulateKeyReleaseDelay{
         this, "SimulateKeyReleaseDelay",
         _("Delay of simulated key release in milliseconds"), 100,
-        IntConstrain(10, 1500)};);
+        IntConstrain(10, 1500)};
+    Option<bool> monitorPasteboard{this, "MonitorPasteboard",
+                                   _("MonitorPasteboard")};);
 
 class MacosFrontend : public AddonInstance {
 public:
@@ -75,6 +78,8 @@ private:
     MacosFrontendConfig config_;
     bool simulateKeyRelease_;
     long simulateKeyReleaseDelay_;
+    bool monitorPasteboard_;
+    std::unique_ptr<EventSourceTime> monitorPasteboardEvent_;
 
     static const inline std::string ConfPath = "conf/macosfrontend.conf";
 

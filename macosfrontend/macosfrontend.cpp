@@ -16,18 +16,40 @@
 #include <fcitx/inputcontext.h>
 #include <fcitx/inputpanel.h>
 
+#include "../fcitx5/src/modules/clipboard/clipboard_public.h"
+
 namespace fcitx {
 
 MacosFrontend::MacosFrontend(Instance *instance)
     : instance_(instance),
       focusGroup_("macos", instance->inputContextManager()) {
     reloadConfig();
+
+    // Runs on the fcitx thread.
+    auto monitorPasteboardCallback = [this](EventSourceTime *time, uint64_t) {
+        if (auto clipboard =
+                instance_->addonManager().addon("clipboard", true)) {
+            std::string str = SwiftFrontend::getPasteboardString();
+            clipboard->call<IClipboard::setPrimary>("", str);
+            FCITX_DEBUG() << "Add to clipboard: " << str;
+        }
+        if (config_.monitorPasteboard.value()) {
+            time->setNextInterval(1000 * 1000);
+            time->setOneShot();
+        }
+        return true;
+    };
+    monitorPasteboardEvent_ = instance_->eventLoop().addTimeEvent(
+        CLOCK_MONOTONIC, now(CLOCK_MONOTONIC) + 1000000, 100000,
+        monitorPasteboardCallback);
+    monitorPasteboardEvent_->setEnabled(true);
 }
 
 void MacosFrontend::updateConfig() {
     simulateKeyRelease_ = config_.simulateKeyRelease.value();
     simulateKeyReleaseDelay_ =
         static_cast<long>(config_.simulateKeyReleaseDelay.value()) * 1000L;
+    monitorPasteboard_ = config_.monitorPasteboard.value();
 }
 
 void MacosFrontend::reloadConfig() {
@@ -38,6 +60,7 @@ void MacosFrontend::reloadConfig() {
 void MacosFrontend::save() {
     config_.simulateKeyRelease.setValue(simulateKeyRelease_);
     config_.simulateKeyReleaseDelay.setValue(simulateKeyReleaseDelay_ / 1000);
+    config_.monitorPasteboard.setValue(monitorPasteboard_);
     safeSaveAsIni(config_, ConfPath);
 }
 

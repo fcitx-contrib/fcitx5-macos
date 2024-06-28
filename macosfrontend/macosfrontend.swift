@@ -1,3 +1,4 @@
+import AppKit
 import InputMethodKit
 
 private var u16pos = 0
@@ -80,4 +81,10 @@ public func getCursorCoordinates(
     return true
   }
   return false
+}
+
+// Retrieve the current string data from the default pasteboard.
+public func getPasteboardString() -> String {
+  let pasteboard = NSPasteboard.general
+  return pasteboard.string(forType: .string) ?? ""
 }
