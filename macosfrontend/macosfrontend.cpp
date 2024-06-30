@@ -175,6 +175,12 @@ MacosInputContext::~MacosInputContext() {
 
 void MacosInputContext::commitStringImpl(const std::string &text) {
     state_.commit += text;
+    // For async event we need to perform commit, otherwise it's buffered and
+    // committed in next commit with a key event. e.g. fcitx commits a ，
+    // asynchronously when deleting , after a number/English character.
+    if (!isSyncEvent) {
+        commitAndSetPreeditAsync();
+    }
 }
 
 void MacosInputContext::updatePreeditImpl() {
