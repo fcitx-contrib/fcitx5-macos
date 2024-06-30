@@ -42,7 +42,7 @@ MacosFrontend::MacosFrontend(Instance *instance)
     monitorPasteboardEvent_ = instance_->eventLoop().addTimeEvent(
         CLOCK_MONOTONIC, now(CLOCK_MONOTONIC) + 1000000, 100000,
         monitorPasteboardCallback);
-    monitorPasteboardEvent_->setEnabled(true);
+    monitorPasteboardEvent_->setOneShot();
 }
 
 void MacosFrontend::updateConfig() {
