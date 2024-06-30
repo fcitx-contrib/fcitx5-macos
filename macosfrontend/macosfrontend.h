@@ -48,7 +48,10 @@ FCITX_CONFIGURATION(
         _("Delay of simulated key release in milliseconds"), 100,
         IntConstrain(10, 1500)};
     Option<bool> monitorPasteboard{this, "MonitorPasteboard",
-                                   _("MonitorPasteboard")};);
+                                   _("Monitor Pasteboard"), false};
+    Option<int, IntConstrain> pollPasteboardInterval{
+        this, "PollPasteboardInterval", _("Poll Pasteboard interval (s)"), 2,
+        IntConstrain(1, 60)};);
 
 class MacosFrontend : public AddonInstance {
 public:
@@ -78,8 +81,8 @@ private:
     MacosFrontendConfig config_;
     bool simulateKeyRelease_;
     long simulateKeyReleaseDelay_;
-    bool monitorPasteboard_;
     std::unique_ptr<EventSourceTime> monitorPasteboardEvent_;
+    void pollPasteboard();
 
     static const inline std::string ConfPath = "conf/macosfrontend.conf";
 

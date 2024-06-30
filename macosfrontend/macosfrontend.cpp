@@ -24,27 +24,30 @@ MacosFrontend::MacosFrontend(Instance *instance)
     : instance_(instance),
       focusGroup_("macos", instance->inputContextManager()) {
     reloadConfig();
+}
 
-    // Runs on the fcitx thread.
-    auto monitorPasteboardCallback = [this](EventSourceTime *time, uint64_t) {
-        if (auto clipboard =
-                instance_->addonManager().addon("clipboard", true)) {
-            const char *p = SwiftFrontend::getPasteboardString();
-            if (p) {
-                std::string str = p;
-                clipboard->call<IClipboard::setPrimary>("", str);
-                FCITX_DEBUG() << "Add to clipboard: " << str;
-            }
-        }
-        if (config_.monitorPasteboard.value()) {
-            time->setNextInterval(1000 * 1000);
-            time->setOneShot();
-        }
-        return true;
-    };
+// Runs on the fcitx thread.
+void MacosFrontend::pollPasteboard() {
     monitorPasteboardEvent_ = instance_->eventLoop().addTimeEvent(
-        CLOCK_MONOTONIC, now(CLOCK_MONOTONIC) + 1000000, 100000,
-        monitorPasteboardCallback);
+        CLOCK_MONOTONIC,
+        now(CLOCK_MONOTONIC) + *config_.pollPasteboardInterval * 1000000,
+        100000, [this](EventSourceTime *time, uint64_t) {
+            if (!*config_.monitorPasteboard) {
+                return true;
+            }
+            if (auto clipboard =
+                    instance_->addonManager().addon("clipboard", true)) {
+                const char *p = SwiftFrontend::getPasteboardString();
+                if (p) {
+                    std::string str = p;
+                    clipboard->call<IClipboard::setPrimary>("", str);
+                    FCITX_DEBUG() << "Add to clipboard: " << str;
+                }
+            }
+            time->setNextInterval(*config_.pollPasteboardInterval * 1000000);
+            time->setOneShot();
+            return true;
+        });
     monitorPasteboardEvent_->setOneShot();
 }
 
@@ -52,7 +55,7 @@ void MacosFrontend::updateConfig() {
     simulateKeyRelease_ = config_.simulateKeyRelease.value();
     simulateKeyReleaseDelay_ =
         static_cast<long>(config_.simulateKeyReleaseDelay.value()) * 1000L;
-    monitorPasteboard_ = config_.monitorPasteboard.value();
+    pollPasteboard();
 }
 
 void MacosFrontend::reloadConfig() {
@@ -63,7 +66,6 @@ void MacosFrontend::reloadConfig() {
 void MacosFrontend::save() {
     config_.simulateKeyRelease.setValue(simulateKeyRelease_);
     config_.simulateKeyReleaseDelay.setValue(simulateKeyReleaseDelay_ / 1000);
-    config_.monitorPasteboard.setValue(monitorPasteboard_);
     safeSaveAsIni(config_, ConfPath);
 }
 
