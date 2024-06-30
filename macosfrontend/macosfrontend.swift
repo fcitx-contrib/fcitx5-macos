@@ -83,8 +83,19 @@ public func getCursorCoordinates(
   return false
 }
 
+private var lastChangeCount = 0
+private var data: Data?
+
 // Retrieve the current string data from the default pasteboard.
-public func getPasteboardString() -> String {
+public func getPasteboardString() -> UnsafePointer<CChar>? {
   let pasteboard = NSPasteboard.general
-  return pasteboard.string(forType: .string) ?? ""
+  if pasteboard.changeCount == lastChangeCount {
+    return nil
+  }
+  lastChangeCount = pasteboard.changeCount
+  data = pasteboard.data(forType: .string)
+  if let data = data {
+    return data.withUnsafeBytes { $0.baseAddress?.assumingMemoryBound(to: CChar.self) }
+  }
+  return nil
 }

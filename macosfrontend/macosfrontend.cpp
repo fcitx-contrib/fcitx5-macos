@@ -29,9 +29,12 @@ MacosFrontend::MacosFrontend(Instance *instance)
     auto monitorPasteboardCallback = [this](EventSourceTime *time, uint64_t) {
         if (auto clipboard =
                 instance_->addonManager().addon("clipboard", true)) {
-            std::string str = SwiftFrontend::getPasteboardString();
-            clipboard->call<IClipboard::setPrimary>("", str);
-            FCITX_DEBUG() << "Add to clipboard: " << str;
+            const char *p = SwiftFrontend::getPasteboardString();
+            if (p) {
+                std::string str = p;
+                clipboard->call<IClipboard::setPrimary>("", str);
+                FCITX_DEBUG() << "Add to clipboard: " << str;
+            }
         }
         if (config_.monitorPasteboard.value()) {
             time->setNextInterval(1000 * 1000);
