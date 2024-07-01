@@ -85,9 +85,10 @@ public func getCursorCoordinates(
 
 private var lastChangeCount = 0
 private var data: Data?
+private let passwordType = NSPasteboard.PasteboardType("org.nspasteboard.ConcealedType")
 
 // Retrieve the current string data from the default pasteboard.
-public func getPasteboardString() -> UnsafePointer<CChar>? {
+public func getPasteboardString(_ isPassword: UnsafeMutablePointer<Bool>) -> UnsafePointer<CChar>? {
   let pasteboard = NSPasteboard.general
   if pasteboard.changeCount == lastChangeCount {
     return nil
@@ -95,6 +96,7 @@ public func getPasteboardString() -> UnsafePointer<CChar>? {
   lastChangeCount = pasteboard.changeCount
   data = pasteboard.data(forType: .string)
   if let data = data {
+    isPassword.pointee = pasteboard.string(forType: passwordType) != nil
     return data.withUnsafeBytes { $0.baseAddress?.assumingMemoryBound(to: CChar.self) }
   }
   return nil
