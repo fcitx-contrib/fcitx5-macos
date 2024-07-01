@@ -358,8 +358,7 @@ void WebPanel::updateInputPanel(const Text &preedit, const Text &auxUp,
 
 void WebPanel::updateClient(InputContext *ic) {
     if (auto macosIC = dynamic_cast<MacosInputContext *>(ic)) {
-        macosIC->setDummyPreedit((panelShow_ & PanelShowFlag::HasPreedit) |
-                                 (panelShow_ & PanelShowFlag::HasCandidates));
+        macosIC->setDummyPreedit(bool(panelShow_));
         if (!macosIC->isSyncEvent) {
             macosIC->commitAndSetPreeditAsync();
         }
