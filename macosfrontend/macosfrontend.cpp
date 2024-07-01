@@ -16,6 +16,8 @@
 #include <fcitx/inputcontext.h>
 #include <fcitx/inputpanel.h>
 
+#include "../fcitx5/src/modules/clipboard/clipboard_public.h"
+
 namespace fcitx {
 
 MacosFrontend::MacosFrontend(Instance *instance)
@@ -24,10 +26,38 @@ MacosFrontend::MacosFrontend(Instance *instance)
     reloadConfig();
 }
 
+// Runs on the fcitx thread.
+void MacosFrontend::pollPasteboard() {
+    monitorPasteboardEvent_ = instance_->eventLoop().addTimeEvent(
+        CLOCK_MONOTONIC,
+        now(CLOCK_MONOTONIC) + *config_.pollPasteboardInterval * 1000000,
+        100000, [this](EventSourceTime *time, uint64_t) {
+            if (!*config_.monitorPasteboard) {
+                return true;
+            }
+            if (auto clipboard =
+                    instance_->addonManager().addon("clipboard", true)) {
+                bool isPassword = false;
+                const char *p = SwiftFrontend::getPasteboardString(&isPassword);
+                if (p) {
+                    std::string str = p;
+                    clipboard->call<IClipboard::setClipboardV2>("", str,
+                                                                isPassword);
+                    FCITX_DEBUG() << "Add to clipboard: " << str;
+                }
+            }
+            time->setNextInterval(*config_.pollPasteboardInterval * 1000000);
+            time->setOneShot();
+            return true;
+        });
+    monitorPasteboardEvent_->setOneShot();
+}
+
 void MacosFrontend::updateConfig() {
     simulateKeyRelease_ = config_.simulateKeyRelease.value();
     simulateKeyReleaseDelay_ =
         static_cast<long>(config_.simulateKeyReleaseDelay.value()) * 1000L;
+    pollPasteboard();
 }
 
 void MacosFrontend::reloadConfig() {

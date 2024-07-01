@@ -323,10 +323,12 @@ void WebPanel::update(UserInterfaceComponent component,
             scrollState_ = candidate_window::scroll_state_t::none;
         }
         window_->set_paging_buttons(pageable, hasPrev, hasNext);
+        window_->set_layout(layout);
         window_->set_writing_mode(writingMode);
+        // Must be called after set_layout and set_writing_mode so that proper
+        // states are read after set.
         window_->set_candidates(candidates, highlighted, scrollState_, false,
                                 false);
-        window_->set_layout(layout);
         updatePanelShowFlags(!candidates.empty(), PanelShowFlag::HasCandidates);
         updateClient(inputContext);
         showAsync(panelShow_);
@@ -358,8 +360,7 @@ void WebPanel::updateInputPanel(const Text &preedit, const Text &auxUp,
 
 void WebPanel::updateClient(InputContext *ic) {
     if (auto macosIC = dynamic_cast<MacosInputContext *>(ic)) {
-        macosIC->setDummyPreedit((panelShow_ & PanelShowFlag::HasPreedit) |
-                                 (panelShow_ & PanelShowFlag::HasCandidates));
+        macosIC->setDummyPreedit(bool(panelShow_));
         if (!macosIC->isSyncEvent) {
             macosIC->commitAndSetPreeditAsync();
         }
