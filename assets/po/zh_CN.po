@@ -16,17 +16,25 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: macosfrontend/macosfrontend.h:42
+#: macosfrontend/macosfrontend.h:43
 msgid "App default IM"
 msgstr "应用默认输入法"
 
-#: macosfrontend/macosfrontend.h:44
+#: macosfrontend/macosfrontend.h:45
 msgid "Simulate key release"
 msgstr "模拟按键释放"
 
-#: macosfrontend/macosfrontend.h:47
+#: macosfrontend/macosfrontend.h:48
 msgid "Delay of simulated key release in milliseconds"
 msgstr "模拟按键释放延迟毫秒数"
+
+#: macosfrontend/macosfrontend.h:51
+msgid "Monitor Pasteboard"
+msgstr "监视剪贴板"
+
+#: macosfrontend/macosfrontend.h:53
+msgid "Poll Pasteboard interval (s)"
+msgstr "轮询剪贴板的间隔（秒）"
 
 #: macosnotifications/macosnotifications.h:20
 msgid "Hidden Notifications"
