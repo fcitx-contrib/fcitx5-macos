@@ -38,9 +38,8 @@ void MacosFrontend::pollPasteboard() {
             if (auto clipboard =
                     instance_->addonManager().addon("clipboard", true)) {
                 bool isPassword = false;
-                const char *p = SwiftFrontend::getPasteboardString(&isPassword);
-                if (p) {
-                    std::string str = p;
+                std::string str = getPasteboardString(&isPassword);
+                if (!str.empty()) {
                     clipboard->call<IClipboard::setClipboardV2>("", str,
                                                                 isPassword);
                     FCITX_DEBUG() << "Add to clipboard: " << str;
