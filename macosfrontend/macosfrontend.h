@@ -145,6 +145,8 @@ public:
     }
 };
 
+std::string getPasteboardString(bool *isPassword);
+
 } // namespace fcitx
 
 #endif
