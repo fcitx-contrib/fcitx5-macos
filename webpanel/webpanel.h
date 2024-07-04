@@ -38,6 +38,14 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(HoverBehavior, N_("None"), N_("Move"),
 
 namespace fcitx {
 
+struct ImageAnnotation {
+    bool skipDescription() { return false; }
+    bool skipSave() { return false; }
+    void dumpDescription(RawConfig &config) {
+        config.setValueByPath("Image", "True");
+    }
+};
+
 FCITX_CONFIGURATION(BasicConfig,
                     Option<bool> followCursor{this, "FollowCursor",
                                               _("Follow cursor"), false};
@@ -166,8 +174,8 @@ FCITX_CONFIGURATION(
                                                   PagingButtonsStyle::Arrow};);
 
 FCITX_CONFIGURATION(BackgroundConfig,
-                    Option<std::string> imageUrl{this, "ImageUrl",
-                                                 _("Image URL"), ""};
+                    OptionWithAnnotation<std::string, ImageAnnotation>
+                    imageUrl{this, "ImageUrl", _("Image"), ""};
                     Option<bool> blur{this, "Blur", _("Blur"), true};
                     Option<int, IntConstrain> blurRadius{
                         this, "BlurRadius", _("Radius of blur (px)"), 16,

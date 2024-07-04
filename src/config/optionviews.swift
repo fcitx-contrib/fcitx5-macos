@@ -596,6 +596,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return BooleanOptionView(label: label, model: option)
   } else if let option = option as? FontOption {
     return FontOptionView(label: label, model: option)
+  } else if let option = option as? ImageOption {
+    return ImageOptionView(label: label, model: option)
   } else if let option = option as? AppIMOption {
     return AppIMOptionView(label: label, model: option)
   } else if let option = option as? KeyOption {
