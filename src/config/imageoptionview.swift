@@ -15,6 +15,7 @@ struct ImageOptionView: OptionView {
   @State private var openPanel = NSOpenPanel()
 
   func selectImage() {
+    mkdirP(imageDir.localPath())
     // Only consider the first image, but allow multiple deletion.
     openPanel.allowsMultipleSelection = true
     openPanel.canChooseDirectories = false
