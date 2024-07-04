@@ -38,7 +38,10 @@ public func commitAndSetPreeditSync(
   // Without client preedit, Backspace bypasses IM in Terminal, every key
   // is both processed by IM and passed to client in iTerm, so we force a
   // dummy client preedit here.
-  if preedit.isEmpty && dummyPreedit {
+  // Some apps also need it to get accurate cursor position to place candidate window.
+  // But when there is selected text, we don't want the dummy preedit to clear all of
+  // them. An example is using Shift+click to select but IM switch happens.
+  if preedit.isEmpty && dummyPreedit && client.selectedRange().length == 0 {
     setPreedit(client, " ", 0)
   } else {
     setPreedit(client, preedit, cursorPos)
