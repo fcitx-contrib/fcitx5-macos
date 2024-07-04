@@ -39,8 +39,8 @@ public func commitAndSetPreeditSync(
   // is both processed by IM and passed to client in iTerm, so we force a
   // dummy client preedit here.
   // Some apps also need it to get accurate cursor position to place candidate window.
-  // But when user selects some text using Shift, we don't want the dummy
-  // preedit resulted from IM switch clear all the selected text.
+  // But when there is selected text, we don't want the dummy preedit to clear all of
+  // them. An example is using Shift+click to select but IM switch happens.
   if preedit.isEmpty && dummyPreedit && client.selectedRange().length == 0 {
     setPreedit(client, " ", 0)
   } else {
