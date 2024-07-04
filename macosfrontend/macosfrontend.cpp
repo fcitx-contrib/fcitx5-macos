@@ -16,6 +16,7 @@
 #include <fcitx/inputcontext.h>
 #include <fcitx/inputpanel.h>
 
+#include "../deps/url-filter/src/url-filter.hpp"
 #include "../fcitx5/src/modules/clipboard/clipboard_public.h"
 
 namespace fcitx {
@@ -39,6 +40,9 @@ void MacosFrontend::pollPasteboard() {
                     instance_->addonManager().addon("clipboard", true)) {
                 bool isPassword = false;
                 std::string str = getPasteboardString(&isPassword);
+                if (*config_.removeTrackingParameters) {
+                    str = url_filter::filterTrackingParameters(str);
+                }
                 if (!str.empty()) {
                     clipboard->call<IClipboard::setClipboardV2>("", str,
                                                                 isPassword);

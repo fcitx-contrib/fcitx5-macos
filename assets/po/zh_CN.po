@@ -33,6 +33,10 @@ msgid "Monitor Pasteboard"
 msgstr "监视剪贴板"
 
 #: macosfrontend/macosfrontend.h:53
+msgid "Remove tracking parameters"
+msgstr "清除追踪参数"
+
+#: macosfrontend/macosfrontend.h:56
 msgid "Poll Pasteboard interval (s)"
 msgstr "轮询剪贴板的间隔（秒）"
 
