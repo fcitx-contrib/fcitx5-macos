@@ -1,6 +1,5 @@
 import SwiftUI
 import SwiftyJSON
-import Logging
 
 private let modes = [
   NSLocalizedString("Local", comment: ""),
@@ -58,7 +57,8 @@ struct ImageOptionView: OptionView {
           }
         }
       } else {
-        TextField("https:// or data:image/png;base64,", text: $model.url)
+        TextField(
+          NSLocalizedString("https:// or data:image/png;base64,", comment: ""), text: $model.url)
       }
     }
   }

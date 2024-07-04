@@ -66,7 +66,7 @@ extension URL {
     let path = self.localPath()
     let filePath = file.localPath()
     // path[-1] is always "/" for directory.
-    return path.count < filePath.count && filePath.hasPrefix(path) 
+    return path.count < filePath.count && filePath.hasPrefix(path)
   }
 }
 
