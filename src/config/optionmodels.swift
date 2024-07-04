@@ -222,6 +222,54 @@ extension Color: FcitxCodable {
   }
 }
 
+private let fcitxPrefix = "fcitx:///file/img/"
+
+class ImageOption: Option, ObservableObject {
+  let defaultValue: String
+  var value: String
+  @Published var file: String {
+    didSet {
+      value = fcitxPrefix + file
+    }
+  }
+  @Published var url: String {
+    didSet {
+      value = url
+    }
+  }
+  @Published var mode = 0
+
+  required init(defaultValue: String, value: String?) {
+    self.defaultValue = defaultValue
+    self.value = value ?? defaultValue
+    if self.value.isEmpty || self.value.hasPrefix(fcitxPrefix) {
+      file = String(self.value.dropFirst(fcitxPrefix.count))
+      url = ""
+      mode = 0
+    } else {
+      file = ""
+      url = self.value
+      mode = 1
+    }
+  }
+
+  static func decode(json: JSON) throws -> Self {
+    return Self(
+      defaultValue: try String.decode(json: json["DefaultValue"]),
+      value: try String?.decode(json: json["Value"])
+    )
+  }
+
+  func encodeValueJSON() -> JSON {
+    return value.encodeValueJSON()
+  }
+
+  func resetToDefault() {
+    file = ""
+    url = ""
+  }
+}
+
 class EnumOption: Option, ObservableObject, EmptyConstructible {
   let defaultValue: String
   let enumStrings: [String]

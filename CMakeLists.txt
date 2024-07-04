@@ -68,6 +68,9 @@ add_subdirectory(deps)
 
 add_subdirectory(logging)
 
+set(WKWEBVIEW_PROTOCOL "fcitx")
+set(WEBVIEW_WWW_PATH ".local/share/fcitx5/www")
+
 include_directories(
     fcitx5-webview/include
     fcitx5-webview/webview

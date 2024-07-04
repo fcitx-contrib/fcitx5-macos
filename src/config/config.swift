@@ -80,6 +80,9 @@ private func jsonToOption(_ json: JSON, _ type: String) throws -> any Option {
     if let isEnum = json["IsEnum"].string, isEnum == "True" {
       return try EnumOption.decode(json: json)
     }
+    if let image = json["Image"].string, image == "True" {
+      return try ImageOption.decode(json: json)
+    }
     return try StringOption.decode(json: json)
   } else if type == "Enum" {
     return try EnumOption.decode(json: json)

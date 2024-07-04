@@ -7,6 +7,7 @@ let libraryDir = homeDir.appendingPathComponent("Library/fcitx5")
 let cacheDir = libraryDir.appendingPathComponent("cache")
 let configDir = homeDir.appendingPathComponent(".config/fcitx5")
 let localDir = homeDir.appendingPathComponent(".local/share/fcitx5")
+let wwwDir = localDir.appendingPathComponent("www")
 let imLocalDir = localDir.appendingPathComponent("inputmethod")
 let pinyinLocalDir = localDir.appendingPathComponent("pinyin")
 let tableLocalDir = localDir.appendingPathComponent("table")
@@ -59,6 +60,13 @@ extension URL {
 
   func exists() -> Bool {
     return FileManager.default.fileExists(atPath: self.localPath())
+  }
+
+  func contains(_ file: URL) -> Bool {
+    let path = self.localPath()
+    let filePath = file.localPath()
+    // path[-1] is always "/" for directory.
+    return path.count < filePath.count && filePath.hasPrefix(path)
   }
 }
 
