@@ -49,6 +49,9 @@ FCITX_CONFIGURATION(
         IntConstrain(10, 1500)};
     Option<bool> monitorPasteboard{this, "MonitorPasteboard",
                                    _("Monitor Pasteboard"), false};
+    Option<bool> removeTrackingParameters{this, "RemoveTrackingParameters",
+                                          _("Remove tracking parameters"),
+                                          true};
     Option<int, IntConstrain> pollPasteboardInterval{
         this, "PollPasteboardInterval", _("Poll Pasteboard interval (s)"), 2,
         IntConstrain(1, 60)};);

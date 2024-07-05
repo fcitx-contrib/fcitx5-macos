@@ -13,3 +13,6 @@
 [submodule "deps/AlertToast"]
 	path = deps/AlertToast
 	url = https://github.com/fcitx-contrib/AlertToast
+[submodule "deps/url-filter"]
+	path = deps/url-filter
+	url = https://github.com/fcitx-contrib/url-filter

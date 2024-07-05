@@ -12,7 +12,7 @@ _swift_generate_cxx_header(
 
 add_library(macosfrontend STATIC macosfrontend.cpp pasteboard.mm keycode.cpp)
 add_dependencies(macosfrontend SwiftFrontend)
-target_link_libraries(macosfrontend Fcitx5::Core)
+target_link_libraries(macosfrontend Fcitx5::Core url-filter)
 target_include_directories(macosfrontend PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}/include"
     "${CMAKE_SOURCE_DIR}/src"
