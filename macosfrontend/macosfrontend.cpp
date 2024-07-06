@@ -117,6 +117,7 @@ ICUUID MacosFrontend::createInputContext(const std::string &appId, id client) {
     auto ic = new MacosInputContext(this, instance_->inputContextManager(),
                                     appId, client);
     ic->setFocusGroup(&focusGroup_);
+    FCITX_INFO() << "Create IC for " << appId;
     return ic->uuid();
 }
 
@@ -125,9 +126,19 @@ void MacosFrontend::destroyInputContext(ICUUID uuid) {
     // The only exception is when Instance is destroyed,
     // InputContextManager deletes all InputContexts.
     auto ic = findIC(uuid);
-    ic->focusOut();
+    // This check is necessary. Although system sends destroy event immediately
+    // after focus out for most scenarios, when using fn+E to call out emoji
+    // picker (com.apple.CharacterPaletteIM), the sequence is: user clicks emoji
+    // -> picker focus out -> original client focus in -> user starts typing --
+    // after a while --> picker destroy. If we don't check whether picker's
+    // context has focus, we will reset current focus to nullptr as well, which
+    // interrupts user's typing.
+    if (ic->hasFocus()) {
+        ic->focusOut();
+        focusGroup_.setFocusedInputContext(nullptr);
+    }
+    FCITX_INFO() << "Destroy IC for " << ic->program();
     delete ic;
-    focusGroup_.setFocusedInputContext(nullptr);
 }
 
 void MacosFrontend::useAppDefaultIM(const std::string &appId) {
@@ -164,6 +175,7 @@ void MacosFrontend::focusOut(ICUUID uuid) {
     auto *ic = findIC(uuid);
     if (!ic)
         return;
+    FCITX_INFO() << "Focus out " << ic->program();
     ic->focusOut();
 }
 
