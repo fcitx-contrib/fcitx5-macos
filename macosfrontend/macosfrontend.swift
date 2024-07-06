@@ -4,6 +4,8 @@ import InputMethodKit
 private var u16pos = 0
 private var currentPreedit = ""
 
+private let zeroWidthSpace = "\u{200B}"
+
 private func commitString(_ client: IMKTextInput, _ string: String) {
   client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
 }
@@ -42,7 +44,7 @@ public func commitAndSetPreeditSync(
   // But when there is selected text, we don't want the dummy preedit to clear all of
   // them. An example is using Shift+click to select but IM switch happens.
   if preedit.isEmpty && dummyPreedit && client.selectedRange().length == 0 {
-    setPreedit(client, " ", 0)
+    setPreedit(client, zeroWidthSpace, 0)
   } else {
     setPreedit(client, preedit, cursorPos)
   }
