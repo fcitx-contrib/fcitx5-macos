@@ -117,6 +117,7 @@ ICUUID MacosFrontend::createInputContext(const std::string &appId, id client) {
     auto ic = new MacosInputContext(this, instance_->inputContextManager(),
                                     appId, client);
     ic->setFocusGroup(&focusGroup_);
+    FCITX_INFO() << "Create IC for " << appId;
     return ic->uuid();
 }
 
@@ -136,6 +137,7 @@ void MacosFrontend::destroyInputContext(ICUUID uuid) {
         ic->focusOut();
         focusGroup_.setFocusedInputContext(nullptr);
     }
+    FCITX_INFO() << "Destroy IC for " << ic->program();
     delete ic;
 }
 
