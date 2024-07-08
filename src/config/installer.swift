@@ -24,7 +24,7 @@ private func extractPlugin(_ plugin: String, native: Bool) -> Bool {
   let url = getCacheURL(plugin, native: native)
   let path = url.localPath()
   let ret = exec("/usr/bin/tar", ["-xjf", path, "-C", libraryDir.localPath()])
-  removeFile(url)
+  let _ = removeFile(url)
   return ret
 }
 

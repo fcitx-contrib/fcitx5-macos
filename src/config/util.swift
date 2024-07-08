@@ -175,14 +175,23 @@ func readJSON(_ file: URL) -> JSON? {
 
 func openInEditor(_ path: String) {
   let apps = ["VSCodium", "Visual Studio Code"]
+  let fileURL = URL(fileURLWithPath: path)
   for app in apps {
     let appURL = URL(fileURLWithPath: "/Applications/\(app).app")
-    if appURL.exists() {
-      NSWorkspace.shared.openFile(path, withApplication: app)
+    if FileManager.default.fileExists(atPath: appURL.path) {
+      NSWorkspace.shared.open(
+        [fileURL], withApplicationAt: appURL, configuration: NSWorkspace.OpenConfiguration(),
+        completionHandler: nil)
       return
     }
   }
-  NSWorkspace.shared.openFile(path, withApplication: "TextEdit")
+  if let textEditURL = NSWorkspace.shared.urlForApplication(
+    withBundleIdentifier: "com.apple.TextEdit")
+  {
+    NSWorkspace.shared.open(
+      [fileURL], withApplicationAt: textEditURL, configuration: NSWorkspace.OpenConfiguration(),
+      completionHandler: nil)
+  }
 }
 
 func exec(_ command: String, _ args: [String]) -> Bool {

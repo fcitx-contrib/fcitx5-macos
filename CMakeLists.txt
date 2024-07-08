@@ -33,6 +33,12 @@ set(LibIntl_DIR "${PREBUILT_INSTALL_PATH}/lib/cmake")
 find_package(LibIntl)
 set(fmt_DIR "${PREBUILT_INSTALL_PATH}/lib/cmake/fmt")
 find_package(fmt)
+if (TARGET fmt::fmt-header-only)
+    # Resolve swiftc warnings
+    set_target_properties(fmt::fmt-header-only PROPERTIES
+        INTERFACE_COMPILE_DEFINITIONS "FMT_HEADER_ONLY"
+    )
+endif()
 
 option(ENABLE_TEST "" OFF)
 option(ENABLE_COVERAGE "" OFF)
@@ -77,7 +83,7 @@ include_directories(
     "${HOMEBREW_PATH}/include" # nlohmann-json
 )
 
-add_definitions(-DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\")
+add_compile_definitions($<$<COMPILE_LANGUAGE:C,CXX>:-DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\">)
 
 add_subdirectory(macosfrontend)
 add_subdirectory(macosnotifications)
