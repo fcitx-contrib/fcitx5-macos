@@ -196,7 +196,6 @@ struct QuickPhraseView: View {
         Button {
           mkdirP(localQuickphrasePath)
           let localURL = localQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb")
-          let path = localURL.localPath()
           if !localURL.exists() {
             if !copyFile(
               globalQuickphraseDir.appendingPathComponent(quickphraseVM.current + ".mb"),
@@ -206,7 +205,7 @@ struct QuickPhraseView: View {
               return
             }
           }
-          openInEditor(path)
+          openInEditor(url: localURL)
         } label: {
           Text("Open in editor")
         }.disabled(quickphraseVM.current.isEmpty)
