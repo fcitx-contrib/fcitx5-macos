@@ -118,6 +118,8 @@ struct InputMethodConfigView: View {
                     viewModel.removeItem(group.name, inputMethod.id)
                   } label: {
                     Image(systemName: "minus")
+                      .frame(maxHeight: .infinity)
+                      .contentShape(Rectangle())
                   }
                   .buttonStyle(BorderlessButtonStyle())
                   .frame(alignment: .trailing)
