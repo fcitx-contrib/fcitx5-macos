@@ -176,9 +176,9 @@ struct PluginView: View {
         if keptFiles.contains(file) {
           continue
         }
-        removeFile(libraryDir.appendingPathComponent(file))
+        let _ = removeFile(libraryDir.appendingPathComponent(file))
       }
-      removeFile(descriptor)
+      let _ = removeFile(descriptor)
       FCITX_INFO("Uninstalled \(selectedPlugin)")
     }
     selectedInstalled.removeAll()

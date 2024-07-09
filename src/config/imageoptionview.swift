@@ -43,8 +43,8 @@ struct ImageOptionView: OptionView {
   var body: some View {
     VStack {
       Picker("", selection: $model.mode) {
-        ForEach(0..<modes.count) { idx in
-          Text(modes[idx])
+        ForEach(Array(modes.enumerated()), id: \.0) { idx, mode in
+          Text(mode)
         }
       }
       if model.mode == 0 {

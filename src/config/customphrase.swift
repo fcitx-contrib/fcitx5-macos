@@ -201,7 +201,7 @@ struct CustomPhraseView: View {
               return
             }
           }
-          openInEditor(customphrase.localPath())
+          openInEditor(url: customphrase)
         } label: {
           Text("Open in editor")
         }

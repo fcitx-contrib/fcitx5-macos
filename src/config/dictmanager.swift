@@ -92,9 +92,9 @@ struct DictManagerView: View {
                   let enabledPath = dictDir.appendingPathComponent(dict.id + ".dict")
                   let disabledPath = dictDir.appendingPathComponent(dict.id + ".dict.disable")
                   if $0 {
-                    moveFile(disabledPath, enabledPath)
+                    let _ = moveFile(disabledPath, enabledPath)
                   } else {
-                    moveFile(enabledPath, disabledPath)
+                    let _ = moveFile(enabledPath, disabledPath)
                   }
                   reloadDicts()
                 }
@@ -145,7 +145,7 @@ struct DictManagerView: View {
 
         Button {
           for dict in selectedDicts {
-            removeFile(dictDir.appendingPathComponent(dict + ".dict"))
+            let _ = removeFile(dictDir.appendingPathComponent(dict + ".dict"))
           }
           selectedDicts.removeAll()
           reloadDicts()
