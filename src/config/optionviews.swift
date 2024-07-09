@@ -297,6 +297,8 @@ struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
 
           Button(action: { remove(at: index) }) {
             Image(systemName: "minus")
+              .frame(maxHeight: .infinity)
+              .contentShape(Rectangle())
           }
           .buttonStyle(BorderlessButtonStyle())
 
