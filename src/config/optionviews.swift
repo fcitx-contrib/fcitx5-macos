@@ -436,71 +436,6 @@ struct FontOptionView: OptionView {
   }
 }
 
-func bundleIdentifier(_ appPath: String) -> String {
-  guard let bundle = Bundle(path: appPath) else {
-    return ""
-  }
-  return bundle.bundleIdentifier ?? ""
-}
-
-struct AppIMOptionView: OptionView {
-  let label: String
-  let overrideLabel: String? = nil
-  let openPanel = NSOpenPanel()
-  @ObservedObject var model: AppIMOption
-  @State private var appIcon: NSImage? = nil
-  @State private var imNameMap: [String: String] = [:]
-
-  var body: some View {
-    HStack {
-      if !model.appPath.isEmpty {
-        let icon = NSWorkspace.shared.icon(forFile: model.appPath)
-        Image(nsImage: icon)
-          .padding(.trailing, 8)
-      }
-      Button(action: openSelector) {
-        Text(model.appName.isEmpty ? NSLocalizedString("Select App", comment: "") : model.appName)
-      }
-      Picker(
-        NSLocalizedString("uses", comment: "App X *uses* some input method"),
-        selection: $model.imName
-      ) {
-        ForEach(Array(imNameMap.keys), id: \.self) { key in
-          Text(imNameMap[key] ?? "").tag(key)
-        }
-      }
-    }.padding(.bottom, 8)
-      .onAppear {
-        imNameMap = [:]
-        let curGroup = JSON(parseJSON: String(Fcitx.imGetCurrentGroup()))
-        for (_, inputMethod) in curGroup {
-          let imName = inputMethod["name"].stringValue
-          let nativeName = inputMethod["displayName"].stringValue
-          imNameMap[imName] = nativeName
-        }
-      }
-  }
-
-  private func openSelector() {
-    openPanel.allowsMultipleSelection = false
-    openPanel.canChooseDirectories = false
-    openPanel.allowedContentTypes = [.application]
-    openPanel.directoryURL = URL(fileURLWithPath: "/Applications")
-    openPanel.begin { response in
-      if response == .OK {
-        let selectedApp = openPanel.urls.first
-        if let appURL = selectedApp {
-          let path = appURL.localPath()
-          model.appId = bundleIdentifier(path)
-          let name = appURL.lastPathComponent
-          model.appName = name.hasSuffix(".app") ? String(name.dropLast(4)) : name
-          model.appPath = path
-        }
-      }
-    }
-  }
-}
-
 struct PunctuationMapOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
@@ -566,7 +501,7 @@ struct GroupOptionView: OptionView {
           // content in the right column.
           GridRow {
             subLabel
-              .frame(minWidth: 100, maxWidth: 300, alignment: .trailing)
+              .frame(minWidth: 100, maxWidth: 250, alignment: .trailing)
               .help(NSLocalizedString("Right click to reset this item", comment: ""))
               .contextMenu {
                 Button {

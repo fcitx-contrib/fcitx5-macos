@@ -329,19 +329,32 @@ protocol EmptyConstructible {
 
 class FontOption: StringOption {}
 
+private func bundleIdentifier(_ appPath: String) -> String {
+  guard let bundle = Bundle(path: appPath) else {
+    return ""
+  }
+  return bundle.bundleIdentifier ?? ""
+}
+
+func appNameFromPath(_ path: String) -> String {
+  let name = URL(filePath: path).lastPathComponent
+  return name.hasSuffix(".app") ? String(name.dropLast(4)) : name
+}
+
 class AppIMOption: Option, ObservableObject, EmptyConstructible {
   typealias Storage = String
   let defaultValue: String
   var value: String
-  @Published var appId: String {
-    didSet { updateValue() }
-  }
-  @Published var appName: String {
-    didSet { updateValue() }
-  }
+
+  // Source of truth as it can generate other fields.
   @Published var appPath: String {
     didSet { updateValue() }
   }
+  // Actually used by frontend.
+  @Published var appId: String
+  // Shown in config UI.
+  @Published var appName: String
+
   @Published var imName: String {
     didSet { updateValue() }
   }
@@ -353,8 +366,9 @@ class AppIMOption: Option, ObservableObject, EmptyConstructible {
       if let data = (value ?? defaultValue).data(using: .utf8) {
         let json = try JSON(data: data)
         appId = try String?.decode(json: json["appId"]) ?? ""
-        appName = try String?.decode(json: json["appName"]) ?? ""
-        appPath = try String?.decode(json: json["appPath"]) ?? ""
+        let path = try String?.decode(json: json["appPath"]) ?? ""
+        appName = appNameFromPath(path)
+        appPath = path
         imName = try String?.decode(json: json["imName"]) ?? ""
       } else {
         throw NSError()
@@ -368,9 +382,10 @@ class AppIMOption: Option, ObservableObject, EmptyConstructible {
   }
 
   private func updateValue() {
+    appId = bundleIdentifier(appPath)
+    appName = appNameFromPath(appPath)
     let json = JSON([
       "appId": appId.encodeValueJSON(),
-      "appName": appName.encodeValueJSON(),
       "appPath": appPath.encodeValueJSON(),
       "imName": imName.encodeValueJSON(),
     ])
@@ -389,8 +404,6 @@ class AppIMOption: Option, ObservableObject, EmptyConstructible {
   }
 
   func resetToDefault() {
-    appId = ""
-    appName = ""
     appPath = ""
     imName = ""
   }
