@@ -22,7 +22,7 @@
 #include "webview_candidate_window.hpp"
 
 #define TERMINAL_USE_EN                                                        \
-    R"JSON({"appPath": "/System/Applications/Utilities/Terminal.app/", "appName": "Terminal", "appId": "com.apple.Terminal", "imName": "keyboard-us"})JSON"
+    R"JSON({"appPath": "/System/Applications/Utilities/Terminal.app", "appId": "com.apple.Terminal", "imName": "keyboard-us"})JSON"
 
 namespace fcitx {
 
