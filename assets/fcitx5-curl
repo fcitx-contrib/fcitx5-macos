@@ -7,7 +7,39 @@ if [[ $# -eq 0 || $# -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
   exit 0
 fi
 
-source ~/.config/fcitx5/conf/beast.conf || Port=32489
-url="http://127.0.0.1:$Port$1"
+CONFIG_FILE_PATH="$HOME/.config/fcitx5/conf/beast.conf"
+
+if [ -f "$CONFIG_FILE_PATH" ]
+then
+  COMMUNICATION=$(sed -n 's/Communication=\([^ ]*.*\)/\1/p' "$CONFIG_FILE_PATH")
+  UDS_PATH=$(sed -n 's/Path=\([^ ]*.*\)/\1/p' "$CONFIG_FILE_PATH")
+  TCP_PORT=$(sed -n 's/Port=\([^ ]*.*\)/\1/p' "$CONFIG_FILE_PATH")
+fi
+
+COMMUNICATION="${COMMUNICATION:-UDS}"
+UDS_PATH="${UDS_PATH:-/tmp/fcitx5.sock}"
+TCP_PORT="${TCP_PORT:-32489}"
+
+CURL_FLAGS=()
+
+if [[ "$COMMUNICATION" == 'TCP' ]]
+then
+  FCITX_BEAST_URL="http://127.0.0.1:$TCP_PORT$1"
+else
+  CURL_FLAGS+=('--unix-socket' "$UDS_PATH")
+  FCITX_BEAST_URL="http://fcitx$1"
+fi
+
 shift
-curl "$url" "$@"
+CURL_FLAGS+=$@
+
+if [ -n "DEBUG" ]
+then
+  echo "COMMUNICATION=$COMMUNICATION"
+  echo "UDS_PATH=$UDS_PATH"
+  echo "TCP_PORT=$TCP_PORT"
+  echo "FCITX_BEAST_URL=$FCITX_BEAST_URL"
+  echo "CURL_FLAGS=$CURL_FLAGS"
+fi
+curl $CURL_FLAGS "$FCITX_BEAST_URL"
+
