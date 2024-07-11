@@ -39,22 +39,20 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(HoverBehavior, N_("None"), N_("Move"),
 
 namespace fcitx {
 
-struct UserThemeAnnotation : public fcitx::EnumAnnotation {
-    void setThemes(std::vector<std::pair<std::string, std::string>> themes) {
-        themes_ = std::move(themes);
-    }
-    void dumpDescription(fcitx::RawConfig &config) const {
-        fcitx::EnumAnnotation::dumpDescription(config);
-        for (size_t i = 0; i < themes_.size(); i++) {
-            config.setValueByPath("Enum/" + std::to_string(i),
-                                  themes_[i].first);
+struct UserThemeAnnotation : public EnumAnnotation {
+    void dumpDescription(RawConfig &config) const {
+        EnumAnnotation::dumpDescription(config);
+        int i = 0;
+        for (const auto &pair :
+             StandardPath::global().locate(StandardPath::Type::PkgData, "theme",
+                                           filter::Suffix(".conf"))) {
+            auto name = pair.first.substr(0, pair.first.size() - 5);
+            config.setValueByPath("Enum/" + std::to_string(i), name);
             config.setValueByPath("EnumI18n/" + std::to_string(i),
-                                  themes_[i].second);
+                                  std::move(name));
+            ++i;
         }
     }
-
-private:
-    std::vector<std::pair<std::string, std::string>> themes_;
 };
 
 struct ImageAnnotation {
