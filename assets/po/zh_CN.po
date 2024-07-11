@@ -44,306 +44,322 @@ msgstr "轮询剪贴板的间隔（秒）"
 msgid "Hidden Notifications"
 msgstr "隐藏通知"
 
-#: webpanel/webpanel.h:51
+#: webpanel/webpanel.h:70
 msgid "Follow cursor"
 msgstr "跟随光标"
 
-#: webpanel/webpanel.h:53
+#: webpanel/webpanel.h:71
 msgid "Theme"
 msgstr "主题"
 
-#: webpanel/webpanel.h:58 webpanel/webpanel.h:102
+#: webpanel/webpanel.h:75
+msgid "User theme"
+msgstr "用户主题"
+
+#: webpanel/webpanel.h:76
+msgid "Import themes"
+msgstr "导入主题"
+
+#: webpanel/webpanel.h:78
+msgid "Export current theme"
+msgstr "导出当前主题"
+
+#: webpanel/webpanel.h:79
+msgid "User theme dir"
+msgstr "用户主题目录"
+
+#: webpanel/webpanel.h:84 webpanel/webpanel.h:128
 msgid "Override default"
 msgstr "覆盖默认值"
 
-#: webpanel/webpanel.h:59 webpanel/webpanel.h:105
+#: webpanel/webpanel.h:85 webpanel/webpanel.h:131
 msgid "Highlight color"
 msgstr "高亮颜色"
 
-#: webpanel/webpanel.h:62 webpanel/webpanel.h:108
+#: webpanel/webpanel.h:88 webpanel/webpanel.h:134
 msgid "Highlight color on hover"
 msgstr "悬停时高亮颜色"
 
-#: webpanel/webpanel.h:65 webpanel/webpanel.h:111
+#: webpanel/webpanel.h:91 webpanel/webpanel.h:137
 msgid "Highlight text color"
 msgstr "高亮文本颜色"
 
-#: webpanel/webpanel.h:68 webpanel/webpanel.h:114
+#: webpanel/webpanel.h:94 webpanel/webpanel.h:140
 msgid "Highlight text color on press"
 msgstr "按下时高亮文本颜色"
 
-#: webpanel/webpanel.h:71 webpanel/webpanel.h:117
+#: webpanel/webpanel.h:97 webpanel/webpanel.h:143
 msgid "Highlight label color"
 msgstr "高亮标签颜色"
 
-#: webpanel/webpanel.h:74 webpanel/webpanel.h:120
+#: webpanel/webpanel.h:100 webpanel/webpanel.h:146
 msgid "Highlight comment color"
 msgstr "高亮注释颜色"
 
-#: webpanel/webpanel.h:77 webpanel/webpanel.h:123
+#: webpanel/webpanel.h:103 webpanel/webpanel.h:149
 msgid "Highlight mark color"
 msgstr "高亮标记颜色"
 
-#: webpanel/webpanel.h:79 webpanel/webpanel.h:125
+#: webpanel/webpanel.h:105 webpanel/webpanel.h:151
 msgid "Panel color"
 msgstr "面板颜色"
 
-#: webpanel/webpanel.h:81 webpanel/webpanel.h:127
+#: webpanel/webpanel.h:107 webpanel/webpanel.h:153
 msgid "Text color"
 msgstr "文本颜色"
 
-#: webpanel/webpanel.h:83 webpanel/webpanel.h:129
+#: webpanel/webpanel.h:109 webpanel/webpanel.h:155
 msgid "Label color"
 msgstr "标签颜色"
 
-#: webpanel/webpanel.h:85 webpanel/webpanel.h:131
+#: webpanel/webpanel.h:111 webpanel/webpanel.h:157
 msgid "Comment color"
 msgstr "注释颜色"
 
-#: webpanel/webpanel.h:88 webpanel/webpanel.h:134
+#: webpanel/webpanel.h:114 webpanel/webpanel.h:160
 msgid "Paging button color"
 msgstr "翻页按钮颜色"
 
-#: webpanel/webpanel.h:91 webpanel/webpanel.h:137
+#: webpanel/webpanel.h:117 webpanel/webpanel.h:163
 msgid "Disabled paging button color"
 msgstr "禁用的翻页按钮颜色"
 
-#: webpanel/webpanel.h:93 webpanel/webpanel.h:139
+#: webpanel/webpanel.h:119 webpanel/webpanel.h:165
 msgid "Preedit color"
 msgstr "预编辑颜色"
 
-#: webpanel/webpanel.h:95 webpanel/webpanel.h:141
+#: webpanel/webpanel.h:121 webpanel/webpanel.h:167
 msgid "Border color"
 msgstr "边框颜色"
 
-#: webpanel/webpanel.h:97 webpanel/webpanel.h:143
+#: webpanel/webpanel.h:123 webpanel/webpanel.h:169
 msgid "Divider color"
 msgstr "分隔线颜色"
 
-#: webpanel/webpanel.h:104
+#: webpanel/webpanel.h:130
 msgid "Same with light mode"
 msgstr "与浅色模式相同"
 
-#: webpanel/webpanel.h:148
+#: webpanel/webpanel.h:174
 msgid "Enable scroll"
 msgstr "启用卷轴"
 
-#: webpanel/webpanel.h:149
+#: webpanel/webpanel.h:175
 msgid "Expand"
 msgstr "展开"
 
-#: webpanel/webpanel.h:150
+#: webpanel/webpanel.h:176
 msgid "Collapse"
 msgstr "折叠"
 
-#: webpanel/webpanel.h:151
+#: webpanel/webpanel.h:177
 msgid "Up"
 msgstr "上"
 
-#: webpanel/webpanel.h:152
+#: webpanel/webpanel.h:178
 msgid "Down"
 msgstr "下"
 
-#: webpanel/webpanel.h:153
+#: webpanel/webpanel.h:179
 msgid "Left"
 msgstr "左"
 
-#: webpanel/webpanel.h:154
+#: webpanel/webpanel.h:180
 msgid "Right"
 msgstr "右"
 
-#: webpanel/webpanel.h:156
+#: webpanel/webpanel.h:182
 msgid "Row start"
 msgstr "行首"
 
-#: webpanel/webpanel.h:157
+#: webpanel/webpanel.h:183
 msgid "Row end"
 msgstr "行尾"
 
-#: webpanel/webpanel.h:159
+#: webpanel/webpanel.h:185
 msgid "Page up"
 msgstr "上一页"
 
-#: webpanel/webpanel.h:161
+#: webpanel/webpanel.h:187
 msgid "Page down"
 msgstr "下一页"
 
-#: webpanel/webpanel.h:163
+#: webpanel/webpanel.h:189
 msgid "Commit"
 msgstr "提交"
 
-#: webpanel/webpanel.h:168
+#: webpanel/webpanel.h:194
 msgid "Layout"
 msgstr "布局"
 
-#: webpanel/webpanel.h:170
+#: webpanel/webpanel.h:196
 msgid "Writing mode"
 msgstr "书写模式"
 
-#: webpanel/webpanel.h:173
+#: webpanel/webpanel.h:199
 msgid "Paging buttons style"
 msgstr "翻页按钮样式"
 
-#: webpanel/webpanel.h:178
+#: webpanel/webpanel.h:204
 msgid "Image"
 msgstr "图片"
 
-#: webpanel/webpanel.h:179
+#: webpanel/webpanel.h:205
 msgid "Blur"
 msgstr "模糊"
 
-#: webpanel/webpanel.h:181
+#: webpanel/webpanel.h:207
 msgid "Radius of blur (px)"
 msgstr "模糊半径（px）"
 
-#: webpanel/webpanel.h:183
+#: webpanel/webpanel.h:209
 msgid "Shadow"
 msgstr "阴影"
 
-#: webpanel/webpanel.h:191
+#: webpanel/webpanel.h:217
 msgid "Text font family"
 msgstr "文本字体族"
 
-#: webpanel/webpanel.h:193
+#: webpanel/webpanel.h:219
 msgid "Text font size"
 msgstr "文本字号"
 
-#: webpanel/webpanel.h:195
+#: webpanel/webpanel.h:221
 msgid "Label font family"
 msgstr "标签字体族"
 
-#: webpanel/webpanel.h:197
+#: webpanel/webpanel.h:223
 msgid "Label font size"
 msgstr "标签字号"
 
-#: webpanel/webpanel.h:199
+#: webpanel/webpanel.h:225
 msgid "Comment font family"
 msgstr "注释字体族"
 
-#: webpanel/webpanel.h:201
+#: webpanel/webpanel.h:227
 msgid "Comment font size"
 msgstr "注释字号"
 
-#: webpanel/webpanel.h:204
+#: webpanel/webpanel.h:230
 msgid "Preedit font family"
 msgstr "预编辑字体族"
 
-#: webpanel/webpanel.h:206
+#: webpanel/webpanel.h:232
 msgid "Preedit font size"
 msgstr "预编辑字号"
 
-#: webpanel/webpanel.h:208
+#: webpanel/webpanel.h:234
 msgid "User font dir"
 msgstr "用户字体目录"
 
-#: webpanel/webpanel.h:209
+#: webpanel/webpanel.h:235
 msgid "System font dir"
 msgstr "系统字体目录"
 
-#: webpanel/webpanel.h:213
+#: webpanel/webpanel.h:239
 msgid "Style"
 msgstr "样式"
 
-#: webpanel/webpanel.h:215
+#: webpanel/webpanel.h:241
 msgid "Text"
 msgstr "文本"
 
-#: webpanel/webpanel.h:219
+#: webpanel/webpanel.h:245
 msgid "Mark style"
 msgstr "标记样式"
 
-#: webpanel/webpanel.h:221
+#: webpanel/webpanel.h:247
 msgid "Mark text"
 msgstr "标记文本"
 
-#: webpanel/webpanel.h:223
+#: webpanel/webpanel.h:249
 msgid "Hover behavior"
 msgstr "悬停行为"
 
-#: webpanel/webpanel.h:228
+#: webpanel/webpanel.h:254
 msgid "Border width (px)"
 msgstr "边框宽度（px）"
 
-#: webpanel/webpanel.h:231
+#: webpanel/webpanel.h:257
 msgid "Border radius (px)"
 msgstr "边框半径（px）"
 
-#: webpanel/webpanel.h:232
+#: webpanel/webpanel.h:258
 msgid "Margin (px)"
 msgstr "外边距（px）"
 
-#: webpanel/webpanel.h:235
+#: webpanel/webpanel.h:261
 msgid "Highlight radius (px)"
 msgstr "高亮半径（px）"
 
-#: webpanel/webpanel.h:238
+#: webpanel/webpanel.h:264
 msgid "Top padding (px)"
 msgstr "顶填充（px）"
 
-#: webpanel/webpanel.h:240
+#: webpanel/webpanel.h:266
 msgid "Right padding (px)"
 msgstr "右填充（px）"
 
-#: webpanel/webpanel.h:242
+#: webpanel/webpanel.h:268
 msgid "Bottom padding (px)"
 msgstr "底填充（px）"
 
-#: webpanel/webpanel.h:245
+#: webpanel/webpanel.h:271
 msgid "Left padding (px)"
 msgstr "左填充（px）"
 
-#: webpanel/webpanel.h:247
+#: webpanel/webpanel.h:273
 msgid "Gap between label, text and comment (px)"
 msgstr "标签、文本、注释间隔（px）"
 
-#: webpanel/webpanel.h:250
+#: webpanel/webpanel.h:276
 msgid "Horizontal divider width (px)"
 msgstr "水平分隔线宽度（px）"
 
-#: webpanel/webpanel.h:254
+#: webpanel/webpanel.h:280
 msgid "Copy HTML"
 msgstr "复制 HTML"
 
-#: webpanel/webpanel.h:257
+#: webpanel/webpanel.h:283
 msgid "Basic"
 msgstr "基础"
 
-#: webpanel/webpanel.h:258
+#: webpanel/webpanel.h:284
 msgid "Light mode"
 msgstr "浅色模式"
 
-#: webpanel/webpanel.h:259
+#: webpanel/webpanel.h:285
 msgid "Dark mode"
 msgstr "深色模式"
 
-#: webpanel/webpanel.h:260
+#: webpanel/webpanel.h:286
 msgid "Typography"
 msgstr "版式"
 
-#: webpanel/webpanel.h:261
+#: webpanel/webpanel.h:287
 msgid "Scroll mode"
 msgstr "卷轴模式"
 
-#: webpanel/webpanel.h:262
+#: webpanel/webpanel.h:288
 msgid "Background"
 msgstr "背景"
 
-#: webpanel/webpanel.h:263
+#: webpanel/webpanel.h:289
 msgid "Font"
 msgstr "字体"
 
-#: webpanel/webpanel.h:264
+#: webpanel/webpanel.h:290
 msgid "Cursor"
 msgstr "光标"
 
-#: webpanel/webpanel.h:265
+#: webpanel/webpanel.h:291
 msgid "Highlight"
 msgstr "高亮"
 
-#: webpanel/webpanel.h:266
+#: webpanel/webpanel.h:292
 msgid "Size"
 msgstr "尺寸"
 
-#: webpanel/webpanel.h:267
+#: webpanel/webpanel.h:293
 msgid "Advanced"
 msgstr "高级"

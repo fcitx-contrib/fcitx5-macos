@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fcitx-config/configuration.h>
+#include <fcitx-config/enum.h>
 #include <fcitx-config/iniparser.h>
 #include <fcitx-utils/i18n.h>
 #include <fcitx/addonfactory.h>
@@ -38,6 +39,24 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(HoverBehavior, N_("None"), N_("Move"),
 
 namespace fcitx {
 
+struct UserThemeAnnotation : public fcitx::EnumAnnotation {
+    void setThemes(std::vector<std::pair<std::string, std::string>> themes) {
+        themes_ = std::move(themes);
+    }
+    void dumpDescription(fcitx::RawConfig &config) const {
+        fcitx::EnumAnnotation::dumpDescription(config);
+        for (size_t i = 0; i < themes_.size(); i++) {
+            config.setValueByPath("Enum/" + std::to_string(i),
+                                  themes_[i].first);
+            config.setValueByPath("EnumI18n/" + std::to_string(i),
+                                  themes_[i].second);
+        }
+    }
+
+private:
+    std::vector<std::pair<std::string, std::string>> themes_;
+};
+
 struct ImageAnnotation {
     bool skipDescription() { return false; }
     bool skipSave() { return false; }
@@ -46,12 +65,19 @@ struct ImageAnnotation {
     }
 };
 
-FCITX_CONFIGURATION(BasicConfig,
-                    Option<bool> followCursor{this, "FollowCursor",
-                                              _("Follow cursor"), false};
-                    Option<candidate_window::theme_t> theme{
-                        this, "Theme", _("Theme"),
-                        candidate_window::theme_t::system};);
+FCITX_CONFIGURATION(
+    BasicConfig,
+    Option<bool> followCursor{this, "FollowCursor", _("Follow cursor"), false};
+    Option<candidate_window::theme_t> theme{this, "Theme", _("Theme"),
+                                            candidate_window::theme_t::system};
+    Option<std::string, fcitx::NoConstrain<std::string>,
+           fcitx::DefaultMarshaller<std::string>, UserThemeAnnotation>
+        userTheme{this, "UserTheme", _("User theme"), ""};
+    ExternalOption importThemes{this, "ImportThemes", _("Import themes"), ""};
+    ExternalOption exportCurrentTheme{this, "ExportCurrentTheme",
+                                      _("Export current theme"), ""};
+    ExternalOption userThemeDir{this, "UserThemeDir", _("User theme dir"),
+                                ""};);
 
 FCITX_CONFIGURATION(
     LightModeConfig, Option<bool> overrideDefault{this, "OverrideDefault",

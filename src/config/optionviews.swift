@@ -195,6 +195,9 @@ struct ExternalOptionView: OptionView {
   var body: some View {
     Button(label) {
       switch model.option {
+      case "UserThemeDir":
+        mkdirP(themeDir.localPath())
+        NSWorkspace.shared.open(themeDir)
       case "UserFontDir":
         let fontDir = homeDir.appendingPathComponent("Library/Fonts")
         NSWorkspace.shared.open(fontDir)
