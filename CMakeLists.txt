@@ -95,6 +95,7 @@ add_subdirectory(assets)
 option(BUILD_PREVIEW "" OFF)
 add_subdirectory(fcitx5-webview)
 
+set(ADDON_TYPE "StaticLibrary")
 add_subdirectory(fcitx5-beast/src)
 target_include_directories(beast PRIVATE "${PREBUILT_INSTALL_PATH}/include")
 
