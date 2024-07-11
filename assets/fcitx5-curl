@@ -1,6 +1,8 @@
 #!/bin/zsh
 set -eu
 
+DEBUG="${DEBUG:-}"
+
 if [[ $# -eq 0 || $# -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]; then
   echo "Usage: fcitx5-curl path [curl options]"
   echo "Example: fcitx5-curl /config/addon/rime/deploy -X POST -d '{}'"
@@ -22,8 +24,7 @@ TCP_PORT="${TCP_PORT:-32489}"
 
 CURL_FLAGS=()
 
-if [[ "$COMMUNICATION" == 'TCP' ]]
-then
+if [[ "$COMMUNICATION" == 'TCP' ]]; then
   FCITX_BEAST_URL="http://127.0.0.1:$TCP_PORT$1"
 else
   CURL_FLAGS+=('--unix-socket' "$UDS_PATH")
@@ -31,15 +32,14 @@ else
 fi
 
 shift
-CURL_FLAGS+=$@
+CURL_FLAGS+=($@)
 
-if [ -n "DEBUG" ]
-then
+if [[ -n "$DEBUG" ]]; then
   echo "COMMUNICATION=$COMMUNICATION"
   echo "UDS_PATH=$UDS_PATH"
   echo "TCP_PORT=$TCP_PORT"
   echo "FCITX_BEAST_URL=$FCITX_BEAST_URL"
   echo "CURL_FLAGS=$CURL_FLAGS"
 fi
-curl $CURL_FLAGS "$FCITX_BEAST_URL"
 
+curl $CURL_FLAGS "$FCITX_BEAST_URL"
