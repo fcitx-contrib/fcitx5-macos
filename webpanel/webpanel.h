@@ -302,6 +302,8 @@ public:
     void reloadConfig() override;
     const Configuration *getConfig() const override { return &config_; }
     void setConfig(const RawConfig &config) override;
+    void setSubConfig(const std::string &path,
+                      const RawConfig &config) override;
 
     Instance *instance() { return instance_; }
 

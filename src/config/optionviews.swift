@@ -188,6 +188,7 @@ struct ExternalOptionView: OptionView {
   let overrideLabel: String? = ""
 
   @StateObject private var viewModel = ExternalConfigViewModel()
+  @State private var showExportCurrentTheme = false
   @State private var showCustomPhrase = false
   @State private var showDictManager = false
   @State private var showQuickPhrase = false
@@ -195,6 +196,8 @@ struct ExternalOptionView: OptionView {
   var body: some View {
     Button(label) {
       switch model.option {
+      case "ExportCurrentTheme":
+        showExportCurrentTheme = true
       case "UserThemeDir":
         mkdirP(themeDir.localPath())
         NSWorkspace.shared.open(themeDir)
@@ -221,6 +224,9 @@ struct ExternalOptionView: OptionView {
           viewModel.showConfig(model.external)
         }
       }
+    }
+    .sheet(isPresented: $showExportCurrentTheme) {
+      ExportThemeView()
     }
     .sheet(isPresented: $showCustomPhrase) {
       CustomPhraseView().refreshItems()

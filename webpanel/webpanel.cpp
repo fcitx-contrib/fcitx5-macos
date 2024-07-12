@@ -242,6 +242,20 @@ void WebPanel::setConfig(const RawConfig &config) {
     updateConfig();
 }
 
+void WebPanel::setSubConfig(const std::string &path, const RawConfig &config) {
+    if (path == "exportcurrenttheme") {
+        static auto removedKeys = {"Basic", "ScrollMode", "Advanced"};
+        auto themeName = config.value();
+        RawConfig raw;
+        config_.save(raw);
+        for (const auto &key : removedKeys) {
+            raw.remove(key);
+        }
+        safeSaveAsIni(raw, StandardPath::Type::PkgData,
+                      "theme/" + themeName + ".conf");
+    }
+}
+
 void WebPanel::update(UserInterfaceComponent component,
                       InputContext *inputContext) {
     switch (component) {
