@@ -43,6 +43,7 @@ struct ListConfigView: View {
         apply: {
           // Save all pages.
           Fcitx.setConfig("fcitx://\(path)", viewModel.config?.encodeValue())
+          viewModel.load()  // Need updated color/size after selecting a theme.
         },
         close: {
           FcitxInputController.controllers[key]?.window?.performClose(_: nil)

@@ -627,8 +627,8 @@ class InputDialog: ObservableObject {
           self.presented = false
         } label: {
           Text("OK")
-        }
-        .buttonStyle(.borderedProminent)
+        }.disabled(self.userInput.isEmpty)
+          .buttonStyle(.borderedProminent)
       }
     }.padding()
       .frame(minWidth: 200)

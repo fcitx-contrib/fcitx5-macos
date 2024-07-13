@@ -188,6 +188,7 @@ struct ExternalOptionView: OptionView {
   let overrideLabel: String? = ""
 
   @StateObject private var viewModel = ExternalConfigViewModel()
+  @State private var showExportCurrentTheme = false
   @State private var showCustomPhrase = false
   @State private var showDictManager = false
   @State private var showQuickPhrase = false
@@ -195,6 +196,8 @@ struct ExternalOptionView: OptionView {
   var body: some View {
     Button(label) {
       switch model.option {
+      case "ExportCurrentTheme":
+        showExportCurrentTheme = true
       case "UserFontDir":
         let fontDir = homeDir.appendingPathComponent("Library/Fonts")
         NSWorkspace.shared.open(fontDir)
@@ -218,6 +221,9 @@ struct ExternalOptionView: OptionView {
           viewModel.showConfig(model.external)
         }
       }
+    }
+    .sheet(isPresented: $showExportCurrentTheme) {
+      ExportThemeView()
     }
     .sheet(isPresented: $showCustomPhrase) {
       CustomPhraseView().refreshItems()
@@ -533,6 +539,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return BooleanOptionView(label: label, model: option)
   } else if let option = option as? FontOption {
     return FontOptionView(label: label, model: option)
+  } else if let option = option as? UserThemeOption {
+    return UserThemeOptionView(label: label, model: option)
   } else if let option = option as? ImageOption {
     return ImageOptionView(label: label, model: option)
   } else if let option = option as? AppIMOption {

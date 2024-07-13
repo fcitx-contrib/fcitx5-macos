@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 let sectionHeaderSize: CGFloat = 16
 let gapSize: CGFloat = 10
@@ -50,4 +51,32 @@ func footer(reset: @escaping () -> Void, apply: @escaping () -> Void, close: @es
     }
     .buttonStyle(.borderedProminent)
   }.padding()
+}
+
+func selectFile(
+  _ openPanel: NSOpenPanel, _ directory: URL, _ allowedContentTypes: [UTType],
+  _ callback: @escaping (String) -> Void
+) {
+  // Only consider the first file, but allow multiple deletion.
+  openPanel.allowsMultipleSelection = true
+  openPanel.canChooseDirectories = false
+  openPanel.allowedContentTypes = allowedContentTypes
+  openPanel.directoryURL = directory
+  openPanel.begin { response in
+    if response == .OK {
+      guard let file = openPanel.urls.first else {
+        return callback("")
+      }
+      var fileName = file.lastPathComponent
+      if !directory.contains(file) {
+        if !copyFile(file, directory.appendingPathComponent(fileName)) {
+          return
+        }
+      } else {
+        // Need to consider subdirectory of www/img.
+        fileName = String(file.localPath().dropFirst(directory.localPath().count))
+      }
+      callback(fileName)
+    }
+  }
 }

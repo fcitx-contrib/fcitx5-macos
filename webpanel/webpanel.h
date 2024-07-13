@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fcitx-config/configuration.h>
+#include <fcitx-config/enum.h>
 #include <fcitx-config/iniparser.h>
 #include <fcitx-utils/i18n.h>
 #include <fcitx/addonfactory.h>
@@ -38,6 +39,14 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(HoverBehavior, N_("None"), N_("Move"),
 
 namespace fcitx {
 
+struct UserThemeAnnotation {
+    bool skipDescription() { return false; }
+    bool skipSave() { return false; }
+    void dumpDescription(RawConfig &config) const {
+        config.setValueByPath("UserTheme", "True");
+    }
+};
+
 struct ImageAnnotation {
     bool skipDescription() { return false; }
     bool skipSave() { return false; }
@@ -46,12 +55,15 @@ struct ImageAnnotation {
     }
 };
 
-FCITX_CONFIGURATION(BasicConfig,
-                    Option<bool> followCursor{this, "FollowCursor",
-                                              _("Follow cursor"), false};
-                    Option<candidate_window::theme_t> theme{
-                        this, "Theme", _("Theme"),
-                        candidate_window::theme_t::system};);
+FCITX_CONFIGURATION(
+    BasicConfig,
+    Option<bool> followCursor{this, "FollowCursor", _("Follow cursor"), false};
+    Option<candidate_window::theme_t> theme{this, "Theme", _("Theme"),
+                                            candidate_window::theme_t::system};
+    OptionWithAnnotation<std::string, UserThemeAnnotation> userTheme{
+        this, "UserTheme", _("User theme"), ""};
+    ExternalOption exportCurrentTheme{this, "ExportCurrentTheme",
+                                      _("Export current theme"), ""};);
 
 FCITX_CONFIGURATION(
     LightModeConfig, Option<bool> overrideDefault{this, "OverrideDefault",
@@ -278,6 +290,8 @@ public:
     void reloadConfig() override;
     const Configuration *getConfig() const override { return &config_; }
     void setConfig(const RawConfig &config) override;
+    void setSubConfig(const std::string &path,
+                      const RawConfig &config) override;
 
     Instance *instance() { return instance_; }
 
