@@ -42,7 +42,9 @@ namespace fcitx {
 struct UserThemeAnnotation : public EnumAnnotation {
     void dumpDescription(RawConfig &config) const {
         EnumAnnotation::dumpDescription(config);
-        int i = 0;
+        config.setValueByPath("Enum/0", "");
+        config.setValueByPath("EnumI18n/0", "");
+        int i = 1;
         for (const auto &pair :
              StandardPath::global().locate(StandardPath::Type::PkgData, "theme",
                                            filter::Suffix(".conf"))) {
