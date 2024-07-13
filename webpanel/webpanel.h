@@ -39,21 +39,11 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(HoverBehavior, N_("None"), N_("Move"),
 
 namespace fcitx {
 
-struct UserThemeAnnotation : public EnumAnnotation {
+struct UserThemeAnnotation {
+    bool skipDescription() { return false; }
+    bool skipSave() { return false; }
     void dumpDescription(RawConfig &config) const {
-        EnumAnnotation::dumpDescription(config);
-        config.setValueByPath("Enum/0", "");
-        config.setValueByPath("EnumI18n/0", "");
-        int i = 1;
-        for (const auto &pair :
-             StandardPath::global().locate(StandardPath::Type::PkgData, "theme",
-                                           filter::Suffix(".conf"))) {
-            auto name = pair.first.substr(0, pair.first.size() - 5);
-            config.setValueByPath("Enum/" + std::to_string(i), name);
-            config.setValueByPath("EnumI18n/" + std::to_string(i),
-                                  std::move(name));
-            ++i;
-        }
+        config.setValueByPath("UserTheme", "True");
     }
 };
 
@@ -70,14 +60,10 @@ FCITX_CONFIGURATION(
     Option<bool> followCursor{this, "FollowCursor", _("Follow cursor"), false};
     Option<candidate_window::theme_t> theme{this, "Theme", _("Theme"),
                                             candidate_window::theme_t::system};
-    Option<std::string, fcitx::NoConstrain<std::string>,
-           fcitx::DefaultMarshaller<std::string>, UserThemeAnnotation>
-        userTheme{this, "UserTheme", _("User theme"), ""};
-    ExternalOption importThemes{this, "ImportThemes", _("Import themes"), ""};
+    OptionWithAnnotation<std::string, UserThemeAnnotation> userTheme{
+        this, "UserTheme", _("User theme"), ""};
     ExternalOption exportCurrentTheme{this, "ExportCurrentTheme",
-                                      _("Export current theme"), ""};
-    ExternalOption userThemeDir{this, "UserThemeDir", _("User theme dir"),
-                                ""};);
+                                      _("Export current theme"), ""};);
 
 FCITX_CONFIGURATION(
     LightModeConfig, Option<bool> overrideDefault{this, "OverrideDefault",

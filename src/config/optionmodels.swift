@@ -329,6 +329,8 @@ protocol EmptyConstructible {
 
 class FontOption: StringOption {}
 
+class UserThemeOption: StringOption {}
+
 private func bundleIdentifier(_ appPath: String) -> String {
   guard let bundle = Bundle(path: appPath) else {
     return ""
