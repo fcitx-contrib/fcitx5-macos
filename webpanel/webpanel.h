@@ -55,6 +55,14 @@ struct ImageAnnotation {
     }
 };
 
+struct CssAnnotation {
+    bool skipDescription() { return false; }
+    bool skipSave() { return false; }
+    void dumpDescription(RawConfig &config) {
+        config.setValueByPath("CSS", "True");
+    }
+};
+
 FCITX_CONFIGURATION(
     BasicConfig,
     Option<bool> followCursor{this, "FollowCursor", _("Follow cursor"), false};
@@ -262,8 +270,11 @@ FCITX_CONFIGURATION(
         this, "HorizontalDividerWidth", _("Horizontal divider width (px)"), 1,
         IntConstrain(0, BORDER_WIDTH_MAX)};);
 
-FCITX_CONFIGURATION(Advanced, Option<KeyList> copyHtml{
-                                  this, "CopyHtml", _("Copy HTML"), {}};);
+FCITX_CONFIGURATION(Advanced,
+                    OptionWithAnnotation<std::string, CssAnnotation> userCss{
+                        this, "UserCss", _("User CSS"), {}};
+                    Option<KeyList> copyHtml{
+                        this, "CopyHtml", _("Copy HTML"), {}};);
 
 FCITX_CONFIGURATION(
     WebPanelConfig, Option<BasicConfig> basic{this, "Basic", _("Basic")};

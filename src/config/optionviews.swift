@@ -543,6 +543,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return UserThemeOptionView(label: label, model: option)
   } else if let option = option as? ImageOption {
     return ImageOptionView(label: label, model: option)
+  } else if let option = option as? CssOption {
+    return CssOptionView(label: label, model: option)
   } else if let option = option as? AppIMOption {
     return AppIMOptionView(label: label, model: option)
   } else if let option = option as? KeyOption {

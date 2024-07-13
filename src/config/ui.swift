@@ -57,6 +57,7 @@ func selectFile(
   _ openPanel: NSOpenPanel, _ directory: URL, _ allowedContentTypes: [UTType],
   _ callback: @escaping (String) -> Void
 ) {
+  mkdirP(directory.localPath())
   // Only consider the first file, but allow multiple deletion.
   openPanel.allowsMultipleSelection = true
   openPanel.canChooseDirectories = false
@@ -77,6 +78,9 @@ func selectFile(
         fileName = String(file.localPath().dropFirst(directory.localPath().count))
       }
       callback(fileName)
+    } else {
+      // No selection.
+      callback("")
     }
   }
 }
