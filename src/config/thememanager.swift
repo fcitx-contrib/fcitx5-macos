@@ -7,7 +7,7 @@ struct ExportThemeView: View {
 
   var body: some View {
     VStack {
-      TextField("Theme name", text: $themeName)
+      TextField(NSLocalizedString("Theme name", comment: ""), text: $themeName)
       HStack {
         Button {
           presentationMode.wrappedValue.dismiss()
