@@ -112,6 +112,9 @@ FCITX_CONFIGURATION(
                                             Color(127, 127, 127, 255)};
     Option<Color> preeditColor{this, "PreeditColor", _("Preedit color"),
                                Color(0, 0, 0, 255)};
+    Option<Color> preeditColorPreCursor{this, "PreeditColorPreCursor",
+                                        _("Preedit color pre-cursor"),
+                                        Color(0, 0, 0, 255)};
     Option<Color> borderColor{this, "BorderColor", _("Border color"),
                               Color(0, 0, 0, 255)};
     Option<Color> dividerColor{this, "DividerColor", _("Divider color"),
@@ -158,6 +161,9 @@ FCITX_CONFIGURATION(
                                             Color(127, 127, 127, 255)};
     Option<Color> preeditColor{this, "PreeditColor", _("Preedit color"),
                                Color(255, 255, 255, 255)};
+    Option<Color> preeditColorPreCursor{this, "PreeditColorPreCursor",
+                                        _("Preedit color pre-cursor"),
+                                        Color(255, 255, 255, 255)};
     Option<Color> borderColor{this, "BorderColor", _("Border color"),
                               Color(255, 255, 255, 255)};
     Option<Color> dividerColor{this, "DividerColor", _("Divider color"),
