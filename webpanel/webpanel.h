@@ -272,6 +272,9 @@ FCITX_CONFIGURATION(
     Option<int, IntConstrain> labelTextGap{
         this, "LabelTextGap", _("Gap between label, text and comment (px)"), 6,
         IntConstrain(0, 16)};
+    Option<int, IntConstrain> verticalMinWidth{this, "VerticalMinWidth",
+                                               _("Vertical minimum width (px)"),
+                                               200, IntConstrain(0, 960)};
     Option<int, IntConstrain> horizontalDividerWidth{
         this, "HorizontalDividerWidth", _("Horizontal divider width (px)"), 1,
         IntConstrain(0, BORDER_WIDTH_MAX)};);
