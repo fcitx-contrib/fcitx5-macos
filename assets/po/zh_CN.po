@@ -309,57 +309,61 @@ msgid "Gap between label, text and comment (px)"
 msgstr "标签、文本、注释间隔（px）"
 
 #: webpanel/webpanel.h:276
+msgid "Vertical minimum width (px)"
+msgstr "垂直时最小宽度（px）"
+
+#: webpanel/webpanel.h:278
 msgid "Horizontal divider width (px)"
 msgstr "水平分隔线宽度（px）"
 
-#: webpanel/webpanel.h:281
+#: webpanel/webpanel.h:283
 msgid "User CSS"
 msgstr "用户 CSS"
 
-#: webpanel/webpanel.h:283
+#: webpanel/webpanel.h:285
 msgid "Copy HTML"
 msgstr "复制 HTML"
 
-#: webpanel/webpanel.h:286
+#: webpanel/webpanel.h:288
 msgid "Basic"
 msgstr "基础"
 
-#: webpanel/webpanel.h:287
+#: webpanel/webpanel.h:289
 msgid "Light mode"
 msgstr "浅色模式"
 
-#: webpanel/webpanel.h:288
+#: webpanel/webpanel.h:290
 msgid "Dark mode"
 msgstr "深色模式"
 
-#: webpanel/webpanel.h:289
+#: webpanel/webpanel.h:291
 msgid "Typography"
 msgstr "版式"
 
-#: webpanel/webpanel.h:290
+#: webpanel/webpanel.h:292
 msgid "Scroll mode"
 msgstr "卷轴模式"
 
-#: webpanel/webpanel.h:291
+#: webpanel/webpanel.h:293
 msgid "Background"
 msgstr "背景"
 
-#: webpanel/webpanel.h:292
+#: webpanel/webpanel.h:294
 msgid "Font"
 msgstr "字体"
 
-#: webpanel/webpanel.h:293
+#: webpanel/webpanel.h:295
 msgid "Cursor"
 msgstr "光标"
 
-#: webpanel/webpanel.h:294
+#: webpanel/webpanel.h:296
 msgid "Highlight"
 msgstr "高亮"
 
-#: webpanel/webpanel.h:295
+#: webpanel/webpanel.h:297
 msgid "Size"
 msgstr "尺寸"
 
-#: webpanel/webpanel.h:296
+#: webpanel/webpanel.h:298
 msgid "Advanced"
 msgstr "高级"
