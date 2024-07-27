@@ -229,6 +229,12 @@ void WebPanel::updateConfig() {
                                          : "");
     auto style = configValueToJson(config_).dump();
     window_->set_style(style.c_str());
+    if (auto web = dynamic_cast<candidate_window::WebviewCandidateWindow *>(
+            window_.get())) {
+        using namespace candidate_window;
+        uint64_t apis = (config_.advanced->unsafeAPI->curl.value() ? kCurl : 0);
+        web->set_api(apis);
+    }
 }
 
 void WebPanel::reloadConfig() {

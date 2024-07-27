@@ -279,11 +279,16 @@ FCITX_CONFIGURATION(
         this, "HorizontalDividerWidth", _("Horizontal divider width (px)"), 1,
         IntConstrain(0, BORDER_WIDTH_MAX)};);
 
-FCITX_CONFIGURATION(Advanced,
-                    OptionWithAnnotation<std::string, CssAnnotation> userCss{
-                        this, "UserCss", _("User CSS"), {}};
-                    Option<KeyList> copyHtml{
-                        this, "CopyHtml", _("Copy HTML"), {}};);
+FCITX_CONFIGURATION(UnsafeAPI, Option<bool> curl{this, "EnableUnsafeCurlAPI",
+                                                 "curl", false};);
+
+FCITX_CONFIGURATION(
+    Advanced,
+    OptionWithAnnotation<std::string, CssAnnotation> userCss{
+        this, "UserCss", _("User CSS"), {}};
+    Option<KeyList> copyHtml{this, "CopyHtml", _("Copy HTML"), {}};
+    Option<UnsafeAPI> unsafeAPI{this, "UnsafeAPI",
+                                _("Dangerous API for JavaScript plugins")};);
 
 FCITX_CONFIGURATION(
     WebPanelConfig, Option<BasicConfig> basic{this, "Basic", _("Basic")};

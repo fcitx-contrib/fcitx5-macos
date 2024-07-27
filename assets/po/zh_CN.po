@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fcitx 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-31 20:54-0400\n"
-"PO-Revision-Date: 2024-04-04 00:50+0800\n"
+"POT-Creation-Date: 2024-07-27 15:27+0200\n"
+"PO-Revision-Date: 2024-07-27 15:28+0200\n"
 "Last-Translator: ksqsf <i@ksqsf.moe>\n"
 "Language-Team: \n"
 "Language: zh_CN\n"
@@ -312,58 +312,62 @@ msgstr "标签、文本、注释间隔（px）"
 msgid "Vertical minimum width (px)"
 msgstr "垂直时最小宽度（px）"
 
-#: webpanel/webpanel.h:278
+#: webpanel/webpanel.h:279
 msgid "Horizontal divider width (px)"
 msgstr "水平分隔线宽度（px）"
 
-#: webpanel/webpanel.h:283
+#: webpanel/webpanel.h:288
 msgid "User CSS"
 msgstr "用户 CSS"
 
-#: webpanel/webpanel.h:285
+#: webpanel/webpanel.h:290
 msgid "Copy HTML"
 msgstr "复制 HTML"
 
-#: webpanel/webpanel.h:288
+#: webpanel/webpanel.h:291
+msgid "Dangerous API for JavaScript plugins"
+msgstr "用于 JavaScript 插件的危险 API"
+
+#: webpanel/webpanel.h:295
 msgid "Basic"
 msgstr "基础"
 
-#: webpanel/webpanel.h:289
+#: webpanel/webpanel.h:296
 msgid "Light mode"
 msgstr "浅色模式"
 
-#: webpanel/webpanel.h:290
+#: webpanel/webpanel.h:297
 msgid "Dark mode"
 msgstr "深色模式"
 
-#: webpanel/webpanel.h:291
+#: webpanel/webpanel.h:298
 msgid "Typography"
 msgstr "版式"
 
-#: webpanel/webpanel.h:292
+#: webpanel/webpanel.h:299
 msgid "Scroll mode"
 msgstr "卷轴模式"
 
-#: webpanel/webpanel.h:293
+#: webpanel/webpanel.h:300
 msgid "Background"
 msgstr "背景"
 
-#: webpanel/webpanel.h:294
+#: webpanel/webpanel.h:301
 msgid "Font"
 msgstr "字体"
 
-#: webpanel/webpanel.h:295
+#: webpanel/webpanel.h:302
 msgid "Cursor"
 msgstr "光标"
 
-#: webpanel/webpanel.h:296
+#: webpanel/webpanel.h:303
 msgid "Highlight"
 msgstr "高亮"
 
-#: webpanel/webpanel.h:297
+#: webpanel/webpanel.h:304
 msgid "Size"
 msgstr "尺寸"
 
-#: webpanel/webpanel.h:298
+#: webpanel/webpanel.h:305
 msgid "Advanced"
 msgstr "高级"
