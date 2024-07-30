@@ -207,6 +207,9 @@ struct ExternalOptionView: OptionView {
       case "UserDataDir":
         mkdirP(rimeLocalDir.localPath())
         NSWorkspace.shared.open(rimeLocalDir)
+      case "PluginDir":
+        mkdirP(pluginDir.localPath())
+        NSWorkspace.shared.open(pluginDir)
       case "CustomPhrase":
         showCustomPhrase = true
       case "DictManager":
@@ -547,6 +550,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return CssOptionView(label: label, model: option)
   } else if let option = option as? AppIMOption {
     return AppIMOptionView(label: label, model: option)
+  } else if let option = option as? PluginOption {
+    return PluginOptionView(label: label, model: option)
   } else if let option = option as? KeyOption {
     return KeyOptionView(label: label, model: option)
   } else if let option = option as? StringOption {
@@ -565,6 +570,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return ListOptionView<FontOption>(label: label, model: option)
   } else if let option = option as? ListOption<AppIMOption> {
     return ListOptionView<AppIMOption>(label: label, model: option)
+  } else if let option = option as? ListOption<PluginOption> {
+    return ListOptionView<PluginOption>(label: label, model: option)
   } else if let option = option as? ListOption<KeyOption> {
     return ListOptionView<KeyOption>(label: label, model: option)
   } else if let option = option as? ListOption<StringOption> {

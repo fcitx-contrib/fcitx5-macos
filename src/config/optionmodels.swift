@@ -333,6 +333,8 @@ class UserThemeOption: StringOption {}
 
 class CssOption: StringOption {}
 
+class PluginOption: StringOption {}
+
 private func bundleIdentifier(_ appPath: String) -> String {
   guard let bundle = Bundle(path: appPath) else {
     return ""
