@@ -63,6 +63,14 @@ struct CssAnnotation {
     }
 };
 
+struct PluginAnnotation {
+    bool skipDescription() { return false; }
+    bool skipSave() { return false; }
+    void dumpDescription(RawConfig &config) {
+        config.setValueByPath("Plugin", "True");
+    }
+};
+
 FCITX_CONFIGURATION(
     BasicConfig,
     Option<bool> followCursor{this, "FollowCursor", _("Follow cursor"), false};
@@ -287,6 +295,12 @@ FCITX_CONFIGURATION(
     OptionWithAnnotation<std::string, CssAnnotation> userCss{
         this, "UserCss", _("User CSS"), {}};
     Option<KeyList> copyHtml{this, "CopyHtml", _("Copy HTML"), {}};
+    ExternalOption pluginDir{this, "PluginDir", _("Plugin dir"), ""};
+    Option<bool> pluginNotice{this, "PluginNotice",
+                              _("I know there may be risks for using plugins"),
+                              false};
+    OptionWithAnnotation<std::vector<std::string>, PluginAnnotation> plugins{
+        this, "Plugins", _("Plugins"), {}};
     Option<UnsafeAPI> unsafeAPI{this, "UnsafeAPI",
                                 _("Dangerous API for JavaScript plugins")};);
 

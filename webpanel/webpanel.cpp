@@ -231,9 +231,13 @@ void WebPanel::updateConfig() {
     window_->set_style(style.c_str());
     if (auto web = dynamic_cast<candidate_window::WebviewCandidateWindow *>(
             window_.get())) {
+        web->unload_plugins();
         using namespace candidate_window;
         uint64_t apis = (config_.advanced->unsafeAPI->curl.value() ? kCurl : 0);
         web->set_api(apis);
+        if (*config_.advanced->pluginNotice) {
+            web->load_plugins({*config_.advanced->plugins});
+        }
     }
 }
 
