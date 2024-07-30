@@ -4,6 +4,10 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/fcitx.icns"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
 
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/penguins.svg"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
+)
+
 # Preserve execution permission
 install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/uninstall.sh"
     "${CMAKE_CURRENT_SOURCE_DIR}/update.sh"
