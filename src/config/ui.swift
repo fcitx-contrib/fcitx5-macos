@@ -53,34 +53,52 @@ func footer(reset: @escaping () -> Void, apply: @escaping () -> Void, close: @es
   }.padding()
 }
 
-func selectFile(
-  _ openPanel: NSOpenPanel, _ directory: URL, _ allowedContentTypes: [UTType],
-  _ callback: @escaping (String) -> Void
-) {
-  mkdirP(directory.localPath())
-  // Only consider the first file, but allow multiple deletion.
-  openPanel.allowsMultipleSelection = true
-  openPanel.canChooseDirectories = false
-  openPanel.allowedContentTypes = allowedContentTypes
-  openPanel.directoryURL = directory
-  openPanel.begin { response in
-    if response == .OK {
-      guard let file = openPanel.urls.first else {
-        return callback("")
+struct SelectFileButton<Label>: View where Label: View {
+  let directory: URL
+  let allowedContentTypes: [UTType]
+  let onFinish: (String) -> Void
+  let label: () -> Label
+  let model: Binding<String>
+
+  @State private var openPanel = NSOpenPanel()
+
+  var body: some View {
+    HStack {
+      Button(
+        action: {
+          mkdirP(directory.localPath())
+          // Only consider the first file, but allow multiple deletion.
+          openPanel.allowsMultipleSelection = true
+          openPanel.canChooseDirectories = false
+          openPanel.allowedContentTypes = allowedContentTypes
+          openPanel.directoryURL = directory
+          openPanel.begin { response in
+            if response == .OK {
+              guard let file = openPanel.urls.first else {
+                return
+              }
+              var fileName = file.lastPathComponent
+              if !directory.contains(file) {
+                if !copyFile(file, directory.appendingPathComponent(fileName)) {
+                  return
+                }
+              } else {
+                // Need to consider subdirectory of www/img.
+                fileName = String(file.localPath().dropFirst(directory.localPath().count))
+              }
+              onFinish(fileName)
+            }
+          }
+        },
+        label: label
+      )
+      if !model.wrappedValue.isEmpty {
+        Button {
+          model.wrappedValue = ""
+        } label: {
+          Image(systemName: "xmark.circle.fill")
+        }.buttonStyle(BorderlessButtonStyle())
       }
-      var fileName = file.lastPathComponent
-      if !directory.contains(file) {
-        if !copyFile(file, directory.appendingPathComponent(fileName)) {
-          return
-        }
-      } else {
-        // Need to consider subdirectory of www/img.
-        fileName = String(file.localPath().dropFirst(directory.localPath().count))
-      }
-      callback(fileName)
-    } else {
-      // No selection.
-      callback("")
     }
   }
 }
