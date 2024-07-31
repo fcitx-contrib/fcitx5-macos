@@ -61,6 +61,8 @@ struct SelectFileButton<Label>: View where Label: View {
   let model: Binding<String>
 
   @State private var openPanel = NSOpenPanel()
+  @State private var showDuplicate = false
+  @State private var src: URL? = nil
 
   var body: some View {
     HStack {
@@ -79,7 +81,13 @@ struct SelectFileButton<Label>: View where Label: View {
               }
               var fileName = file.lastPathComponent
               if !directory.contains(file) {
-                if !copyFile(file, directory.appendingPathComponent(fileName)) {
+                let dst = directory.appendingPathComponent(fileName)
+                if dst.exists() {
+                  src = file
+                  showDuplicate = true
+                  return
+                }
+                if !copyFile(file, dst) {
                   return
                 }
               } else {
@@ -91,7 +99,30 @@ struct SelectFileButton<Label>: View where Label: View {
           }
         },
         label: label
-      )
+      ).sheet(isPresented: $showDuplicate) {
+        VStack {
+          Text("\(src!.lastPathComponent) already exists. Replace?")
+          HStack {
+            Button {
+              showDuplicate = false
+            } label: {
+              Text("Cancel")
+            }
+            Button {
+              showDuplicate = false
+              guard let src = src else { return }
+              let fileName = src.lastPathComponent
+              let dst = directory.appendingPathComponent(fileName)
+              _ = removeFile(dst)
+              if copyFile(src, dst) {
+                onFinish(fileName)
+              }
+            } label: {
+              Text("OK")
+            }.buttonStyle(.borderedProminent)
+          }
+        }.padding()
+      }
       if !model.wrappedValue.isEmpty {
         Button {
           model.wrappedValue = ""

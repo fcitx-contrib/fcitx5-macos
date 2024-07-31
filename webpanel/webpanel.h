@@ -41,7 +41,11 @@ namespace fcitx {
 
 struct UserThemeAnnotation {
     bool skipDescription() { return false; }
-    bool skipSave() { return false; }
+    // Skip save so that when theme editor passes a non-empty string, we know
+    // user actually selects a theme file. Comparing new value with old (saved)
+    // value makes no sense because user may replace a theme with another theme
+    // that has the same file name.
+    bool skipSave() { return true; }
     void dumpDescription(RawConfig &config) const {
         config.setValueByPath("UserTheme", "True");
     }
