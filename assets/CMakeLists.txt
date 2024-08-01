@@ -4,7 +4,14 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/fcitx.icns"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
 
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/penguins.svg"
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/penguins.pdf
+    COMMAND rsvg-convert -f pdf -o ${CMAKE_CURRENT_BINARY_DIR}/penguins.pdf ${CMAKE_CURRENT_SOURCE_DIR}/penguins.svg
+)
+add_custom_target(GeneratePDF ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/penguins.pdf
+)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/penguins.pdf"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
 
