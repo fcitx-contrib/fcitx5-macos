@@ -251,20 +251,12 @@ inline std::string themePath(const std::string &themeName) {
 }
 
 void WebPanel::setConfig(const RawConfig &config) {
-    auto oldThemeName = *config_.basic->userTheme;
     config_.load(config, true);
     auto themeName = *config_.basic->userTheme;
     if (!themeName.empty()) {
         RawConfig raw;
-        if (themeName == oldThemeName) {
-            // Reset current theme to empty so that user could re-select it
-            // after modifying color/size.
-            config_.save(raw);
-            raw.setValueByPath("Basic/UserTheme", "");
-        } else {
-            // Only override current theme when user theme is changed.
-            readAsIni(raw, StandardPath::Type::PkgData, themePath(themeName));
-        }
+        // Only override current theme when user selects a theme file.
+        readAsIni(raw, StandardPath::Type::PkgData, themePath(themeName));
         config_.load(raw, true);
     }
     safeSaveAsIni(config_, ConfPath);

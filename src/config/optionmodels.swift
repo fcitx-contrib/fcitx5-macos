@@ -229,7 +229,7 @@ class ImageOption: Option, ObservableObject {
   var value: String
   @Published var file: String {
     didSet {
-      value = fcitxPrefix + file
+      value = file.isEmpty ? "" : fcitxPrefix + file
     }
   }
   @Published var url: String {

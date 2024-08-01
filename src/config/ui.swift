@@ -53,34 +53,83 @@ func footer(reset: @escaping () -> Void, apply: @escaping () -> Void, close: @es
   }.padding()
 }
 
-func selectFile(
-  _ openPanel: NSOpenPanel, _ directory: URL, _ allowedContentTypes: [UTType],
-  _ callback: @escaping (String) -> Void
-) {
-  mkdirP(directory.localPath())
-  // Only consider the first file, but allow multiple deletion.
-  openPanel.allowsMultipleSelection = true
-  openPanel.canChooseDirectories = false
-  openPanel.allowedContentTypes = allowedContentTypes
-  openPanel.directoryURL = directory
-  openPanel.begin { response in
-    if response == .OK {
-      guard let file = openPanel.urls.first else {
-        return callback("")
+struct SelectFileButton<Label>: View where Label: View {
+  let directory: URL
+  let allowedContentTypes: [UTType]
+  let onFinish: (String) -> Void
+  let label: () -> Label
+  let model: Binding<String>
+
+  @State private var openPanel = NSOpenPanel()
+  @State private var showDuplicate = false
+  @State private var src: URL? = nil
+
+  var body: some View {
+    HStack {
+      Button(
+        action: {
+          mkdirP(directory.localPath())
+          // Only consider the first file, but allow multiple deletion.
+          openPanel.allowsMultipleSelection = true
+          openPanel.canChooseDirectories = false
+          openPanel.allowedContentTypes = allowedContentTypes
+          openPanel.directoryURL = directory
+          openPanel.begin { response in
+            if response == .OK {
+              guard let file = openPanel.urls.first else {
+                return
+              }
+              var fileName = file.lastPathComponent
+              if !directory.contains(file) {
+                let dst = directory.appendingPathComponent(fileName)
+                if dst.exists() {
+                  src = file
+                  showDuplicate = true
+                  return
+                }
+                if !copyFile(file, dst) {
+                  return
+                }
+              } else {
+                // Need to consider subdirectory of www/img.
+                fileName = String(file.localPath().dropFirst(directory.localPath().count))
+              }
+              onFinish(fileName)
+            }
+          }
+        },
+        label: label
+      ).sheet(isPresented: $showDuplicate) {
+        VStack {
+          Text("\(src!.lastPathComponent) already exists. Replace?")
+          HStack {
+            Button {
+              showDuplicate = false
+            } label: {
+              Text("Cancel")
+            }
+            Button {
+              showDuplicate = false
+              guard let src = src else { return }
+              let fileName = src.lastPathComponent
+              let dst = directory.appendingPathComponent(fileName)
+              _ = removeFile(dst)
+              if copyFile(src, dst) {
+                onFinish(fileName)
+              }
+            } label: {
+              Text("OK")
+            }.buttonStyle(.borderedProminent)
+          }
+        }.padding()
       }
-      var fileName = file.lastPathComponent
-      if !directory.contains(file) {
-        if !copyFile(file, directory.appendingPathComponent(fileName)) {
-          return
-        }
-      } else {
-        // Need to consider subdirectory of www/img.
-        fileName = String(file.localPath().dropFirst(directory.localPath().count))
+      if !model.wrappedValue.isEmpty {
+        Button {
+          model.wrappedValue = ""
+        } label: {
+          Image(systemName: "xmark.circle.fill")
+        }.buttonStyle(BorderlessButtonStyle())
       }
-      callback(fileName)
-    } else {
-      // No selection.
-      callback("")
     }
   }
 }
