@@ -40,7 +40,9 @@ void MacosFrontend::pollPasteboard() {
                     instance_->addonManager().addon("clipboard", true)) {
                 bool isPassword = false;
                 std::string str = getPasteboardString(&isPassword);
-                if (*config_.removeTrackingParameters) {
+                if (str.size() <= 2048 /* otherwise unlikely to be URL and will
+                                          hang for seconds */
+                    && *config_.removeTrackingParameters) {
                     str = url_filter::filterTrackingParameters(str);
                 }
                 if (!str.empty()) {
