@@ -37,11 +37,11 @@
         <key>TISIntendedLanguage</key>
         <string>zh-Hans</string>
         <key>tsInputModeMenuIconFileKey</key>
-				<string>penguins.pdf</string>
+        <string>penguins.pdf</string>
         <key>tsInputModeAlternateMenuIconFileKey</key>
-				<string>penguins.pdf</string>
+        <string>penguins.pdf</string>
         <key>tsInputModePaletteIconFileKey</key>
-				<string>penguins.pdf</string>
+        <string>penguins.pdf</string>
       </dict>
     </dict>
   </dict>

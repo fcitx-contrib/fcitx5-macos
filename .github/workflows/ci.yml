@@ -55,8 +55,8 @@ jobs:
           brew install \
             nlohmann-json \
             extra-cmake-modules \
-            ninja \
-            librsvg
+            librsvg \
+            ninja
           ./install-deps.sh ${{ matrix.arch }}
           npm i -g pnpm
           pnpm --prefix=fcitx5-webview i
