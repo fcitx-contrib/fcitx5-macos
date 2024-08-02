@@ -5,14 +5,14 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/fcitx.icns"
 )
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/penguins.pdf
-    COMMAND SOURCE_DATE_EPOCH=0 rsvg-convert -f pdf -o ${CMAKE_CURRENT_BINARY_DIR}/penguins.pdf ${CMAKE_CURRENT_SOURCE_DIR}/penguins.svg
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/penguins.svg
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/menu_icon.pdf
+    COMMAND SOURCE_DATE_EPOCH=0 rsvg-convert -f pdf -o ${CMAKE_CURRENT_BINARY_DIR}/menu_icon.pdf ${CMAKE_CURRENT_SOURCE_DIR}/penguin.svg
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/penguin.svg
 )
 add_custom_target(GeneratePDF ALL
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/penguins.pdf
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/menu_icon.pdf
 )
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/penguins.pdf"
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/menu_icon.pdf"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
 
