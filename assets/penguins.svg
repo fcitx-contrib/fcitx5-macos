@@ -1,39 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   width="29"
-   height="21"
-   version="1.1"
-   id="svg188"
-   sodipodi:docname="penguins.svg"
-   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs192" />
-  <sodipodi:namedview
-     id="namedview190"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     showgrid="false"
-     inkscape:zoom="11.0625"
-     inkscape:cx="15.367232"
-     inkscape:cy="11.525424"
-     inkscape:window-width="1645"
-     inkscape:window-height="793"
-     inkscape:window-x="0"
-     inkscape:window-y="25"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="svg188" />
+<svg xmlns="http://www.w3.org/2000/svg" width="29" height="21">
   <path
-     d="M 5,0 q -5,0 -5,5 v 11 q 0,5 5,5 h 19 q 5,0 5,-5 V 5 q 0,-5 -5,-5 Z M 5,8 c 0,-2.5 2,-4 4,-4 c 2,0 3.4,1.2 4,3 c 0.3,0.9 1,1.3 2,1.5 -1,0.2 -2,1 -2,2 v 2.5 c 0,2.5 -2,4 -4,4 h -8 c 2.5,-0.5 4,-3 4,-5 z m 3,0 a 1.5 1.5 0 0 0 1.5 1.5 a 1.5 1.5 0 0 0 1.5 -1.5 a 1.5 1.5 0 0 0 -1.5 -1.5 a 1.5 1.5 0 0 0 -1.5 1.5 z m 8,0 c 0,-2.5 2,-4 4,-4 c 2,0 3.4,1.2 4,3 c 0.3,0.9 1,1.3 2,1.5 -1,0.2 -2,1 -2,2 v 2.5 c 0,2.5 -2,4 -4,4 h -8 c 2.5,-0.5 4,-3 4,-5 z m 3,0 a 1.5 1.5 0 0 0 1.5 1.5 a 1.5 1.5 0 0 0 1.5 -1.5 a 1.5 1.5 0 0 0 -1.5 -1.5 a 1.5 1.5 0 0 0 -1.5 1.5 z"
-     style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333"
-     id="path186"
-     sodipodi:nodetypes="cssssssscsscccscssscssssccccscssscsssssccscccssssscsccssscs" />
+    d="M 5,0 q -5,0 -5,5 v 11 q 0,5 5,5 h 19 q 5,0 5,-5 V 5 q 0,-5 -5,-5 Z M 5,8 c 0,-2.5 2,-4 4,-4 c 2,0 3.4,1.2 4,3 c 0.3,0.9 1,1.3 2,1.5 -1,0.2 -2,1 -2,2 v 2.5 c 0,2.5 -2,4 -4,4 h -8 c 2.5,-0.5 4,-3 4,-5 z m 3,0 a 1.5 1.5 0 0 0 1.5 1.5 a 1.5 1.5 0 0 0 1.5 -1.5 a 1.5 1.5 0 0 0 -1.5 -1.5 a 1.5 1.5 0 0 0 -1.5 1.5 z m 8,0 c 0,-2.5 2,-4 4,-4 c 2,0 3.4,1.2 4,3 c 0.3,0.9 1,1.3 2,1.5 -1,0.2 -2,1 -2,2 v 2.5 c 0,2.5 -2,4 -4,4 h -8 c 2.5,-0.5 4,-3 4,-5 z m 3,0 a 1.5 1.5 0 0 0 1.5 1.5 a 1.5 1.5 0 0 0 1.5 -1.5 a 1.5 1.5 0 0 0 -1.5 -1.5 a 1.5 1.5 0 0 0 -1.5 1.5 z"
+    style="fill:#000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1" />
 </svg>
