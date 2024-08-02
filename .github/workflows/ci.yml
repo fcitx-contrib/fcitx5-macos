@@ -55,6 +55,8 @@ jobs:
           brew install \
             nlohmann-json \
             extra-cmake-modules \
+            librsvg \
+            md5sha1sum \
             ninja
           ./install-deps.sh ${{ matrix.arch }}
           npm i -g pnpm
@@ -83,7 +85,9 @@ jobs:
             Fcitx5-${{ matrix.arch }}.tar.bz2
 
       - name: Check validity
-        run: ./check-validity.sh
+        run: |
+          ./check-validity.sh
+          md5sum -c checksum
 
       - name: Generate meta.json
         if: ${{ matrix.os == 'macos-14' }}
