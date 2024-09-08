@@ -58,13 +58,12 @@ func shortcutRepr(_ key: String, _ modifiers: NSEvent.ModifierFlags, _ code: UIn
   var desc = ""
   if modifiers.contains(.control) { desc += "⌃" }
   if modifiers.contains(.option) { desc += "⌥" }
-  if modifiers.contains(.shift) {
-    // Only when Shift is main key we distinguish L/R.
-    if code == 0x3c {
-      desc += "⬆"  // Shift_R
-    } else {
-      desc += "⇧"  // Shift_L
-    }
+  // There could be Shift_L or Shift+Shift_L
+  // Only when Shift is main key we distinguish L/R.
+  if code == 0x3c {
+    desc += "⬆"  // Shift_R
+  } else if code == 0x38 || modifiers.contains(.shift) {
+    desc += "⇧"  // Shift_L
   }
   if modifiers.contains(.command) { desc += "⌘" }
   // Use uppercase to match menu.
