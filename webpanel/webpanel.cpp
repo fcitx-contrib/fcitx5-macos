@@ -143,10 +143,10 @@ WebPanel::WebPanel(Instance *instance)
         EventType::InputContextKeyEvent, EventWatcherPhase::PreInputMethod,
         [this](Event &event) {
             auto &keyEvent = static_cast<KeyEvent &>(event);
-            if (keyEvent.isRelease()) {
-                return;
-            }
             if (keyEvent.key().checkKeyList(*config_.advanced->copyHtml)) {
+                if (keyEvent.isRelease()) {
+                    return;
+                }
                 static_cast<candidate_window::WebviewCandidateWindow *>(
                     window_.get())
                     ->copy_html();
@@ -154,6 +154,9 @@ WebPanel::WebPanel(Instance *instance)
             }
             if (scrollState_ == candidate_window::scroll_state_t::ready &&
                 keyEvent.key().checkKeyList(*config_.scrollMode->expand)) {
+                if (keyEvent.isRelease()) {
+                    return;
+                }
                 expand();
                 return keyEvent.filterAndAccept();
             }
@@ -176,6 +179,9 @@ WebPanel::WebPanel(Instance *instance)
                     };
                 for (const auto &pair : selectMap) {
                     if (keyEvent.key().check(pair.first)) {
+                        if (keyEvent.isRelease()) {
+                            return;
+                        }
                         window_->scroll_key_action(pair.second);
                         return keyEvent.filterAndAccept();
                     }
@@ -204,12 +210,19 @@ WebPanel::WebPanel(Instance *instance)
                     }; // Can't be static because config could be modified.
                 for (const auto &pair : actionMap) {
                     if (keyEvent.key().checkKeyList(*pair.first)) {
-                        window_->scroll_key_action(pair.second);
+                        if (!keyEvent.isRelease()) {
+                            window_->scroll_key_action(pair.second);
+                        }
+                        // Must not send release event to engine, which resets
+                        // scroll mode.
                         return keyEvent.filterAndAccept();
                     }
                 }
                 if (keyEvent.key().checkKeyList(
                         *config_.scrollMode->collapse)) {
+                    if (keyEvent.isRelease()) {
+                        return;
+                    }
                     collapse();
                     return keyEvent.filterAndAccept();
                 }
