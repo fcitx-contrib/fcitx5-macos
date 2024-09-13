@@ -52,6 +52,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          brew update && brew upgrade || true
           brew install \
             nlohmann-json \
             extra-cmake-modules \
