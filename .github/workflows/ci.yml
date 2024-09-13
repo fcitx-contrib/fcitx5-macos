@@ -55,7 +55,7 @@ jobs:
           brew install \
             nlohmann-json \
             extra-cmake-modules \
-            librsvg@2.58.4 \
+            librsvg \
             md5sha1sum \
             ninja
           ./install-deps.sh ${{ matrix.arch }}
