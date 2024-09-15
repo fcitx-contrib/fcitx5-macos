@@ -197,8 +197,9 @@ FCITX_CONFIGURATION(
         this, "PageUp", _("Page up"), {Key(FcitxKey_Page_Up)}};
     Option<KeyList> pageDown{
         this, "PageDown", _("Page down"), {Key(FcitxKey_Page_Down)}};
-    Option<KeyList> commit{
-        this, "Commit", _("Commit"), {Key(FcitxKey_space)}};);
+    Option<KeyList> commit{this, "Commit", _("Commit"), {Key(FcitxKey_space)}};
+    Option<bool> optimizeForHyperKey{this, "OptimizeForHyperKey",
+                                     _("Optimize for Hyper key"), true};);
 
 FCITX_CONFIGURATION(
     TypographyConfig,
