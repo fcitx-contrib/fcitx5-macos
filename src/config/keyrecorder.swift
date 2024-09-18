@@ -79,6 +79,10 @@ struct RecordingOverlay: NSViewRepresentable {
   func makeNSView(context: Context) -> NSView {
     let view = KeyCaptureView()
     view.coordinator = context.coordinator
+    // Not sure why macOS 15 arm needs this but x86 doesn't.
+    DispatchQueue.main.async {
+      view.window?.makeFirstResponder(view)
+    }
     return view
   }
 
