@@ -350,6 +350,10 @@ void WebPanel::update(UserInterfaceComponent component,
                     candidate_window::scroll_state_t::scrolling) {
                     return expand();
                 }
+                if (*config_.scrollMode->autoExpand) {
+                    scrollState_ = candidate_window::scroll_state_t::scrolling;
+                    return expand();
+                }
                 scrollState_ = candidate_window::scroll_state_t::ready;
             } else {
                 scrollState_ = candidate_window::scroll_state_t::none;
