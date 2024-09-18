@@ -28,7 +28,7 @@ int main() {
     }
 
     // Can get available input methods.
-    { std::cerr << imGetAvailableIMs() << std::endl; }
+    std::cerr << imGetAvailableIMs() << std::endl;
 
     // Can set config
     std::vector<std::string> values{"False", "True"};

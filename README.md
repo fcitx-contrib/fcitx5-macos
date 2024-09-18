@@ -32,6 +32,10 @@ cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 sudo cmake --install build
 ```
+After the first time you execute `cmake --install`, you need to logout and login,
+then add Fcitx5 in System Setttings -> Keyboard -> Input Sources, Chinese Simplified.
+
+For installations afterwards, clicking `Restart` in Fcitx5 menu suffices.
 
 ### Code sign
 Some features (e.g. notifications, core dump) require the app bundle be code-signed after installation:

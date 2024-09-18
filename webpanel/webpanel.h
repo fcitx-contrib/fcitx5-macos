@@ -184,6 +184,7 @@ FCITX_CONFIGURATION(
 FCITX_CONFIGURATION(
     ScrollConfig,
     Option<bool> enableScroll{this, "EnableScroll", _("Enable scroll"), true};
+    Option<bool> autoExpand{this, "AutoExpand", _("Auto expand"), false};
     Option<KeyList> expand{this, "Expand", _("Expand"), {Key(FcitxKey_Down)}};
     Option<KeyList> collapse{this, "Collapse", _("Collapse"), {}};
     Option<KeyList> up{this, "Up", _("Up"), {Key(FcitxKey_Up)}};
