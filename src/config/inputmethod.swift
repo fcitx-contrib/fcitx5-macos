@@ -24,36 +24,15 @@ class InputMethodConfigController: ConfigWindowController {
   }
 }
 
-private struct Group: Identifiable, Codable {
+private struct Group: Codable {
   var name: String
   var inputMethods: [GroupItem]
-  let id = UUID()
-
-  private enum CodingKeys: CodingKey {
-    case name, inputMethods
-  }
-
-  init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    name = try container.decode(String.self, forKey: .name)
-    inputMethods = (try? container.decode([GroupItem].self, forKey: .inputMethods)) ?? []
-  }
-
-  init(name: String, inputMethods: [GroupItem]) {
-    self.name = name
-    self.inputMethods = inputMethods
-  }
 }
 
 private struct GroupItem: Identifiable, Codable {
-  var name: String
-  var displayName: String
+  let name: String
+  let displayName: String
   let id = UUID()
-
-  private enum CodingKeys: CodingKey {
-    case name
-    case displayName
-  }
 }
 
 struct InputMethodConfigView: View {
@@ -77,7 +56,7 @@ struct InputMethodConfigView: View {
   var body: some View {
     NavigationSplitView {
       List(selection: $viewModel.selectedItem) {
-        ForEach($viewModel.groups) { $group in
+        ForEach($viewModel.groups, id: \.name) { $group in
           let header = HStack {
             Text(group.name)
 

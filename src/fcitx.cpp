@@ -295,10 +295,12 @@ std::string imGetGroups() noexcept {
             if (auto group = imMgr.group(groupName)) {
                 nlohmann::json g;
                 g["name"] = groupName;
+                auto ims = nlohmann::json::array();
                 for (const auto &im : group->inputMethodList()) {
                     if (auto entry = imMgr.entry(im.name()))
-                        g["inputMethods"].push_back(json_describe_im(entry));
+                        ims.push_back(json_describe_im(entry));
                 }
+                g["inputMethods"] = ims;
                 j.push_back(g);
             }
         }
