@@ -4,6 +4,7 @@ project(fcitx5-macos VERSION 0.1.0 LANGUAGES CXX Swift)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_Swift_LANGUAGE_VRSION 5.9)
 
 include(InitializeSwift)
 include(AddSwift)
