@@ -224,7 +224,7 @@ FCITX_CONFIGURATION(
     Option<int, IntConstrain> blurRadius{this, "BlurRadius",
                                          _("Radius of web-based blur (px)"), 16,
                                          IntConstrain(1, 32)};
-    Option<bool> shadow{this, "Shadow", _("Web-based shadow"), true};);
+    Option<bool> shadow{this, "Shadow", _("Web-based shadow"), false};);
 
 using FontFamilyOption =
     OptionWithAnnotation<std::vector<std::string>, FontAnnotation>;
