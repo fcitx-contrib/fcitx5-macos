@@ -263,8 +263,8 @@ void WebPanel::updateConfig() {
                                              HighlightMarkStyle::Text
                                          ? config_.highlight->markText.value()
                                          : "");
-    window_->set_native_blur(config_.background->nativeBlur.value());
-    window_->set_native_shadow(config_.background->nativeShadow.value());
+    window_->set_native_blur(config_.background->blur.value());
+    window_->set_native_shadow(config_.background->shadow.value());
     auto style = configValueToJson(config_).dump();
     window_->set_style(style.c_str());
     if (auto web = dynamic_cast<candidate_window::WebviewCandidateWindow *>(
