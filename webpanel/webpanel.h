@@ -217,9 +217,6 @@ FCITX_CONFIGURATION(BackgroundConfig,
                     OptionWithAnnotation<std::string, ImageAnnotation> imageUrl{
                         this, "ImageUrl", _("Image"), ""};
                     Option<bool> blur{this, "Blur", _("Blur"), true};
-                    Option<int, IntConstrain> blurRadius{
-                        this, "BlurRadius", _("Radius of blur (px)"), 16,
-                        IntConstrain(1, 32)};
                     Option<bool> shadow{this, "Shadow", _("Shadow"), true};);
 
 using FontFamilyOption =
