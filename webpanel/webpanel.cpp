@@ -264,7 +264,9 @@ void WebPanel::updateConfig() {
                                          ? config_.highlight->markText.value()
                                          : "");
     window_->set_native_blur(config_.background->blur.value());
-    window_->set_native_shadow(config_.background->shadow.value());
+    // Keep CSS shadow as native may leave a ghost shadow of last frame when
+    // typing fast.
+    // window_->set_native_shadow(config_.background->shadow.value());
     auto style = configValueToJson(config_).dump();
     window_->set_style(style.c_str());
     if (auto web = dynamic_cast<candidate_window::WebviewCandidateWindow *>(
