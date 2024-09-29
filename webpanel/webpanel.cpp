@@ -516,7 +516,8 @@ void WebPanel::scroll(int start, int count) {
 }
 
 void WebPanel::expand() {
-    scroll(0, 42); // Hard-coded like fcitx5-webview
+    scroll(0, 6 * (*config_.scrollMode->maxRowCount +
+                   1)); // Hard-coded like fcitx5-webview
 }
 
 void WebPanel::collapse() {
