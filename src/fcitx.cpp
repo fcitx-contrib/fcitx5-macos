@@ -149,14 +149,14 @@ void Fcitx::setupInstance() {
     dispatcher_->attach(&instance_->eventLoop());
 }
 
-void Fcitx::exec() { instance_->exec(); }
+void Fcitx::exec() { instance_->eventLoop().exec(); }
 
 void Fcitx::exit() {
     // the fcitx instance may have been destroyed by stop_fcitx_thread.
     if (dispatcher_)
         dispatcher_->detach();
     if (instance_)
-        instance_->exit();
+        instance_->eventLoop().exit();
 }
 
 void Fcitx::schedule(std::function<void()> func) {
