@@ -28,6 +28,7 @@ let officialPlugins = [
   Plugin(id: "hallelujah", category: English, native: true, github: "fcitx-contrib/fcitx5-hallelujah"),
   Plugin(id: "lua", category: Other, native: true, github: "fcitx/fcitx5-lua"),
   Plugin(id: "quick", category: Chinese, native: false, github: tableExtra, dependencies: ["chinese-addons"]),
+  Plugin(id: "mozc", category: Japanese, native: true, github: "fcitx/mozc"),
   Plugin(id: "rime", category: Generic, native: true, github: "fcitx/fcitx5-rime"),
   Plugin(id: "skk", category: Japanese, native: true, github: "fcitx/fcitx5-skk"),
   Plugin(id: "stroke", category: Chinese, native: false, github: tableExtra, dependencies: ["chinese-addons"]),
