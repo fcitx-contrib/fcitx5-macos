@@ -19,12 +19,7 @@ jobs:
         run: brew install clang-format swift-format
 
       - name: Lint
-        run: |
-          find macosfrontend macosnotifications webpanel src tests -name '*.cpp' -o -name '*.h' | xargs clang-format -Werror --dry-run -style=file:fcitx5/.clang-format
-          clang-format -Werror --dry-run macosfrontend/pasteboard.mm
-          swift-format lint --configuration .swift-format.json -rs macosfrontend macosnotifications src assets
-          ./check-code-style.sh
-          file assets/zh-Hans.lproj/Localizable.strings | grep UTF-16
+        run: ./scripts/lint.sh
 
   build:
     needs: lint
@@ -59,7 +54,7 @@ jobs:
             librsvg \
             md5sha1sum \
             ninja
-          ./install-deps.sh ${{ matrix.arch }}
+          ./scripts/install-deps.sh ${{ matrix.arch }}
           npm i -g pnpm
           pnpm --prefix=fcitx5-webview i
 
@@ -72,6 +67,7 @@ jobs:
           cmake --build build
           sudo cmake --install build
           tar cjvf Fcitx5-${{ matrix.arch }}.tar.bz2 -C "/Library/Input Methods" Fcitx5.app
+          ./scripts/code-sign.sh # after tar to avoid local signature in tarball
 
       - name: Test
         run: |
@@ -87,7 +83,7 @@ jobs:
 
       - name: Check validity
         run: |
-          ./check-validity.sh
+          ./scripts/check-validity.sh
           md5sum -c checksum
 
       - name: Generate meta.json

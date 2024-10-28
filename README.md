@@ -21,7 +21,7 @@ to install node, then
 ```sh
 sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 brew install cmake ninja extra-cmake-modules gettext nlohmann-json librsvg
-./install-deps.sh # Required to re-run after rebooting
+./scripts/install-deps.sh # Required to re-run after rebooting
 npm i -g pnpm
 pnpm --prefix=fcitx5-webview i
 ```
@@ -37,10 +37,12 @@ then add Fcitx5 in System Setttings -> Keyboard -> Input Sources, Chinese Simpli
 
 For installations afterwards, clicking `Restart` in Fcitx5 menu suffices.
 
+You can also use `Cmd+Shift+B` in VSCode to execute a task.
+
 ### Code sign
 Some features (e.g. notifications, core dump) require the app bundle be code-signed after installation:
 ```sh
-sudo /usr/bin/codesign --force --sign - --entitlements assets/core.entitlements --deep /Library/Input\ Methods/Fcitx5.app
+./scripts/code-sign.sh
 ```
 
 ## Debug
