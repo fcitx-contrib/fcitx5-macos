@@ -1,2 +1,3 @@
 let commit = "@COMMIT@"
+// swift-format-ignore
 let unixTime = @UNIX_TIME@
