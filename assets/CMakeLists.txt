@@ -27,22 +27,6 @@ install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/fcitx5-curl"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
 )
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Base.lproj"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
-)
-
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/en.lproj"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
-)
-
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/zh-Hans.lproj"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
-)
-
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/zh-Hant.lproj"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
-)
-
 install(DIRECTORY "${PREBUILT_INSTALL_PATH}/share/icons"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/share"
 )
@@ -61,20 +45,31 @@ install(DIRECTORY "${PREBUILT_INSTALL_PATH}/share/X11"
 #
 file(GLOB_RECURSE LOCALIZABLE_SWIFT_SOURCES ${CMAKE_SOURCE_DIR}/src/*.swift)
 set(LOCALIZABLE_STRINGS_FILES
-    ${PROJECT_SOURCE_DIR}/assets/en.lproj/Localizable.strings
-    ${PROJECT_SOURCE_DIR}/assets/zh-Hans.lproj/Localizable.strings
+    ${CMAKE_CURRENT_SOURCE_DIR}/en.lproj/Localizable.strings
+    ${CMAKE_CURRENT_SOURCE_DIR}/zh-Hans.lproj/Localizable.strings
 )
 add_custom_command(
     OUTPUT ${LOCALIZABLE_STRINGS_FILES}
-    COMMAND genstrings ${LOCALIZABLE_SWIFT_SOURCES} -SwiftUI -o ${PROJECT_SOURCE_DIR}/assets/en.lproj
-    COMMAND ${PROJECT_SOURCE_DIR}/assets/update_translations.py ${LOCALIZABLE_STRINGS_FILES}
+    COMMAND genstrings ${LOCALIZABLE_SWIFT_SOURCES} -SwiftUI -o ${CMAKE_CURRENT_SOURCE_DIR}/en.lproj
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/update_translations.py ${LOCALIZABLE_STRINGS_FILES}
     DEPENDS ${LOCALIZABLE_SWIFT_SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating Localizable.strings..."
 )
 add_custom_target(GenerateStrings
-    DEPENDS ${PROJECT_SOURCE_DIR}/assets/en.lproj/Localizable.strings
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/en.lproj/Localizable.strings
 )
+
+foreach(LOCALE
+    Base
+    en
+    zh-Hans
+    zh-Hant
+)
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${LOCALE}.lproj"
+        DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
+    )
+endforeach()
 
 #
 # C++ i18n through gettext
@@ -91,14 +86,14 @@ set(TRANSLATABLE_CXX_SOURCES
     webpanel/*.h
 )
 add_custom_command(
-    OUTPUT ${CMAKE_SOURCE_DIR}/assets/po/base.pot
-    COMMAND xgettext --c++ --keyword=_ ${TRANSLATABLE_CXX_SOURCES} -o ${CMAKE_SOURCE_DIR}/assets/po/base.pot
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/po/base.pot
+    COMMAND xgettext --c++ --keyword=_ ${TRANSLATABLE_CXX_SOURCES} -o ${CMAKE_CURRENT_SOURCE_DIR}/po/base.pot
     DEPENDS ${LOCALIZABLE_CXX_SOURCES}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Generating base.pot..."
 )
 add_custom_target(pot
-    DEPENDS ${CMAKE_SOURCE_DIR}/assets/po/base.pot
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/po/base.pot
 )
 
 foreach(LOCALE zh_CN)

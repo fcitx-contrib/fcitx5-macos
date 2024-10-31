@@ -15,6 +15,8 @@ codesign --force --sign - --deep "$APP_DIR"
 
 cd "$RESOURCES_DIR"
 # Switching out is necessary, otherwise it doesn't show menu
+# Not sure which one so try both.
 su -m "$user" -c "./switch_im com.apple.keylayout.ABC"
+su -m "$user" -c "./switch_im com.apple.keylayout.US"
 killall Fcitx5
 su -m "$user" -c "./switch_im org.fcitx.inputmethod.Fcitx5.fcitx5"

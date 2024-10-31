@@ -19,7 +19,7 @@ private var pluginMap = officialPlugins.reduce(into: [String: Plugin]()) { resul
 }
 
 // fcitx5 doesn't unload addons from memory, so once loaded, we have to restart process to use an updated version.
-private var inMemoryPlugins: [String] = []
+private var inMemoryPlugins = [String]()
 private var needsRestart = false
 
 private func getInstalledPlugins() -> [Plugin] {
@@ -56,22 +56,15 @@ private func getAutoAddIms(_ plugin: String) -> [String] {
 }
 
 class PluginVM: ObservableObject {
-  @Published private(set) var installedPlugins: [Plugin] = []
-  @Published private(set) var availablePlugins: [Plugin] = []
+  @Published private(set) var installedPlugins = [Plugin]()
+  @Published private(set) var availablePlugins = [Plugin]()
   @Published var upToDate = false
 
   func refreshPlugins() {
     installedPlugins = getInstalledPlugins()
-    availablePlugins.removeAll()
-    for plugin in officialPlugins {
-      if !installedPlugins.contains(plugin) {
-        availablePlugins.append(plugin)
-      }
-    }
-    for plugin in installedPlugins {
-      if !inMemoryPlugins.contains(plugin.id) {
-        inMemoryPlugins.append(plugin.id)
-      }
+    availablePlugins = officialPlugins.filter { !installedPlugins.contains($0) }
+    for plugin in installedPlugins.filter({ !inMemoryPlugins.contains($0.id) }) {
+      inMemoryPlugins.append(plugin.id)
     }
     // Allow recheck update on reopen plugin manager.
     upToDate = false
@@ -135,6 +128,8 @@ struct PluginView: View {
   @State private var downloadProgress = 0.0
 
   @State private var showUpToDate = false
+  @State private var showCheckFailed = false
+  @State private var showDownloadFailed = false
   @State private var showUpdateAvailable = false
 
   @ObservedObject private var pluginVM = PluginVM()
@@ -146,6 +141,11 @@ struct PluginView: View {
   private func checkUpdate() {
     processing = true
     checkPluginUpdate({ success, nativePlugins, dataPlugins in
+      processing = false
+      if !success {
+        showCheckFailed = true
+        return
+      }
       nativeAvailable = nativePlugins
       dataAvailable = dataPlugins
       if nativePlugins.isEmpty && dataPlugins.isEmpty {
@@ -170,12 +170,8 @@ struct PluginView: View {
     }
     for selectedPlugin in selectedInstalled {
       let descriptor = pluginDirectory.appendingPathComponent(selectedPlugin + ".json")
-      let files = getFiles(descriptor)
-      for file in files {
-        // Don't remove files shared by other plugins
-        if keptFiles.contains(file) {
-          continue
-        }
+      // Don't remove files shared by other plugins
+      for file in getFiles(descriptor).filter({ !keptFiles.contains($0) }) {
         let _ = removeFile(libraryDir.appendingPathComponent(file))
       }
       let _ = removeFile(descriptor)
@@ -199,14 +195,11 @@ struct PluginView: View {
             if plugin.github != nil,
               let url = URL(string: "https://github.com/\(plugin.github!)")
             {
-              Button(
-                action: {
-                  NSWorkspace.shared.open(url)
-                },
-                label: {
-                  Image(systemName: "arrow.up.forward.app.fill")
-                }
-              ).buttonStyle(.plain).help("\(url)")
+              Button {
+                NSWorkspace.shared.open(url)
+              } label: {
+                Image(systemName: "arrow.up.forward.app.fill")
+              }.buttonStyle(.plain).help("\(url)")
             }
           }
         }
@@ -249,16 +242,18 @@ struct PluginView: View {
     let updater = Updater(main: false, nativePlugins: nativeAvailable, dataPlugins: dataAvailable)
     updater.update(
       onFinish: { _, nativeResults, dataResults in
-        var inputMethods: [String] = [String]()
+        processing = false
+        var inputMethods = [String]()
         if !isUpdate {
-          // Don't add IMs for dependencies.
-          for plugin in selectedPlugins {
-            if (nativeResults[plugin] ?? true) && (dataResults[plugin] ?? true) {
-              for im in getAutoAddIms(plugin) {
-                inputMethods.append(im)
-              }
-            }
+          let downloadedPlugins = selectedPlugins.filter {
+            (nativeResults[$0] ?? true) && (dataResults[$0] ?? true)
           }
+          if downloadedPlugins.isEmpty {
+            showDownloadFailed = true
+            return
+          }
+          // Don't add IMs for dependencies.
+          inputMethods = downloadedPlugins.flatMap { getAutoAddIms($0) }
         }
         if !Set(nativeResults.filter({ _, success in success }).keys).intersection(inMemoryPlugins)
           .isEmpty
@@ -353,26 +348,20 @@ struct PluginView: View {
           install(false)
         }
         HStack {
-          Button(
-            action: {
-              install(false)
-            },
-            label: {
-              Text("Install")
-            }
-          ).disabled(selectedAvailable.isEmpty || processing)
+          Button {
+            install(false)
+          } label: {
+            Text("Install")
+          }.disabled(selectedAvailable.isEmpty || processing)
             .buttonStyle(.borderedProminent)
-          Button(
-            action: {
-              install(true)
-            },
-            label: {
-              Text("Install silently").tooltip(
-                NSLocalizedString(
-                  "Upgrading a plugin needs to restart IM. Click it to auto restart on demand.",
-                  comment: ""))
-            }
-          ).disabled(selectedAvailable.isEmpty || processing)
+          Button {
+            install(true)
+          } label: {
+            Text("Install silently").tooltip(
+              NSLocalizedString(
+                "Upgrading a plugin needs to restart IM. Click it to auto restart on demand.",
+                comment: ""))
+          }.disabled(selectedAvailable.isEmpty || processing)
             .buttonStyle(.borderedProminent)
         }
       }
@@ -380,14 +369,11 @@ struct PluginView: View {
       .sheet(isPresented: $promptRestart) {
         VStack {
           Text("Please restart Fcitx5 in IM menu")
-          Button(
-            action: {
-              promptRestart = false
-            },
-            label: {
-              Text("OK")
-            }
-          ).buttonStyle(.borderedProminent)
+          Button {
+            promptRestart = false
+          } label: {
+            Text("OK")
+          }.buttonStyle(.borderedProminent)
         }.padding()
       }
       .toast(isPresenting: $showUpToDate) {
@@ -395,6 +381,16 @@ struct PluginView: View {
           displayMode: .hud,
           type: .complete(Color.green),
           title: NSLocalizedString("All plugins are up to date", comment: ""))
+      }
+      .toast(isPresenting: $showCheckFailed) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Failed to check update", comment: ""))
+      }
+      .toast(isPresenting: $showDownloadFailed) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Download failed", comment: ""))
       }
   }
 }

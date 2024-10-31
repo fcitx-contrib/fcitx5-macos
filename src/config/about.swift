@@ -14,21 +14,6 @@ func getDate() -> String {
   return dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(unixTime)))
 }
 
-func urlButton(_ text: String, _ link: String) -> some View {
-  Button(
-    action: {
-      if let url = URL(string: link) {
-        NSWorkspace.shared.open(url)
-      }
-    },
-    label: {
-      Text(text)
-        .foregroundColor(.blue)
-    }
-  ).buttonStyle(PlainButtonStyle())
-    .focusable(false)
-}
-
 let bundleId = "org.fcitx.inputmethod.Fcitx5"
 let inputSourceId = bundleId
 
@@ -121,26 +106,23 @@ struct AboutView: View {
 
       Spacer().frame(height: gapSize)
       HStack {
-        Button(
-          action: {
-            if viewModel.state == .notChecked {
-              checkUpdate()
-            } else if viewModel.state == .available {
-              update()
-            }
-          },
-          label: {
-            if viewModel.state == .notChecked || viewModel.state == .upToDate {
-              Text("Check update")
-            } else if viewModel.state == .checking
-              || viewModel.state == .availableSheet
-            {
-              Text("Checking")
-            } else {
-              Text("Update")
-            }
+        Button {
+          if viewModel.state == .notChecked {
+            checkUpdate()
+          } else if viewModel.state == .available {
+            update()
           }
-        ).buttonStyle(.borderedProminent)
+        } label: {
+          if viewModel.state == .notChecked || viewModel.state == .upToDate {
+            Text("Check update")
+          } else if viewModel.state == .checking
+            || viewModel.state == .availableSheet
+          {
+            Text("Checking")
+          } else {
+            Text("Update")
+          }
+        }.buttonStyle(.borderedProminent)
           .disabled(
             viewModel.state == .checking || viewModel.state == .upToDate
               || viewModel.state == .downloading || viewModel.state == .installing
@@ -156,60 +138,45 @@ struct AboutView: View {
           ) {
             VStack {
               Text("Update available")
-              Button(
-                action: {
-                  update()
-                },
-                label: {
-                  Text("Update now")
-                }
-              ).buttonStyle(.borderedProminent)
-              Button(
-                action: {
-                  viewModel.state = .available
-                },
-                label: {
-                  Text("Maybe later")
-                }
-              )
+              Button {
+                update()
+              } label: {
+                Text("Update now")
+              }.buttonStyle(.borderedProminent)
+              Button {
+                viewModel.state = .available
+              } label: {
+                Text("Maybe later")
+              }
             }.padding()
           }
 
-        Button(
-          action: {
-            confirmUninstall = true
-          },
-          label: {
-            Text("Uninstall")
-          }
-        ).sheet(
+        Button {
+          confirmUninstall = true
+        } label: {
+          Text("Uninstall")
+        }.sheet(
           isPresented: $confirmUninstall
         ) {
           VStack {
             Text("Are you sure to uninstall?")
-            Button(
-              action: {
-                confirmUninstall = false
-              },
-              label: {
-                Text("Cancel")
-              })
-            Button(
-              action: {
-                removeUserData = false
-                uninstall()
-              },
-              label: {
-                Text("Uninstall and keep user data")
-              })
-            Button(
-              action: {
-                removeUserData = true
-                uninstall()
-              },
-              label: {
-                Text("Uninstall")
-              })
+            Button {
+              confirmUninstall = false
+            } label: {
+              Text("Cancel")
+            }
+            Button {
+              removeUserData = false
+              uninstall()
+            } label: {
+              Text("Uninstall and keep user data")
+            }
+            Button {
+              removeUserData = true
+              uninstall()
+            } label: {
+              Text("Uninstall")
+            }
           }.padding()
         }.sheet(isPresented: $uninstallFailed) {
           VStack {
@@ -220,14 +187,11 @@ struct AboutView: View {
             if removeUserData {
               Text("~/.local/share/fcitx5")
             }
-            Button(
-              action: {
-                uninstallFailed = false
-              },
-              label: {
-                Text("OK")
-              }
-            ).buttonStyle(.borderedProminent)
+            Button {
+              uninstallFailed = false
+            } label: {
+              Text("OK")
+            }.buttonStyle(.borderedProminent)
           }.padding()
         }
       }

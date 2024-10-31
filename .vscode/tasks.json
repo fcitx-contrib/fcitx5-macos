@@ -28,7 +28,7 @@
         {
             "type": "shell",
             "label": "Install",
-            "command": "sudo cmake --install build && ./scripts/code-sign.sh && killall Fcitx5",
+            "command": "sudo cmake --install build && ./scripts/code-sign.sh",
             "group": {
                 "kind": "build"
             }
@@ -45,6 +45,14 @@
             "type": "shell",
             "label": "Lint",
             "command": "./scripts/lint.sh",
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Test",
+            "command": "ctest --test-dir build --output-on-failure",
             "group": {
                 "kind": "build"
             }
