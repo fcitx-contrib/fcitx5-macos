@@ -65,7 +65,7 @@ class Updater {
           }
         }
 
-        var dataResults: [String: Bool] = nativePlugins.reduce(
+        var dataResults: [String: Bool] = dataPlugins.reduce(
           into: [String: Bool](), { $0[$1] = false })
         for plugin in dataPlugins {
           let result = results[getAddress(plugin, native: false)]!

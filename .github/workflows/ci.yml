@@ -70,9 +70,7 @@ jobs:
           ./scripts/code-sign.sh # after tar to avoid local signature in tarball
 
       - name: Test
-        run: |
-          cd build
-          ctest --output-on-failure
+        run: ctest --test-dir build --output-on-failure
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

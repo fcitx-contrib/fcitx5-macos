@@ -56,7 +56,7 @@ set(BINARY_LIB_PATH "${PROJECT_BINARY_DIR}/fcitx5/src/lib")
 set(BINARY_MODULE_PATH "${PROJECT_BINARY_DIR}/fcitx5/src/modules")
 
 add_custom_command(TARGET Fcitx5 POST_BUILD
-    COMMAND rm -f "${CMAKE_CURRENT_BINARY_DIR}/Fcitx5.app/Contents/Macos/Fcitx5.d"
+    COMMAND rm -f "${CMAKE_CURRENT_BINARY_DIR}/Fcitx5.app/Contents/MacOS/Fcitx5.d"
 )
 
 install(TARGETS Fcitx5

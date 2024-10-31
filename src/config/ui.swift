@@ -53,6 +53,21 @@ func footer(reset: @escaping () -> Void, apply: @escaping () -> Void, close: @es
   }.padding()
 }
 
+func urlButton(_ text: String, _ link: String) -> some View {
+  Button(
+    action: {
+      if let url = URL(string: link) {
+        NSWorkspace.shared.open(url)
+      }
+    },
+    label: {
+      Text(text)
+        .foregroundColor(.blue)
+    }
+  ).buttonStyle(PlainButtonStyle())
+    .focusable(false)
+}
+
 struct SelectFileButton<Label>: View where Label: View {
   let directory: URL
   let allowedContentTypes: [UTType]
