@@ -8,6 +8,11 @@ let pinyinPath = pinyinLocalDir.localPath()
 let customphrase = pinyinLocalDir.appendingPathComponent("customphrase")
 let nativeCustomPhrase = cacheDir.appendingPathComponent("customphrase.plist")
 
+// XXX: remove it once the file is moved to config tool
+func quote(_ s: String) -> String {
+  return s.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
+}
+
 struct CustomPhrase: Identifiable, Hashable {
   var id: Int {
     var hasher = Hasher()

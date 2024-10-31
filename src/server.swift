@@ -54,6 +54,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     let locale = getLocale()
     start_fcitx_thread(locale)
+
+    // Config Tool may restart Fcitx5 with input methods to auto add.
+    let inputMethods = CommandLine.arguments.dropFirst()
+    if imGroupCount() == 1 {
+      // Otherwise user knows how to play with it, don't mess it up.
+      for im in inputMethods {
+        Fcitx.imAddToCurrentGroup(im)
+      }
+    }
   }
 
   func applicationWillTerminate(_ notification: Notification) {

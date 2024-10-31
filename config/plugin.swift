@@ -1,5 +1,4 @@
 import AlertToast
-import Fcitx
 import Logging
 import SwiftUI
 import SwiftyJSON
@@ -17,10 +16,6 @@ struct Plugin: Identifiable, Hashable {
 private var pluginMap = officialPlugins.reduce(into: [String: Plugin]()) { result, plugin in
   result[plugin.id] = plugin
 }
-
-// fcitx5 doesn't unload addons from memory, so once loaded, we have to restart process to use an updated version.
-private var inMemoryPlugins = [String]()
-private var needsRestart = false
 
 private func getInstalledPlugins() -> [Plugin] {
   let names = getFileNamesWithExtension(pluginDirectory.localPath(), ".json")
@@ -63,9 +58,6 @@ class PluginVM: ObservableObject {
   func refreshPlugins() {
     installedPlugins = getInstalledPlugins()
     availablePlugins = officialPlugins.filter { !installedPlugins.contains($0) }
-    for plugin in installedPlugins.filter({ !inMemoryPlugins.contains($0.id) }) {
-      inMemoryPlugins.append(plugin.id)
-    }
     // Allow recheck update on reopen plugin manager.
     upToDate = false
   }
@@ -123,7 +115,6 @@ struct PluginView: View {
   @State private var dataAvailable = [String]()
 
   @State private var processing = false
-  @State private var promptRestart = false
 
   @State private var downloadProgress = 0.0
 
@@ -154,7 +145,6 @@ struct PluginView: View {
       } else {
         showUpdateAvailable = true
       }
-      processing = false
     })
   }
 
@@ -179,7 +169,7 @@ struct PluginView: View {
     }
     selectedInstalled.removeAll()
     refreshPlugins()
-    restartAndReconnect()
+    restartFcitxProcess()
     processing = false
   }
 
@@ -207,7 +197,7 @@ struct PluginView: View {
     }
   }
 
-  private func install(_ autoRestart: Bool, isUpdate: Bool = false) {
+  private func install(isUpdate: Bool = false) {
     processing = true
 
     if !isUpdate {
@@ -243,42 +233,20 @@ struct PluginView: View {
     updater.update(
       onFinish: { _, nativeResults, dataResults in
         processing = false
-        var inputMethods = [String]()
-        if !isUpdate {
-          let downloadedPlugins = selectedPlugins.filter {
-            (nativeResults[$0] ?? true) && (dataResults[$0] ?? true)
-          }
-          if downloadedPlugins.isEmpty {
-            showDownloadFailed = true
-            return
-          }
-          // Don't add IMs for dependencies.
-          inputMethods = downloadedPlugins.flatMap { getAutoAddIms($0) }
+        let downloadedPlugins = selectedPlugins.filter {
+          (nativeResults[$0] ?? true) && (dataResults[$0] ?? true)
         }
-        if !Set(nativeResults.filter({ _, success in success }).keys).intersection(inMemoryPlugins)
-          .isEmpty
-        {
-          needsRestart = true
+        if downloadedPlugins.isEmpty {
+          showDownloadFailed = true
+          return
         }
+        // Don't add IMs for dependencies.
+        let inputMethods =
+          isUpdate
+          ? [String]()
+          : downloadedPlugins.flatMap { getAutoAddIms($0) }
         refreshPlugins()
-        restartAndReconnect()
-        if Fcitx.imGroupCount() == 1 {
-          // Otherwise user knows how to play with it, don't mess it up.
-          for im in inputMethods {
-            Fcitx.imAddToCurrentGroup(im)
-          }
-        }
-        processing = false
-        if needsRestart {
-          if autoRestart {
-            FcitxInputController.pluginManager.window?.performClose(_: nil)
-            DispatchQueue.main.async {
-              restartProcess()
-            }
-          } else {
-            promptRestart = true
-          }
-        }
+        restartFcitxProcess(inputMethods: inputMethods)
       },
       onProgress: { progress in
         downloadProgress = progress
@@ -326,15 +294,18 @@ struct PluginView: View {
                   }
                   Button {
                     showUpdateAvailable = false
-                    install(true, isUpdate: true)
+                    install(isUpdate: true)
                   } label: {
                     Text("Update")
                   }.buttonStyle(.borderedProminent)
                 }
               }.padding()
             }
-          Button("Uninstall", role: .destructive, action: uninstall).disabled(
-            selectedInstalled.isEmpty || processing)
+          Button {
+            uninstall()
+          } label: {
+            Text("Uninstall")
+          }.disabled(selectedInstalled.isEmpty || processing)
         }
       }
       VStack {
@@ -345,37 +316,18 @@ struct PluginView: View {
         }.contextMenu(forSelectionType: String.self) { items in
         } primaryAction: { items in
           // Double click
-          install(false)
+          install()
         }
         HStack {
           Button {
-            install(false)
+            install()
           } label: {
             Text("Install")
-          }.disabled(selectedAvailable.isEmpty || processing)
-            .buttonStyle(.borderedProminent)
-          Button {
-            install(true)
-          } label: {
-            Text("Install silently").tooltip(
-              NSLocalizedString(
-                "Upgrading a plugin needs to restart IM. Click it to auto restart on demand.",
-                comment: ""))
           }.disabled(selectedAvailable.isEmpty || processing)
             .buttonStyle(.borderedProminent)
         }
       }
     }.padding()
-      .sheet(isPresented: $promptRestart) {
-        VStack {
-          Text("Please restart Fcitx5 in IM menu")
-          Button {
-            promptRestart = false
-          } label: {
-            Text("OK")
-          }.buttonStyle(.borderedProminent)
-        }.padding()
-      }
       .toast(isPresenting: $showUpToDate) {
         AlertToast(
           displayMode: .hud,

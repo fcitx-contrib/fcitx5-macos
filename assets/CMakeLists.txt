@@ -1,5 +1,3 @@
-add_executable(switch_im switch_im.swift)
-
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/fcitx.icns"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
@@ -16,13 +14,9 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/menu_icon.pdf"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
 
-# Preserve execution permission
-install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/uninstall.sh"
-    "${CMAKE_CURRENT_SOURCE_DIR}/update.sh"
-    "${CMAKE_CURRENT_BINARY_DIR}/switch_im"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
-)
+add_subdirectory(config)
 
+# Preserve execution permission
 install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/fcitx5-curl"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
 )
@@ -44,20 +38,28 @@ install(DIRECTORY "${PREBUILT_INSTALL_PATH}/share/X11"
 # Use 'GenerateStrings' to update .strings files.
 #
 file(GLOB_RECURSE LOCALIZABLE_SWIFT_SOURCES ${CMAKE_SOURCE_DIR}/src/*.swift)
+file(GLOB_RECURSE LOCALIZABLE_CONFIGTOOL_SWIFT_SOURCES ${CMAKE_SOURCE_DIR}/config/*.swift)
+
 set(LOCALIZABLE_STRINGS_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/en.lproj/Localizable.strings
     ${CMAKE_CURRENT_SOURCE_DIR}/zh-Hans.lproj/Localizable.strings
 )
+set(LOCALIZABLE_CONFIGTOOL_STRINGS_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/config/en.lproj/Localizable.strings
+    ${CMAKE_CURRENT_SOURCE_DIR}/config/zh-Hans.lproj/Localizable.strings
+)
 add_custom_command(
-    OUTPUT ${LOCALIZABLE_STRINGS_FILES}
+    OUTPUT ${LOCALIZABLE_STRINGS_FILES} ${LOCALIZABLE_CONFIGTOOL_STRINGS_FILES}
     COMMAND genstrings ${LOCALIZABLE_SWIFT_SOURCES} -SwiftUI -o ${CMAKE_CURRENT_SOURCE_DIR}/en.lproj
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/update_translations.py ${LOCALIZABLE_STRINGS_FILES}
-    DEPENDS ${LOCALIZABLE_SWIFT_SOURCES}
+    COMMAND genstrings ${LOCALIZABLE_CONFIGTOOL_SWIFT_SOURCES} -SwiftUI -o ${CMAKE_CURRENT_SOURCE_DIR}/config/en.lproj
+    COMMAND ./update_translations.py ${LOCALIZABLE_STRINGS_FILES}
+    COMMAND ./update_translations.py ${LOCALIZABLE_CONFIGTOOL_STRINGS_FILES}
+    DEPENDS ${LOCALIZABLE_SWIFT_SOURCES} ${LOCALIZABLE_CONFIGTOOL_SWIFT_SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating Localizable.strings..."
 )
 add_custom_target(GenerateStrings
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/en.lproj/Localizable.strings
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/en.lproj/Localizable.strings ${CMAKE_CURRENT_SOURCE_DIR}/config/en.lproj/Localizable.strings
 )
 
 foreach(LOCALE

@@ -59,10 +59,13 @@ struct AboutView: View {
   @State private var showCheckFailed = false
   @State private var showDownloadFailed = false
   @State private var showInstallFailed = false
+  @State private var showUninstalled = false
+
   @State private var confirmUninstall = false
   @State private var removeUserData = false
   @State private var uninstalling = false
   @State private var uninstallFailed = false
+  @State private var uninstalled = false
 
   var body: some View {
     VStack {
@@ -124,7 +127,7 @@ struct AboutView: View {
           }
         }.buttonStyle(.borderedProminent)
           .disabled(
-            viewModel.state == .checking || viewModel.state == .upToDate
+            uninstalled || viewModel.state == .checking || viewModel.state == .upToDate
               || viewModel.state == .downloading || viewModel.state == .installing
           )
           .sheet(
@@ -155,45 +158,46 @@ struct AboutView: View {
           confirmUninstall = true
         } label: {
           Text("Uninstall")
-        }.sheet(
-          isPresented: $confirmUninstall
-        ) {
-          VStack {
-            Text("Are you sure to uninstall?")
-            Button {
-              confirmUninstall = false
-            } label: {
-              Text("Cancel")
-            }
-            Button {
-              removeUserData = false
-              uninstall()
-            } label: {
-              Text("Uninstall and keep user data")
-            }
-            Button {
-              removeUserData = true
-              uninstall()
-            } label: {
-              Text("Uninstall")
-            }
-          }.padding()
-        }.sheet(isPresented: $uninstallFailed) {
-          VStack {
-            Text("Uninstall failed, you may need to manually remove")
-            Text("/Library/Input Methods/Fcitx5.app")
-            Text("~/Library/fcitx5")
-            Text("~/.config/fcitx5")
-            if removeUserData {
-              Text("~/.local/share/fcitx5")
-            }
-            Button {
-              uninstallFailed = false
-            } label: {
-              Text("OK")
-            }.buttonStyle(.borderedProminent)
-          }.padding()
-        }
+        }.disabled(uninstallFailed || uninstalled)
+          .sheet(
+            isPresented: $confirmUninstall
+          ) {
+            VStack {
+              Text("Are you sure to uninstall?")
+              Button {
+                confirmUninstall = false
+              } label: {
+                Text("Cancel")
+              }
+              Button {
+                removeUserData = false
+                uninstall()
+              } label: {
+                Text("Uninstall and keep user data")
+              }
+              Button {
+                removeUserData = true
+                uninstall()
+              } label: {
+                Text("Uninstall")
+              }
+            }.padding()
+          }.sheet(isPresented: $uninstallFailed) {
+            VStack {
+              Text("Uninstall failed, you may need to manually remove")
+              Text("/Library/Input Methods/Fcitx5.app")
+              Text("~/Library/fcitx5")
+              Text("~/.config/fcitx5")
+              if removeUserData {
+                Text("~/.local/share/fcitx5")
+              }
+              Button {
+                uninstallFailed = false
+              } label: {
+                Text("OK")
+              }.buttonStyle(.borderedProminent)
+            }.padding()
+          }
       }
       if viewModel.state == .downloading {
         ProgressView(value: downloadProgress, total: 1)
@@ -219,6 +223,11 @@ struct AboutView: View {
           displayMode: .hud, type: .error(Color.red),
           title: NSLocalizedString("Install failed", comment: ""))
       }
+      .toast(isPresenting: $showUninstalled) {
+        AlertToast(
+          displayMode: .hud, type: .complete(Color.green),
+          title: NSLocalizedString("Fcitx5 is uninstalled", comment: ""))
+      }
       .toast(
         isPresenting: Binding(
           get: { viewModel.state == .installing || uninstalling },
@@ -236,7 +245,13 @@ struct AboutView: View {
     // Without this, if user cancels sudo prompt and try again, UI will hang.
     disableInputMethod()
     DispatchQueue.global().async {
-      if !sudo("uninstall", removeUserData ? "true" : "false", uninstallLog) {
+      if sudo("uninstall", removeUserData ? "true" : "false", uninstallLog) {
+        DispatchQueue.main.async {
+          uninstalling = false
+          uninstalled = true
+          showUninstalled = true
+        }
+      } else {
         DispatchQueue.main.async {
           uninstalling = false
           uninstallFailed = true
@@ -294,19 +309,16 @@ struct AboutView: View {
 
   func install() {
     viewModel.state = .installing
-    let conditions = NSMutableDictionary()
-    conditions.setValue("com.apple.keylayout.ABC", forKey: kTISPropertyInputSourceID as String)
-    if let array = TISCreateInputSourceList(conditions, true)?.takeRetainedValue()
-      as? [TISInputSource]
-    {
-      for inputSource in array {
-        TISSelectInputSource(inputSource)
-      }
-    }
+    switchOut()
     let path = cacheDir.appendingPathComponent(mainFileName).localPath()
     // Necessary to put it in background, otherwise sudo UI will hang if it has been canceled once.
     DispatchQueue.global().async {
-      if !sudo("update", path, updateLog) {
+      if sudo("update", path, updateLog) {
+        DispatchQueue.main.async {
+          viewModel.state = .upToDate
+          showUpToDate = true
+        }
+      } else {
         DispatchQueue.main.async {
           viewModel.state = .available
           showInstallFailed = true
