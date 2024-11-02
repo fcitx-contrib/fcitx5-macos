@@ -73,7 +73,7 @@ class FcitxInputController: IMKInputController {
   }
 
   override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
-    guard let event = event, let _ = sender as? IMKTextInput else {
+    guard let event = event, sender as? IMKTextInput != nil else {
       return false
     }
 
