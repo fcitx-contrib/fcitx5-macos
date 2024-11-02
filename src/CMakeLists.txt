@@ -12,6 +12,7 @@ file(GLOB CONFIG_UI_FILES CONFIGURE_DEPENDS config/*.swift)
 
 add_library(Fcitx5Objs STATIC
     fcitx.cpp
+    tunnel.cpp
     config/config.cpp
     controller.swift
     ${CONFIG_UI_FILES}
