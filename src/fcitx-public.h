@@ -44,4 +44,7 @@ std::string getAddons() noexcept;
 std::string getActions() noexcept;
 void activateActionById(int id) noexcept;
 
+// Tunnel variables
+#include "tunnel.h"
+
 #endif
