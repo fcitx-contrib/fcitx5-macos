@@ -187,10 +187,14 @@ FCITX_CONFIGURATION(
     Option<bool> autoExpand{this, "AutoExpand", _("Auto expand"), false};
     Option<int, IntConstrain> maxRowCount{
         this, "MaxRowCount", _("Max row count"), 6, IntConstrain(2, 10)};
-    Option<KeyList> expand{this, "Expand", _("Expand"), {Key(FcitxKey_Down)}};
-    Option<KeyList> collapse{this, "Collapse", _("Collapse"), {}};
-    Option<KeyList> up{this, "Up", _("Up"), {Key(FcitxKey_Up)}};
-    Option<KeyList> down{this, "Down", _("Down"), {Key(FcitxKey_Down)}};
+    Option<KeyList> expand{
+        this, "Expand", _("Expand"), {Key(FcitxKey_equal), Key(FcitxKey_Down)}};
+    Option<KeyList> collapse{
+        this, "Collapse", _("Collapse"), {Key(FcitxKey_minus)}};
+    Option<KeyList> up{
+        this, "Up", _("Up"), {Key(FcitxKey_minus), Key(FcitxKey_Up)}};
+    Option<KeyList> down{
+        this, "Down", _("Down"), {Key(FcitxKey_equal), Key(FcitxKey_Down)}};
     Option<KeyList> left{this, "Left", _("Left"), {Key(FcitxKey_Left)}};
     Option<KeyList> right{this, "Right", _("Right"), {Key(FcitxKey_Right)}};
     Option<KeyList> rowStart{
