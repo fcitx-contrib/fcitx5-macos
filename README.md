@@ -51,8 +51,9 @@ Some features (e.g. notifications, core dump) require the app bundle be code-sig
 * Put `FcitxLog` in `Search`.
 
 ### Log
-`/tmp/Fcitx5.log` contains all log in Console.app,
+* `/tmp/Fcitx5.log` contains all Fcitx5 log in Console.app,
 plus those written to stderr by engines, e.g. rime.
+* `/tmp/Fcitx5ConfigTool.log` is for config tool.
 
 ### lldb
 SSH into the mac from another device, then
@@ -60,6 +61,7 @@ SSH into the mac from another device, then
 $ /usr/bin/lldb
 (lldb) process attach --name Fcitx5
 ```
+Config tool is debuggable locally with VSCode.
 
 ### Core dump
 ```sh

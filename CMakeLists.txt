@@ -61,6 +61,7 @@ endif()
 
 set(APP_INSTALL_PATH "/Library/Input Methods")
 set(CMAKE_INSTALL_PREFIX "${APP_INSTALL_PATH}/Fcitx5.app/Contents")
+set(CONFIGTOOL_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/MacOS/Fcitx5ConfigTool.app/Contents")
 # Reproducible
 set(CMAKE_INSTALL_LIBDATADIR "${CMAKE_INSTALL_PREFIX}/lib")
 
@@ -99,6 +100,8 @@ add_subdirectory(fcitx5-webview)
 set(ADDON_TYPE "StaticLibrary")
 add_subdirectory(fcitx5-beast/src)
 target_include_directories(beast PRIVATE "${PREBUILT_INSTALL_PATH}/include")
+
+add_subdirectory(config)
 
 enable_testing()
 add_subdirectory(tests)
