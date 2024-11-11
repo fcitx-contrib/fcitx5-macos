@@ -41,7 +41,7 @@ struct DataView: View {
     }
     openPanel.allowsMultipleSelection = false
     openPanel.canChooseDirectories = false
-    openPanel.allowedContentTypes = [UTType.init(filenameExtension: "zip")!]
+    openPanel.allowedContentTypes = [.zip]
     openPanel.directoryURL = URL(
       fileURLWithPath: importDataSelectedDirectory
         ?? homeDir.appendingPathComponent("Downloads").localPath())

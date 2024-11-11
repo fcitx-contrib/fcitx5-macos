@@ -9,7 +9,7 @@ on:
 
 jobs:
   lint:
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,9 +27,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-14, macos-13]
+        os: [macos-15, macos-13]
         include:
-          - { os: macos-14, arch: arm64 }
+          - { os: macos-15, arch: arm64 }
           - { os: macos-13, arch: x86_64 }
 
     steps:
@@ -85,12 +85,12 @@ jobs:
           md5sum -c checksum
 
       - name: Generate meta.json
-        if: ${{ matrix.os == 'macos-14' }}
+        if: ${{ matrix.os == 'macos-15' }}
         run: |
           echo "{\"object\": {\"sha\": \"$(git rev-parse HEAD)\"}}" > meta.json
 
       - name: Upload meta.json
-        if: ${{ matrix.os == 'macos-14' }}
+        if: ${{ matrix.os == 'macos-15' }}
         uses: actions/upload-artifact@v4
         with:
           name: meta.json
