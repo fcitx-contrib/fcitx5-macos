@@ -101,6 +101,11 @@ jobs:
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
 
+  compare:
+    if: ${{ github.ref != 'refs/heads/master' }}
+    needs: build
+    uses: ./.github/workflows/compare.yml
+
   release:
     needs: build
     if: ${{ github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, '!release') }}
