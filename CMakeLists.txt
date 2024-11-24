@@ -6,6 +6,9 @@ list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_Swift_LANGUAGE_VRSION 5.9)
 
+# On x86 /Library/Frameworks/Mono.framework will mess up libintl.
+set(CMAKE_FIND_FRAMEWORK LAST)
+
 include(InitializeSwift)
 include(AddSwift)
 
