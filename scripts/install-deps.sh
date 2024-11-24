@@ -6,16 +6,16 @@ else
   ARCH=$1
 fi
 
-# This is the same with INSTALL_PREFIX of prebuilder
-INSTALL_PREFIX=/tmp/fcitx5
-mkdir -p $INSTALL_PREFIX
+EXTRACT_DIR=build/sysroot/usr
+mkdir -p $EXTRACT_DIR
 
 deps=(
   default-icon-theme
   boost
-  expat
+  libexpat
   fmt
   libintl
+  json
   json-c
   libuv
   libxkbcommon
@@ -25,6 +25,6 @@ deps=(
 
 for dep in "${deps[@]}"; do
   file=$dep-$ARCH.tar.bz2
-  [[ -f cache/$file ]] || wget -P cache https://github.com/fcitx-contrib/fcitx5-macos-prebuilder/releases/download/latest/$file
-  tar xjvf cache/$file -C $INSTALL_PREFIX
+  [[ -f cache/$file ]] || wget -P cache https://github.com/fcitx-contrib/fcitx5-prebuilder/releases/download/macos/$file
+  tar xjvf cache/$file -C $EXTRACT_DIR
 done

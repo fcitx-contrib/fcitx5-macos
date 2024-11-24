@@ -20,8 +20,8 @@ to install node, then
 
 ```sh
 sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-brew install cmake ninja extra-cmake-modules gettext nlohmann-json librsvg
-./scripts/install-deps.sh # Required to re-run after rebooting
+brew install cmake ninja extra-cmake-modules gettext librsvg
+./scripts/install-deps.sh
 npm i -g pnpm
 pnpm --prefix=fcitx5-webview i
 ```
