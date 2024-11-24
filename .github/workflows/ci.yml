@@ -66,6 +66,11 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
           cmake --build build
           sudo cmake --install build
+          if [[ ${{ matrix.arch }} == 'arm64' ]]; then
+            sudo touch /Library/Input\ Methods/Fcitx5.app/Contents/bin/addition
+          else
+            sudo rm -rf /Library/Input\ Methods/Fcitx5.app/Contents/share/icons
+          fi
           tar cjvf Fcitx5-${{ matrix.arch }}.tar.bz2 -C "/Library/Input Methods" Fcitx5.app
           ./scripts/code-sign.sh # after tar to avoid local signature in tarball
 
