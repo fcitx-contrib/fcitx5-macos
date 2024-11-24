@@ -8,17 +8,16 @@
 
 #include <fcitx-utils/i18n.h>
 #include <fcitx/action.h>
+#include <fcitx/inputmethodentry.h>
+#include <fcitx/inputmethodmanager.h>
 #include <fcitx/menu.h>
 #include <fcitx/statusarea.h>
 #include <fcitx/userinterfacemanager.h>
-#include <keyboard.h>
 #include <nlohmann/json.hpp>
 
 #include "fcitx.h"
 #include "../fcitx5-beast/src/beast.h"
 #include "../macosfrontend/keycode.h"
-#include "../macosnotifications/macosnotifications.h"
-#include "../webpanel/webpanel.h"
 #include "config/config-public.h"
 #include "nativestreambuf.h"
 
@@ -26,21 +25,14 @@ namespace fs = std::filesystem;
 
 #define APP_CONTENTS_PATH "/Library/Input Methods/Fcitx5.app/Contents"
 
-fcitx::KeyboardEngineFactory keyboardFactory;
-fcitx::MacosFrontendFactory macosFrontendFactory;
-fcitx::WebPanelFactory webpanelFactory;
-fcitx::MacosNotificationsFactory macosNotificationsFactory;
 fcitx::BeastFactory beastFactory;
 fcitx::StaticAddonRegistry staticAddons = {
-    std::make_pair<std::string, fcitx::AddonFactory *>("keyboard",
-                                                       &keyboardFactory),
-    std::make_pair<std::string, fcitx::AddonFactory *>("macosfrontend",
-                                                       &macosFrontendFactory),
-    std::make_pair<std::string, fcitx::AddonFactory *>("webpanel",
-                                                       &webpanelFactory),
-    std::make_pair<std::string, fcitx::AddonFactory *>("beast", &beastFactory),
-    std::make_pair<std::string, fcitx::AddonFactory *>(
-        "notifications", &macosNotificationsFactory)};
+    std::make_pair<std::string, fcitx::AddonFactory *>("beast", &beastFactory)};
+
+FCITX_IMPORT_ADDON_FACTORY(staticAddons, keyboard);
+FCITX_IMPORT_ADDON_FACTORY(staticAddons, webpanel);
+FCITX_IMPORT_ADDON_FACTORY(staticAddons, macosfrontend);
+FCITX_IMPORT_ADDON_FACTORY(staticAddons, notifications);
 
 static std::string join_paths(const std::vector<fs::path> &paths,
                               char sep = ':');
