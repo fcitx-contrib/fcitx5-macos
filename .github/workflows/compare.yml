@@ -1,0 +1,48 @@
+name: Compare
+
+on:
+  workflow_call:
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release
+        run: wget -O release.tar.bz2 https://github.com/fcitx-contrib/fcitx5-macos/releases/download/latest/Fcitx5-arm64.tar.bz2
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Compare content
+        run: |
+          tar tjf release.tar.bz2 > release.list
+          for arch in arm64 x86_64; do
+            echo "## $arch comparison" >> summary.md
+            tar tjf Fcitx5-$arch.tar.bz2 > $arch.list
+            diff -u release.list $arch.list > $arch.diff || true
+            if [[ -s $arch.diff ]]; then
+              echo '```diff' >> summary.md
+              cat $arch.diff >> summary.md
+              echo '```' >> summary.md
+            else
+              echo "No difference." >> summary.md
+            fi
+          done
+
+      - name: Find comment
+        uses: peter-evans/find-comment@v3
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: "arm64 comparison"
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          body-path: summary.md
+          edit-mode: replace
