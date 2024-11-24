@@ -535,3 +535,5 @@ void WebPanel::collapse() {
 }
 
 } // namespace fcitx
+
+FCITX_ADDON_FACTORY_V2(webpanel, fcitx::WebPanelFactory);

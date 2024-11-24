@@ -15,6 +15,7 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputcontext.h>
 #include <fcitx/inputpanel.h>
+#include <nlohmann/json.hpp>
 
 #include "../deps/url-filter/src/url-filter.hpp"
 #include "../fcitx5/src/modules/clipboard/clipboard_public.h"
@@ -242,6 +243,8 @@ MacosInputContext::getCursorCoordinates(bool followCursor) {
 }
 
 } // namespace fcitx
+
+FCITX_ADDON_FACTORY_V2(macosfrontend, fcitx::MacosFrontendFactory);
 
 fcitx::Key osx_key_to_fcitx_key(uint32_t unicode, uint32_t modifiers,
                                 uint16_t code) noexcept {

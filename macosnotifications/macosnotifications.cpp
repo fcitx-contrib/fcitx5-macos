@@ -134,4 +134,4 @@ void destroyNotificationItem(const char *externalId,
 
 } // namespace fcitx
 
-FCITX_ADDON_FACTORY(fcitx::MacosNotificationsFactory)
+FCITX_ADDON_FACTORY_V2(notifications, fcitx::MacosNotificationsFactory);

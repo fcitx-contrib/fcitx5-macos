@@ -21,9 +21,7 @@ add_library(Fcitx5Objs STATIC
 
 target_include_directories(Fcitx5Objs PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}/include"
-    "${PROJECT_SOURCE_DIR}/fcitx5/src/im/keyboard"
-    "${PROJECT_SOURCE_DIR}/fcitx5/src/modules/quickphrase/"
-    "${CMAKE_CURRENT_BINARY_DIR}/../fcitx5"
+    "${PROJECT_BINARY_DIR}/fcitx5"
 )
 target_link_libraries(Fcitx5Objs
     "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
