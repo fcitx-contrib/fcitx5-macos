@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.27)
 
 project(fcitx5-macos VERSION 0.1.0 LANGUAGES CXX Swift)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_Swift_LANGUAGE_VRSION 5.9)
 
@@ -18,28 +18,22 @@ endif()
 set(CMAKE_OSX_DEPLOYMENT_TARGET 13)
 add_definitions(-target "${CMAKE_OSX_ARCHITECTURES}-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET}")
 
-# Need HOMEBREW_PATH for nlohmann-json
-if(CMAKE_OSX_ARCHITECTURES STREQUAL arm64)
-    set(HOMEBREW_PATH "/opt/homebrew")
-else()
-    set(HOMEBREW_PATH "/usr/local")
-endif()
+set(FIND_ROOT_PATH "${PROJECT_BINARY_DIR}/sysroot/usr")
+set(PREBUILDER_INCLUDE_DIR "${FIND_ROOT_PATH}/include")
+set(PREBUILDER_LIB_DIR "${FIND_ROOT_PATH}/lib")
+set(PREBUILDER_SHARE_DIR "${FIND_ROOT_PATH}/share")
 
-set(PREBUILT_INSTALL_PATH "/tmp/fcitx5")
+list(APPEND CMAKE_FIND_ROOT_PATH "${FIND_ROOT_PATH}")
 
-set(ENV{PKG_CONFIG_PATH} "${PREBUILT_INSTALL_PATH}/lib/pkgconfig:${PREBUILT_INSTALL_PATH}/share/pkgconfig")
+set(ENV{PKG_CONFIG_SYSROOT_DIR} "${PROJECT_BINARY_DIR}/sysroot")
+set(ENV{PKG_CONFIG_PATH} "${PREBUILDER_LIB_DIR}/pkgconfig;${PREBUILDER_SHARE_DIR}/pkgconfig")
 
-# For dependencies not to be find via pkg-config
-set(LibIntl_DIR "${PREBUILT_INSTALL_PATH}/lib/cmake")
-find_package(LibIntl)
-set(fmt_DIR "${PREBUILT_INSTALL_PATH}/lib/cmake/fmt")
-find_package(fmt)
-if (TARGET fmt::fmt-header-only)
-    # Resolve swiftc warnings
-    set_target_properties(fmt::fmt-header-only PROPERTIES
-        INTERFACE_COMPILE_DEFINITIONS "FMT_HEADER_ONLY"
-    )
-endif()
+add_library(Libuv_static STATIC IMPORTED)
+set_target_properties(Libuv_static PROPERTIES
+    IMPORTED_LOCATION "${PREBUILDER_LIB_DIR}/libuv.a"
+    INTERFACE_INCLUDE_DIRECTORIES "${PREBUILDER_INCLUDE_DIR}"
+)
+set(LIBUV_TARGET Libuv_static)
 
 option(ENABLE_TEST "" OFF)
 option(ENABLE_COVERAGE "" OFF)
@@ -81,7 +75,7 @@ set(WEBVIEW_WWW_PATH ".local/share/fcitx5/www")
 include_directories(
     fcitx5-webview/include
     fcitx5-webview/webview
-    "${HOMEBREW_PATH}/include" # nlohmann-json
+    "${PREBUILDER_INCLUDE_DIR}" # nlohmann-json
 )
 
 add_compile_definitions($<$<COMPILE_LANGUAGE:C,CXX>:-DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\">)
@@ -98,7 +92,6 @@ add_subdirectory(fcitx5-webview)
 
 set(ADDON_TYPE "StaticLibrary")
 add_subdirectory(fcitx5-beast/src)
-target_include_directories(beast PRIVATE "${PREBUILT_INSTALL_PATH}/include")
 
 enable_testing()
 add_subdirectory(tests)
