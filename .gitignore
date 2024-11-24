@@ -6,6 +6,7 @@ build
 
 # Auto-generated data
 assets/en.lproj/Localizable.strings
+assets/config/en.lproj/Localizable.strings
 assets/po/base.pot
 meta.swift
 debug.swift

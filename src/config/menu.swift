@@ -1,6 +1,9 @@
 import Cocoa
 import Fcitx
 
+let configAppExecutable =
+  "/Library/Input Methods/Fcitx5.app/Contents/MacOS/Fcitx5ConfigTool.app/Contents/MacOS/Fcitx5ConfigTool"
+
 func restartAndReconnect(_ actionBetween: (() -> Void)? = nil) {
   stop_fcitx_thread()
   actionBetween?()
@@ -16,12 +19,6 @@ func restartProcess() {
 }
 
 extension FcitxInputController {
-  static var fcitxAbout: FcitxAboutController = {
-    return FcitxAboutController()
-  }()
-  static var pluginManager: PluginManager = {
-    return PluginManager()
-  }()
   static var globalConfigController: GlobalConfigController = {
     return GlobalConfigController()
   }()
@@ -41,8 +38,7 @@ extension FcitxInputController {
   ]
 
   @objc func plugin(_: Any? = nil) {
-    FcitxInputController.pluginManager.refreshPlugins()
-    FcitxInputController.pluginManager.showWindow(nil)
+    let _ = exec(configAppExecutable, ["Plugin"], isAsync: true)
   }
 
   @objc func restart(_: Any? = nil) {
@@ -50,8 +46,7 @@ extension FcitxInputController {
   }
 
   @objc func about(_: Any? = nil) {
-    FcitxInputController.fcitxAbout.refresh()
-    FcitxInputController.fcitxAbout.showWindow(nil)
+    let _ = exec(configAppExecutable, ["About"], isAsync: true)
   }
 
   @objc func globalConfig(_: Any? = nil) {

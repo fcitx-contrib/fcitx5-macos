@@ -194,13 +194,16 @@ func openInEditor(url: URL) {
   }
 }
 
-func exec(_ command: String, _ args: [String]) -> Bool {
+func exec(_ command: String, _ args: [String], isAsync: Bool = false) -> Bool {
   let process = Process()
   process.launchPath = command
   process.arguments = args
 
   do {
     try process.run()
+    if isAsync {
+      return true
+    }
     process.waitUntilExit()
     return process.terminationStatus == 0
   } catch {
