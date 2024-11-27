@@ -98,6 +98,9 @@ void Fcitx::setupEnv() {
     std::string libime_model_dirs = join_paths({
         user_prefix / "lib" / "libime" // ~/Library/fcitx5/lib/libime
     });
+    std::string libskk_data_path = user_prefix / "share" / "libskk";
+
+    setenv("LIBSKK_DATA_PATH", libskk_data_path.c_str(), 1);
     setenv("FCITX_ADDON_DIRS", fcitx_addon_dirs.c_str(), 1);
     setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
     setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
