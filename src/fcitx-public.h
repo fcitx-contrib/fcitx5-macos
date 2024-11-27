@@ -1,12 +1,8 @@
 #ifndef FCITX5_MACOS_FCITX_H
 #define FCITX5_MACOS_FCITX_H
 
-#include <array>
 #include <cstdint>
 #include <string>
-
-// Identical to fcitx::ICUUID. Replicated for Swift interop.
-typedef std::array<uint8_t, 16> ICUUID;
 
 void start_fcitx_thread(const char *locale) noexcept;
 void stop_fcitx_thread() noexcept;
