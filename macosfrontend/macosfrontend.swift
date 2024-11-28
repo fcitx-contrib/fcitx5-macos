@@ -6,6 +6,8 @@ private var currentPreedit = ""
 
 private let zeroWidthSpace = "\u{200B}"
 
+public var hasCursor = false
+
 private func commitString(_ client: IMKTextInput, _ string: String) {
   client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
 }
@@ -36,6 +38,11 @@ public func commitAndSetPreeditSync(
 ) {
   if !commit.isEmpty {
     commitString(client, commit)
+  }
+  // Setting preedit on focus out may cause IMK stall for seconds. High possibility
+  // to reproduce by having no cursor on a Safari page and Cmd+T to open a new Tab.
+  if !hasCursor {
+    return
   }
   // Without client preedit, Backspace bypasses IM in Terminal, every key
   // is both processed by IM and passed to client in iTerm, so we force a
@@ -81,7 +88,7 @@ public func getCursorCoordinates(
     forCharacterIndex: followCursor ? (isEnd ? u16pos - 1 : u16pos) : 0,
     lineHeightRectangle: &rect)
   if rect.width == 0 && rect.height == 0 {
-    // No focus
+    hasCursor = false
     return false
   }
   x.pointee = Double(NSMinX(rect))
@@ -89,5 +96,6 @@ public func getCursorCoordinates(
   if followCursor && isEnd {
     x.pointee += 10
   }
+  hasCursor = true
   return true
 }
