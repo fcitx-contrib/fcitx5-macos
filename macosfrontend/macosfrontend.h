@@ -75,7 +75,7 @@ public:
     void destroyInputContext(ICUUID);
     std::string keyEvent(ICUUID, const Key &key, bool isRelease);
     void focusIn(ICUUID);
-    void focusOut(ICUUID);
+    std::string focusOut(ICUUID);
 
 private:
     Instance *instance_;
