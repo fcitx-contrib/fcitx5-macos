@@ -252,9 +252,10 @@ void MacosInputContext::commitAndSetPreeditAsync() {
 
 std::pair<double, double>
 MacosInputContext::getCursorCoordinates(bool followCursor) {
-    double x = 0, y = 0;
+    // Memorize to avoid jumping to origin on failure.
+    static double x = 0, y = 0;
     if (!SwiftFrontend::getCursorCoordinates(client_, followCursor, &x, &y)) {
-        FCITX_WARN() << "Failed to get cursor coordinates";
+        FCITX_DEBUG() << "Failed to get cursor coordinates";
     }
     return std::make_pair(x, y);
 }

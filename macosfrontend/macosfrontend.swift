@@ -70,20 +70,24 @@ public func getCursorCoordinates(
   _ y: UnsafeMutablePointer<Double>
 ) -> Bool {
   let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
-  if let client = client as? IMKTextInput {
-    var rect = NSRect(x: 0, y: 0, width: 0, height: 0)
-    // n characters have n+1 cursor positions, but character index only accepts 0 to n-1,
-    // and passing n results in (0,0). So if cursor is in the end, go back and add 10px
-    let isEnd = u16pos == currentPreedit.count
-    client.attributes(
-      forCharacterIndex: followCursor ? (isEnd ? u16pos - 1 : u16pos) : 0,
-      lineHeightRectangle: &rect)
-    x.pointee = Double(NSMinX(rect))
-    y.pointee = Double(NSMinY(rect))
-    if followCursor && isEnd {
-      x.pointee += 10
-    }
-    return true
+  guard let client = client as? IMKTextInput else {
+    return false
   }
-  return false
+  var rect = NSRect(x: 0, y: 0, width: 0, height: 0)
+  // n characters have n+1 cursor positions, but character index only accepts 0 to n-1,
+  // and passing n results in (0,0). So if cursor is in the end, go back and add 10px
+  let isEnd = u16pos == currentPreedit.count
+  client.attributes(
+    forCharacterIndex: followCursor ? (isEnd ? u16pos - 1 : u16pos) : 0,
+    lineHeightRectangle: &rect)
+  if rect.width == 0 && rect.height == 0 {
+    // No focus
+    return false
+  }
+  x.pointee = Double(NSMinX(rect))
+  y.pointee = Double(NSMinY(rect))
+  if followCursor && isEnd {
+    x.pointee += 10
+  }
+  return true
 }
