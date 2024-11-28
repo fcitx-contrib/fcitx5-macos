@@ -14,6 +14,7 @@
 #include <fcitx-utils/event.h>
 #include <fcitx/addonmanager.h>
 #include <fcitx/inputcontext.h>
+#include <fcitx/inputmethodengine.h>
 #include <fcitx/inputpanel.h>
 #include <nlohmann/json.hpp>
 
@@ -174,12 +175,28 @@ void MacosFrontend::focusIn(ICUUID uuid) {
     useAppDefaultIM(program);
 }
 
-void MacosFrontend::focusOut(ICUUID uuid) {
+std::string MacosFrontend::focusOut(ICUUID uuid) {
     auto *ic = findIC(uuid);
     if (!ic)
-        return;
+        return "{}";
+
+    // Fake a switch input method event to call engine's deactivate method and
+    // maybe commit and clear preedit synchronously.
+    ic->isSyncEvent = true;
+    InputContextEvent event(ic, EventType::InputContextSwitchInputMethod);
+    auto engine = instance_->inputMethodEngine(ic);
+    auto entry = instance_->inputMethodEntry(ic);
+    engine->deactivate(*entry, event);
+    // At this stage panel is still shown. If removed, a following backspace
+    // will commit a BS character in VSCode.
+    ic->setDummyPreedit(false);
+    auto state = ic->getState(false);
+    ic->isSyncEvent = false;
+
     FCITX_INFO() << "Focus out " << ic->program();
     ic->focusOut();
+
+    return state;
 }
 
 MacosInputContext::MacosInputContext(MacosFrontend *frontend,
@@ -306,6 +323,7 @@ void focus_in(ICUUID uuid) noexcept {
     with_fcitx([=](Fcitx &fcitx) { return fcitx.frontend()->focusIn(uuid); });
 }
 
-void focus_out(ICUUID uuid) noexcept {
-    with_fcitx([=](Fcitx &fcitx) { return fcitx.frontend()->focusOut(uuid); });
+std::string focus_out(ICUUID uuid) noexcept {
+    return with_fcitx(
+        [=](Fcitx &fcitx) { return fcitx.frontend()->focusOut(uuid); });
 }

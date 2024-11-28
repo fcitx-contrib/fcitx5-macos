@@ -44,11 +44,7 @@ class FcitxInputController: IMKInputController {
     uuid = create_input_context(appId, client)
   }
 
-  func processKey(_ unicode: UInt32, _ modsVal: UInt32, _ code: UInt16, _ isRelease: Bool) -> Bool {
-    guard let client = client as? IMKTextInput else {
-      return false
-    }
-    let res = String(process_key(uuid, unicode, modsVal, code, isRelease))
+  func processRes(_ client: IMKTextInput, _ res: String) -> Bool {
     do {
       if let data = res.data(using: .utf8) {
         let json = try JSON(data: data)
@@ -64,6 +60,14 @@ class FcitxInputController: IMKInputController {
     } catch {
     }
     return false
+  }
+
+  func processKey(_ unicode: UInt32, _ modsVal: UInt32, _ code: UInt16, _ isRelease: Bool) -> Bool {
+    guard let client = client as? IMKTextInput else {
+      return false
+    }
+    let res = String(process_key(uuid, unicode, modsVal, code, isRelease))
+    return processRes(client, res)
   }
 
   // Default behavior is to recognize keyDown only
@@ -130,7 +134,12 @@ class FcitxInputController: IMKInputController {
   }
 
   override func deactivateServer(_ client: Any!) {
-    focus_out(uuid)
+    guard let client = client as? IMKTextInput else {
+      return
+    }
+    let res = String(focus_out(uuid))
+    // Maybe commit and clear preedit synchronously if user switches to ABC by Ctrl+Space.
+    let _ = processRes(client, res)
   }
 
   override func menu() -> NSMenu! {

@@ -18,4 +18,4 @@ uint16_t fcitx_string_to_osx_keycode(const char *) noexcept;
 ICUUID create_input_context(const char *appId, id client) noexcept;
 void destroy_input_context(ICUUID uuid) noexcept;
 void focus_in(ICUUID uuid) noexcept;
-void focus_out(ICUUID uuid) noexcept;
+std::string focus_out(ICUUID uuid) noexcept;
