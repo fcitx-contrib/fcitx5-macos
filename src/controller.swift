@@ -130,6 +130,8 @@ class FcitxInputController: IMKInputController {
     if let client = client as? IMKTextInput {
       client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.ABC")
     }
+    // activateServer is called when app is in foreground but not necessarily a text field is selected.
+    hasCursor = false
     focus_in(uuid)
   }
 
@@ -140,6 +142,7 @@ class FcitxInputController: IMKInputController {
     let res = String(focus_out(uuid))
     // Maybe commit and clear preedit synchronously if user switches to ABC by Ctrl+Space.
     let _ = processRes(client, res)
+    hasCursor = false
   }
 
   override func menu() -> NSMenu! {
