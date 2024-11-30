@@ -4,8 +4,6 @@ import Logging
 import SwiftUI
 import SwiftyJSON
 
-private let pluginDirectory = libraryDir.appendingPathComponent("plugin")
-
 struct Plugin: Identifiable, Hashable {
   let id: String
   let category: String
@@ -23,7 +21,7 @@ private var inMemoryPlugins = [String]()
 private var needsRestart = false
 
 private func getInstalledPlugins() -> [Plugin] {
-  let names = getFileNamesWithExtension(pluginDirectory.localPath(), ".json")
+  let names = getFileNamesWithExtension(pluginDir.localPath(), ".json")
   return names.map {
     pluginMap[$0]
       ?? Plugin(
@@ -31,16 +29,8 @@ private func getInstalledPlugins() -> [Plugin] {
   }
 }
 
-private func getFiles(_ descriptor: URL) -> [String] {
-  guard let json = readJSON(descriptor) else {
-    FCITX_WARN("Skipped invalid JSON \(descriptor.localPath())")
-    return []
-  }
-  return json["files"].arrayValue.map { $0.stringValue }
-}
-
 private func getVersion(_ plugin: String, native: Bool) -> String {
-  let descriptor = pluginDirectory.appendingPathComponent(plugin + ".json")
+  let descriptor = getPluginDescriptor(plugin)
   guard let json = readJSON(descriptor) else {
     return ""
   }
@@ -48,7 +38,7 @@ private func getVersion(_ plugin: String, native: Bool) -> String {
 }
 
 private func getAutoAddIms(_ plugin: String) -> [String] {
-  let descriptor = pluginDirectory.appendingPathComponent(plugin + ".json")
+  let descriptor = getPluginDescriptor(plugin)
   guard let json = readJSON(descriptor) else {
     return []
   }
@@ -160,18 +150,11 @@ struct PluginView: View {
 
   private func uninstall() {
     processing = true
-    var keptFiles = Set<String>()
-    for plugin in pluginVM.installedPlugins {
-      if selectedInstalled.contains(plugin.id) {
-        continue
-      }
-      let descriptor = pluginDirectory.appendingPathComponent(plugin.id + ".json")
-      keptFiles.formUnion(getFiles(descriptor))
-    }
     for selectedPlugin in selectedInstalled {
-      let descriptor = pluginDirectory.appendingPathComponent(selectedPlugin + ".json")
-      // Don't remove files shared by other plugins
-      for file in getFiles(descriptor).filter({ !keptFiles.contains($0) }) {
+      let descriptor = getPluginDescriptor(selectedPlugin)
+      // Plugins don't have shared files.
+      // https://github.com/fcitx-contrib/fcitx5-plugins/blob/master/scripts/check-shared-files.py
+      for file in getFilesFromDescriptor(descriptor) {
         let _ = removeFile(libraryDir.appendingPathComponent(file))
       }
       let _ = removeFile(descriptor)

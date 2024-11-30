@@ -13,8 +13,8 @@ struct PluginOptionView: OptionView {
         Text(plugin)
       }
     }.onAppear {
-      for fileName in getFileNamesWithExtension(pluginDir.localPath()) {
-        let url = pluginDir.appendingPathComponent(fileName)
+      for fileName in getFileNamesWithExtension(jsPluginDir.localPath()) {
+        let url = jsPluginDir.appendingPathComponent(fileName)
         if !url.isDirectory {
           continue
         }

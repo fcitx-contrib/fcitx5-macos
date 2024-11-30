@@ -5,10 +5,11 @@ import SwiftyJSON
 let homeDir = FileManager.default.homeDirectoryForCurrentUser
 let libraryDir = homeDir.appendingPathComponent("Library/fcitx5")
 let cacheDir = libraryDir.appendingPathComponent("cache")
+let pluginDir = libraryDir.appendingPathComponent("plugin")
 let configDir = homeDir.appendingPathComponent(".config/fcitx5")
 let localDir = homeDir.appendingPathComponent(".local/share/fcitx5")
 let wwwDir = localDir.appendingPathComponent("www")
-let pluginDir = wwwDir.appendingPathComponent("plugin")
+let jsPluginDir = wwwDir.appendingPathComponent("plugin")
 let imLocalDir = localDir.appendingPathComponent("inputmethod")
 let pinyinLocalDir = localDir.appendingPathComponent("pinyin")
 let tableLocalDir = localDir.appendingPathComponent("table")

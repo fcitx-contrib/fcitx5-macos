@@ -77,7 +77,7 @@ When Fcitx5 crashes, it creates a ~10GB core file under `/cores`.
 
 ## Plugins
 Fcitx5 only packages keyboard engine.
-To install other [engines](https://github.com/fcitx-contrib/fcitx5-macos-plugins),
+To install other [engines or tables](https://github.com/fcitx-contrib/fcitx5-plugins),
 use the built-in Plugin Manager.
 
 ## Translation

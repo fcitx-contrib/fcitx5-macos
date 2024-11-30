@@ -208,8 +208,8 @@ struct ExternalOptionView: OptionView {
         mkdirP(rimeLocalDir.localPath())
         NSWorkspace.shared.open(rimeLocalDir)
       case "PluginDir":
-        mkdirP(pluginDir.localPath())
-        NSWorkspace.shared.open(pluginDir)
+        mkdirP(jsPluginDir.localPath())
+        NSWorkspace.shared.open(jsPluginDir)
       case "CustomPhrase":
         showCustomPhrase = true
       case "DictManager":

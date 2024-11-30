@@ -4,7 +4,7 @@ import Logging
 let mainFileName = "Fcitx5-\(arch).tar.bz2"
 private let mainAddress = "\(sourceRepo)/releases/download/latest/\(mainFileName)"
 let pluginBaseAddress =
-  "https://github.com/fcitx-contrib/fcitx5-macos-plugins/releases/download/latest/"
+  "https://github.com/fcitx-contrib/fcitx5-plugins/releases/download/macos/"
 
 private func getFileName(_ plugin: String, native: Bool) -> String {
   return native ? "\(plugin)-\(arch).tar.bz2" : "\(plugin)-any.tar.bz2"
@@ -19,12 +19,39 @@ private func getCacheURL(_ plugin: String, native: Bool) -> URL {
   return cacheDir.appendingPathComponent(fileName)
 }
 
+func getPluginDescriptor(_ plugin: String) -> URL {
+  return pluginDir.appendingPathComponent(plugin + ".json")
+}
+
+func getFilesFromDescriptor(_ descriptor: URL) -> [String] {
+  guard let json = readJSON(descriptor) else {
+    FCITX_WARN("Skipped invalid JSON \(descriptor.localPath())")
+    return []
+  }
+  return json["files"].arrayValue.map { $0.stringValue }
+}
+
 private func extractPlugin(_ plugin: String, native: Bool) -> Bool {
+  let descriptor = getPluginDescriptor(plugin)
+  let oldFiles = getFilesFromDescriptor(descriptor)
+
   mkdirP(libraryDir.localPath())
   let url = getCacheURL(plugin, native: native)
   let path = url.localPath()
   let ret = exec("/usr/bin/tar", ["-xjf", path, "-C", libraryDir.localPath()])
   let _ = removeFile(url)
+
+  if ret {
+    let newFiles = getFilesFromDescriptor(descriptor)
+    let removedFiles = oldFiles.filter { !newFiles.contains($0) }
+    if removedFiles.count > 0 {
+      FCITX_INFO("Removing \(removedFiles) which are no longer needed")
+      for file in removedFiles {
+        let path = libraryDir.appendingPathComponent(file)
+        let _ = removeFile(path)
+      }
+    }
+  }
   return ret
 }
 
