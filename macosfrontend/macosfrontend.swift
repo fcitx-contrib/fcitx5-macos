@@ -34,14 +34,14 @@ private func setPreedit(_ client: IMKTextInput, _ preedit: String, _ caretPosUtf
 
 public func commitAndSetPreeditSync(
   _ client: IMKTextInput, _ commit: String, _ preedit: String, _ cursorPos: Int,
-  _ dummyPreedit: Bool
+  _ dummyPreedit: Bool, focusOut: Bool = false
 ) {
   if !commit.isEmpty {
     commitString(client, commit)
   }
   // Setting preedit on focus out may cause IMK stall for seconds. High possibility
   // to reproduce by having no cursor on a Safari page and Cmd+T to open a new Tab.
-  if !hasCursor {
+  if focusOut && !hasCursor {
     return
   }
   // Without client preedit, Backspace bypasses IM in Terminal, every key

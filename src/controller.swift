@@ -44,7 +44,7 @@ class FcitxInputController: IMKInputController {
     uuid = create_input_context(appId, client)
   }
 
-  func processRes(_ client: IMKTextInput, _ res: String) -> Bool {
+  func processRes(_ client: IMKTextInput, _ res: String, focusOut: Bool = false) -> Bool {
     do {
       if let data = res.data(using: .utf8) {
         let json = try JSON(data: data)
@@ -54,7 +54,8 @@ class FcitxInputController: IMKInputController {
         let cursorPos = try Int?.decode(json: json["cursorPos"]) ?? -1
         let dummyPreedit = (try Int?.decode(json: json["dummyPreedit"]) ?? 0) == 1
         let accepted = (try Int?.decode(json: json["accepted"]) ?? 0) == 1
-        commitAndSetPreeditSync(client, commit, preedit, cursorPos, dummyPreedit)
+        commitAndSetPreeditSync(
+          client, commit, preedit, cursorPos, dummyPreedit, focusOut: focusOut)
         return accepted
       }
     } catch {
@@ -141,7 +142,7 @@ class FcitxInputController: IMKInputController {
     }
     let res = String(focus_out(uuid))
     // Maybe commit and clear preedit synchronously if user switches to ABC by Ctrl+Space.
-    let _ = processRes(client, res)
+    let _ = processRes(client, res, focusOut: true)
     hasCursor = false
   }
 
