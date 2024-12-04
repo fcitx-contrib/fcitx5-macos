@@ -66,7 +66,12 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
           cmake --build build
           sudo cmake --install build
-          tar cjvf Fcitx5-${{ matrix.arch }}.tar.bz2 -C "/Library/Input Methods" Fcitx5.app
+
+      - name: Package and remove dev files
+        run: |
+          tar cjf Fcitx5-${{ matrix.arch }}-dev.tar.bz2 -C "/Library/Input Methods" Fcitx5.app/Contents/{include,lib}
+          sudo rm -rf "/Library/Input Methods/Fcitx5.app/Contents"/{bin/fcitx5-{configtool,diagnose},include,lib/{cmake,pkgconfig},share/{applications,metainfo}}
+          tar cjf Fcitx5-${{ matrix.arch }}.tar.bz2 -C "/Library/Input Methods" Fcitx5.app
           ./scripts/code-sign.sh # after tar to avoid local signature in tarball
 
       - name: Test
@@ -75,9 +80,10 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Fcitx5-${{ matrix.arch }}.tar.bz2
+          name: Fcitx5-${{ matrix.arch }}
           path: |
             Fcitx5-${{ matrix.arch }}.tar.bz2
+            Fcitx5-${{ matrix.arch }}-dev.tar.bz2
 
       - name: Check validity
         run: |
@@ -125,5 +131,7 @@ jobs:
           title: "Nightly Build"
           files: |
             Fcitx5-x86_64.tar.bz2
+            Fcitx5-x86_64-dev.tar.bz2
             Fcitx5-arm64.tar.bz2
+            Fcitx5-arm64-dev.tar.bz2
             meta.json

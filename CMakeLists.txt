@@ -38,6 +38,7 @@ set_target_properties(Libuv_static PROPERTIES
 )
 set(LIBUV_TARGET Libuv_static)
 
+option(ENABLE_TESTING_ADDONS "" OFF)
 option(ENABLE_TEST "" OFF)
 option(ENABLE_COVERAGE "" OFF)
 option(ENABLE_ENCHANT "" OFF)
