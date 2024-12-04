@@ -5,6 +5,14 @@ import Logging
 import SwiftFrontend
 import SwiftyJSON
 
+struct SyncResponse: Codable {
+  let commit: String
+  let preedit: String
+  let cursorPos: Int
+  let dummyPreedit: Bool
+  let accepted: Bool
+}
+
 class FcitxInputController: IMKInputController {
   var uuid: ICUUID
   var appId: String
@@ -45,22 +53,15 @@ class FcitxInputController: IMKInputController {
   }
 
   func processRes(_ client: IMKTextInput, _ res: String, focusOut: Bool = false) -> Bool {
-    do {
-      if let data = res.data(using: .utf8) {
-        let json = try JSON(data: data)
-        let commit = try String?.decode(json: json["commit"]) ?? ""
-        let preedit = try String?.decode(json: json["preedit"]) ?? ""
-        // Bool?.decode doesn't work so use int for all bool fields.
-        let cursorPos = try Int?.decode(json: json["cursorPos"]) ?? -1
-        let dummyPreedit = (try Int?.decode(json: json["dummyPreedit"]) ?? 0) == 1
-        let accepted = (try Int?.decode(json: json["accepted"]) ?? 0) == 1
-        commitAndSetPreeditSync(
-          client, commit, preedit, cursorPos, dummyPreedit, focusOut: focusOut)
-        return accepted
-      }
-    } catch {
+    guard let data = res.data(using: .utf8),
+      let response = try? JSONDecoder().decode(SyncResponse.self, from: data)
+    else {
+      return false
     }
-    return false
+    commitAndSetPreeditSync(
+      client, response.commit, response.preedit, response.cursorPos, response.dummyPreedit,
+      focusOut: focusOut)
+    return response.accepted
   }
 
   func processKey(_ unicode: UInt32, _ modsVal: UInt32, _ code: UInt16, _ isRelease: Bool) -> Bool {

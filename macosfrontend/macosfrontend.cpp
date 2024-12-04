@@ -237,8 +237,8 @@ std::string MacosInputContext::getState(bool accepted) {
     j["commit"] = state_.commit;
     j["preedit"] = state_.preedit;
     j["cursorPos"] = state_.cursorPos;
-    j["dummyPreedit"] = int(state_.dummyPreedit);
-    j["accepted"] = int(accepted);
+    j["dummyPreedit"] = state_.dummyPreedit;
+    j["accepted"] = accepted;
     return j.dump();
 }
 
