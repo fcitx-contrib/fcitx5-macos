@@ -70,7 +70,7 @@ jobs:
       - name: Package and remove dev files
         run: |
           tar cjf Fcitx5-${{ matrix.arch }}-dev.tar.bz2 -C "/Library/Input Methods" Fcitx5.app/Contents/{include,lib}
-          sudo rm -rf "/Library/Input Methods/Fcitx5.app/Contents"/{bin/fcitx5-{configtool,diagnose},include,lib/{cmake,pkgconfig}}
+          sudo rm -rf "/Library/Input Methods/Fcitx5.app/Contents"/{bin/fcitx5-{configtool,diagnose},include,lib/{cmake,pkgconfig},share/{applications,metainfo}}
           tar cjf Fcitx5-${{ matrix.arch }}.tar.bz2 -C "/Library/Input Methods" Fcitx5.app
           ./scripts/code-sign.sh # after tar to avoid local signature in tarball
 
