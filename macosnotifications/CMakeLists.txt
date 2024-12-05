@@ -1,8 +1,8 @@
 add_library(SwiftNotify STATIC notify.swift)
 set_target_properties(SwiftNotify PROPERTIES Swift_MODULE_NAME SwiftNotify)
 target_compile_options(SwiftNotify PUBLIC "$<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default>")
-target_include_directories(SwiftNotify PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(SwiftNotify Logging)
+target_include_directories(SwiftNotify PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}/logging")
+add_dependencies(SwiftNotify Logging)
 
 _swift_generate_cxx_header(
     SwiftNotify
