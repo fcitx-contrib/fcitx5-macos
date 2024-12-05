@@ -84,6 +84,7 @@ include_directories(
 
 add_compile_definitions($<$<COMPILE_LANGUAGE:C,CXX>:-DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\">)
 
+add_subdirectory(keycode)
 add_subdirectory(macosfrontend)
 add_subdirectory(macosnotifications)
 add_subdirectory(webpanel)

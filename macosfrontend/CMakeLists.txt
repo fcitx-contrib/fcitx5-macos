@@ -10,9 +10,9 @@ _swift_generate_cxx_header(
     SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-add_library(macosfrontend STATIC macosfrontend.cpp pasteboard.mm keycode.cpp)
+add_library(macosfrontend STATIC macosfrontend.cpp pasteboard.mm)
 add_dependencies(macosfrontend SwiftFrontend)
-target_link_libraries(macosfrontend Fcitx5::Core url-filter)
+target_link_libraries(macosfrontend Fcitx5::Core url-filter Keycode)
 target_include_directories(macosfrontend PUBLIC
     "${CMAKE_CURRENT_BINARY_DIR}/include"
     "${CMAKE_SOURCE_DIR}/src"
