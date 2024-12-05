@@ -17,7 +17,7 @@
 
 #include "fcitx.h"
 #include "../fcitx5-beast/src/beast.h"
-#include "../macosfrontend/keycode.h"
+#include "../keycode/keycode.h"
 #include "config/config-public.h"
 #include "nativestreambuf.h"
 

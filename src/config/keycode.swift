@@ -1,5 +1,5 @@
 import Cocoa
-import CxxFrontend
+import Keycode
 
 func keyToUnicode(_ key: String) -> UInt32 {
   if key.isEmpty {

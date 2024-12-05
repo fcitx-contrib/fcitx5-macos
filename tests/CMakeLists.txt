@@ -17,12 +17,15 @@ add_executable(xml-parser testxmlparser.swift
 add_test(NAME xml-parser COMMAND xml-parser "${PROJECT_SOURCE_DIR}/tests/customphrase.plist")
 
 add_executable(key-cpp testkey.cpp)
-target_link_libraries(key-cpp Fcitx5Objs)
+target_link_libraries(key-cpp Keycode)
 add_test(NAME key-cpp COMMAND key-cpp)
 
 add_executable(key-swift testkey.swift
     ${PROJECT_SOURCE_DIR}/src/config/keycode.swift
     ${PROJECT_SOURCE_DIR}/src/config/keyrecorder.swift
 )
-target_link_libraries(key-swift Fcitx5Objs)
+target_compile_options(key-swift PUBLIC
+    "$<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default>"
+)
+target_link_libraries(key-swift Keycode)
 add_test(NAME key-swift COMMAND key-swift)

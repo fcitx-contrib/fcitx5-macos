@@ -1,6 +1,5 @@
 #include <cassert>
 #include "keycode.h"
-#include "macosfrontend-public.h"
 
 void test_osx_to_fcitx() {
     assert(osx_unicode_to_fcitx_keysym('0', 0, 0) == FcitxKey_0);
