@@ -14,18 +14,10 @@ add_library(Fcitx5Objs STATIC
     fcitx.cpp
     tunnel.cpp
     config/config.cpp
-    controller.swift
-    ${CONFIG_UI_FILES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/config/meta.swift
 )
 
-target_include_directories(Fcitx5Objs PUBLIC
-    "${CMAKE_CURRENT_BINARY_DIR}/include"
-    "${PROJECT_BINARY_DIR}/fcitx5"
-)
 target_link_libraries(Fcitx5Objs
     "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
-    AlertToast
     SwiftyJSON
     SwiftFrontend
     SwiftNotify
@@ -47,7 +39,13 @@ add_executable(Fcitx5
     ${CONFIG_UI_FILES}
 )
 
-target_link_libraries(Fcitx5 Fcitx5Objs)
+target_link_libraries(Fcitx5
+    Fcitx5Objs
+    AlertToast
+    SwiftyJSON
+    SwiftFrontend
+    SwiftNotify
+)
 
 set(APP_PATH "${CMAKE_CURRENT_BINARY_DIR}/Fcitx5.app/Contents")
 
