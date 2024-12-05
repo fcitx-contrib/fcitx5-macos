@@ -58,6 +58,9 @@ jobs:
           npm i -g pnpm
           pnpm --prefix=fcitx5-webview i
 
+      - name: Bypass download.fcitx-im.org
+        run: wget -P fcitx5/src/modules/spell https://github.com/fcitx-contrib/fcitx5/releases/download/20241204/en_dict-20121020.tar.gz
+
       - name: Build
         run: |
           cmake -B build -G Ninja \
