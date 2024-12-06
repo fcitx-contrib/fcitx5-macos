@@ -9,6 +9,8 @@ set(CMAKE_Swift_LANGUAGE_VRSION 5.9)
 # On x86 /Library/Frameworks/Mono.framework will mess up libintl.
 set(CMAKE_FIND_FRAMEWORK LAST)
 
+# Disallow InitializeSwift to execute link_directories which adds Xcode paths to rpath.
+set(SWIFT_LIBRARY_SEARCH_PATHS "")
 include(InitializeSwift)
 include(AddSwift)
 
