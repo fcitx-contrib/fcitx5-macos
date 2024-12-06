@@ -17,7 +17,6 @@ add_library(Fcitx5Objs STATIC
 )
 
 target_link_libraries(Fcitx5Objs
-    "-Xlinker -rpath -Xlinker '${CMAKE_INSTALL_PREFIX}/lib'"
     SwiftyJSON
     SwiftFrontend
     SwiftNotify

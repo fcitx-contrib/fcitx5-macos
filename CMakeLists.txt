@@ -59,6 +59,7 @@ endif()
 
 set(APP_INSTALL_PATH "/Library/Input Methods")
 set(CMAKE_INSTALL_PREFIX "${APP_INSTALL_PATH}/Fcitx5.app/Contents")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # Reproducible
 set(CMAKE_INSTALL_LIBDATADIR "${CMAKE_INSTALL_PREFIX}/lib")
 
