@@ -25,14 +25,7 @@ namespace fs = std::filesystem;
 
 #define APP_CONTENTS_PATH "/Library/Input Methods/Fcitx5.app/Contents"
 
-fcitx::BeastFactory beastFactory;
-fcitx::StaticAddonRegistry staticAddons = {
-    std::make_pair<std::string, fcitx::AddonFactory *>("beast", &beastFactory)};
-
-FCITX_IMPORT_ADDON_FACTORY(staticAddons, keyboard);
-FCITX_IMPORT_ADDON_FACTORY(staticAddons, webpanel);
-FCITX_IMPORT_ADDON_FACTORY(staticAddons, macosfrontend);
-FCITX_IMPORT_ADDON_FACTORY(staticAddons, notifications);
+FCITX_DEFINE_STATIC_ADDON_REGISTRY(getStaticAddon)
 
 static std::string join_paths(const std::vector<fs::path> &paths,
                               char sep = ':');
@@ -139,7 +132,7 @@ void Fcitx::setupInstance() {
     instance_ = std::make_unique<fcitx::Instance>(0, nullptr);
     dispatcher_ = std::make_unique<fcitx::EventDispatcher>();
     auto &addonMgr = instance_->addonManager();
-    addonMgr.registerDefaultLoader(&staticAddons);
+    addonMgr.registerDefaultLoader(&getStaticAddon());
     instance_->initialize();
     dispatcher_->attach(&instance_->eventLoop());
 }

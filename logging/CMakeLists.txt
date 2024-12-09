@@ -5,4 +5,4 @@ else()
 endif()
 configure_file(debug.swift.in ${CMAKE_CURRENT_SOURCE_DIR}/debug.swift @ONLY)
 
-add_library(Logging logging.swift debug.swift)
+add_library(Logging STATIC logging.swift debug.swift)
