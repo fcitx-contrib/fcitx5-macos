@@ -12,10 +12,10 @@ _swift_generate_cxx_header(
     DEPENDS Logging
 )
 
-add_library(macosnotifications STATIC macosnotifications.cpp)
-add_dependencies(macosnotifications SwiftNotify)
-target_link_libraries(macosnotifications Fcitx5::Core Fcitx5::Module::Notifications)
-target_include_directories(macosnotifications PUBLIC
+add_library(notifications STATIC macosnotifications.cpp)
+add_dependencies(notifications SwiftNotify)
+target_link_libraries(notifications Fcitx5::Core Fcitx5::Module::Notifications)
+target_include_directories(notifications PUBLIC
   "${CMAKE_CURRENT_BINARY_DIR}/include"
   "${CMAKE_SOURCE_DIR}/src"
 )

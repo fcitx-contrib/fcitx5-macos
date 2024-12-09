@@ -25,7 +25,7 @@ target_link_libraries(Fcitx5Objs
     webpanel
     beast
     macosfrontend
-    macosnotifications
+    notifications
     WebviewCandidateWindow
     Logging
 )
@@ -44,6 +44,11 @@ target_link_libraries(Fcitx5
     SwiftyJSON
     SwiftFrontend
     SwiftNotify
+)
+
+fcitx5_import_addons(Fcitx5
+    REGISTRY_VARNAME getStaticAddon
+    ADDONS beast keyboard webpanel macosfrontend notifications
 )
 
 set(APP_PATH "${CMAKE_CURRENT_BINARY_DIR}/Fcitx5.app/Contents")

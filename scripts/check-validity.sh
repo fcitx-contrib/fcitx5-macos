@@ -2,6 +2,7 @@ set -e
 
 has_homebrew_deps=0
 has_xcode_rpath=0
+has_extra_dylib=0
 
 cd /Library/Input\ Methods/Fcitx5.app/Contents
 libs=(MacOS/Fcitx5)
@@ -18,6 +19,10 @@ for lib in "${libs[@]}"; do
     otool -l $lib | grep -A2 LC_RPATH
     has_xcode_rpath=2
   fi
+  n_dylib=$(otool -L MacOS/Fcitx5 | grep rpath | wc -l | xargs)
+  if [[ $n_dylib != 3 ]]; then
+    has_extra_dylib=4
+  fi
 done
 
-exit $((has_homebrew_deps + has_xcode_rpath))
+exit $((has_homebrew_deps + has_xcode_rpath + has_extra_dylib))

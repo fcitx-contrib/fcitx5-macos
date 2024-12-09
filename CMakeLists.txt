@@ -90,16 +90,17 @@ add_compile_definitions($<$<COMPILE_LANGUAGE:C,CXX>:-DFCITX_GETTEXT_DOMAIN=\"fci
 add_subdirectory(keycode)
 add_subdirectory(macosfrontend)
 add_subdirectory(macosnotifications)
-add_subdirectory(webpanel)
-
-add_subdirectory(src)
-add_subdirectory(assets)
 
 option(BUILD_PREVIEW "" OFF)
 add_subdirectory(fcitx5-webview)
+add_subdirectory(webpanel)
 
-set(ADDON_TYPE "StaticLibrary")
+set(BUILD_SHARED_FCITX_ADDON OFF)
+include(fcitx5/src/lib/fcitx-utils/Fcitx5Macros.cmake)
 add_subdirectory(fcitx5-beast/src)
+
+add_subdirectory(src)
+add_subdirectory(assets)
 
 enable_testing()
 add_subdirectory(tests)
