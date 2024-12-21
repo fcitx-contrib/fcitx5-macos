@@ -1,9 +1,7 @@
 #include <unistd.h>
 #include <algorithm>
 #include <atomic>
-#include <cctype>
 #include <filesystem>
-#include <sstream>
 #include <thread>
 
 #include <fcitx-utils/i18n.h>
@@ -49,7 +47,45 @@ Fcitx::~Fcitx() {
     teardown();
 }
 
+// Collect all ~/Library/fcitx5/share/locale/*/LC_MESSAGES/*.mo
+std::set<std::string> getPluginDomains(const fs::path &localedir) {
+    std::set<std::string> ret;
+    try {
+        for (const auto &entry : fs::directory_iterator(localedir)) {
+            if (!entry.is_directory()) {
+                continue;
+            }
+            fs::path lcMessagesPath = entry.path() / "LC_MESSAGES";
+            try {
+                for (const auto &file :
+                     fs::directory_iterator(lcMessagesPath)) {
+                    if (file.path().extension() == ".mo") {
+                        ret.insert(file.path().stem());
+                    }
+                }
+            } catch (const std::exception &e) {
+                // LC_MESSAGES not exist.
+            }
+        }
+    } catch (const std::exception &e) {
+        // localedir not exist.
+    }
+    return ret;
+}
+
+// Must be executed before creating fcitx instance, i.e. loading addons, because
+// addons register compile-time domain path, and only 1st call of registerDomain
+// counts. The .mo files must exist.
+void setupI18N() {
+    fs::path home{getenv("HOME")};
+    fs::path localedir = home / "Library" / "fcitx5" / "share" / "locale";
+    for (const auto &domain : getPluginDomains(localedir)) {
+        fcitx::registerDomain(domain.c_str(), localedir.c_str());
+    }
+}
+
 void Fcitx::setup() {
+    setupI18N();
     setupInstance();
     frontend_ =
         dynamic_cast<fcitx::MacosFrontend *>(addonMgr().addon("macosfrontend"));
@@ -113,19 +149,6 @@ void Fcitx::setupEnv() {
 
     fcitx::registerDomain(FCITX_GETTEXT_DOMAIN,
                           (app_contents_path / "share" / "locale").c_str());
-
-    // Register text domains of well-known addons.
-    fs::path localedir = user_prefix / "share" / "locale";
-
-    const char *addon_names[] = {"fcitx5-anthy",      "fcitx5-chinese-addons",
-                                 "fcitx5-hallelujah", "fcitx5-libthai",
-                                 "fcitx5-lua",        "fcitx5-rime",
-                                 "fcitx5-skk",        "fcitx5-unikey",
-                                 "fcitx5-chewing",    "fcitx5-hangul",
-                                 "fcitx5-sayura",     "fcitx5-bamboo"};
-    for (const auto addon : addon_names) {
-        fcitx::registerDomain(addon, localedir.c_str());
-    }
 }
 
 void Fcitx::setupInstance() {
