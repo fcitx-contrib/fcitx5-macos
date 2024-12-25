@@ -215,6 +215,9 @@ FCITX_CONFIGURATION(
     Option<candidate_window::writing_mode_t> writingMode{
         this, "WritingMode", _("Writing mode"),
         candidate_window::writing_mode_t::horizontal_tb};
+    Option<bool> typographyAwarenessForIM{this, "TypographyAwarenessForIM",
+                                          _("Typography awareness for IM"),
+                                          true};
     Option<PagingButtonsStyle> pagingButtonsStyle{this, "PagingButtonsStyle",
                                                   _("Paging buttons style"),
                                                   PagingButtonsStyle::Arrow};);

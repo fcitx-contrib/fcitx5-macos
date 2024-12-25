@@ -332,14 +332,8 @@ void WebPanel::update(UserInterfaceComponent component,
         std::vector<candidate_window::Candidate> candidates;
         int size = 0;
         candidate_window::layout_t layout = config_.typography->layout.value();
-        f5m_is_linear_layout =
-            (layout == candidate_window::layout_t::horizontal);
         candidate_window::writing_mode_t writingMode =
             config_.typography->writingMode.value();
-        f5m_is_vertical_rl =
-            (writingMode == candidate_window::writing_mode_t::vertical_rl);
-        f5m_is_vertical_lr =
-            (writingMode == candidate_window::writing_mode_t::vertical_lr);
         if (const auto &list = inputPanel.candidateList()) {
             switch (list->layoutHint()) {
             case CandidateLayoutHint::Vertical:
@@ -350,6 +344,23 @@ void WebPanel::update(UserInterfaceComponent component,
                 break;
             default:
                 break;
+            }
+            // hack for rime
+            if (*config_.typography->typographyAwarenessForIM) {
+                // Allow -> to move highlight on horizontal+horizontal_tb.
+                f5m_is_linear_layout =
+                    (layout == candidate_window::layout_t::horizontal);
+                f5m_is_vertical_rl =
+                    (writingMode ==
+                     candidate_window::writing_mode_t::vertical_rl);
+                f5m_is_vertical_lr =
+                    (writingMode ==
+                     candidate_window::writing_mode_t::vertical_lr);
+            } else {
+                // Allow -> to move cursor on horizontal+horizontal_tb.
+                f5m_is_linear_layout = false;
+                f5m_is_vertical_rl = false;
+                f5m_is_vertical_lr = false;
             }
             const auto &bulk = list->toBulk();
             if (layout == candidate_window::layout_t::horizontal &&
