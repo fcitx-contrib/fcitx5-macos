@@ -362,6 +362,16 @@ void WebPanel::update(UserInterfaceComponent component,
                 f5m_is_vertical_rl = false;
                 f5m_is_vertical_lr = false;
             }
+            // Paging
+            auto *pageableList = list->toPageable();
+            pageable =
+                pageableList && *config_.typography->pagingButtonsStyle !=
+                                    PagingButtonsStyle::None;
+            if (pageable) {
+                hasPrev = pageableList->hasPrev();
+                hasNext = pageableList->hasNext();
+            }
+            // Scroll mode
             const auto &bulk = list->toBulk();
             if (layout == candidate_window::layout_t::horizontal &&
                 writingMode ==
@@ -375,10 +385,17 @@ void WebPanel::update(UserInterfaceComponent component,
                     scrollState_ = candidate_window::scroll_state_t::scrolling;
                     return expand();
                 }
-                scrollState_ = candidate_window::scroll_state_t::ready;
+                // Disable scroll mode if all candidates are shown.
+                if (pageableList != nullptr && pageableList->hasNext()) {
+                    scrollState_ = candidate_window::scroll_state_t::ready;
+                } else {
+                    pageable = false;
+                    scrollState_ = candidate_window::scroll_state_t::none;
+                }
             } else {
                 scrollState_ = candidate_window::scroll_state_t::none;
             }
+            // Candidate actions
             auto *actionableList = list->toActionable();
             size = list->size();
             for (int i = 0; i < size; i++) {
@@ -406,14 +423,6 @@ void WebPanel::update(UserInterfaceComponent component,
                      actions});
             }
             highlighted = list->cursorIndex();
-            auto *pageableList = list->toPageable();
-            pageable =
-                pageableList && *config_.typography->pagingButtonsStyle !=
-                                    PagingButtonsStyle::None;
-            if (pageable) {
-                hasPrev = pageableList->hasPrev();
-                hasNext = pageableList->hasNext();
-            }
         } else {
             scrollState_ = candidate_window::scroll_state_t::none;
         }
