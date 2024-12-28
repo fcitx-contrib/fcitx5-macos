@@ -186,7 +186,10 @@ std::string MacosFrontend::focusOut(ICUUID uuid) {
     InputContextEvent event(ic, EventType::InputContextSwitchInputMethod);
     auto engine = instance_->inputMethodEngine(ic);
     auto entry = instance_->inputMethodEntry(ic);
-    engine->deactivate(*entry, event);
+    if (engine && entry) {
+        // Prevent crash for unavailable IM (addon not loaded).
+        engine->deactivate(*entry, event);
+    }
     // At this stage panel is still shown. If removed, a following backspace
     // will commit a BS character in VSCode.
     ic->setDummyPreedit(false);
