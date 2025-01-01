@@ -28,9 +28,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-15, macos-13]
+        type: [Release, Debug]
         include:
-          - { os: macos-15, arch: arm64 }
-          - { os: macos-13, arch: x86_64 }
+          - { os: macos-15, arch: arm64, type: Release, postfix: '' }
+          - { os: macos-15, arch: arm64, type: Debug, postfix: -debug }
+          - { os: macos-13, arch: x86_64, type: Release, postfix: '' }
+          - { os: macos-13, arch: x86_64, type: Debug, postfix: -debug }
 
     steps:
       - uses: actions/checkout@v4
@@ -46,6 +49,8 @@ jobs:
           node-version: 20.x
 
       - name: Install dependencies
+        env:
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
         run: |
           brew update && brew upgrade || true
           brew install \
@@ -66,15 +71,17 @@ jobs:
           cmake -B build -G Ninja \
             -DCMAKE_Swift_COMPILER=`which swiftc` \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=${{ matrix.type }}
           cmake --build build
           sudo cmake --install build
 
       - name: Package and remove dev files
         run: |
-          tar cjf Fcitx5-${{ matrix.arch }}-dev.tar.bz2 -C "/Library/Input Methods" Fcitx5.app/Contents/{include,lib}
+          if [[ ${{ matrix.type }} == "Release" ]]; then
+            tar cjf Fcitx5-${{ matrix.arch }}-dev.tar.bz2 -C "/Library/Input Methods" Fcitx5.app/Contents/{include,lib}
+          fi
           sudo rm -rf "/Library/Input Methods/Fcitx5.app/Contents"/{bin/fcitx5-{configtool,diagnose},include,lib/{cmake,pkgconfig},share/{applications,metainfo}}
-          tar cjf Fcitx5-${{ matrix.arch }}.tar.bz2 -C "/Library/Input Methods" Fcitx5.app
+          tar cjf Fcitx5-${{ matrix.arch }}${{ matrix.postfix }}.tar.bz2 -C "/Library/Input Methods" Fcitx5.app
           ./scripts/code-sign.sh # after tar to avoid local signature in tarball
 
       - name: Test
@@ -85,8 +92,7 @@ jobs:
         with:
           name: Fcitx5-${{ matrix.arch }}
           path: |
-            Fcitx5-${{ matrix.arch }}.tar.bz2
-            Fcitx5-${{ matrix.arch }}-dev.tar.bz2
+            Fcitx5-${{ matrix.arch }}*.tar.bz2
 
       - name: Check validity
         run: |
@@ -94,12 +100,12 @@ jobs:
           md5sum -c checksum
 
       - name: Generate meta.json
-        if: ${{ matrix.os == 'macos-15' }}
+        if: ${{ matrix.os == 'macos-15' && matrix.type == 'Release' }}
         run: |
           echo "{\"object\": {\"sha\": \"$(git rev-parse HEAD)\"}}" > meta.json
 
       - name: Upload meta.json
-        if: ${{ matrix.os == 'macos-15' }}
+        if: ${{ matrix.os == 'macos-15' && matrix.type == 'Release' }}
         uses: actions/upload-artifact@v4
         with:
           name: meta.json
@@ -133,8 +139,5 @@ jobs:
           prerelease: true
           title: "Nightly Build"
           files: |
-            Fcitx5-x86_64.tar.bz2
-            Fcitx5-x86_64-dev.tar.bz2
-            Fcitx5-arm64.tar.bz2
-            Fcitx5-arm64-dev.tar.bz2
+            Fcitx5-*.tar.bz2
             meta.json
