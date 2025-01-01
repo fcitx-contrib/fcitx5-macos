@@ -8,6 +8,10 @@ add_test(NAME config-swift COMMAND config-swift)
 
 add_executable(config-cpp testconfig.cpp)
 target_link_libraries(config-cpp Fcitx5Objs)
+fcitx5_import_addons(config-cpp
+    REGISTRY_VARNAME getStaticAddon
+    ADDONS keyboard
+)
 add_test(NAME config-cpp COMMAND config-cpp)
 
 # CustomPhrase .plist parser

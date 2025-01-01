@@ -18,12 +18,12 @@ int main() {
     }
     {
         auto j = nlohmann::json::parse(
-            getConfig("fcitx://config/addon/punctuation"));
+            getConfig("fcitx://config/addon/unicode"));
         assert(j.is_object() && j.find("ERROR") == j.end());
     }
     {
         auto j = nlohmann::json::parse(
-            getConfig("fcitx://config/inputmethod/pinyin"));
+            getConfig("fcitx://config/inputmethod/keyboard-us"));
         assert(j.is_object() && j.find("ERROR") == j.end());
     }
 
