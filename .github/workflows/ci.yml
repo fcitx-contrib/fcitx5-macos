@@ -90,7 +90,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Fcitx5-${{ matrix.arch }}
+          name: Fcitx5-${{ matrix.arch }}${{ matrix.postfix }}
           path: |
             Fcitx5-${{ matrix.arch }}*.tar.bz2
 
