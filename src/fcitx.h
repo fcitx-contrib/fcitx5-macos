@@ -30,7 +30,7 @@ public:
     fcitx::MacosFrontend *frontend();
 
 private:
-    void setupLog(bool verbose);
+    void setupLog();
     void setupEnv();
     void setupInstance();
 
