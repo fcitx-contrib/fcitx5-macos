@@ -17,8 +17,8 @@ int main() {
         assert(j.is_object() && j.find("ERROR") == j.end());
     }
     {
-        auto j = nlohmann::json::parse(
-            getConfig("fcitx://config/addon/unicode"));
+        auto j =
+            nlohmann::json::parse(getConfig("fcitx://config/addon/unicode"));
         assert(j.is_object() && j.find("ERROR") == j.end());
     }
     {
