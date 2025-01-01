@@ -2,7 +2,7 @@ import Foundation
 import Logging
 
 let mainFileName = "Fcitx5-\(arch).tar.bz2"
-private let mainAddress = "\(sourceRepo)/releases/download/latest/\(mainFileName)"
+let mainDebugFileName = "Fcitx5-\(arch)-debug.tar.bz2"
 let pluginBaseAddress =
   "https://github.com/fcitx-contrib/fcitx5-plugins/releases/download/macos/"
 
@@ -56,12 +56,14 @@ private func extractPlugin(_ plugin: String, native: Bool) -> Bool {
 }
 
 class Updater {
-  private var main: Bool
-  private var nativePlugins: [String]
-  private var dataPlugins: [String]
+  private let main: Bool
+  private let debug: Bool
+  private let nativePlugins: [String]
+  private let dataPlugins: [String]
 
-  init(main: Bool, nativePlugins: [String], dataPlugins: [String]) {
+  init(main: Bool, debug: Bool, nativePlugins: [String], dataPlugins: [String]) {
     self.main = main
+    self.debug = debug
     self.nativePlugins = nativePlugins
     self.dataPlugins = dataPlugins
   }
@@ -70,6 +72,8 @@ class Updater {
     onFinish: @escaping (Bool, [String: Bool], [String: Bool]) -> Void,
     onProgress: ((Double) -> Void)? = nil
   ) {
+    let mainAddress =
+      "\(sourceRepo)/releases/download/latest/\(self.debug ? mainDebugFileName : mainFileName)"
     let downloader = Downloader(
       nativePlugins.map({ getAddress($0, native: true) })
         + dataPlugins.map({ getAddress($0, native: false) }) + (main ? [mainAddress] : [])

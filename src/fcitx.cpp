@@ -38,7 +38,7 @@ Fcitx &Fcitx::shared() {
 }
 
 Fcitx::Fcitx() {
-    setupLog(true);
+    setupLog();
     setupEnv();
 }
 
@@ -99,15 +99,15 @@ void Fcitx::teardown() {
     instance_.reset();
 }
 
-void Fcitx::setupLog(bool verbose) {
+void Fcitx::setupLog() {
     static native_streambuf log_streambuf;
     static std::ostream stream(&log_streambuf);
     fcitx::Log::setLogStream(stream);
-    if (verbose) {
-        fcitx::Log::setLogRule("*=5,notimedate");
-    } else {
-        fcitx::Log::setLogRule("notimedate");
-    }
+#ifdef VERBOSE_LOGGING
+    fcitx::Log::setLogRule("*=5,notimedate");
+#else
+    fcitx::Log::setLogRule("*=4,notimedate");
+#endif
 }
 
 void Fcitx::setupEnv() {

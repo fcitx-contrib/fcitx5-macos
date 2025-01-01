@@ -1,8 +1,7 @@
+set(LOGGING_SRCS logging.swift)
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
-    set(IS_DEBUG true)
+    list(APPEND LOGGING_SRCS debug.swift)
 else()
-    set(IS_DEBUG false)
+    list(APPEND LOGGING_SRCS release.swift)
 endif()
-configure_file(debug.swift.in ${CMAKE_CURRENT_SOURCE_DIR}/debug.swift @ONLY)
-
-add_library(Logging STATIC logging.swift debug.swift)
+add_library(Logging STATIC ${LOGGING_SRCS})

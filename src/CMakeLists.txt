@@ -16,6 +16,11 @@ add_library(Fcitx5Objs STATIC
     config/config.cpp
 )
 
+option(VERBOSE_LOGGING "Enable verbose logging" ON)
+if(VERBOSE_LOGGING)
+    target_compile_definitions(Fcitx5Objs PRIVATE VERBOSE_LOGGING)
+endif()
+
 target_link_libraries(Fcitx5Objs
     SwiftyJSON
     SwiftFrontend
