@@ -59,6 +59,7 @@ struct AboutView: View {
   @State private var showCheckFailed = false
   @State private var showDownloadFailed = false
   @State private var showInstallFailed = false
+  @State private var showSwitchToDebug = false
   @State private var confirmUninstall = false
   @State private var removeUserData = false
   @State private var uninstalling = false
@@ -77,7 +78,13 @@ struct AboutView: View {
         .font(.title)
 
       Spacer().frame(height: gapSize)
-      Text(arch)
+
+      HStack {
+        Text(arch)
+        if isDebug {
+          Text("Debug")
+        }
+      }
 
       Spacer().frame(height: gapSize)
       urlButton(String(commit.prefix(7)), sourceRepo + "/commit/" + commit)
@@ -110,7 +117,7 @@ struct AboutView: View {
           if viewModel.state == .notChecked {
             checkUpdate()
           } else if viewModel.state == .available {
-            update()
+            update(debug: isDebug)
           }
         } label: {
           if viewModel.state == .notChecked || viewModel.state == .upToDate {
@@ -139,7 +146,7 @@ struct AboutView: View {
             VStack {
               Text("Update available")
               Button {
-                update()
+                update(debug: isDebug)
               } label: {
                 Text("Update now")
               }.buttonStyle(.borderedProminent)
@@ -151,11 +158,50 @@ struct AboutView: View {
             }.padding()
           }
 
+        if isDebug {
+          Button {
+            update(debug: false)
+          } label: {
+            Text("Switch to Release")
+          }.disabled(
+            viewModel.state == .downloading || viewModel.state == .installing
+          )
+        } else {
+          Button {
+            showSwitchToDebug = true
+          } label: {
+            Text("Switch to Debug")
+          }.disabled(
+            viewModel.state == .downloading || viewModel.state == .installing
+          ).sheet(
+            isPresented: $showSwitchToDebug
+          ) {
+            VStack {
+              Text("Switch to debug only if Fctix5 crashes and you want to help debug.")
+              HStack {
+                Button {
+                  showSwitchToDebug = false
+                } label: {
+                  Text("Cancel")
+                }
+                Button {
+                  update(debug: true)
+                  showSwitchToDebug = false
+                } label: {
+                  Text("OK")
+                }.buttonStyle(.borderedProminent)
+              }
+            }.padding()
+          }
+        }
+
         Button {
           confirmUninstall = true
         } label: {
           Text("Uninstall")
-        }.sheet(
+        }.disabled(
+          viewModel.state == .downloading || viewModel.state == .installing
+        ).sheet(
           isPresented: $confirmUninstall
         ) {
           VStack {
@@ -272,15 +318,16 @@ struct AboutView: View {
     }.resume()
   }
 
-  func update() {
+  func update(debug: Bool) {
     viewModel.state = .downloading
     checkPluginUpdate({ success, nativePlugins, dataPlugins in
-      let updater = Updater(main: true, nativePlugins: nativePlugins, dataPlugins: dataPlugins)
+      let updater = Updater(
+        main: true, debug: debug, nativePlugins: nativePlugins, dataPlugins: dataPlugins)
       updater.update(
         // Install plugin in a best-effort manner. No need to check plugin status.
         onFinish: { result, _, _ in
           if result {
-            install()
+            install(debug: debug)
           } else {
             viewModel.state = .available
             showDownloadFailed = true
@@ -292,7 +339,7 @@ struct AboutView: View {
     })
   }
 
-  func install() {
+  func install(debug: Bool) {
     viewModel.state = .installing
     let conditions = NSMutableDictionary()
     conditions.setValue("com.apple.keylayout.ABC", forKey: kTISPropertyInputSourceID as String)
@@ -303,7 +350,7 @@ struct AboutView: View {
         TISSelectInputSource(inputSource)
       }
     }
-    let path = cacheDir.appendingPathComponent(mainFileName).localPath()
+    let path = cacheDir.appendingPathComponent(debug ? mainDebugFileName : mainFileName).localPath()
     // Necessary to put it in background, otherwise sudo UI will hang if it has been canceled once.
     DispatchQueue.global().async {
       if !sudo("update", path, updateLog) {

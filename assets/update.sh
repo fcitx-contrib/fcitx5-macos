@@ -7,7 +7,11 @@ INSTALL_DIR="/Library/Input Methods"
 APP_DIR="$INSTALL_DIR/Fcitx5.app"
 RESOURCES_DIR="$APP_DIR/Contents/Resources"
 
-rm -rf "$APP_DIR/Contents/*"
+# Don't remove files that must exist (which will be overwritten) as that will put Fcitx5 in a registered-but-not-listed state.
+rm -rf "$APP_DIR"/Contents/{bin,lib,share,Resources}
+if ls "$APP_DIR"/Contents/MacOS/Fcitx5.*; then # Debug symbols
+    rm -rf "$APP_DIR"/Contents/MacOS/Fcitx5.*
+fi
 tar xjvf "$tar_ball" -C "$INSTALL_DIR"
 rm -f "$tar_ball"
 xattr -dr com.apple.quarantine "$APP_DIR"
