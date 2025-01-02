@@ -6,16 +6,16 @@ let mainDebugFileName = "Fcitx5-\(arch)-debug.tar.bz2"
 let pluginBaseAddress =
   "https://github.com/fcitx-contrib/fcitx5-plugins/releases/download/macos/"
 
-private func getFileName(_ plugin: String, native: Bool) -> String {
+func getPluginFileName(_ plugin: String, native: Bool) -> String {
   return native ? "\(plugin)-\(arch).tar.bz2" : "\(plugin)-any.tar.bz2"
 }
 
 private func getAddress(_ plugin: String, native: Bool) -> String {
-  return pluginBaseAddress + getFileName(plugin, native: native)
+  return pluginBaseAddress + getPluginFileName(plugin, native: native)
 }
 
-private func getCacheURL(_ plugin: String, native: Bool) -> URL {
-  let fileName = getFileName(plugin, native: native)
+func getCacheURL(_ plugin: String, native: Bool) -> URL {
+  let fileName = getPluginFileName(plugin, native: native)
   return cacheDir.appendingPathComponent(fileName)
 }
 
@@ -31,14 +31,13 @@ func getFilesFromDescriptor(_ descriptor: URL) -> [String] {
   return json["files"].arrayValue.map { $0.stringValue }
 }
 
-private func extractPlugin(_ plugin: String, native: Bool) -> Bool {
+func extractPlugin(_ plugin: String, native: Bool) -> Bool {
   let descriptor = getPluginDescriptor(plugin)
   let oldFiles = getFilesFromDescriptor(descriptor)
 
   mkdirP(libraryDir.localPath())
   let url = getCacheURL(plugin, native: native)
-  let path = url.localPath()
-  let ret = exec("/usr/bin/tar", ["-xjf", path, "-C", libraryDir.localPath()])
+  let ret = exec("/usr/bin/tar", ["-xjf", url.localPath(), "-C", libraryDir.localPath()])
   let _ = removeFile(url)
 
   if ret {
@@ -47,8 +46,7 @@ private func extractPlugin(_ plugin: String, native: Bool) -> Bool {
     if removedFiles.count > 0 {
       FCITX_INFO("Removing \(removedFiles) which are no longer needed")
       for file in removedFiles {
-        let path = libraryDir.appendingPathComponent(file)
-        let _ = removeFile(path)
+        let _ = removeFile(libraryDir.appendingPathComponent(file))
       }
     }
   }
@@ -83,7 +81,7 @@ class Updater {
         var nativeResults = nativePlugins.reduce(into: [String: Bool](), { $0[$1] = false })
         for plugin in nativePlugins {
           let result = results[getAddress(plugin, native: true)]!
-          let fileName = getFileName(plugin, native: true)
+          let fileName = getPluginFileName(plugin, native: true)
           if result {
             if extractPlugin(plugin, native: true) {
               nativeResults[plugin] = true
@@ -100,7 +98,7 @@ class Updater {
           into: [String: Bool](), { $0[$1] = false })
         for plugin in dataPlugins {
           let result = results[getAddress(plugin, native: false)]!
-          let fileName = getFileName(plugin, native: false)
+          let fileName = getPluginFileName(plugin, native: false)
           if result {
             if extractPlugin(plugin, native: false) {
               dataResults[plugin] = true

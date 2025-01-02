@@ -3,6 +3,7 @@ import Fcitx
 import Logging
 import SwiftUI
 import SwiftyJSON
+import UniformTypeIdentifiers
 
 struct Plugin: Identifiable, Hashable {
   let id: String
@@ -121,8 +122,11 @@ struct PluginView: View {
   @State private var showCheckFailed = false
   @State private var showDownloadFailed = false
   @State private var showUpdateAvailable = false
+  @State private var showInvalidFileName = false
 
   @ObservedObject private var pluginVM = PluginVM()
+
+  private let openPanel = NSOpenPanel()
 
   func refreshPlugins() {
     pluginVM.refreshPlugins()
@@ -255,10 +259,7 @@ struct PluginView: View {
         processing = false
         if needsRestart {
           if autoRestart {
-            FcitxInputController.pluginManager.window?.performClose(_: nil)
-            DispatchQueue.main.async {
-              restartProcess()
-            }
+            restart()
           } else {
             promptRestart = true
           }
@@ -267,6 +268,13 @@ struct PluginView: View {
       onProgress: { progress in
         downloadProgress = progress
       })
+  }
+
+  private func restart() {
+    FcitxInputController.pluginManager.window?.performClose(_: nil)
+    DispatchQueue.main.async {
+      restartProcess()
+    }
   }
 
   var body: some View {
@@ -347,6 +355,34 @@ struct PluginView: View {
                 comment: ""))
           }.disabled(selectedAvailable.isEmpty || processing)
             .buttonStyle(.borderedProminent)
+          Button {
+            openPanel.allowsMultipleSelection = false
+            openPanel.canChooseDirectories = false
+            openPanel.allowedContentTypes = [UTType.init(filenameExtension: "bz2")!]
+            openPanel.directoryURL = URL(
+              fileURLWithPath: homeDir.appendingPathComponent("Downloads").localPath())
+            openPanel.begin { response in
+              if response == .OK {
+                for url in openPanel.urls {
+                  let fileName = url.lastPathComponent
+                  for pluginName in pluginMap.keys {
+                    if fileName == getPluginFileName(pluginName, native: true) {
+                      mkdirP(cacheDir.localPath())
+                      let cacheFileURL = getCacheURL(pluginName, native: true)
+                      let _ = copyFile(url, cacheFileURL)
+                      let _ = exec(
+                        "/usr/bin/xattr", ["-dr", "com.apple.quarantine", cacheFileURL.localPath()])
+                      let _ = extractPlugin(pluginName, native: true)
+                      restart()
+                    }
+                  }
+                }
+                showInvalidFileName = true
+              }
+            }
+          } label: {
+            Text("Install manually")
+          }
         }
       }
     }.padding()
@@ -375,6 +411,11 @@ struct PluginView: View {
         AlertToast(
           displayMode: .hud, type: .error(Color.red),
           title: NSLocalizedString("Download failed", comment: ""))
+      }
+      .toast(isPresenting: $showInvalidFileName) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Invalid file name", comment: ""))
       }
   }
 }
