@@ -71,41 +71,4 @@ foreach(LOCALE
     )
 endforeach()
 
-#
-# C++ i18n through gettext
-# Use 'pot' to generate the POT file.
-#
-set(TRANSLATABLE_CXX_SOURCES
-    src/*.cpp
-    src/*.h
-    macosfrontend/*.cpp
-    macosfrontend/*.h
-    macosnotifications/*.cpp
-    macosnotifications/*.h
-    webpanel/*.cpp
-    webpanel/*.h
-)
-add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/po/base.pot
-    COMMAND xgettext --c++ --keyword=_ ${TRANSLATABLE_CXX_SOURCES} -o ${CMAKE_CURRENT_SOURCE_DIR}/po/base.pot
-    DEPENDS ${LOCALIZABLE_CXX_SOURCES}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Generating base.pot..."
-)
-add_custom_target(pot
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/po/base.pot
-)
-
-foreach(LOCALE zh_CN)
-    set(MO_FILE ${CMAKE_CURRENT_BINARY_DIR}/po/${LOCALE}.mo)
-    add_custom_command(
-        OUTPUT ${MO_FILE}
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/po/${LOCALE}.po
-        COMMAND msgfmt ${CMAKE_CURRENT_SOURCE_DIR}/po/${LOCALE}.po -o ${MO_FILE}
-    )
-    add_custom_target(${LOCALE}_mo ALL DEPENDS ${MO_FILE})
-    install(FILES ${MO_FILE}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/locale/${LOCALE}/LC_MESSAGES
-        RENAME fcitx5-macos.mo
-    )
-endforeach()
+add_subdirectory(po)
