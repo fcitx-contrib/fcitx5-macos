@@ -78,8 +78,9 @@ struct PluginAnnotation {
 FCITX_CONFIGURATION(
     BasicConfig,
     Option<bool> followCursor{this, "FollowCursor", _("Follow cursor"), false};
-    Option<candidate_window::theme_t> theme{this, "Theme", _("Theme"),
-                                            candidate_window::theme_t::system};
+    OptionWithAnnotation<candidate_window::theme_t,
+                         candidate_window::theme_tI18NAnnotation>
+        theme{this, "Theme", _("Theme"), candidate_window::theme_t::system};
     OptionWithAnnotation<std::string, UserThemeAnnotation> userTheme{
         this, "UserTheme", _("User theme"), ""};
     ExternalOption exportCurrentTheme{this, "ExportCurrentTheme",
@@ -210,17 +211,21 @@ FCITX_CONFIGURATION(
 
 FCITX_CONFIGURATION(
     TypographyConfig,
-    Option<candidate_window::layout_t> layout{
-        this, "Layout", _("Layout"), candidate_window::layout_t::horizontal};
-    Option<candidate_window::writing_mode_t> writingMode{
-        this, "WritingMode", _("Writing mode"),
-        candidate_window::writing_mode_t::horizontal_tb};
+    OptionWithAnnotation<candidate_window::layout_t,
+                         candidate_window::layout_tI18NAnnotation>
+        layout{this, "Layout", _("Layout"),
+               candidate_window::layout_t::horizontal};
+    OptionWithAnnotation<candidate_window::writing_mode_t,
+                         candidate_window::writing_mode_tI18NAnnotation>
+        writingMode{this, "WritingMode", _("Writing mode"),
+                    candidate_window::writing_mode_t::horizontal_tb};
     Option<bool> typographyAwarenessForIM{this, "TypographyAwarenessForIM",
                                           _("Typography awareness for IM"),
                                           true};
-    Option<PagingButtonsStyle> pagingButtonsStyle{this, "PagingButtonsStyle",
-                                                  _("Paging buttons style"),
-                                                  PagingButtonsStyle::Arrow};);
+    OptionWithAnnotation<PagingButtonsStyle, PagingButtonsStyleI18NAnnotation>
+        pagingButtonsStyle{this, "PagingButtonsStyle",
+                           _("Paging buttons style"),
+                           PagingButtonsStyle::Arrow};);
 
 FCITX_CONFIGURATION(BackgroundConfig,
                     OptionWithAnnotation<std::string, ImageAnnotation> imageUrl{
@@ -256,17 +261,18 @@ FCITX_CONFIGURATION(
                                  ""};);
 
 FCITX_CONFIGURATION(CursorConfig,
-                    Option<CursorStyle> style{this, "Style", _("Style"),
-                                              CursorStyle::Blink};
+                    OptionWithAnnotation<CursorStyle, CursorStyleI18NAnnotation>
+                        style{this, "Style", _("Style"), CursorStyle::Blink};
                     Option<std::string> text{this, "Text", _("Text"), "‸"};);
 
 FCITX_CONFIGURATION(
     HighlightConfig,
-    Option<HighlightMarkStyle> markStyle{this, "MarkStyle", _("Mark style"),
-                                         HighlightMarkStyle::None};
+    OptionWithAnnotation<HighlightMarkStyle, HighlightMarkStyleI18NAnnotation>
+        markStyle{this, "MarkStyle", _("Mark style"), HighlightMarkStyle::None};
     Option<std::string> markText{this, "MarkText", _("Mark text"), "🐧"};
-    Option<HoverBehavior> hoverBehavior{
-        this, "HoverBehavior", _("Hover behavior"), HoverBehavior::None};);
+    OptionWithAnnotation<HoverBehavior, HoverBehaviorI18NAnnotation>
+        hoverBehavior{this, "HoverBehavior", _("Hover behavior"),
+                      HoverBehavior::None};);
 
 FCITX_CONFIGURATION(
     Size,
