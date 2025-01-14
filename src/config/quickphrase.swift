@@ -236,6 +236,7 @@ struct QuickPhraseView: View {
               Text("Cancel")
             }
             Button {
+              mkdirP(localQuickphrasePath)
               let localURL = localQuickphraseDir.appendingPathComponent(newFileName + ".mb")
               if !writeUTF8(localURL, "") {
                 showCreateFailed = true
