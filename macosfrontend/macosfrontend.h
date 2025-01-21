@@ -23,6 +23,10 @@
 #define TERMINAL_USE_EN                                                        \
     R"JSON({"appPath": "/System/Applications/Utilities/Terminal.app", "appId": "com.apple.Terminal", "imName": "keyboard-us"})JSON"
 
+// User deletes ABC to enable Fcitx5 on password input.
+#define PASSWORDS_USE_EN                                                       \
+    R"JSON({"appPath": "/System/Applications/Passwords.app", "appId": "com.apple.Passwords", "imName": "keyboard-us"})JSON"
+
 namespace fcitx {
 
 class MacosInputContext;
@@ -38,8 +42,10 @@ struct AppIMAnnotation {
 FCITX_CONFIGURATION(
     MacosFrontendConfig,
     OptionWithAnnotation<std::vector<std::string>, AppIMAnnotation>
-        appDefaultIM{
-            this, "AppDefaultIM", _("App default IM"), {TERMINAL_USE_EN}};
+        appDefaultIM{this,
+                     "AppDefaultIM",
+                     _("App default IM"),
+                     {TERMINAL_USE_EN, PASSWORDS_USE_EN}};
     Option<bool> simulateKeyRelease{this, "SimulateKeyRelease",
                                     _("Simulate key release")};
     Option<int, IntConstrain> simulateKeyReleaseDelay{
