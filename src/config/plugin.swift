@@ -49,6 +49,8 @@ private func getAutoAddIms(_ plugin: String) -> [String] {
 class PluginVM: ObservableObject {
   @Published private(set) var installedPlugins = [Plugin]()
   @Published private(set) var availablePlugins = [Plugin]()
+  @Published var nativeAvailable = [String]()
+  @Published var dataAvailable = [String]()
   @Published var upToDate = false
 
   func refreshPlugins() {
@@ -110,9 +112,6 @@ struct PluginView: View {
   @State private var selectedInstalled = Set<String>()
   @State private var selectedAvailable = Set<String>()
 
-  @State private var nativeAvailable = [String]()
-  @State private var dataAvailable = [String]()
-
   @State private var processing = false
   @State private var promptRestart = false
 
@@ -140,8 +139,8 @@ struct PluginView: View {
         showCheckFailed = true
         return
       }
-      nativeAvailable = nativePlugins
-      dataAvailable = dataPlugins
+      pluginVM.nativeAvailable = nativePlugins
+      pluginVM.dataAvailable = dataPlugins
       if nativePlugins.isEmpty && dataPlugins.isEmpty {
         pluginVM.upToDate = true
         showUpToDate = true
@@ -198,8 +197,8 @@ struct PluginView: View {
     processing = true
 
     if !isUpdate {
-      nativeAvailable.removeAll()
-      dataAvailable.removeAll()
+      pluginVM.nativeAvailable.removeAll()
+      pluginVM.dataAvailable.removeAll()
 
       var countedPlugins = Set<String>()
       func helper(_ plugin: String) {
@@ -210,10 +209,10 @@ struct PluginView: View {
         // Skip installed dependencies.
         if let info = pluginMap[plugin], !pluginVM.installedPlugins.contains(info) {
           if info.native {
-            nativeAvailable.append(plugin)
+            pluginVM.nativeAvailable.append(plugin)
           }
           // Assumption: all official plugins contain a data tarball.
-          dataAvailable.append(plugin)
+          pluginVM.dataAvailable.append(plugin)
           for dependency in info.dependencies {
             helper(dependency)
           }
@@ -227,7 +226,8 @@ struct PluginView: View {
     selectedAvailable.removeAll()
 
     let updater = Updater(
-      main: false, debug: false, nativePlugins: nativeAvailable, dataPlugins: dataAvailable)
+      main: false, debug: false, nativePlugins: pluginVM.nativeAvailable,
+      dataPlugins: pluginVM.dataAvailable)
     updater.update(
       onFinish: { _, nativeResults, dataResults in
         processing = false
@@ -301,7 +301,9 @@ struct PluginView: View {
 
                 Spacer().frame(height: gapSize)
 
-                ForEach(Set(nativeAvailable).union(dataAvailable).sorted(), id: \.self) {
+                ForEach(
+                  Set(pluginVM.nativeAvailable).union(pluginVM.dataAvailable).sorted(), id: \.self
+                ) {
                   plugin in
                   Text(plugin)
                 }
