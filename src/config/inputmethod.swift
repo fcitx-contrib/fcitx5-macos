@@ -57,37 +57,38 @@ struct InputMethodConfigView: View {
     NavigationSplitView {
       List(selection: $viewModel.selectedItem) {
         ForEach($viewModel.groups, id: \.name) { $group in
-          let header = HStack {
-            Text(group.name)
+          Section {
+            HStack {
+              Text(group.name)
 
-            Button {
-              addToGroup = group
-              addingInputMethod = true
-            } label: {
-              Image(systemName: "plus.circle")
-            }
-            .buttonStyle(BorderlessButtonStyle())
-            .help(NSLocalizedString("Add input methods to", comment: "") + " '\(group.name)'")
-
-            Button {
-              renameGroupDialog.show { input in
-                viewModel.renameGroup(&group, input)
+              Button {
+                addToGroup = group
+                addingInputMethod = true
+              } label: {
+                Image(systemName: "plus.circle")
               }
-            } label: {
-              Image(systemName: "pencil")
-            }
-            .buttonStyle(BorderlessButtonStyle())
-            .help(NSLocalizedString("Rename", comment: "") + " '\(group.name)'")
-          }
-          .frame(maxWidth: .infinity, alignment: .leading)
-          .contentShape(Rectangle())
-          .contextMenu {
-            Button(NSLocalizedString("Remove", comment: "") + " '\(group.name)'") {
-              viewModel.removeGroup(group.name)
-            }
-          }
+              .buttonStyle(BorderlessButtonStyle())
+              .foregroundColor(.secondary)  // As if it's in section header.
+              .help(NSLocalizedString("Add input methods to", comment: "") + " '\(group.name)'")
 
-          Section(header: header) {
+              Button {
+                renameGroupDialog.show { input in
+                  viewModel.renameGroup(&group, input)
+                }
+              } label: {
+                Image(systemName: "pencil")
+              }
+              .buttonStyle(BorderlessButtonStyle())
+              .foregroundColor(.secondary)
+              .help(NSLocalizedString("Rename", comment: "") + " '\(group.name)'")
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .contextMenu {
+              Button(NSLocalizedString("Remove", comment: "") + " '\(group.name)'") {
+                viewModel.removeGroup(group.name)
+              }
+            }
             ForEach($group.inputMethods) { $inputMethod in
               HStack {
                 Text(inputMethod.displayName)
@@ -325,11 +326,8 @@ struct InputMethodConfigView: View {
       if groups.count <= 1 {
         return
       }
-      DispatchQueue.main.async {
-        self.groups = self.groups.filter({ $0.name != name })
-        self.save()
-        self.load()  // Refresh to avoid UI state inconsistency.
-      }
+      self.groups = self.groups.filter({ $0.name != name })
+      self.save()
     }
 
     func renameGroup(_ group: inout Group, _ name: String) {
