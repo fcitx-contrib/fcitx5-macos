@@ -34,7 +34,7 @@ function(_setup_swift_paths)
     #       To handle it correctly, we would need to pass the target triple and
     #       flags to this compiler invocation.
     execute_process(
-      COMMAND ${CMAKE_Swift_COMPILER} ${SDK_FLAGS} -print-target-info
+      COMMAND ${CMAKE_Swift_COMPILER} ${SDK_FLAGS} -target ${F5M_TARGET} -print-target-info
       OUTPUT_VARIABLE SWIFT_TARGET_INFO
     )
 

@@ -23,17 +23,15 @@ jobs:
 
   build:
     needs: lint
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-15
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, macos-13]
-        type: [Release, Debug]
         include:
-          - { os: macos-15, arch: arm64, type: Release, postfix: '' }
-          - { os: macos-15, arch: arm64, type: Debug, postfix: -debug }
-          - { os: macos-13, arch: x86_64, type: Release, postfix: '' }
-          - { os: macos-13, arch: x86_64, type: Debug, postfix: -debug }
+          - { arch: arm64, type: Release, postfix: '' }
+          - { arch: arm64, type: Debug, postfix: -debug }
+          - { arch: x86_64, type: Release, postfix: '' }
+          - { arch: x86_64, type: Debug, postfix: -debug }
 
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +44,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
 
       - name: Install dependencies
         env:
@@ -69,13 +67,13 @@ jobs:
       - name: Build
         run: |
           # Don't log key on any CI artifact.
-          cmake -B build -G Ninja \
+          cmake -B build/${{ matrix.arch }} -G Ninja \
             -DCMAKE_Swift_COMPILER=`which swiftc` \
             -DVERBOSE_LOGGING=OFF \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.type }}
-          cmake --build build
-          sudo cmake --install build
+          cmake --build build/${{ matrix.arch }}
+          sudo cmake --install build/${{ matrix.arch }}
 
       - name: Package and remove dev files
         run: |
@@ -87,7 +85,7 @@ jobs:
           ./scripts/code-sign.sh # after tar to avoid local signature in tarball
 
       - name: Test
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --test-dir build/${{ matrix.arch }} --output-on-failure
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -102,12 +100,12 @@ jobs:
           md5sum -c checksum
 
       - name: Generate meta.json
-        if: ${{ matrix.os == 'macos-15' && matrix.type == 'Release' }}
+        if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
         run: |
           echo "{\"object\": {\"sha\": \"$(git rev-parse HEAD)\"}}" > meta.json
 
       - name: Upload meta.json
-        if: ${{ matrix.os == 'macos-15' && matrix.type == 'Release' }}
+        if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
         uses: actions/upload-artifact@v4
         with:
           name: meta.json
