@@ -23,17 +23,15 @@ jobs:
 
   build:
     needs: lint
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-15
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-15, macos-13]
-        type: [Release, Debug]
         include:
-          - { os: macos-15, arch: arm64, type: Release, postfix: '' }
-          - { os: macos-15, arch: arm64, type: Debug, postfix: -debug }
-          - { os: macos-13, arch: x86_64, type: Release, postfix: '' }
-          - { os: macos-13, arch: x86_64, type: Debug, postfix: -debug }
+          - { arch: arm64, type: Release, postfix: '' }
+          - { arch: arm64, type: Debug, postfix: -debug }
+          - { arch: x86_64, type: Release, postfix: '' }
+          - { arch: x86_64, type: Debug, postfix: -debug }
 
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +44,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
 
       - name: Install dependencies
         env:
@@ -102,12 +100,12 @@ jobs:
           md5sum -c checksum
 
       - name: Generate meta.json
-        if: ${{ matrix.os == 'macos-15' && matrix.type == 'Release' }}
+        if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
         run: |
           echo "{\"object\": {\"sha\": \"$(git rev-parse HEAD)\"}}" > meta.json
 
       - name: Upload meta.json
-        if: ${{ matrix.os == 'macos-15' && matrix.type == 'Release' }}
+        if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
         uses: actions/upload-artifact@v4
         with:
           name: meta.json

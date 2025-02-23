@@ -6,7 +6,7 @@ else
   ARCH=$1
 fi
 
-EXTRACT_DIR=build/sysroot/usr
+EXTRACT_DIR=build/$ARCH/usr
 mkdir -p $EXTRACT_DIR
 
 deps=(

@@ -28,9 +28,9 @@ pnpm --prefix=fcitx5-webview i
 
 ### Build with CMake
 ```sh
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
-cmake --build build
-sudo cmake --install build
+cmake -B build/$(uname -m) -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build/$(uname -m)
+sudo cmake --install build/$(uname -m)
 ```
 After the first time you execute `cmake --install`, you need to logout and login,
 then add Fcitx5 in System Setttings -> Keyboard -> Input Sources, Chinese Simplified.
@@ -85,7 +85,7 @@ use the built-in Plugin Manager.
 ### Swift sources
 To update .strings files for each supported locale, run
 ```sh
-cmake --build build --target GenerateStrings
+cmake --build build/$(uname -m) --target GenerateStrings
 ```
 
 This will, e.g., update assets/zh-Hans/Localizable.strings, and then the translator can work on it.
@@ -93,7 +93,7 @@ This will, e.g., update assets/zh-Hans/Localizable.strings, and then the transla
 ### C++ sources
 First, create assets/po/base.pot file:
 ```sh
-cmake --build build --target pot
+cmake --build build/$(uname -m) --target pot
 ```
 
 To add a new language, do

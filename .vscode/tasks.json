@@ -3,24 +3,48 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "Install dependencies",
-            "command": "./scripts/install-deps.sh",
+            "label": "Install dependencies (arm64)",
+            "command": "./scripts/install-deps.sh arm64",
             "group": {
                 "kind": "build"
             }
         },
         {
             "type": "shell",
-            "label": "Configure",
-            "command": "cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug",
+            "label": "Install dependencies (x86_64)",
+            "command": "./scripts/install-deps.sh x86_64",
             "group": {
                 "kind": "build"
             }
         },
         {
             "type": "shell",
-            "label": "Build",
-            "command": "cmake --build build",
+            "label": "Configure (arm64)",
+            "command": "cmake -B build/arm64 -G Ninja -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=Debug",
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Configure (x86_64)",
+            "command": "cmake -B build/x86_64 -G Ninja -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_BUILD_TYPE=Debug",
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Build (arm64)",
+            "command": "cmake --build build/arm64",
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Build (x86_64)",
+            "command": "cmake --build build/x86_64",
             "group": {
                 "kind": "build"
             }
@@ -28,7 +52,7 @@
         {
             "type": "shell",
             "label": "Install",
-            "command": "sudo cmake --install build && ./scripts/code-sign.sh",
+            "command": "sudo cmake --install build/$(uname -m) && ./scripts/code-sign.sh",
             "group": {
                 "kind": "build"
             }
