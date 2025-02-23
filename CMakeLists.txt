@@ -21,7 +21,7 @@ set(SWIFT_LIBRARY_SEARCH_PATHS "")
 include(InitializeSwift)
 include(AddSwift)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 set(FIND_ROOT_PATH "${PROJECT_BINARY_DIR}/usr")
 set(PREBUILDER_INCLUDE_DIR "${FIND_ROOT_PATH}/include")
