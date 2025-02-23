@@ -76,7 +76,7 @@
         {
             "type": "shell",
             "label": "Test",
-            "command": "ctest --test-dir build --output-on-failure",
+            "command": "ctest --test-dir build/$(uname -m) --output-on-failure",
             "group": {
                 "kind": "build"
             }

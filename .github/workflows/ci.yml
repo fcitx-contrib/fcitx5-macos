@@ -67,13 +67,13 @@ jobs:
       - name: Build
         run: |
           # Don't log key on any CI artifact.
-          cmake -B build -G Ninja \
+          cmake -B build/${{ matrix.arch }} -G Ninja \
             -DCMAKE_Swift_COMPILER=`which swiftc` \
             -DVERBOSE_LOGGING=OFF \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.type }}
-          cmake --build build
-          sudo cmake --install build
+          cmake --build build/${{ matrix.arch }}
+          sudo cmake --install build/${{ matrix.arch }}
 
       - name: Package and remove dev files
         run: |
@@ -85,7 +85,7 @@ jobs:
           ./scripts/code-sign.sh # after tar to avoid local signature in tarball
 
       - name: Test
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --test-dir build/${{ matrix.arch }} --output-on-failure
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
