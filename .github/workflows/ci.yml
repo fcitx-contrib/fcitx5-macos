@@ -112,6 +112,18 @@ jobs:
           path: |
             meta.json
 
+      - name: Generate version.json
+        if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
+        run: python scripts/generate-version.py
+
+      - name: Upload version.json
+        if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: version.json
+          path: |
+            version.json
+
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
@@ -141,3 +153,4 @@ jobs:
           files: |
             Fcitx5-*.tar.bz2
             meta.json
+            version.json
