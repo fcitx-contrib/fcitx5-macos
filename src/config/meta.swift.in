@@ -1,3 +1,4 @@
 let commit = "@COMMIT@"
 // swift-format-ignore
 let unixTime = @UNIX_TIME@
+let releaseTag = "@RELEASE_TAG@"
