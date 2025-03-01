@@ -53,17 +53,68 @@ func extractPlugin(_ plugin: String, native: Bool) -> Bool {
   return ret
 }
 
+struct VersionItem: Codable {
+  let tag: String
+  let macos: String
+  let sha: String
+  let time: Int64
+}
+
+struct Version: Codable {
+  let versions: [VersionItem]
+}
+
+func checkMainUpdate(_ callback: @escaping (Bool, VersionItem?, VersionItem?) -> Void) {
+  guard
+    let url = URL(
+      string: "\(sourceRepo)/releases/download/latest/version.json")
+  else {
+    return
+  }
+  getNoCacheSession().dataTask(with: url) { data, response, error in
+    if let data = data,
+      let version = try? JSONDecoder().decode(Version.self, from: data)
+    {
+      var latest: VersionItem? = nil
+      var stable: VersionItem? = nil
+      for item in version.versions {
+        // Assume linear history and sorted version.json.
+        // We don't backport by keeping multiple version branches.
+        if item.time <= unixTime {
+          break
+        }
+        if compatibleWith(item.macos) {
+          if item.tag == "latest" {
+            latest = item
+          } else {
+            stable = item
+            break
+          }
+        }
+      }
+      callback(true, latest, stable)
+    } else {
+      callback(false, nil, nil)
+    }
+  }.resume()
+}
+
 class Updater {
+  private let tag: String
   private let main: Bool
   private let debug: Bool
   private let nativePlugins: [String]
   private let dataPlugins: [String]
 
-  init(main: Bool, debug: Bool, nativePlugins: [String], dataPlugins: [String]) {
+  init(tag: String, main: Bool, debug: Bool, nativePlugins: [String], dataPlugins: [String]) {
+    self.tag = tag
     self.main = main
     self.debug = debug
     self.nativePlugins = nativePlugins
     self.dataPlugins = dataPlugins
+    if tag != "latest" && debug {
+      FCITX_ERROR("Debug build only exists on latest")
+    }
   }
 
   func update(
@@ -71,7 +122,7 @@ class Updater {
     onProgress: ((Double) -> Void)? = nil
   ) {
     let mainAddress =
-      "\(sourceRepo)/releases/download/latest/\(self.debug ? mainDebugFileName : mainFileName)"
+      "\(sourceRepo)/releases/download/\(tag)/\(self.debug ? mainDebugFileName : mainFileName)"
     let downloader = Downloader(
       nativePlugins.map({ getAddress($0, native: true) })
         + dataPlugins.map({ getAddress($0, native: false) }) + (main ? [mainAddress] : [])
