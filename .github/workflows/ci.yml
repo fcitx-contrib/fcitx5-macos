@@ -68,6 +68,7 @@ jobs:
 
       - name: Build
         run: |
+          git fetch --tags -f
           # Don't log key on any CI artifact.
           cmake -B build/${{ matrix.arch }} -G Ninja \
             -DCMAKE_Swift_COMPILER=`which swiftc` \
