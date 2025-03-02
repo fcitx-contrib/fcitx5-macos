@@ -5,6 +5,7 @@
   * 对当前 commit 打 tag；
   * 将新版本插入 [version.jsonl](../version.jsonl) 首行；
   * 更新 [CMakeLists.txt](../CMakeLists.txt) 中的版本号；
-  * 提交上述两个文件的更改。
+  * 将上述两个文件的更改加入暂存区。
 * `git push origin 版本号`，这会在 GitHub 上创建一个新的 release。
-* 待 release 成功创建，`git push origin master`，这将更新 latest 中的 version.json，
+* 待 release 成功创建，在 [fcitx5-plugins](https://github.com/fcitx-contrib/fcitx5-plugins) 中发布新版插件。
+* `git push origin master`，这将更新 latest 中的 version.json，

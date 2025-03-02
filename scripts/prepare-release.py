@@ -28,4 +28,3 @@ if os.system(f'sed -i.bak "s/fcitx5-macos VERSION {major}\\.{minor}\\.{patch}/fc
 os.system('rm CMakeLists.txt.bak')
 
 os.system('git add version.jsonl CMakeLists.txt')
-os.system('git commit -m "bump version"')
