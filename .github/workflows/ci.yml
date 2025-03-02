@@ -101,10 +101,11 @@ jobs:
           ./scripts/check-validity.sh
           md5sum -c checksum
 
+      # TODO: remove all meta.json stuff after 2026-03-02
       - name: Generate meta.json
         if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
         run: |
-          echo "{\"object\": {\"sha\": \"$(git rev-parse HEAD)\"}}" > meta.json
+          echo "{\"object\": {\"sha\": \"6dddc59c941ead66d0020ec7eef9dea85c401ffb\"}}" > meta.json
 
       - name: Upload meta.json
         if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}

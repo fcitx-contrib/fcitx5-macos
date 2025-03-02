@@ -58,6 +58,7 @@ struct AboutView: View {
   @State private var uninstalling = false
   @State private var uninstallFailed = false
   @State private var targetTag: String? = nil
+  @State private var latestAvailable = false
 
   var body: some View {
     VStack {
@@ -168,7 +169,7 @@ struct AboutView: View {
           } label: {
             Text("Switch to Release")
           }.disabled(
-            targetTag == nil || viewModel.state == .downloading || viewModel.state == .installing
+            !latestAvailable || viewModel.state == .downloading || viewModel.state == .installing
           )
         } else {
           Button {
@@ -176,7 +177,7 @@ struct AboutView: View {
           } label: {
             Text("Switch to Debug")
           }.disabled(
-            targetTag != "latest" || viewModel.state == .downloading
+            !latestAvailable || viewModel.state == .downloading
               || viewModel.state == .installing
           ).sheet(
             isPresented: $showSwitchToDebug
@@ -305,6 +306,7 @@ struct AboutView: View {
     viewModel.state = .checking
     checkMainUpdate { success, latestCompatible, latest, stable in
       if success {
+        latestAvailable = latestCompatible
         if let stable = stable {
           // latest >= stable > current
           targetTag = stable.tag
@@ -331,7 +333,7 @@ struct AboutView: View {
   }
 
   func update(debug: Bool) {
-    guard let tag = targetTag else {
+    guard let tag = latestAvailable ? "latest" : targetTag else {
       FCITX_ERROR("Calling update with nil tag")
       return
     }
