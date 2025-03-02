@@ -240,7 +240,7 @@ struct PluginView: View {
     selectedAvailable.removeAll()
 
     let updater = Updater(
-      tag: "latest", main: false, debug: false, nativePlugins: pluginVM.nativeAvailable,
+      tag: releaseTag, main: false, debug: false, nativePlugins: pluginVM.nativeAvailable,
       dataPlugins: pluginVM.dataAvailable)
     updater.update(
       onFinish: { _, nativeResults, dataResults in

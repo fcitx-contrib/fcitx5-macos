@@ -62,7 +62,7 @@ struct VersionItem: Codable {
   let time: Int64
 }
 
-struct Version: Codable {
+private struct Version: Codable {
   let versions: [VersionItem]
 }
 
@@ -124,7 +124,7 @@ class Updater {
     onProgress: ((Double) -> Void)? = nil
   ) {
     let mainAddress =
-      "\(sourceRepo)/releases/download/\(tag)/\(self.debug ? mainDebugFileName : mainFileName)"
+      "\(sourceRepo)/releases/download/\(self.tag)/\(self.debug ? mainDebugFileName : mainFileName)"
     let downloader = Downloader(
       nativePlugins.map({ getAddress(self.tag, $0, native: true) })
         + dataPlugins.map({ getAddress(self.tag, $0, native: false) }) + (main ? [mainAddress] : [])
