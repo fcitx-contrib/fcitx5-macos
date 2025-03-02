@@ -6,6 +6,10 @@ execute_process(COMMAND git show --no-patch --format=%ct
     OUTPUT_VARIABLE UNIX_TIME
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+execute_process(COMMAND bash -c "git describe --exact-match || echo latest"
+    OUTPUT_VARIABLE RELEASE_TAG
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 configure_file(config/meta.swift.in ${CMAKE_CURRENT_SOURCE_DIR}/config/meta.swift @ONLY)
 
 file(GLOB CONFIG_UI_FILES CONFIGURE_DEPENDS config/*.swift)

@@ -9,3 +9,5 @@ assets/en.lproj/Localizable.strings
 assets/po/base.pot
 meta.swift
 *~
+version.json
+*.pyc

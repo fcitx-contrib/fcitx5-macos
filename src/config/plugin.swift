@@ -74,8 +74,8 @@ private struct Meta: Codable {
   let plugins: [Plugin]
 }
 
-func checkPluginUpdate(_ callback: @escaping (Bool, [String], [String]) -> Void) {
-  guard let url = URL(string: pluginBaseAddress + "meta-\(arch).json") else {
+func checkPluginUpdate(_ tag: String, _ callback: @escaping (Bool, [String], [String]) -> Void) {
+  guard let url = URL(string: pluginBaseAddress(tag) + "meta-\(arch).json") else {
     return callback(false, [], [])
   }
   URLSession.shared.dataTask(with: url) { data, response, error in
@@ -119,6 +119,8 @@ struct PluginView: View {
 
   @State private var showUpToDate = false
   @State private var showCheckFailed = false
+  @State private var showMainOutdated = false
+  @State private var showSystemNotSupported = false
   @State private var showDownloadFailed = false
   @State private var showUpdateAvailable = false
   @State private var showInvalidFileName = false
@@ -131,24 +133,54 @@ struct PluginView: View {
     pluginVM.refreshPlugins()
   }
 
-  private func checkUpdate() {
-    processing = true
-    checkPluginUpdate({ success, nativePlugins, dataPlugins in
-      processing = false
+  // Avoid downloading plugins that are incompatible with current main.
+  private func ensureMainCompatible(_ callback: @escaping () -> Void) {
+    // Either a stable release ...
+    if releaseTag != "latest" {
+      return callback()
+    }
+    // ... or a latest release.
+    checkMainUpdate { success, latestCompatible, latest, stable in
       if !success {
+        processing = false
         showCheckFailed = true
         return
       }
-      pluginVM.nativeAvailable = nativePlugins
-      pluginVM.dataAvailable = dataPlugins
-      if nativePlugins.isEmpty && dataPlugins.isEmpty {
-        pluginVM.upToDate = true
-        showUpToDate = true
-      } else {
-        showUpdateAvailable = true
+      if latest != nil || stable != nil {
+        // latest > current or stable > current
+        processing = false
+        showMainOutdated = true
+        return
       }
-      processing = false
-    })
+      if !latestCompatible {
+        processing = false
+        showSystemNotSupported = true
+        return
+      }
+      // latest == current > stable
+      callback()
+    }
+  }
+
+  private func checkUpdate() {
+    processing = true
+    ensureMainCompatible {
+      checkPluginUpdate("latest") { success, nativePlugins, dataPlugins in
+        processing = false
+        if !success {
+          showCheckFailed = true
+          return
+        }
+        pluginVM.nativeAvailable = nativePlugins
+        pluginVM.dataAvailable = dataPlugins
+        if nativePlugins.isEmpty && dataPlugins.isEmpty {
+          pluginVM.upToDate = true
+          showUpToDate = true
+        } else {
+          showUpdateAvailable = true
+        }
+      }
+    }
   }
 
   private func uninstall() {
@@ -195,79 +227,81 @@ struct PluginView: View {
 
   private func install(_ autoRestart: Bool, isUpdate: Bool = false) {
     processing = true
+    ensureMainCompatible {
+      if !isUpdate {
+        pluginVM.nativeAvailable.removeAll()
+        pluginVM.dataAvailable.removeAll()
 
-    if !isUpdate {
-      pluginVM.nativeAvailable.removeAll()
-      pluginVM.dataAvailable.removeAll()
-
-      var countedPlugins = Set<String>()
-      func helper(_ plugin: String) {
-        if countedPlugins.contains(plugin) {
-          return
-        }
-        countedPlugins.insert(plugin)
-        // Skip installed dependencies.
-        if let info = pluginMap[plugin], !pluginVM.installedPlugins.contains(info) {
-          if info.native {
-            pluginVM.nativeAvailable.append(plugin)
-          }
-          // Assumption: all official plugins contain a data tarball.
-          pluginVM.dataAvailable.append(plugin)
-          for dependency in info.dependencies {
-            helper(dependency)
-          }
-        }
-      }
-      for plugin in selectedAvailable {
-        helper(plugin)
-      }
-    }
-    let selectedPlugins = selectedAvailable
-    selectedAvailable.removeAll()
-
-    let updater = Updater(
-      main: false, debug: false, nativePlugins: pluginVM.nativeAvailable,
-      dataPlugins: pluginVM.dataAvailable)
-    updater.update(
-      onFinish: { _, nativeResults, dataResults in
-        processing = false
-        var inputMethods = [String]()
-        if !isUpdate {
-          let downloadedPlugins = selectedPlugins.filter {
-            (nativeResults[$0] ?? true) && (dataResults[$0] ?? true)
-          }
-          if downloadedPlugins.isEmpty {
-            showDownloadFailed = true
+        var countedPlugins = Set<String>()
+        func helper(_ plugin: String) {
+          if countedPlugins.contains(plugin) {
             return
           }
-          // Don't add IMs for dependencies.
-          inputMethods = downloadedPlugins.flatMap { getAutoAddIms($0) }
-        }
-        if !Set(nativeResults.filter({ _, success in success }).keys).intersection(inMemoryPlugins)
-          .isEmpty
-        {
-          needsRestart = true
-        }
-        refreshPlugins()
-        restartAndReconnect()
-        if Fcitx.imGroupCount() == 1 {
-          // Otherwise user knows how to play with it, don't mess it up.
-          for im in inputMethods {
-            Fcitx.imAddToCurrentGroup(im)
+          countedPlugins.insert(plugin)
+          // Skip installed dependencies.
+          if let info = pluginMap[plugin], !pluginVM.installedPlugins.contains(info) {
+            if info.native {
+              pluginVM.nativeAvailable.append(plugin)
+            }
+            // Assumption: all official plugins contain a data tarball.
+            pluginVM.dataAvailable.append(plugin)
+            for dependency in info.dependencies {
+              helper(dependency)
+            }
           }
         }
-        processing = false
-        if needsRestart {
-          if autoRestart {
-            restart()
-          } else {
-            promptRestart = true
-          }
+        for plugin in selectedAvailable {
+          helper(plugin)
         }
-      },
-      onProgress: { progress in
-        downloadProgress = progress
-      })
+      }
+      let selectedPlugins = selectedAvailable
+      selectedAvailable.removeAll()
+
+      let updater = Updater(
+        tag: releaseTag, main: false, debug: false, nativePlugins: pluginVM.nativeAvailable,
+        dataPlugins: pluginVM.dataAvailable)
+      updater.update(
+        onFinish: { _, nativeResults, dataResults in
+          processing = false
+          var inputMethods = [String]()
+          if !isUpdate {
+            let downloadedPlugins = selectedPlugins.filter {
+              (nativeResults[$0] ?? true) && (dataResults[$0] ?? true)
+            }
+            if downloadedPlugins.isEmpty {
+              showDownloadFailed = true
+              return
+            }
+            // Don't add IMs for dependencies.
+            inputMethods = downloadedPlugins.flatMap { getAutoAddIms($0) }
+          }
+          if !Set(nativeResults.filter({ _, success in success }).keys).intersection(
+            inMemoryPlugins
+          )
+          .isEmpty {
+            needsRestart = true
+          }
+          refreshPlugins()
+          restartAndReconnect()
+          if Fcitx.imGroupCount() == 1 {
+            // Otherwise user knows how to play with it, don't mess it up.
+            for im in inputMethods {
+              Fcitx.imAddToCurrentGroup(im)
+            }
+          }
+          processing = false
+          if needsRestart {
+            if autoRestart {
+              restart()
+            } else {
+              promptRestart = true
+            }
+          }
+        },
+        onProgress: { progress in
+          downloadProgress = progress
+        })
+    }
   }
 
   private func restart() {
@@ -289,44 +323,47 @@ struct PluginView: View {
           categorizePlugins(pluginVM.installedPlugins)
         }
         HStack {
-          Button {
-            checkUpdate()
-          } label: {
-            Text("Check update")
-          }.buttonStyle(.borderedProminent)
-            .disabled(processing || pluginVM.upToDate)
-            .sheet(isPresented: $showUpdateAvailable) {
-              VStack {
-                Text("Update available")
+          // No plugin update for stable release.
+          if releaseTag == "latest" {
+            Button {
+              checkUpdate()
+            } label: {
+              Text("Check update")
+            }.buttonStyle(.borderedProminent)
+              .disabled(processing || pluginVM.upToDate)
+              .sheet(isPresented: $showUpdateAvailable) {
+                VStack {
+                  Text("Update available")
 
-                Spacer().frame(height: gapSize)
+                  Spacer().frame(height: gapSize)
 
-                ForEach(
-                  Set(pluginVM.nativeAvailable).union(pluginVM.dataAvailable).sorted(), id: \.self
-                ) {
-                  plugin in
-                  Text(plugin)
-                }
-
-                Spacer().frame(height: gapSize)
-
-                Text("Fcitx5 will auto restart if needed.")
-
-                HStack {
-                  Button {
-                    showUpdateAvailable = false
-                  } label: {
-                    Text("Cancel")
+                  ForEach(
+                    Set(pluginVM.nativeAvailable).union(pluginVM.dataAvailable).sorted(), id: \.self
+                  ) {
+                    plugin in
+                    Text(plugin)
                   }
-                  Button {
-                    showUpdateAvailable = false
-                    install(true, isUpdate: true)
-                  } label: {
-                    Text("Update")
-                  }.buttonStyle(.borderedProminent)
-                }
-              }.padding()
-            }
+
+                  Spacer().frame(height: gapSize)
+
+                  Text("Fcitx5 will auto restart if needed.")
+
+                  HStack {
+                    Button {
+                      showUpdateAvailable = false
+                    } label: {
+                      Text("Cancel")
+                    }
+                    Button {
+                      showUpdateAvailable = false
+                      install(true, isUpdate: true)
+                    } label: {
+                      Text("Update")
+                    }.buttonStyle(.borderedProminent)
+                  }
+                }.padding()
+              }
+          }
           Button("Uninstall", role: .destructive, action: uninstall).disabled(
             selectedInstalled.isEmpty || processing)
         }
@@ -408,6 +445,16 @@ struct PluginView: View {
         AlertToast(
           displayMode: .hud, type: .error(Color.red),
           title: NSLocalizedString("Failed to check update", comment: ""))
+      }
+      .toast(isPresenting: $showMainOutdated) {
+        AlertToast(
+          displayMode: .hud, type: .regular,
+          title: NSLocalizedString("Please update Fcitx5 in \"About\" first", comment: ""))
+      }
+      .toast(isPresenting: $showSystemNotSupported) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Your system version is no longer supported", comment: ""))
       }
       .toast(isPresenting: $showDownloadFailed) {
         AlertToast(

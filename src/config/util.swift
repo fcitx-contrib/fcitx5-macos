@@ -19,6 +19,18 @@ let squirrelDir = homeDir.appendingPathComponent("Library/Rime")
 
 let sourceRepo = "https://github.com/fcitx-contrib/fcitx5-macos"
 
+private let osVersion = ProcessInfo.processInfo.operatingSystemVersion
+private let macOSVersion =
+  "\(osVersion.majorVersion).\(osVersion.minorVersion).\(osVersion.patchVersion)"
+
+private func compareVersions(_ v1: String, _ v2: String) -> ComparisonResult {
+  return v1.compare(v2, options: .numeric)
+}
+
+func compatibleWith(_ version: String) -> Bool {
+  return compareVersions(macOSVersion, version) != .orderedAscending
+}
+
 func getArch() -> String {
   #if arch(x86_64)
     return "x86_64"
@@ -208,4 +220,11 @@ func exec(_ command: String, _ args: [String]) -> Bool {
     FCITX_ERROR("Fatal error executing \(command) \(args)")
     return false
   }
+}
+
+func getNoCacheSession() -> URLSession {
+  // URLSession.shared caches even after process restarted.
+  let config = URLSessionConfiguration.default
+  config.requestCachePolicy = .reloadIgnoringLocalCacheData
+  return URLSession(configuration: config)
 }
