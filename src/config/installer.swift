@@ -3,15 +3,17 @@ import Logging
 
 let mainFileName = "Fcitx5-\(arch).tar.bz2"
 let mainDebugFileName = "Fcitx5-\(arch)-debug.tar.bz2"
-let pluginBaseAddress =
-  "https://github.com/fcitx-contrib/fcitx5-plugins/releases/download/macos/"
+
+func pluginBaseAddress(_ tag: String) -> String {
+  return "https://github.com/fcitx-contrib/fcitx5-plugins/releases/download/macos-\(tag)/"
+}
 
 func getPluginFileName(_ plugin: String, native: Bool) -> String {
   return native ? "\(plugin)-\(arch).tar.bz2" : "\(plugin)-any.tar.bz2"
 }
 
-private func getAddress(_ plugin: String, native: Bool) -> String {
-  return pluginBaseAddress + getPluginFileName(plugin, native: native)
+private func getAddress(_ tag: String, _ plugin: String, native: Bool) -> String {
+  return pluginBaseAddress(tag) + getPluginFileName(plugin, native: native)
 }
 
 func getCacheURL(_ plugin: String, native: Bool) -> URL {
@@ -124,14 +126,14 @@ class Updater {
     let mainAddress =
       "\(sourceRepo)/releases/download/\(tag)/\(self.debug ? mainDebugFileName : mainFileName)"
     let downloader = Downloader(
-      nativePlugins.map({ getAddress($0, native: true) })
-        + dataPlugins.map({ getAddress($0, native: false) }) + (main ? [mainAddress] : [])
+      nativePlugins.map({ getAddress(self.tag, $0, native: true) })
+        + dataPlugins.map({ getAddress(self.tag, $0, native: false) }) + (main ? [mainAddress] : [])
     )
     downloader.download(
       onFinish: { [self] results in
         var nativeResults = nativePlugins.reduce(into: [String: Bool](), { $0[$1] = false })
         for plugin in nativePlugins {
-          let result = results[getAddress(plugin, native: true)]!
+          let result = results[getAddress(self.tag, plugin, native: true)]!
           let fileName = getPluginFileName(plugin, native: true)
           if result {
             if extractPlugin(plugin, native: true) {
@@ -148,7 +150,7 @@ class Updater {
         var dataResults: [String: Bool] = dataPlugins.reduce(
           into: [String: Bool](), { $0[$1] = false })
         for plugin in dataPlugins {
-          let result = results[getAddress(plugin, native: false)]!
+          let result = results[getAddress(self.tag, plugin, native: false)]!
           let fileName = getPluginFileName(plugin, native: false)
           if result {
             if extractPlugin(plugin, native: false) {

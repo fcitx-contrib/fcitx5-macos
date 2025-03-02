@@ -161,8 +161,7 @@ struct AboutView: View {
             }.padding()
           }
 
-        // if isDebug {
-        if false {  // XXX: fixme
+        if isDebug {
           Button {
             update(debug: false)
           } label: {
@@ -301,13 +300,16 @@ struct AboutView: View {
     checkMainUpdate { success, latest, stable in
       if success {
         if let stable = stable {
+          // latest >= stable > current
           targetTag = stable.tag
           viewModel.state = .availableSheet
         } else {
           if latest == nil {
+            // latest == current >= stable
             viewModel.state = .upToDate
             showUpToDate = true
           } else {
+            // latest > current >= stable
             targetTag = "latest"
             viewModel.state = .availableSheet
           }
@@ -325,7 +327,7 @@ struct AboutView: View {
       return
     }
     viewModel.state = .downloading
-    checkPluginUpdate({ success, nativePlugins, dataPlugins in
+    checkPluginUpdate(tag) { success, nativePlugins, dataPlugins in
       let updater = Updater(
         tag: tag, main: true, debug: debug, nativePlugins: nativePlugins, dataPlugins: dataPlugins)
       updater.update(
@@ -341,7 +343,7 @@ struct AboutView: View {
         onProgress: { progress in
           downloadProgress = progress
         })
-    })
+    }
   }
 
   func install(debug: Bool) {

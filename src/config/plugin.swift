@@ -74,8 +74,8 @@ private struct Meta: Codable {
   let plugins: [Plugin]
 }
 
-func checkPluginUpdate(_ callback: @escaping (Bool, [String], [String]) -> Void) {
-  guard let url = URL(string: pluginBaseAddress + "meta-\(arch).json") else {
+func checkPluginUpdate(_ tag: String, _ callback: @escaping (Bool, [String], [String]) -> Void) {
+  guard let url = URL(string: pluginBaseAddress(tag) + "meta-\(arch).json") else {
     return callback(false, [], [])
   }
   URLSession.shared.dataTask(with: url) { data, response, error in
@@ -119,6 +119,7 @@ struct PluginView: View {
 
   @State private var showUpToDate = false
   @State private var showCheckFailed = false
+  @State private var showMainOutdated = false
   @State private var showDownloadFailed = false
   @State private var showUpdateAvailable = false
   @State private var showInvalidFileName = false
@@ -133,22 +134,35 @@ struct PluginView: View {
 
   private func checkUpdate() {
     processing = true
-    checkPluginUpdate({ success, nativePlugins, dataPlugins in
-      processing = false
+    checkMainUpdate { success, latest, stable in
       if !success {
+        processing = false
         showCheckFailed = true
         return
       }
-      pluginVM.nativeAvailable = nativePlugins
-      pluginVM.dataAvailable = dataPlugins
-      if nativePlugins.isEmpty && dataPlugins.isEmpty {
-        pluginVM.upToDate = true
-        showUpToDate = true
-      } else {
-        showUpdateAvailable = true
+      if latest != nil {
+        // latest > current
+        processing = false
+        showMainOutdated = true
+        return
       }
-      processing = false
-    })
+      // latest == current > stable
+      checkPluginUpdate("latest") { success, nativePlugins, dataPlugins in
+        processing = false
+        if !success {
+          showCheckFailed = true
+          return
+        }
+        pluginVM.nativeAvailable = nativePlugins
+        pluginVM.dataAvailable = dataPlugins
+        if nativePlugins.isEmpty && dataPlugins.isEmpty {
+          pluginVM.upToDate = true
+          showUpToDate = true
+        } else {
+          showUpdateAvailable = true
+        }
+      }
+    }
   }
 
   private func uninstall() {
@@ -289,44 +303,47 @@ struct PluginView: View {
           categorizePlugins(pluginVM.installedPlugins)
         }
         HStack {
-          Button {
-            checkUpdate()
-          } label: {
-            Text("Check update")
-          }.buttonStyle(.borderedProminent)
-            .disabled(processing || pluginVM.upToDate)
-            .sheet(isPresented: $showUpdateAvailable) {
-              VStack {
-                Text("Update available")
+          // No plugin update for stable release.
+          if releaseTag == "latest" {
+            Button {
+              checkUpdate()
+            } label: {
+              Text("Check update")
+            }.buttonStyle(.borderedProminent)
+              .disabled(processing || pluginVM.upToDate)
+              .sheet(isPresented: $showUpdateAvailable) {
+                VStack {
+                  Text("Update available")
 
-                Spacer().frame(height: gapSize)
+                  Spacer().frame(height: gapSize)
 
-                ForEach(
-                  Set(pluginVM.nativeAvailable).union(pluginVM.dataAvailable).sorted(), id: \.self
-                ) {
-                  plugin in
-                  Text(plugin)
-                }
-
-                Spacer().frame(height: gapSize)
-
-                Text("Fcitx5 will auto restart if needed.")
-
-                HStack {
-                  Button {
-                    showUpdateAvailable = false
-                  } label: {
-                    Text("Cancel")
+                  ForEach(
+                    Set(pluginVM.nativeAvailable).union(pluginVM.dataAvailable).sorted(), id: \.self
+                  ) {
+                    plugin in
+                    Text(plugin)
                   }
-                  Button {
-                    showUpdateAvailable = false
-                    install(true, isUpdate: true)
-                  } label: {
-                    Text("Update")
-                  }.buttonStyle(.borderedProminent)
-                }
-              }.padding()
-            }
+
+                  Spacer().frame(height: gapSize)
+
+                  Text("Fcitx5 will auto restart if needed.")
+
+                  HStack {
+                    Button {
+                      showUpdateAvailable = false
+                    } label: {
+                      Text("Cancel")
+                    }
+                    Button {
+                      showUpdateAvailable = false
+                      install(true, isUpdate: true)
+                    } label: {
+                      Text("Update")
+                    }.buttonStyle(.borderedProminent)
+                  }
+                }.padding()
+              }
+          }
           Button("Uninstall", role: .destructive, action: uninstall).disabled(
             selectedInstalled.isEmpty || processing)
         }
@@ -408,6 +425,11 @@ struct PluginView: View {
         AlertToast(
           displayMode: .hud, type: .error(Color.red),
           title: NSLocalizedString("Failed to check update", comment: ""))
+      }
+      .toast(isPresenting: $showMainOutdated) {
+        AlertToast(
+          displayMode: .hud, type: .regular,
+          title: NSLocalizedString("Please update Fcitx5 in \"About\" first", comment: ""))
       }
       .toast(isPresenting: $showDownloadFailed) {
         AlertToast(
