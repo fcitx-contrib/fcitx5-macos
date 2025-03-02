@@ -132,8 +132,13 @@ struct PluginView: View {
     pluginVM.refreshPlugins()
   }
 
-  private func checkUpdate() {
-    processing = true
+  // Avoid downloading plugins that are incompatible with current main.
+  private func ensureMainCompatible(_ callback: @escaping () -> Void) {
+    // Either a stable release ...
+    if releaseTag != "latest" {
+      return callback()
+    }
+    // ... or a latest release.
     checkMainUpdate { success, latest, stable in
       if !success {
         processing = false
@@ -147,6 +152,13 @@ struct PluginView: View {
         return
       }
       // latest == current > stable
+      callback()
+    }
+  }
+
+  private func checkUpdate() {
+    processing = true
+    ensureMainCompatible {
       checkPluginUpdate("latest") { success, nativePlugins, dataPlugins in
         processing = false
         if !success {
@@ -209,79 +221,81 @@ struct PluginView: View {
 
   private func install(_ autoRestart: Bool, isUpdate: Bool = false) {
     processing = true
+    ensureMainCompatible {
+      if !isUpdate {
+        pluginVM.nativeAvailable.removeAll()
+        pluginVM.dataAvailable.removeAll()
 
-    if !isUpdate {
-      pluginVM.nativeAvailable.removeAll()
-      pluginVM.dataAvailable.removeAll()
-
-      var countedPlugins = Set<String>()
-      func helper(_ plugin: String) {
-        if countedPlugins.contains(plugin) {
-          return
-        }
-        countedPlugins.insert(plugin)
-        // Skip installed dependencies.
-        if let info = pluginMap[plugin], !pluginVM.installedPlugins.contains(info) {
-          if info.native {
-            pluginVM.nativeAvailable.append(plugin)
-          }
-          // Assumption: all official plugins contain a data tarball.
-          pluginVM.dataAvailable.append(plugin)
-          for dependency in info.dependencies {
-            helper(dependency)
-          }
-        }
-      }
-      for plugin in selectedAvailable {
-        helper(plugin)
-      }
-    }
-    let selectedPlugins = selectedAvailable
-    selectedAvailable.removeAll()
-
-    let updater = Updater(
-      tag: releaseTag, main: false, debug: false, nativePlugins: pluginVM.nativeAvailable,
-      dataPlugins: pluginVM.dataAvailable)
-    updater.update(
-      onFinish: { _, nativeResults, dataResults in
-        processing = false
-        var inputMethods = [String]()
-        if !isUpdate {
-          let downloadedPlugins = selectedPlugins.filter {
-            (nativeResults[$0] ?? true) && (dataResults[$0] ?? true)
-          }
-          if downloadedPlugins.isEmpty {
-            showDownloadFailed = true
+        var countedPlugins = Set<String>()
+        func helper(_ plugin: String) {
+          if countedPlugins.contains(plugin) {
             return
           }
-          // Don't add IMs for dependencies.
-          inputMethods = downloadedPlugins.flatMap { getAutoAddIms($0) }
-        }
-        if !Set(nativeResults.filter({ _, success in success }).keys).intersection(inMemoryPlugins)
-          .isEmpty
-        {
-          needsRestart = true
-        }
-        refreshPlugins()
-        restartAndReconnect()
-        if Fcitx.imGroupCount() == 1 {
-          // Otherwise user knows how to play with it, don't mess it up.
-          for im in inputMethods {
-            Fcitx.imAddToCurrentGroup(im)
+          countedPlugins.insert(plugin)
+          // Skip installed dependencies.
+          if let info = pluginMap[plugin], !pluginVM.installedPlugins.contains(info) {
+            if info.native {
+              pluginVM.nativeAvailable.append(plugin)
+            }
+            // Assumption: all official plugins contain a data tarball.
+            pluginVM.dataAvailable.append(plugin)
+            for dependency in info.dependencies {
+              helper(dependency)
+            }
           }
         }
-        processing = false
-        if needsRestart {
-          if autoRestart {
-            restart()
-          } else {
-            promptRestart = true
-          }
+        for plugin in selectedAvailable {
+          helper(plugin)
         }
-      },
-      onProgress: { progress in
-        downloadProgress = progress
-      })
+      }
+      let selectedPlugins = selectedAvailable
+      selectedAvailable.removeAll()
+
+      let updater = Updater(
+        tag: releaseTag, main: false, debug: false, nativePlugins: pluginVM.nativeAvailable,
+        dataPlugins: pluginVM.dataAvailable)
+      updater.update(
+        onFinish: { _, nativeResults, dataResults in
+          processing = false
+          var inputMethods = [String]()
+          if !isUpdate {
+            let downloadedPlugins = selectedPlugins.filter {
+              (nativeResults[$0] ?? true) && (dataResults[$0] ?? true)
+            }
+            if downloadedPlugins.isEmpty {
+              showDownloadFailed = true
+              return
+            }
+            // Don't add IMs for dependencies.
+            inputMethods = downloadedPlugins.flatMap { getAutoAddIms($0) }
+          }
+          if !Set(nativeResults.filter({ _, success in success }).keys).intersection(
+            inMemoryPlugins
+          )
+          .isEmpty {
+            needsRestart = true
+          }
+          refreshPlugins()
+          restartAndReconnect()
+          if Fcitx.imGroupCount() == 1 {
+            // Otherwise user knows how to play with it, don't mess it up.
+            for im in inputMethods {
+              Fcitx.imAddToCurrentGroup(im)
+            }
+          }
+          processing = false
+          if needsRestart {
+            if autoRestart {
+              restart()
+            } else {
+              promptRestart = true
+            }
+          }
+        },
+        onProgress: { progress in
+          downloadProgress = progress
+        })
+    }
   }
 
   private func restart() {
