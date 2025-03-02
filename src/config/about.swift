@@ -48,6 +48,7 @@ struct AboutView: View {
   @State private var downloadProgress = 0.0
 
   @State private var showUpToDate = false
+  @State private var showSystemNotSupported = false
   @State private var showCheckFailed = false
   @State private var showDownloadFailed = false
   @State private var showInstallFailed = false
@@ -254,6 +255,11 @@ struct AboutView: View {
           displayMode: .hud, type: .complete(Color.green),
           title: NSLocalizedString("Fcitx5 is up to date", comment: ""))
       }
+      .toast(isPresenting: $showSystemNotSupported) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Your system version is no longer supported", comment: ""))
+      }
       .toast(isPresenting: $showCheckFailed) {
         AlertToast(
           displayMode: .hud, type: .error(Color.red),
@@ -297,14 +303,17 @@ struct AboutView: View {
 
   func checkUpdate() {
     viewModel.state = .checking
-    checkMainUpdate { success, latest, stable in
+    checkMainUpdate { success, latestCompatible, latest, stable in
       if success {
         if let stable = stable {
           // latest >= stable > current
           targetTag = stable.tag
           viewModel.state = .availableSheet
         } else {
-          if latest == nil {
+          if !latestCompatible {
+            viewModel.state = .upToDate
+            showSystemNotSupported = true
+          } else if latest == nil {
             // latest == current >= stable
             viewModel.state = .upToDate
             showUpToDate = true

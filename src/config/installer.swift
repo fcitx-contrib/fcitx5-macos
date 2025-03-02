@@ -66,7 +66,7 @@ private struct Version: Codable {
   let versions: [VersionItem]
 }
 
-func checkMainUpdate(_ callback: @escaping (Bool, VersionItem?, VersionItem?) -> Void) {
+func checkMainUpdate(_ callback: @escaping (Bool, Bool, VersionItem?, VersionItem?) -> Void) {
   guard
     let url = URL(
       string: "\(sourceRepo)/releases/download/latest/version.json")
@@ -77,9 +77,13 @@ func checkMainUpdate(_ callback: @escaping (Bool, VersionItem?, VersionItem?) ->
     if let data = data,
       let version = try? JSONDecoder().decode(Version.self, from: data)
     {
+      var latestCompatible = false
       var latest: VersionItem? = nil
       var stable: VersionItem? = nil
       for item in version.versions {
+        if item.tag == "latest" {
+          latestCompatible = compatibleWith(item.macos)
+        }
         // Assume linear history and sorted version.json.
         // We don't backport by keeping multiple version branches.
         if item.time <= unixTime {
@@ -94,9 +98,9 @@ func checkMainUpdate(_ callback: @escaping (Bool, VersionItem?, VersionItem?) ->
           }
         }
       }
-      callback(true, latest, stable)
+      callback(true, latestCompatible, latest, stable)
     } else {
-      callback(false, nil, nil)
+      callback(false, false, nil, nil)
     }
   }.resume()
 }

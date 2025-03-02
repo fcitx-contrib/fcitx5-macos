@@ -120,6 +120,7 @@ struct PluginView: View {
   @State private var showUpToDate = false
   @State private var showCheckFailed = false
   @State private var showMainOutdated = false
+  @State private var showSystemNotSupported = false
   @State private var showDownloadFailed = false
   @State private var showUpdateAvailable = false
   @State private var showInvalidFileName = false
@@ -139,16 +140,21 @@ struct PluginView: View {
       return callback()
     }
     // ... or a latest release.
-    checkMainUpdate { success, latest, stable in
+    checkMainUpdate { success, latestCompatible, latest, stable in
       if !success {
         processing = false
         showCheckFailed = true
         return
       }
-      if latest != nil {
-        // latest > current
+      if latest != nil || stable != nil {
+        // latest > current or stable > current
         processing = false
         showMainOutdated = true
+        return
+      }
+      if !latestCompatible {
+        processing = false
+        showSystemNotSupported = true
         return
       }
       // latest == current > stable
@@ -444,6 +450,11 @@ struct PluginView: View {
         AlertToast(
           displayMode: .hud, type: .regular,
           title: NSLocalizedString("Please update Fcitx5 in \"About\" first", comment: ""))
+      }
+      .toast(isPresenting: $showSystemNotSupported) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Your system version is no longer supported", comment: ""))
       }
       .toast(isPresenting: $showDownloadFailed) {
         AlertToast(
