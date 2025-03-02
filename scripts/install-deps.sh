@@ -13,7 +13,6 @@ deps=(
   default-icon-theme
   boost
   libexpat
-  fmt
   libintl
   json
   json-c
