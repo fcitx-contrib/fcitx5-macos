@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - '[0-9]+.*'
   pull_request:
   workflow_dispatch:
 
@@ -66,6 +68,7 @@ jobs:
 
       - name: Build
         run: |
+          git fetch --tags -f
           # Don't log key on any CI artifact.
           cmake -B build/${{ matrix.arch }} -G Ninja \
             -DCMAKE_Swift_COMPILER=`which swiftc` \
@@ -99,10 +102,11 @@ jobs:
           ./scripts/check-validity.sh
           md5sum -c checksum
 
+      # TODO: remove all meta.json stuff after 2026-03-02
       - name: Generate meta.json
         if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
         run: |
-          echo "{\"object\": {\"sha\": \"$(git rev-parse HEAD)\"}}" > meta.json
+          echo "{\"object\": {\"sha\": \"6dddc59c941ead66d0020ec7eef9dea85c401ffb\"}}" > meta.json
 
       - name: Upload meta.json
         if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
@@ -112,18 +116,30 @@ jobs:
           path: |
             meta.json
 
+      - name: Generate version.json
+        if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
+        run: python scripts/generate-version.py
+
+      - name: Upload version.json
+        if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: version.json
+          path: |
+            version.json
+
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
 
   compare:
-    if: ${{ github.ref != 'refs/heads/master' }}
+    if: ${{ github.event_name == 'pull_request' }}
     needs: build
     uses: ./.github/workflows/compare.yml
 
   release:
     needs: build
-    if: ${{ github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, '!release') }}
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
@@ -132,6 +148,7 @@ jobs:
           merge-multiple: true
 
       - name: Create Nightly release
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: 'marvinpinto/action-automatic-releases@latest'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -141,3 +158,15 @@ jobs:
           files: |
             Fcitx5-*.tar.bz2
             meta.json
+            version.json
+
+      - name: Create Stable release
+        if: ${{ github.ref != 'refs/heads/master' }}
+        uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          prerelease: false
+          title: ${{ github.ref_name }}
+          files: |
+            Fcitx5-*.tar.bz2

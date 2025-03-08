@@ -32,14 +32,6 @@ func disableInputMethod() {
   }
 }
 
-struct Object: Codable {
-  let sha: String
-}
-
-struct Tag: Codable {
-  let object: Object
-}
-
 enum UpdateState {
   case notChecked  // Clickable "Check update"
   case checking  // Disabled "Checking"
@@ -56,6 +48,7 @@ struct AboutView: View {
   @State private var downloadProgress = 0.0
 
   @State private var showUpToDate = false
+  @State private var showSystemNotSupported = false
   @State private var showCheckFailed = false
   @State private var showDownloadFailed = false
   @State private var showInstallFailed = false
@@ -64,6 +57,8 @@ struct AboutView: View {
   @State private var removeUserData = false
   @State private var uninstalling = false
   @State private var uninstallFailed = false
+  @State private var targetTag: String? = nil
+  @State private var latestAvailable = false
 
   var body: some View {
     VStack {
@@ -87,7 +82,11 @@ struct AboutView: View {
       }
 
       Spacer().frame(height: gapSize)
-      urlButton(String(commit.prefix(7)), sourceRepo + "/commit/" + commit)
+      if releaseTag == "latest" {
+        urlButton(String(commit.prefix(7)), sourceRepo + "/commit/" + commit)
+      } else {
+        urlButton(releaseTag, sourceRepo + "/tree/" + releaseTag)
+      }
 
       Spacer().frame(height: gapSize)
       Text(getDate())
@@ -117,7 +116,7 @@ struct AboutView: View {
           if viewModel.state == .notChecked {
             checkUpdate()
           } else if viewModel.state == .available {
-            update(debug: isDebug)
+            update(debug: isDebug && targetTag == "latest")
           }
         } label: {
           if viewModel.state == .notChecked || viewModel.state == .upToDate {
@@ -144,9 +143,15 @@ struct AboutView: View {
             }
           ) {
             VStack {
-              Text("Update available")
+              if let tag = targetTag {  // Should always be true.
+                if tag == "latest" {
+                  Text("Latest (unstable) version available")
+                } else {
+                  Text("Version \(tag) available")
+                }
+              }
               Button {
-                update(debug: isDebug)
+                update(debug: isDebug && targetTag == "latest")
               } label: {
                 Text("Update now")
               }.buttonStyle(.borderedProminent)
@@ -164,7 +169,7 @@ struct AboutView: View {
           } label: {
             Text("Switch to Release")
           }.disabled(
-            viewModel.state == .downloading || viewModel.state == .installing
+            !latestAvailable || viewModel.state == .downloading || viewModel.state == .installing
           )
         } else {
           Button {
@@ -172,12 +177,13 @@ struct AboutView: View {
           } label: {
             Text("Switch to Debug")
           }.disabled(
-            viewModel.state == .downloading || viewModel.state == .installing
+            !latestAvailable || viewModel.state == .downloading
+              || viewModel.state == .installing
           ).sheet(
             isPresented: $showSwitchToDebug
           ) {
             VStack {
-              Text("Switch to debug only if Fctix5 crashes and you want to help debug.")
+              Text("Switch to debug only if Fcitx5 crashes and you want to help debug.")
               HStack {
                 Button {
                   showSwitchToDebug = false
@@ -250,6 +256,11 @@ struct AboutView: View {
           displayMode: .hud, type: .complete(Color.green),
           title: NSLocalizedString("Fcitx5 is up to date", comment: ""))
       }
+      .toast(isPresenting: $showSystemNotSupported) {
+        AlertToast(
+          displayMode: .hud, type: .error(Color.red),
+          title: NSLocalizedString("Your system version is no longer supported", comment: ""))
+      }
       .toast(isPresenting: $showCheckFailed) {
         AlertToast(
           displayMode: .hud, type: .error(Color.red),
@@ -292,37 +303,44 @@ struct AboutView: View {
   }
 
   func checkUpdate() {
-    guard
-      // https://api.github.com/repos/fcitx-contrib/fcitx5-macos/git/ref/tags/latest
-      // GitHub API may be blocked in China and is unstable in general.
-      let url = URL(
-        string: "\(sourceRepo)/releases/download/latest/meta.json")
-    else {
-      return
-    }
     viewModel.state = .checking
-    URLSession.shared.dataTask(with: url) { data, response, error in
-      if let data = data,
-        let tag = try? JSONDecoder().decode(Tag.self, from: data)
-      {
-        if tag.object.sha == commit {
-          viewModel.state = .upToDate
-          showUpToDate = true
-        } else {
+    checkMainUpdate { success, latestCompatible, latest, stable in
+      if success {
+        latestAvailable = latestCompatible
+        if let stable = stable {
+          // latest >= stable > current
+          targetTag = stable.tag
           viewModel.state = .availableSheet
+        } else {
+          if !latestCompatible {
+            viewModel.state = .upToDate
+            showSystemNotSupported = true
+          } else if latest == nil {
+            // latest == current >= stable
+            viewModel.state = .upToDate
+            showUpToDate = true
+          } else {
+            // latest > current >= stable
+            targetTag = "latest"
+            viewModel.state = .availableSheet
+          }
         }
       } else {
         viewModel.state = .notChecked
         showCheckFailed = true
       }
-    }.resume()
+    }
   }
 
   func update(debug: Bool) {
+    guard let tag = latestAvailable ? "latest" : targetTag else {
+      FCITX_ERROR("Calling update with nil tag")
+      return
+    }
     viewModel.state = .downloading
-    checkPluginUpdate({ success, nativePlugins, dataPlugins in
+    checkPluginUpdate(tag) { success, nativePlugins, dataPlugins in
       let updater = Updater(
-        main: true, debug: debug, nativePlugins: nativePlugins, dataPlugins: dataPlugins)
+        tag: tag, main: true, debug: debug, nativePlugins: nativePlugins, dataPlugins: dataPlugins)
       updater.update(
         // Install plugin in a best-effort manner. No need to check plugin status.
         onFinish: { result, _, _ in
@@ -336,7 +354,7 @@ struct AboutView: View {
         onProgress: { progress in
           downloadProgress = progress
         })
-    })
+    }
   }
 
   func install(debug: Bool) {
