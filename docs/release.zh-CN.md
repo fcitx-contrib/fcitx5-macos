@@ -12,3 +12,4 @@
 * 如果下一个版本将抛弃 macOS 的主/次版本，更改 CMakeLists.txt 中 project 的主/次版本和 CMAKE_OSX_DEPLOYMENT_TARGET。
 * 提交更改，`git push origin master`，这将更新 latest 中的 version.json，用户检查更新时将获取到新版信息。
 * 在 [fcitx5-macos-installer](https://github.com/fcitx-contrib/fcitx5-macos-installer) 中发布新版安装包。
+* 更新 [homebrew-tap](https://github.com/fcitx-contrib/homebrew-tap)。
