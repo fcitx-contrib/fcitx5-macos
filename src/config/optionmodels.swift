@@ -202,13 +202,16 @@ private func stringToColor(_ hex: String) -> Color {
 
 private func colorToString(_ color: Color) -> String {
   let resolved = NSColor(color)
-  let components = resolved.cgColor.components!
-  let red = UInt8(round(components[0] * 255.0))
-  let green = UInt8(round(components[1] * 255.0))
-  let blue = UInt8(round(components[2] * 255.0))
-  let alpha = UInt8(round(components[3] * 255.0))
-
-  return String(format: "#%02X%02X%02X%02X", red, green, blue, alpha)
+  if let rgbColor = resolved.usingColorSpace(.sRGB) {
+    let red = UInt8(round(rgbColor.redComponent * 255.0))
+    let green = UInt8(round(rgbColor.greenComponent * 255.0))
+    let blue = UInt8(round(rgbColor.blueComponent * 255.0))
+    let alpha = UInt8(round(rgbColor.alphaComponent * 255.0))
+    return String(format: "#%02X%02X%02X%02X", red, green, blue, alpha)
+  } else {
+    FCITX_ERROR("Can't convert color \(color) to RGB")
+    return "#000000FF"
+  }
 }
 
 extension Color: FcitxCodable {
