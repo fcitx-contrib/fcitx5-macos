@@ -8,7 +8,7 @@ APP_DIR="$INSTALL_DIR/Fcitx5.app"
 RESOURCES_DIR="$APP_DIR/Contents/Resources"
 
 # Don't remove files that must exist (which will be overwritten) as that will put Fcitx5 in a registered-but-not-listed state.
-rm -rf "$APP_DIR"/Contents/{bin,lib,share,Resources}
+rm -rf "$APP_DIR"/Contents/{bin,include,lib,share,Resources}
 if ls "$APP_DIR"/Contents/MacOS/Fcitx5.*; then # Debug symbols
     rm -rf "$APP_DIR"/Contents/MacOS/Fcitx5.*
 fi
