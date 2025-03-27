@@ -9,11 +9,6 @@ private let zeroWidthSpace = "\u{200B}"
 public var hasCursor = false
 
 private func commitString(_ client: IMKTextInput, _ string: String) {
-  // For most apps, insertText will make existing preedit gone. However that's not the case for
-  // Messages, so we manually clear preedit first.
-  if currentPreedit != "" {
-    setPreedit(client, "", 0)
-  }
   client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
 }
 
