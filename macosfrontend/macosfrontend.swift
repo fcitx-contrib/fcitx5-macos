@@ -70,6 +70,16 @@ public func commitAndSetPreeditAsync(
   }
 }
 
+public func commitAsync(_ clientPtr: UnsafeMutableRawPointer, _ commit: String) {
+  let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
+  guard let client = client as? IMKTextInput else {
+    return
+  }
+  DispatchQueue.main.async {
+    commitString(client, commit)
+  }
+}
+
 public func getCursorCoordinates(
   _ clientPtr: UnsafeMutableRawPointer,
   _ followCursor: Bool,

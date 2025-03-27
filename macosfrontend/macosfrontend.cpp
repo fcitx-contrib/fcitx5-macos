@@ -224,7 +224,8 @@ void MacosInputContext::commitStringImpl(const std::string &text) {
     // committed in next commit with a key event. e.g. fcitx commits a ，
     // asynchronously when deleting , after a number/English character.
     if (!isSyncEvent) {
-        commitAndSetPreeditAsync();
+        SwiftFrontend::commitAsync(client_, state_.commit);
+        resetState();
     }
 }
 
