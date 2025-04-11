@@ -44,6 +44,8 @@ jobs:
         with:
           xcode-version: 16.2
 
+      - uses: lukka/get-cmake@3.31.6
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22.x
