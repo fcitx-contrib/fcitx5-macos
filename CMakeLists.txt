@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 4.0.1)
 
 project(fcitx5-macos VERSION 0.2.1 LANGUAGES CXX Swift)
 
@@ -12,6 +12,11 @@ if(NOT CMAKE_OSX_ARCHITECTURES)
     set(CMAKE_OSX_ARCHITECTURES "${CMAKE_HOST_SYSTEM_PROCESSOR}")
 endif()
 
+# Starting from cmake 4.0, CMAKE_OSX_SYSROOT defaults to empty.
+execute_process(COMMAND xcrun --sdk macosx --show-sdk-path
+    OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 13.3)
 set(F5M_TARGET "${CMAKE_OSX_ARCHITECTURES}-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET}")
 add_definitions(-target "${F5M_TARGET}")
