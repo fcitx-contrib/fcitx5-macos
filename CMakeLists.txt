@@ -19,7 +19,8 @@ execute_process(COMMAND xcrun --sdk macosx --show-sdk-path
 )
 set(CMAKE_OSX_DEPLOYMENT_TARGET 13.3)
 set(F5M_TARGET "${CMAKE_OSX_ARCHITECTURES}-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET}")
-add_definitions(-target "${F5M_TARGET}")
+add_compile_options(-target "${F5M_TARGET}")
+add_link_options(-target "${F5M_TARGET}")
 
 # Disallow InitializeSwift to execute link_directories which adds Xcode paths to rpath.
 set(SWIFT_LIBRARY_SEARCH_PATHS "")
