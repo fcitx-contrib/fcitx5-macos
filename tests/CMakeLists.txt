@@ -1,13 +1,16 @@
 # Config and Option
-add_executable(config-swift testconfig.swift
+add_executable(ConfigSwift testconfig.swift
     ${PROJECT_SOURCE_DIR}/src/config/optionmodels.swift
     ${PROJECT_SOURCE_DIR}/src/config/config.swift
 )
-target_link_libraries(config-swift Fcitx5Objs Logging SwiftyJSON)
-add_test(NAME config-swift COMMAND config-swift)
+target_compile_options(ConfigSwift PUBLIC
+    "$<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default>"
+)
+target_link_libraries(ConfigSwift Fcitx5Objs Logging SwiftyJSON SwiftFrontend)
+add_test(NAME ConfigSwift COMMAND ConfigSwift)
 
 add_executable(config-cpp testconfig.cpp)
-target_link_libraries(config-cpp Fcitx5Objs)
+target_link_libraries(config-cpp Fcitx5Objs SwiftFrontend)
 fcitx5_import_addons(config-cpp
     REGISTRY_VARNAME getStaticAddon
     ADDONS keyboard
@@ -15,21 +18,21 @@ fcitx5_import_addons(config-cpp
 add_test(NAME config-cpp COMMAND config-cpp)
 
 # CustomPhrase .plist parser
-add_executable(xml-parser testxmlparser.swift
+add_executable(XmlParser testxmlparser.swift
     ${PROJECT_SOURCE_DIR}/src/config/xmlparser.swift
 )
-add_test(NAME xml-parser COMMAND xml-parser "${PROJECT_SOURCE_DIR}/tests/customphrase.plist")
+add_test(NAME XmlParser COMMAND XmlParser "${PROJECT_SOURCE_DIR}/tests/customphrase.plist")
 
 add_executable(key-cpp testkey.cpp)
 target_link_libraries(key-cpp Keycode)
 add_test(NAME key-cpp COMMAND key-cpp)
 
-add_executable(key-swift testkey.swift
+add_executable(KeySwift testkey.swift
     ${PROJECT_SOURCE_DIR}/src/config/keycode.swift
     ${PROJECT_SOURCE_DIR}/src/config/keyrecorder.swift
 )
-target_compile_options(key-swift PUBLIC
+target_compile_options(KeySwift PUBLIC
     "$<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default>"
 )
-target_link_libraries(key-swift Keycode)
-add_test(NAME key-swift COMMAND key-swift)
+target_link_libraries(KeySwift Keycode)
+add_test(NAME KeySwift COMMAND KeySwift)

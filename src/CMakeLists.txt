@@ -26,9 +26,6 @@ if(VERBOSE_LOGGING)
 endif()
 
 target_link_libraries(Fcitx5Objs
-    SwiftyJSON
-    SwiftFrontend
-    SwiftNotify
     Fcitx5::Core
     keyboard
     webpanel
@@ -36,7 +33,6 @@ target_link_libraries(Fcitx5Objs
     macosfrontend
     notifications
     WebviewCandidateWindow
-    Logging
 )
 
 add_executable(Fcitx5
@@ -53,6 +49,7 @@ target_link_libraries(Fcitx5
     SwiftyJSON
     SwiftFrontend
     SwiftNotify
+    Logging
 )
 
 fcitx5_import_addons(Fcitx5
