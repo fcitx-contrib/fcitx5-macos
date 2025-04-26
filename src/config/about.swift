@@ -57,7 +57,10 @@ struct AboutView: View {
   @State private var removeUserData = false
   @State private var uninstalling = false
   @State private var uninstallFailed = false
+  // The value is based on check update, and is only used for upgrading to release.
+  // If upgrading/switching to debug, always use latest regardless of this value.
   @State private var targetTag: String? = nil
+  // If current version is latest, this is still true (for build type switch).
   @State private var latestAvailable = false
 
   var body: some View {
@@ -169,7 +172,13 @@ struct AboutView: View {
           } label: {
             Text("Switch to Release")
           }.disabled(
-            !latestAvailable || viewModel.state == .downloading || viewModel.state == .installing
+            (!latestAvailable
+              && targetTag
+                == nil  // We should always allow debug build to switch to release build,
+                // so we drop OS version support only immediately after a new tag release.
+                // Plus we don't provide debug build for tag release, this condition shouldn't be true.
+                )
+              || viewModel.state == .downloading || viewModel.state == .installing
           )
         } else {
           Button {
@@ -333,7 +342,8 @@ struct AboutView: View {
   }
 
   func update(debug: Bool) {
-    guard let tag = latestAvailable ? "latest" : targetTag else {
+    // See comment of targetTag.
+    guard let tag = debug && latestAvailable ? "latest" : targetTag else {
       FCITX_ERROR("Calling update with nil tag")
       return
     }
