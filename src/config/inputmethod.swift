@@ -14,7 +14,6 @@ class InputMethodConfigController: ConfigWindowController {
     window.center()
     self.init(window: window)
     window.contentView = NSHostingView(rootView: view)
-    window.level = .floating
     window.titlebarAppearsTransparent = true
     attachToolbar(window)
   }
@@ -73,7 +72,7 @@ struct InputMethodConfigView: View {
 
               Button {
                 renameGroupDialog.show { input in
-                  viewModel.renameGroup(&group, input)
+                  viewModel.renameGroup(group, input)
                 }
               } label: {
                 Image(systemName: "pencil")
@@ -82,6 +81,7 @@ struct InputMethodConfigView: View {
               .foregroundColor(.secondary)
               .help(NSLocalizedString("Rename", comment: "") + " '\(group.name)'")
             }
+            // Make right-click available in the whole line.
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
             .contextMenu {
@@ -98,6 +98,8 @@ struct InputMethodConfigView: View {
                     viewModel.removeItem(group.name, inputMethod.id)
                   } label: {
                     Image(systemName: "minus")
+                      // When system is dark and im is not selected, hover color is black by default which is hardly visible.
+                      .foregroundColor(.primary)
                       .frame(maxHeight: .infinity)
                       .contentShape(Rectangle())
                   }
@@ -330,39 +332,40 @@ struct InputMethodConfigView: View {
       self.save()
     }
 
-    func renameGroup(_ group: inout Group, _ name: String) {
-      if name == "" {
+    func renameGroup(_ group: Group, _ name: String) {
+      if name == "" || groups.contains(where: { $0.name == name }) {
         return
       }
-      group.name = name
+      for i in 0..<self.groups.count {
+        if self.groups[i].name == group.name {
+          self.groups[i].name = name
+          break
+        }
+      }
       save()
     }
 
     func removeItem(_ groupName: String, _ uuid: UUID) {
-      DispatchQueue.main.async {
-        for i in 0..<self.groups.count {
-          if self.groups[i].name == groupName {
-            self.groups[i].inputMethods.removeAll(where: { $0.id == uuid })
-            break
-          }
+      for i in 0..<self.groups.count {
+        if self.groups[i].name == groupName {
+          self.groups[i].inputMethods.removeAll(where: { $0.id == uuid })
+          break
         }
-        self.save()
       }
+      self.save()
     }
 
     func addItems(_ groupName: String, _ ims: Set<InputMethod>) {
-      DispatchQueue.main.async {
-        for i in 0..<self.groups.count {
-          if self.groups[i].name == groupName {
-            for im in ims {
-              let item = GroupItem(name: im.uniqueName, displayName: im.displayName)
-              self.groups[i].inputMethods.append(item)
-              self.uuidToIM[item.id] = item.name
-            }
+      for i in 0..<self.groups.count {
+        if self.groups[i].name == groupName {
+          for im in ims {
+            let item = GroupItem(name: im.uniqueName, displayName: im.displayName)
+            self.groups[i].inputMethods.append(item)
+            self.uuidToIM[item.id] = item.name
           }
         }
-        self.save()
       }
+      self.save()
     }
   }
 }
