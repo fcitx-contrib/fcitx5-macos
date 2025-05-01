@@ -37,7 +37,6 @@ WebPanel::WebPanel(Instance *instance)
             }
         });
     });
-    // Doesn't have any effect now.
     window_->set_highlight_callback([this](int index) {
         with_fcitx([&](Fcitx &fcitx) {
             auto ic = instance_->mostRecentInputContext();
@@ -71,8 +70,9 @@ WebPanel::WebPanel(Instance *instance)
             ic->updateUserInterface(UserInterfaceComponent::InputPanel);
         });
     });
-    window_->set_scroll_callback(
-        [this](int start, int count) { scroll(start, count); });
+    window_->set_scroll_callback([this](int start, int count) {
+        with_fcitx([=, this](Fcitx &fcitx) { scroll(start, count); });
+    });
     window_->set_ask_actions_callback([&](int index) {
         with_fcitx([&](Fcitx &fcitx) {
             auto ic = instance_->mostRecentInputContext();
@@ -223,7 +223,10 @@ WebPanel::WebPanel(Instance *instance)
                     if (keyEvent.isRelease()) {
                         return;
                     }
-                    collapse();
+                    // Instead of directly calling collapse, let webview handle
+                    // animation and call it.
+                    window_->scroll_key_action(
+                        candidate_window::scroll_key_action_t::collapse);
                     return keyEvent.filterAndAccept();
                 }
                 // Karabiner-Elements defines Hyper as Ctrl+Alt+Shift+Cmd, but
@@ -498,47 +501,44 @@ void WebPanel::showAsync(bool show) {
 }
 
 void WebPanel::scroll(int start, int count) {
-    with_fcitx([&](Fcitx &fcitx) {
-        if (scrollState_ == candidate_window::scroll_state_t::none) {
-            return;
+    if (scrollState_ == candidate_window::scroll_state_t::none) {
+        return;
+    }
+    auto ic = instance_->mostRecentInputContext();
+    if (start < 0) { // collapse
+        return collapse();
+    }
+    const auto &list = ic->inputPanel().candidateList();
+    if (!list) {
+        return;
+    }
+    const auto &bulk = list->toBulk();
+    if (!bulk) {
+        return;
+    }
+    int size = bulk->totalSize();
+    int end = size < 0 ? start + count : std::min(start + count, size);
+    bool endReached = size == end;
+    std::vector<candidate_window::Candidate> candidates;
+    for (int i = start; i < end; ++i) {
+        try {
+            auto &candidate = bulk->candidateFromAll(i);
+            candidates.push_back(
+                {instance_->outputFilter(ic, candidate.text()).toString(),
+                 "",
+                 instance_->outputFilter(ic, candidate.comment()).toString(),
+                 {}});
+        } catch (const std::invalid_argument &e) {
+            // size == -1 but actual limit is reached
+            endReached = true;
+            break;
         }
-        auto ic = instance_->mostRecentInputContext();
-        if (start < 0) { // collapse
-            return collapse();
-        }
-        const auto &list = ic->inputPanel().candidateList();
-        if (!list) {
-            return;
-        }
-        const auto &bulk = list->toBulk();
-        if (!bulk) {
-            return;
-        }
-        int size = bulk->totalSize();
-        int end = size < 0 ? start + count : std::min(start + count, size);
-        bool endReached = size == end;
-        std::vector<candidate_window::Candidate> candidates;
-        for (int i = start; i < end; ++i) {
-            try {
-                auto &candidate = bulk->candidateFromAll(i);
-                candidates.push_back(
-                    {instance_->outputFilter(ic, candidate.text()).toString(),
-                     "",
-                     instance_->outputFilter(ic, candidate.comment())
-                         .toString(),
-                     {}});
-            } catch (const std::invalid_argument &e) {
-                // size == -1 but actual limit is reached
-                endReached = true;
-                break;
-            }
-        }
-        scrollState_ = candidate_window::scroll_state_t::scrolling;
-        window_->set_candidates(candidates, -1, scrollState_, start == 0,
-                                endReached);
-        updateClient(ic);
-        showAsync(true);
-    });
+    }
+    scrollState_ = candidate_window::scroll_state_t::scrolling;
+    window_->set_candidates(candidates, -1, scrollState_, start == 0,
+                            endReached);
+    updateClient(ic);
+    showAsync(true);
 }
 
 void WebPanel::expand() {
