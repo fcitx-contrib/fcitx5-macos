@@ -59,6 +59,7 @@ struct AboutView: View {
   @State private var uninstallFailed = false
   // The value is based on check update, and is only used for upgrading to release.
   // If upgrading/switching to debug, always use latest regardless of this value.
+  // If switching from latest debug to latest release, this value is nil.
   @State private var targetTag: String? = nil
   // If current version is latest, this is still true (for build type switch).
   @State private var latestAvailable = false
@@ -343,7 +344,11 @@ struct AboutView: View {
 
   func update(debug: Bool) {
     // See comment of targetTag.
-    guard let tag = debug && latestAvailable ? "latest" : targetTag else {
+    guard
+      let tag = getTag(
+        currentDebug: isDebug, targetDebug: debug, latestAvailable: latestAvailable,
+        targetTag: targetTag)
+    else {
       FCITX_ERROR("Calling update with nil tag")
       return
     }

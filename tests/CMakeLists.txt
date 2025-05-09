@@ -36,3 +36,8 @@ target_compile_options(KeySwift PUBLIC
 )
 target_link_libraries(KeySwift Keycode)
 add_test(NAME KeySwift COMMAND KeySwift)
+
+add_executable(TagSwift testtag.swift
+    ${PROJECT_SOURCE_DIR}/src/config/tag.swift
+)
+add_test(NAME TagSwift COMMAND TagSwift)
