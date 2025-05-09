@@ -95,7 +95,7 @@ msgstr "闪烁"
 msgid "Static"
 msgstr "静止"
 
-#: webpanel/webpanel.h:30 webpanel/webpanel.h:34 webpanel/webpanel.h:267
+#: webpanel/webpanel.h:30 webpanel/webpanel.h:34 webpanel/webpanel.h:273
 msgid "Text"
 msgstr "文本"
 
@@ -263,202 +263,206 @@ msgstr "下一页"
 msgid "Commit"
 msgstr "提交"
 
-#: webpanel/webpanel.h:211
+#: webpanel/webpanel.h:212
+msgid "Select candidate"
+msgstr "选词"
+
+#: webpanel/webpanel.h:217
 msgid "Optimize for Hyper key"
 msgstr "针对 Hyper 键优化"
 
-#: webpanel/webpanel.h:217
+#: webpanel/webpanel.h:223
 msgid "Layout"
 msgstr "布局"
 
-#: webpanel/webpanel.h:221
+#: webpanel/webpanel.h:227
 msgid "Writing mode"
 msgstr "书写模式"
 
-#: webpanel/webpanel.h:224
+#: webpanel/webpanel.h:230
 msgid "Typography awareness for IM"
 msgstr "输入法感知版式"
 
-#: webpanel/webpanel.h:228
+#: webpanel/webpanel.h:234
 msgid "Paging buttons style"
 msgstr "翻页按钮样式"
 
-#: webpanel/webpanel.h:233
+#: webpanel/webpanel.h:239
 msgid "Image"
 msgstr "图片"
 
-#: webpanel/webpanel.h:234
+#: webpanel/webpanel.h:240
 msgid "Blur"
 msgstr "模糊"
 
-#: webpanel/webpanel.h:235
+#: webpanel/webpanel.h:241
 msgid "Shadow"
 msgstr "阴影"
 
-#: webpanel/webpanel.h:243
+#: webpanel/webpanel.h:249
 msgid "Text font family"
 msgstr "文本字体族"
 
-#: webpanel/webpanel.h:245
+#: webpanel/webpanel.h:251
 msgid "Text font size"
 msgstr "文本字号"
 
-#: webpanel/webpanel.h:247
+#: webpanel/webpanel.h:253
 msgid "Label font family"
 msgstr "标签字体族"
 
-#: webpanel/webpanel.h:249
+#: webpanel/webpanel.h:255
 msgid "Label font size"
 msgstr "标签字号"
 
-#: webpanel/webpanel.h:251
+#: webpanel/webpanel.h:257
 msgid "Comment font family"
 msgstr "注释字体族"
 
-#: webpanel/webpanel.h:253
+#: webpanel/webpanel.h:259
 msgid "Comment font size"
 msgstr "注释字号"
 
-#: webpanel/webpanel.h:256
+#: webpanel/webpanel.h:262
 msgid "Preedit font family"
 msgstr "预编辑字体族"
 
-#: webpanel/webpanel.h:258
+#: webpanel/webpanel.h:264
 msgid "Preedit font size"
 msgstr "预编辑字号"
 
-#: webpanel/webpanel.h:260
+#: webpanel/webpanel.h:266
 msgid "User font dir"
 msgstr "用户字体目录"
 
-#: webpanel/webpanel.h:261
+#: webpanel/webpanel.h:267
 msgid "System font dir"
 msgstr "系统字体目录"
 
-#: webpanel/webpanel.h:266
+#: webpanel/webpanel.h:272
 msgid "Style"
 msgstr "样式"
 
-#: webpanel/webpanel.h:272
+#: webpanel/webpanel.h:278
 msgid "Mark style"
 msgstr "标记样式"
 
-#: webpanel/webpanel.h:273
+#: webpanel/webpanel.h:279
 msgid "Mark text"
 msgstr "标记文本"
 
-#: webpanel/webpanel.h:275
+#: webpanel/webpanel.h:281
 msgid "Hover behavior"
 msgstr "悬停行为"
 
-#: webpanel/webpanel.h:281
+#: webpanel/webpanel.h:287
 msgid "Border width (px)"
 msgstr "边框宽度（px）"
 
-#: webpanel/webpanel.h:284
+#: webpanel/webpanel.h:290
 msgid "Border radius (px)"
 msgstr "边框半径（px）"
 
-#: webpanel/webpanel.h:285
+#: webpanel/webpanel.h:291
 msgid "Margin (px)"
 msgstr "外边距（px）"
 
-#: webpanel/webpanel.h:288
+#: webpanel/webpanel.h:294
 msgid "Highlight radius (px)"
 msgstr "高亮半径（px）"
 
-#: webpanel/webpanel.h:291
+#: webpanel/webpanel.h:297
 msgid "Top padding (px)"
 msgstr "顶填充（px）"
 
-#: webpanel/webpanel.h:293
+#: webpanel/webpanel.h:299
 msgid "Right padding (px)"
 msgstr "右填充（px）"
 
-#: webpanel/webpanel.h:295
+#: webpanel/webpanel.h:301
 msgid "Bottom padding (px)"
 msgstr "底填充（px）"
 
-#: webpanel/webpanel.h:298
+#: webpanel/webpanel.h:304
 msgid "Left padding (px)"
 msgstr "左填充（px）"
 
-#: webpanel/webpanel.h:300
+#: webpanel/webpanel.h:306
 msgid "Gap between label, text and comment (px)"
 msgstr "标签、文本、注释间隔（px）"
 
-#: webpanel/webpanel.h:303
+#: webpanel/webpanel.h:309
 msgid "Vertical minimum width (px)"
 msgstr "垂直时最小宽度（px）"
 
-#: webpanel/webpanel.h:306
+#: webpanel/webpanel.h:312
 msgid "Horizontal divider width (px)"
 msgstr "水平分隔线宽度（px）"
 
-#: webpanel/webpanel.h:315
+#: webpanel/webpanel.h:321
 msgid "User CSS"
 msgstr "用户 CSS"
 
-#: webpanel/webpanel.h:316
+#: webpanel/webpanel.h:322
 msgid "Copy HTML"
 msgstr "复制 HTML"
 
-#: webpanel/webpanel.h:317
+#: webpanel/webpanel.h:323
 msgid "Plugin dir"
 msgstr "插件目录"
 
-#: webpanel/webpanel.h:319
+#: webpanel/webpanel.h:325
 msgid "I know there may be risks for using plugins"
 msgstr "我知道使用插件可能有风险"
 
-#: webpanel/webpanel.h:322
+#: webpanel/webpanel.h:328
 msgid "Plugins"
 msgstr "插件"
 
-#: webpanel/webpanel.h:324
+#: webpanel/webpanel.h:330
 msgid "Dangerous API for JavaScript plugins"
 msgstr "用于 JavaScript 插件的危险 API"
 
-#: webpanel/webpanel.h:327
+#: webpanel/webpanel.h:333
 msgid "Basic"
 msgstr "基础"
 
-#: webpanel/webpanel.h:328
+#: webpanel/webpanel.h:334
 msgid "Light mode"
 msgstr "浅色模式"
 
-#: webpanel/webpanel.h:329
+#: webpanel/webpanel.h:335
 msgid "Dark mode"
 msgstr "深色模式"
 
-#: webpanel/webpanel.h:330
+#: webpanel/webpanel.h:336
 msgid "Typography"
 msgstr "版式"
 
-#: webpanel/webpanel.h:331
+#: webpanel/webpanel.h:337
 msgid "Scroll mode"
 msgstr "卷轴模式"
 
-#: webpanel/webpanel.h:332
+#: webpanel/webpanel.h:338
 msgid "Background"
 msgstr "背景"
 
-#: webpanel/webpanel.h:333
+#: webpanel/webpanel.h:339
 msgid "Font"
 msgstr "字体"
 
-#: webpanel/webpanel.h:334
+#: webpanel/webpanel.h:340
 msgid "Cursor"
 msgstr "光标"
 
-#: webpanel/webpanel.h:335
+#: webpanel/webpanel.h:341
 msgid "Highlight"
 msgstr "高亮"
 
-#: webpanel/webpanel.h:336
+#: webpanel/webpanel.h:342
 msgid "Size"
 msgstr "尺寸"
 
-#: webpanel/webpanel.h:337
+#: webpanel/webpanel.h:343
 msgid "Advanced"
 msgstr "高级"

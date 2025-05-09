@@ -207,6 +207,12 @@ FCITX_CONFIGURATION(
     Option<KeyList> pageDown{
         this, "PageDown", _("Page down"), {Key(FcitxKey_Page_Down)}};
     Option<KeyList> commit{this, "Commit", _("Commit"), {Key(FcitxKey_space)}};
+    Option<KeyList> selectCandidate{this,
+                                    "SelectCandidate",
+                                    _("Select candidate"),
+                                    {Key(FcitxKey_1), Key(FcitxKey_2),
+                                     Key(FcitxKey_3), Key(FcitxKey_4),
+                                     Key(FcitxKey_5), Key(FcitxKey_6)}};
     Option<bool> optimizeForHyperKey{this, "OptimizeForHyperKey",
                                      _("Optimize for Hyper key"), true};);
 

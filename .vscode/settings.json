@@ -1,6 +1,6 @@
 {
     "clangd.arguments": [
         "-background-index",
-        "-compile-commands-dir=build"
+        "-compile-commands-dir=build/arm64"
     ]
 }
