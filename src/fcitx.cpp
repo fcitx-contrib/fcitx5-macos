@@ -128,7 +128,9 @@ void Fcitx::setupEnv() {
         user_prefix / "lib" / "libime" // ~/Library/fcitx5/lib/libime
     });
     std::string libskk_data_path = user_prefix / "share" / "libskk";
+    std::string m17n_dir = user_prefix / "share" / "m17n";
 
+    setenv("M17NDIR", m17n_dir.c_str(), 1);
     setenv("LIBSKK_DATA_PATH", libskk_data_path.c_str(), 1);
     setenv("FCITX_ADDON_DIRS", fcitx_addon_dirs.c_str(), 1);
     setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
