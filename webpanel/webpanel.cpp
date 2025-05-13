@@ -4,7 +4,6 @@
 #include "../macosfrontend/macosfrontend.h"
 #include "config/config.h"
 #include "webpanel.h"
-#include "webview_candidate_window.hpp"
 
 namespace fcitx {
 
@@ -148,9 +147,7 @@ WebPanel::WebPanel(Instance *instance)
                 if (keyEvent.isRelease()) {
                     return;
                 }
-                static_cast<candidate_window::WebviewCandidateWindow *>(
-                    window_.get())
-                    ->copy_html();
+                window_->copy_html();
                 return keyEvent.filterAndAccept();
             }
             if (scrollState_ == candidate_window::scroll_state_t::ready &&
@@ -265,15 +262,12 @@ void WebPanel::updateConfig() {
     // window_->set_native_shadow(config_.background->shadow.value());
     auto style = configValueToJson(config_).dump();
     window_->set_style(style.c_str());
-    if (auto web = dynamic_cast<candidate_window::WebviewCandidateWindow *>(
-            window_.get())) {
-        web->unload_plugins();
-        using namespace candidate_window;
-        uint64_t apis = (config_.advanced->unsafeAPI->curl.value() ? kCurl : 0);
-        web->set_api(apis);
-        if (*config_.advanced->pluginNotice) {
-            web->load_plugins({*config_.advanced->plugins});
-        }
+    window_->unload_plugins();
+    using namespace candidate_window;
+    uint64_t apis = (config_.advanced->unsafeAPI->curl.value() ? kCurl : 0);
+    window_->set_api(apis);
+    if (*config_.advanced->pluginNotice) {
+        window_->load_plugins({*config_.advanced->plugins});
     }
 }
 
@@ -473,7 +467,8 @@ void WebPanel::updateClient(InputContext *ic) {
 /// Before calling this, the panel states must already be initialized
 /// synchronously, by using set_candidates, etc.
 void WebPanel::showAsync(bool show) {
-    std::weak_ptr<candidate_window::CandidateWindow> weakWindow = window_;
+    std::weak_ptr<candidate_window::WebviewCandidateWindow> weakWindow =
+        window_;
     dispatch_async(dispatch_get_main_queue(), ^void() {
       if (auto window = weakWindow.lock()) {
           if (show) {

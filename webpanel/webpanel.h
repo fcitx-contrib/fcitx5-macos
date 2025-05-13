@@ -9,7 +9,7 @@
 #include <fcitx/addonmanager.h>
 #include <fcitx/instance.h>
 
-#include "candidate_window.hpp"
+#include "webview_candidate_window.hpp"
 
 #define BORDER_WIDTH_MAX 10
 
@@ -370,7 +370,7 @@ public:
 
 private:
     Instance *instance_;
-    std::shared_ptr<candidate_window::CandidateWindow> window_;
+    std::shared_ptr<candidate_window::WebviewCandidateWindow> window_;
 
     static const inline std::string ConfPath = "conf/webpanel.conf";
     WebPanelConfig config_;
