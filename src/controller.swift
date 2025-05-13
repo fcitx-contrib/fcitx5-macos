@@ -68,7 +68,9 @@ class FcitxInputController: IMKInputController {
     guard let client = client as? IMKTextInput else {
       return false
     }
-    let res = String(process_key(uuid, unicode, modsVal, code, isRelease))
+    // It can change within an IMKInputController (e.g. sudo in Terminal), so must reevaluate before each key sent to IM.
+    let isPassword = IsSecureEventInputEnabled()
+    let res = String(process_key(uuid, unicode, modsVal, code, isRelease, isPassword))
     return processRes(client, res)
   }
 
