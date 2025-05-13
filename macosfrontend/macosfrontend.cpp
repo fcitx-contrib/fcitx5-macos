@@ -78,12 +78,17 @@ void MacosFrontend::save() {
     safeSaveAsIni(config_, ConfPath);
 }
 
-std::string MacosFrontend::keyEvent(ICUUID uuid, const Key &key,
-                                    bool isRelease) {
+std::string MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease,
+                                    bool isPassword) {
     auto *ic = this->findIC(uuid);
     if (!ic) {
         return "{}";
     }
+    CapabilityFlags flags = CapabilityFlag::Preedit;
+    if (isPassword) {
+        flags |= CapabilityFlag::Password;
+    }
+    ic->setCapabilityFlags(flags);
     ic->focusIn();
     KeyEvent keyEvent(ic, key, isRelease);
     ic->isSyncEvent = true;
@@ -271,12 +276,13 @@ MacosInputContext::getCursorCoordinates(bool followCursor) {
 FCITX_ADDON_FACTORY_V2(macosfrontend, fcitx::MacosFrontendFactory);
 
 std::string process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
-                        uint16_t osxKeycode, bool isRelease) noexcept {
+                        uint16_t osxKeycode, bool isRelease,
+                        bool isPassword) noexcept {
     const fcitx::Key parsedKey =
         osx_key_to_fcitx_key(unicode, osxModifiers, osxKeycode);
     return with_fcitx([=](Fcitx &fcitx) {
         auto that = dynamic_cast<fcitx::MacosFrontend *>(fcitx.frontend());
-        return that->keyEvent(uuid, parsedKey, isRelease);
+        return that->keyEvent(uuid, parsedKey, isRelease, isPassword);
     });
 }
 

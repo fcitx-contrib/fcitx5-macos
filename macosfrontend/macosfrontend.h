@@ -79,7 +79,8 @@ public:
 
     ICUUID createInputContext(const std::string &appId, id client);
     void destroyInputContext(ICUUID);
-    std::string keyEvent(ICUUID, const Key &key, bool isRelease);
+    std::string keyEvent(ICUUID, const Key &key, bool isRelease,
+                         bool isPassword);
     void focusIn(ICUUID);
     std::string focusOut(ICUUID);
 
