@@ -492,10 +492,10 @@ void WebPanel::scroll(int start, int count) {
     if (scrollState_ == candidate_window::scroll_state_t::none) {
         return;
     }
-    auto ic = instance_->mostRecentInputContext();
     if (start < 0) { // collapse
         return collapse();
     }
+    auto ic = instance_->mostRecentInputContext();
     const auto &list = ic->inputPanel().candidateList();
     if (!list) {
         return;
@@ -540,6 +540,10 @@ void WebPanel::collapse() {
     // scrolling.
     scrollState_ = candidate_window::scroll_state_t::ready;
     update(UserInterfaceComponent::InputPanel, ic);
+}
+
+void WebPanel::applyAppAccentColor(const std::string &accentColor) {
+    window_->apply_app_accent_color(accentColor);
 }
 
 } // namespace fcitx
