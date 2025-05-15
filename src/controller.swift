@@ -19,6 +19,7 @@ class FcitxInputController: IMKInputController {
   var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
   var ignoreRelease: Bool = false
   let client: Any!
+  var accentColor = ""
 
   // A registry of live FcitxInputController objects.
   // Use NSHashTable to store weak references.
@@ -31,11 +32,12 @@ class FcitxInputController: IMKInputController {
   override init(server: IMKServer!, delegate: Any!, client: Any!) {
     if let client = client as? IMKTextInput {
       appId = client.bundleIdentifier() ?? ""
+      accentColor = getAccentColor(appId)
     } else {
       appId = ""
     }
     self.client = client
-    uuid = create_input_context(appId, client)
+    uuid = create_input_context(appId, client, accentColor)
     super.init(server: server, delegate: delegate, client: client)
     FcitxInputController.registry.add(self)
   }
@@ -47,9 +49,9 @@ class FcitxInputController: IMKInputController {
 
   func reconnectToFcitx() {
     // The old fcitx input context was automatically destroyed when
-    // restarting fcitx. So just start a new one here.
+    // restarting fcitx thread. So just start a new one here.
     FCITX_DEBUG("Reconnecting to \(appId), client = \(String(describing: client))")
-    uuid = create_input_context(appId, client)
+    uuid = create_input_context(appId, client, accentColor)
   }
 
   func processRes(_ client: IMKTextInput, _ res: String, focusOut: Bool = false) -> Bool {

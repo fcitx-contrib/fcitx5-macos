@@ -122,9 +122,10 @@ MacosInputContext *MacosFrontend::findIC(ICUUID uuid) {
         instance_->inputContextManager().findByUUID(uuid));
 }
 
-ICUUID MacosFrontend::createInputContext(const std::string &appId, id client) {
+ICUUID MacosFrontend::createInputContext(const std::string &appId, id client,
+                                         const std::string &accentColor) {
     auto ic = new MacosInputContext(this, instance_->inputContextManager(),
-                                    appId, client);
+                                    appId, client, accentColor);
     ic->setFocusGroup(&focusGroup_);
     FCITX_INFO() << "Create IC for " << appId;
     return ic->uuid();
@@ -174,6 +175,7 @@ void MacosFrontend::focusIn(ICUUID uuid) {
     auto *ic = findIC(uuid);
     if (!ic)
         return;
+    webpanel_->applyAppAccentColor(ic->getAccentColor()); // app-specific
     ic->focusIn();
     auto program = ic->program();
     FCITX_INFO() << "Focus in " << program;
@@ -209,9 +211,10 @@ std::string MacosFrontend::focusOut(ICUUID uuid) {
 
 MacosInputContext::MacosInputContext(MacosFrontend *frontend,
                                      InputContextManager &inputContextManager,
-                                     const std::string &program, id client)
+                                     const std::string &program, id client,
+                                     const std::string &accentColor)
     : InputContext(inputContextManager, program), frontend_(frontend),
-      client_(client) {
+      client_(client), accentColor_(accentColor) {
     CFRetain(client_);
     CapabilityFlags flags = CapabilityFlag::Preedit;
     setCapabilityFlags(flags);
@@ -286,9 +289,10 @@ std::string process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
     });
 }
 
-ICUUID create_input_context(const char *appId, id client) noexcept {
+ICUUID create_input_context(const char *appId, id client,
+                            const char *accentColor) noexcept {
     return with_fcitx([=](Fcitx &fcitx) {
-        return fcitx.frontend()->createInputContext(appId, client);
+        return fcitx.frontend()->createInputContext(appId, client, accentColor);
     });
 }
 

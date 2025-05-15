@@ -25,6 +25,8 @@ namespace fs = std::filesystem;
 
 FCITX_DEFINE_STATIC_ADDON_REGISTRY(getStaticAddon)
 
+fcitx::WebPanel *webpanel_;
+
 static std::string join_paths(const std::vector<fs::path> &paths,
                               char sep = ':');
 
@@ -89,6 +91,7 @@ void Fcitx::setup() {
     setupInstance();
     frontend_ =
         dynamic_cast<fcitx::MacosFrontend *>(addonMgr().addon("macosfrontend"));
+    webpanel_ = dynamic_cast<fcitx::WebPanel *>(addonMgr().addon("webpanel"));
     auto beast_ = dynamic_cast<fcitx::Beast *>(addonMgr().addon("beast"));
     beast_->setConfigGetter(getConfig);
     beast_->setConfigSetter(setConfig);
@@ -96,6 +99,7 @@ void Fcitx::setup() {
 
 void Fcitx::teardown() {
     frontend_ = nullptr;
+    webpanel_ = nullptr;
     instance_.reset();
 }
 

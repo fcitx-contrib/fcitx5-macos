@@ -71,7 +71,8 @@ public:
         updateConfig();
     }
 
-    ICUUID createInputContext(const std::string &appId, id client);
+    ICUUID createInputContext(const std::string &appId, id client,
+                              const std::string &accentColor);
     void destroyInputContext(ICUUID);
     std::string keyEvent(ICUUID, const Key &key, bool isRelease,
                          bool isPassword);
@@ -108,7 +109,8 @@ class MacosInputContext : public InputContext {
 public:
     MacosInputContext(MacosFrontend *frontend,
                       InputContextManager &inputContextManager,
-                      const std::string &program, id client);
+                      const std::string &program, id client,
+                      const std::string &accentColor);
     ~MacosInputContext();
 
     const char *frontend() const override { return "macos"; }
@@ -119,6 +121,7 @@ public:
 
     std::pair<double, double> getCursorCoordinates(bool followCursor);
     id client() { return client_; }
+    std::string getAccentColor() { return accentColor_; }
 
     void resetState() {
         state_.commit.clear();
@@ -139,6 +142,7 @@ private:
     MacosFrontend *frontend_;
     id client_;
     InputContextState state_;
+    std::string accentColor_;
 };
 
 class MacosFrontendFactory : public AddonFactory {
