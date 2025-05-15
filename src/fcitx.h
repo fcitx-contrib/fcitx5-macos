@@ -7,6 +7,9 @@
 
 #include "fcitx-public.h"
 #include "../macosfrontend/macosfrontend.h"
+#include "../webpanel/webpanel.h"
+
+extern fcitx::WebPanel *webpanel_;
 
 /// 'Fcitx' manages the lifecycle of the global Fcitx instance.
 class Fcitx final {

@@ -40,6 +40,7 @@ add_executable(Fcitx5
     server.swift
     locale.swift
     controller.swift
+    color.swift
     ${CONFIG_UI_FILES}
 )
 

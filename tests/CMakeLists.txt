@@ -1,5 +1,6 @@
 # Config and Option
 add_executable(ConfigSwift testconfig.swift
+    ${PROJECT_SOURCE_DIR}/src/color.swift
     ${PROJECT_SOURCE_DIR}/src/config/optionmodels.swift
     ${PROJECT_SOURCE_DIR}/src/config/config.swift
 )
@@ -41,3 +42,8 @@ add_executable(TagSwift testtag.swift
     ${PROJECT_SOURCE_DIR}/src/config/tag.swift
 )
 add_test(NAME TagSwift COMMAND TagSwift)
+
+add_executable(ColorSwift testcolor.swift
+    ${PROJECT_SOURCE_DIR}/src/color.swift
+)
+add_test(NAME ColorSwift COMMAND ColorSwift)

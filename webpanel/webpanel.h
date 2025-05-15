@@ -367,6 +367,7 @@ public:
 
     void updateInputPanel(const Text &preedit, const Text &auxUp,
                           const Text &auxDown);
+    void applyAppAccentColor(const std::string &accentColor);
 
 private:
     Instance *instance_;
