@@ -33,6 +33,19 @@
     <dict>
       <key>org.fcitx.inputmethod.fcitx5</key>
       <dict>
+        <!-- register as English to enable on browser password field/Terminal sudo password input -->
+        <key>tsInputModeMenuIconFileKey</key>
+        <string>menu_icon.pdf</string>
+        <key>tsInputModeAlternateMenuIconFileKey</key>
+        <string>menu_icon.pdf</string>
+        <key>tsInputModePaletteIconFileKey</key>
+        <string>menu_icon.pdf</string>
+      </dict>
+      <key>org.fcitx.inputmethod.zhHans</key>
+      <dict>
+        <!-- register as Chinese to disable on browser password field/Terminal sudo password input -->
+        <key>TISIntendedLanguage</key>
+        <string>zh-Hans</string>
         <key>tsInputModeMenuIconFileKey</key>
         <string>menu_icon.pdf</string>
         <key>tsInputModeAlternateMenuIconFileKey</key>

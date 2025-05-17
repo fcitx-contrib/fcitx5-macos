@@ -23,4 +23,28 @@ cd "$RESOURCES_DIR"
 su -m "$user" -c "./switch_im com.apple.keylayout.ABC"
 su -m "$user" -c "./switch_im com.apple.keylayout.US"
 killall Fcitx5
+
+# This input source ID comes from Carbon API:
+# import Carbon
+
+# let bundleId = "org.fcitx.inputmethod.Fcitx5"
+# let conditions = NSMutableDictionary()
+# conditions.setValue(bundleId, forKey: kTISPropertyBundleID as String)
+# if let array = TISCreateInputSourceList(conditions, true)?.takeRetainedValue()
+#   as? [TISInputSource]
+# {
+#   for inputSource in array {
+#     if let ptr = TISGetInputSourceProperty(inputSource, kTISPropertyInputSourceID) {
+#       let inputSourceID = Unmanaged<CFString>.fromOpaque(ptr).takeUnretainedValue() as String
+#       print(inputSourceID)
+#     }
+#   }
+# }
+
+# The rule to construct seems:
+# org.fcitx.inputmethod.Fcitx5 is our CFBundleIdentifier;
+# The rest is the keys under tsInputModeListKey trimming the org.fcitx.inputmethod.
+
+# Not sure which one so try both.
 su -m "$user" -c "./switch_im org.fcitx.inputmethod.Fcitx5.fcitx5"
+su -m "$user" -c "./switch_im org.fcitx.inputmethod.Fcitx5.zhHans"
