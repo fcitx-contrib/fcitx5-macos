@@ -47,7 +47,11 @@ WebPanel::WebPanel(Instance *instance)
                 if (!bulkCursor) {
                     return;
                 }
-                return bulkCursor->setGlobalCursorIndex(index);
+                try {
+                    bulkCursor->setGlobalCursorIndex(index);
+                } catch (const std::invalid_argument &e) {
+                    FCITX_ERROR() << "highlight candidate index out of range";
+                }
             }
         });
     });
