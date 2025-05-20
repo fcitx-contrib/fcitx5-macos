@@ -286,7 +286,7 @@ void WebPanel::setConfig(const RawConfig &config) {
     if (!themeName.empty()) {
         RawConfig raw;
         // Only override current theme when user selects a theme file.
-        readAsIni(raw, StandardPath::Type::PkgData, themePath(themeName));
+        readAsIni(raw, StandardPathsType::PkgData, themePath(themeName));
         config_.load(raw, true);
     }
     safeSaveAsIni(config_, ConfPath);
@@ -302,7 +302,7 @@ void WebPanel::setSubConfig(const std::string &path, const RawConfig &config) {
         for (const auto &key : removedKeys) {
             raw.remove(key);
         }
-        safeSaveAsIni(raw, StandardPath::Type::PkgData, themePath(themeName));
+        safeSaveAsIni(raw, StandardPathsType::PkgData, themePath(themeName));
     }
 }
 
