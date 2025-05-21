@@ -37,9 +37,12 @@ class FcitxInputController: IMKInputController {
       appId = ""
     }
     self.client = client
-    uuid = create_input_context(appId, client, accentColor)
+    self.uuid = create_input_context(appId, client, accentColor)
     super.init(server: server, delegate: delegate, client: client)
     FcitxInputController.registry.add(self)
+    // Do not clear in deinit, otherwise it will crash with
+    // "Simultaneous accesses to 0x100e05650, but modification requires exclusive access."
+    setController(self)
   }
 
   deinit {

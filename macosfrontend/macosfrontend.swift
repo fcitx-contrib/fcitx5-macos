@@ -8,6 +8,12 @@ private let zeroWidthSpace = "\u{200B}"
 
 public var hasCursor = false
 
+private var controller: IMKInputController? = nil
+
+public func setController(_ ctrl: Any) {
+  controller = ctrl as? IMKInputController
+}
+
 private func commitString(_ client: IMKTextInput, _ string: String) {
   client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
 }
@@ -25,8 +31,12 @@ private func setPreedit(_ client: IMKTextInput, _ preedit: String, _ caretPosUtf
     u8pos += ch.utf8.count
     u16pos += 1
   }
+  // Make underline as thin as macOS pinyin.
+  let attrs =
+    controller?.mark(forStyle: kTSMHiliteConvertedText, at: NSMakeRange(NSNotFound, 0))
+    as? [NSAttributedString.Key: Any]
   client.setMarkedText(
-    NSMutableAttributedString(string: preedit),
+    NSMutableAttributedString(string: preedit, attributes: attrs),
     selectionRange: NSRange(location: u16pos, length: 0),
     replacementRange: NSRange(location: NSNotFound, length: 0)
   )
