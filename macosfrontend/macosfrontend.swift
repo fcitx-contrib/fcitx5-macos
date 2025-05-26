@@ -29,7 +29,7 @@ private func setPreedit(_ client: IMKTextInput, _ preedit: String, _ caretPosUtf
       break
     }
     u8pos += ch.utf8.count
-    u16pos += 1
+    u16pos += ch.utf16.count  // Usually 1 but can be more, e.g. emoji.
   }
   // Make underline as thin as macOS pinyin.
   let attrs =
