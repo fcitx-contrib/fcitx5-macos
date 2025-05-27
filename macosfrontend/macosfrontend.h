@@ -119,7 +119,7 @@ public:
     void forwardKeyImpl(const ForwardKeyEvent &key) override {}
     void updatePreeditImpl() override;
 
-    std::pair<double, double> getCursorCoordinates(bool followCursor);
+    std::tuple<double, double, double> getCursorCoordinates(bool followCursor);
     id client() { return client_; }
     std::string getAccentColor() { return accentColor_; }
 

@@ -264,14 +264,15 @@ void MacosInputContext::commitAndSetPreeditAsync() {
                                             state.dummyPreedit);
 }
 
-std::pair<double, double>
+std::tuple<double, double, double>
 MacosInputContext::getCursorCoordinates(bool followCursor) {
     // Memorize to avoid jumping to origin on failure.
-    static double x = 0, y = 0;
-    if (!SwiftFrontend::getCursorCoordinates(client_, followCursor, &x, &y)) {
+    static double x = 0, y = 0, height = 0;
+    if (!SwiftFrontend::getCursorCoordinates(client_, followCursor, &x, &y,
+                                             &height)) {
         FCITX_DEBUG() << "Failed to get cursor coordinates";
     }
-    return std::make_pair(x, y);
+    return std::make_tuple(x, y, height);
 }
 
 } // namespace fcitx

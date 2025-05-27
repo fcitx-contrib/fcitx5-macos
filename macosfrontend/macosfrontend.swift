@@ -95,7 +95,8 @@ public func getCursorCoordinates(
   _ clientPtr: UnsafeMutableRawPointer,
   _ followCursor: Bool,
   _ x: UnsafeMutablePointer<Double>,
-  _ y: UnsafeMutablePointer<Double>
+  _ y: UnsafeMutablePointer<Double>,
+  _ height: UnsafeMutablePointer<Double>
 ) -> Bool {
   let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
   guard let client = client as? IMKTextInput else {
@@ -114,6 +115,7 @@ public func getCursorCoordinates(
   }
   x.pointee = Double(NSMinX(rect))
   y.pointee = Double(NSMinY(rect))
+  height.pointee = Double(rect.height)
   if followCursor && isEnd {
     x.pointee += 10
   }
