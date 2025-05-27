@@ -481,9 +481,9 @@ void WebPanel::showAsync(bool show) {
                   // MacosInputContext::updatePreeditImpl is executed before
                   // WebPanel::update, so in main thread preedit UI update
                   // happens before here.
-                  auto [x, y] = ic->getCursorCoordinates(
+                  auto [x, y, height] = ic->getCursorCoordinates(
                       config_.basic->followCursor.value());
-                  window->show(x, y);
+                  window->show(x, y, height);
               }
           } else {
               window->hide();
