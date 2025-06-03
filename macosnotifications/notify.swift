@@ -101,10 +101,26 @@ public func sendNotification(
     content.categoryIdentifier = categoryIdent
 
     if iconPath != "" {
-      if let attachment = try? UNNotificationAttachment(
-        identifier: "image", url: URL(fileURLWithPath: iconPath), options: nil)
-      {
-        content.attachments = [attachment]
+      var iconURL = URL(fileURLWithPath: iconPath)
+      do {
+        // Follow symlink as required by UNNotificationAttachment.
+        let attributes = try FileManager.default.attributesOfItem(atPath: iconPath)
+        if attributes[.type] as? FileAttributeType == .typeSymbolicLink {
+          let destination = try FileManager.default.destinationOfSymbolicLink(atPath: iconPath)
+          iconURL = URL(
+            fileURLWithPath: destination, relativeTo: iconURL.deletingLastPathComponent())
+        }
+        // Must duplicate it as Apple deletes it (moves it to data store), see https://stackoverflow.com/a/51081941.
+        let tmpIconURL = URL(fileURLWithPath: "/tmp/" + iconURL.lastPathComponent)
+        // Use try? to prevent file exists error just in case Apple doesn't delete it in time.
+        try? FileManager.default.copyItem(at: iconURL, to: tmpIconURL)
+        if let attachment = try? UNNotificationAttachment(
+          identifier: "image", url: tmpIconURL, options: nil)
+        {
+          content.attachments = [attachment]
+        }
+      } catch {
+        FCITX_ERROR("Failed to duplicate icon: \(error.localizedDescription)")
       }
     }
 

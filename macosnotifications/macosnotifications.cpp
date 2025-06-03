@@ -4,8 +4,6 @@
 #include "fcitx.h"
 #include "macosnotifications.h"
 
-static std::optional<std::string> locateIconPath(const std::string &appIcon);
-
 namespace fcitx {
 
 Notifications::Notifications(Instance *instance)
@@ -59,7 +57,7 @@ uint32_t Notifications::sendNotification(
 
     // Find appIcon file.
     static const std::vector<std::string> iconExtensions{".png"};
-    auto iconPath = iconTheme_->findIcon(appIcon, 48, 1, iconExtensions);
+    auto iconPath = iconTheme_->findIconPath(appIcon, 48, 1, iconExtensions);
 
     // Send the notification.
     std::vector<const char *> cActionStrings;
