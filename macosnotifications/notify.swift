@@ -112,7 +112,8 @@ public func sendNotification(
         }
         // Must duplicate it as Apple deletes it (moves it to data store), see https://stackoverflow.com/a/51081941.
         let tmpIconURL = URL(fileURLWithPath: "/tmp/" + iconURL.lastPathComponent)
-        try FileManager.default.copyItem(at: iconURL, to: tmpIconURL)
+        // Use try? to prevent file exists error just in case Apple doesn't delete it in time.
+        try? FileManager.default.copyItem(at: iconURL, to: tmpIconURL)
         if let attachment = try? UNNotificationAttachment(
           identifier: "image", url: tmpIconURL, options: nil)
         {
