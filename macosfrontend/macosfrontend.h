@@ -91,8 +91,8 @@ private:
     static const inline std::string ConfPath = "conf/macosfrontend.conf";
 
     FocusGroup focusGroup_; // ensure there is at most one active ic
-    std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>>
-        eventHandlers_;
+    std::unique_ptr<HandlerTableEntry<EventHandler>> eventHandler_;
+    std::string statusItemText;
 
     inline MacosInputContext *findIC(ICUUID);
     void useAppDefaultIM(const std::string &appId);

@@ -26,6 +26,31 @@ namespace fcitx {
 MacosFrontend::MacosFrontend(Instance *instance)
     : instance_(instance),
       focusGroup_("macos", instance->inputContextManager()) {
+    eventHandler_ = instance_->watchEvent(
+        EventType::InputContextUpdateUI, EventWatcherPhase::Default,
+        [=, this](Event &event) {
+            if (auto ic = instance->mostRecentInputContext()) {
+                auto engine = instance->inputMethodEngine(ic);
+                auto entry = instance->inputMethodEntry(ic);
+                std::string display;
+                if (engine) {
+                    auto subModeLabel = engine->subModeLabel(*entry, *ic);
+                    auto name =
+                        entry->label().empty() ? entry->name() : entry->label();
+                    if (subModeLabel.empty()) {
+                        display = std::move(name);
+                    } else {
+                        display = std::move(subModeLabel);
+                    }
+                } else {
+                    display = "🐧";
+                }
+                if (statusItemText != display) {
+                    statusItemText = std::move(display);
+                    SwiftFrontend::setStatusItemText(statusItemText);
+                }
+            }
+        });
     reloadConfig();
 }
 
