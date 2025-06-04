@@ -46,7 +46,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     signal(SIGTERM, signalHandler)
 
-    AppDelegate.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    // NSStatusItem.variableLength causes layout shift of icons on the left when switching between en and 拼.
+    AppDelegate.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
     if let button = AppDelegate.statusItem?.button {
       button.action = #selector(handleStatusItemClick)
