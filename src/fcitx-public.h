@@ -29,6 +29,7 @@ void imSetGroups(const char *json) noexcept;
 
 std::string imGetCurrentIMName() noexcept;
 void imSetCurrentIM(const char *imName) noexcept;
+void toggleInputMethod() noexcept;
 
 // Returns a json array of Input Methods.
 // type InputMethod := {uniqueName:str, name:str, nativeName:str,

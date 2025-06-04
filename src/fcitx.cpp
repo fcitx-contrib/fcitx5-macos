@@ -357,6 +357,10 @@ void imSetCurrentIM(const char *imName) noexcept {
         [=](Fcitx &fcitx) { fcitx.instance()->setCurrentInputMethod(imName); });
 }
 
+void toggleInputMethod() noexcept {
+    return with_fcitx([=](Fcitx &fcitx) { return fcitx.instance()->toggle(); });
+}
+
 std::string imGetCurrentIMName() noexcept {
     return with_fcitx(
         [=](Fcitx &fcitx) { return fcitx.instance()->currentInputMethod(); });

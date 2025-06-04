@@ -14,6 +14,16 @@ public func setController(_ ctrl: Any) {
   controller = ctrl as? IMKInputController
 }
 
+private var statusItemCallback: ((String) -> Void)? = nil
+
+public func setStatusItemCallback(_ callback: @escaping (String) -> Void) {
+  statusItemCallback = callback
+}
+
+public func setStatusItemText(_ text: String) {
+  statusItemCallback?(text)
+}
+
 private func commitString(_ client: IMKTextInput, _ string: String) {
   client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
 }

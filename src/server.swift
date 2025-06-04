@@ -39,11 +39,19 @@ private func signalHandler(signal: Int32) {
 class AppDelegate: NSObject, NSApplicationDelegate {
   static var server = IMKServer()
   static var notificationDelegate = NotificationDelegate()
+  static var statusItem: NSStatusItem?
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     redirectStderr()
 
     signal(SIGTERM, signalHandler)
+
+    AppDelegate.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+
+    if let button = AppDelegate.statusItem?.button {
+      button.action = #selector(handleStatusItemClick)
+      button.target = self
+    }
 
     AppDelegate.server = IMKServer(
       name: Bundle.main.infoDictionary?["InputMethodConnectionName"] as? String,
@@ -58,5 +66,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   func applicationWillTerminate(_ notification: Notification) {
     stop_fcitx_thread()
+  }
+
+  @objc func handleStatusItemClick() {
+    toggleInputMethod()
   }
 }
