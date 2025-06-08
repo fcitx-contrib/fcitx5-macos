@@ -429,7 +429,7 @@ class FcitxAboutController: ConfigWindowController {
     window.contentView = NSHostingView(rootView: view)
   }
 
-  func refresh() {
+  override func refresh() {
     view.refresh()
   }
 }

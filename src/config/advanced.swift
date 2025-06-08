@@ -18,7 +18,7 @@ class AdvancedController: ConfigWindowController {
     attachToolbar(window)
   }
 
-  func refresh() {
+  override func refresh() {
     view.refresh()
   }
 }
@@ -79,7 +79,7 @@ struct AdvancedView: View {
                 Fcitx.setConfig("fcitx://config/addon/\(selected)", config.encodeValue())
               },
               close: {
-                FcitxInputController.advancedController.window?.performClose(nil)
+                FcitxInputController.closeWindow("advanced")
               })
           }
         }

@@ -16,7 +16,7 @@ class ThemeEditorController: ConfigWindowController {
     attachToolbar(window)
   }
 
-  func refresh() {
+  override func refresh() {
     view.refresh()
   }
 }
