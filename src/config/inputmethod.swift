@@ -18,7 +18,7 @@ class InputMethodConfigController: ConfigWindowController {
     attachToolbar(window)
   }
 
-  func refresh() {
+  override func refresh() {
     view.refresh()
   }
 }
@@ -148,7 +148,7 @@ struct InputMethodConfigView: View {
                 save(configModel)
               },
               close: {
-                FcitxInputController.inputMethodConfigController.window?.performClose(_: nil)
+                FcitxInputController.closeWindow("im")
               })
           }.padding([.top], 1)  // Cannot be 0 otherwise content overlaps with title bar.
         } else if let errorMsg = viewModel.errorMsg {

@@ -305,7 +305,7 @@ struct PluginView: View {
   }
 
   private func restart() {
-    FcitxInputController.pluginManager.window?.performClose(_: nil)
+    FcitxInputController.closeWindow("plugin")
     DispatchQueue.main.async {
       restartProcess()
     }
@@ -482,7 +482,7 @@ class PluginManager: ConfigWindowController {
     window.contentView = NSHostingView(rootView: view)
   }
 
-  func refreshPlugins() {
+  override func refresh() {
     view.refreshPlugins()
   }
 }
