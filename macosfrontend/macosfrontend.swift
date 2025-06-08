@@ -14,14 +14,18 @@ public func setController(_ ctrl: Any) {
   controller = ctrl as? IMKInputController
 }
 
-private var statusItemCallback: ((String) -> Void)? = nil
+private var statusItemCallback: ((Int32?, String?) -> Void)? = nil
 
-public func setStatusItemCallback(_ callback: @escaping (String) -> Void) {
+public func setStatusItemCallback(_ callback: @escaping (Int32?, String?) -> Void) {
   statusItemCallback = callback
 }
 
 public func setStatusItemText(_ text: String) {
-  statusItemCallback?(text)
+  statusItemCallback?(nil, text)
+}
+
+public func setStatusItemMode(_ mode: Int32) {
+  statusItemCallback?(mode, nil)
 }
 
 private func commitString(_ client: IMKTextInput, _ string: String) {

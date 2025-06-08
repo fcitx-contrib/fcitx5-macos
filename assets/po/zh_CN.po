@@ -15,7 +15,23 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: macosfrontend/macosfrontend.h:47
+#: macosfrontend/macosfrontend.h:27
+msgid "Hidden"
+msgstr "隐藏"
+
+#: macosfrontend/macosfrontend.h:28
+msgid "Toggle input method"
+msgstr "切换输入法"
+
+#: macosfrontend/macosfrontend.h:28
+msgid "Menu"
+msgstr "菜单"
+
+#: macosfrontend/macosfrontend.h:44
+msgid "Status bar"
+msgstr "状态栏"
+
+#: macosfrontend/macosfrontend.h:48
 msgid "App default IM"
 msgstr "应用默认输入法"
 
