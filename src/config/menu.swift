@@ -66,7 +66,6 @@ extension FcitxInputController {
 /// application states so that the config windows can receive user
 /// input.
 class ConfigWindowController: NSWindowController, NSWindowDelegate, NSToolbarDelegate {
-  static var numberOfConfigWindows: Int = 0
   var key: String = ""
 
   override init(window: NSWindow?) {
@@ -82,10 +81,6 @@ class ConfigWindowController: NSWindowController, NSWindowDelegate, NSToolbarDel
 
   override func showWindow(_ sender: Any? = nil) {
     if let window = window {
-      if !window.isVisible {
-        ConfigWindowController.numberOfConfigWindows += 1
-      }
-
       // Switch to normal activation policy so that the config windows
       // can receive key events.
       if NSApp.activationPolicy() != .regular {
@@ -99,15 +94,12 @@ class ConfigWindowController: NSWindowController, NSWindowDelegate, NSToolbarDel
 
   func windowShouldClose(_ sender: NSWindow) -> Bool {
     sender.orderOut(nil)
-    ConfigWindowController.numberOfConfigWindows -= 1
-
-    // Switch back.
-    if ConfigWindowController.numberOfConfigWindows <= 0 {
-      NSApp.setActivationPolicy(.prohibited)
-      ConfigWindowController.numberOfConfigWindows = 0
-    }
-    // Free memory.
+    // Free memory and reset state.
     FcitxInputController.controllers.removeValue(forKey: key)
+    // Switch back.
+    if FcitxInputController.controllers.count == 0 {
+      NSApp.setActivationPolicy(.prohibited)
+    }
     return false
   }
 
