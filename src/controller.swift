@@ -20,6 +20,7 @@ class FcitxInputController: IMKInputController {
   var ignoreRelease: Bool = false
   let client: Any!
   var accentColor = ""
+  var selection: NSRange? = nil
 
   // A registry of live FcitxInputController objects.
   // Use NSHashTable to store weak references.
@@ -72,6 +73,14 @@ class FcitxInputController: IMKInputController {
   func processKey(_ unicode: UInt32, _ modsVal: UInt32, _ code: UInt16, _ isRelease: Bool) -> Bool {
     guard let client = client as? IMKTextInput else {
       return false
+    }
+    let newSelection = client.selectedRange()
+    let selectionChanged: Bool = selection != newSelection
+    selection = newSelection
+    // Shift release when text selection is changed.
+    if modsVal == 0 && (code == 56 || code == 60) && selectionChanged {
+      // Send a no-op key event to fcitx so that Shift+Click doesn't trigger im toggle.
+      process_key(uuid, 0, 0, 0, false, false)
     }
     // It can change within an IMKInputController (e.g. sudo in Terminal), so must reevaluate before each key sent to IM.
     let isPassword = IsSecureEventInputEnabled()
