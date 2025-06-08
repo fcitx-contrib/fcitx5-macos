@@ -23,6 +23,10 @@
 #define TERMINAL_USE_EN                                                        \
     R"JSON({"appPath": "/System/Applications/Utilities/Terminal.app", "appId": "com.apple.Terminal", "imName": "keyboard-us"})JSON"
 
+enum class StatusBar { Hidden, ToggleInputMethod, Menu };
+FCITX_CONFIG_ENUM_NAME_WITH_I18N(StatusBar, N_("Hidden"),
+                                 N_("Toggle input method"), N_("Menu"))
+
 namespace fcitx {
 
 class MacosInputContext;
@@ -37,6 +41,8 @@ struct AppIMAnnotation {
 
 FCITX_CONFIGURATION(
     MacosFrontendConfig,
+    OptionWithAnnotation<StatusBar, StatusBarI18NAnnotation> statusBar{
+        this, "StatusBar", _("Status bar"), StatusBar::Menu};
     OptionWithAnnotation<std::vector<std::string>, AppIMAnnotation>
         appDefaultIM{
             this, "AppDefaultIM", _("App default IM"), {TERMINAL_USE_EN}};
@@ -91,8 +97,10 @@ private:
     static const inline std::string ConfPath = "conf/macosfrontend.conf";
 
     FocusGroup focusGroup_; // ensure there is at most one active ic
-    std::unique_ptr<HandlerTableEntry<EventHandler>> eventHandler_;
+    std::vector<std::unique_ptr<HandlerTableEntry<EventHandler>>>
+        eventHandlers_;
     std::string statusItemText;
+    void updateStatusItemText();
 
     inline MacosInputContext *findIC(ICUUID);
     void useAppDefaultIM(const std::string &appId);

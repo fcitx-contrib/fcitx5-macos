@@ -26,32 +26,39 @@ namespace fcitx {
 MacosFrontend::MacosFrontend(Instance *instance)
     : instance_(instance),
       focusGroup_("macos", instance->inputContextManager()) {
-    eventHandler_ = instance_->watchEvent(
+    // For update when switching internal input method of rime.
+    eventHandlers_.emplace_back(instance_->watchEvent(
         EventType::InputContextUpdateUI, EventWatcherPhase::Default,
-        [=, this](Event &event) {
-            if (auto ic = instance->mostRecentInputContext()) {
-                auto engine = instance->inputMethodEngine(ic);
-                auto entry = instance->inputMethodEntry(ic);
-                std::string display;
-                if (engine) {
-                    auto subModeLabel = engine->subModeLabel(*entry, *ic);
-                    auto name =
-                        entry->label().empty() ? entry->name() : entry->label();
-                    if (subModeLabel.empty()) {
-                        display = std::move(name);
-                    } else {
-                        display = std::move(subModeLabel);
-                    }
-                } else {
-                    display = "🐧";
-                }
-                if (statusItemText != display) {
-                    statusItemText = std::move(display);
-                    SwiftFrontend::setStatusItemText(statusItemText);
-                }
-            }
-        });
+        [this](Event &event) { updateStatusItemText(); }));
+    // For switching from VSCode to Terminal, otherwise the first key press
+    // triggers text update.
+    eventHandlers_.emplace_back(instance_->watchEvent(
+        EventType::InputContextInputMethodActivated, EventWatcherPhase::Default,
+        [this](Event &event) { updateStatusItemText(); }));
     reloadConfig();
+}
+
+void MacosFrontend::updateStatusItemText() {
+    if (auto ic = instance_->mostRecentInputContext()) {
+        auto engine = instance_->inputMethodEngine(ic);
+        auto entry = instance_->inputMethodEntry(ic);
+        std::string display;
+        if (engine) {
+            auto subModeLabel = engine->subModeLabel(*entry, *ic);
+            auto name = entry->label().empty() ? entry->name() : entry->label();
+            if (subModeLabel.empty()) {
+                display = std::move(name);
+            } else {
+                display = std::move(subModeLabel);
+            }
+        } else {
+            display = "🐧";
+        }
+        if (statusItemText != display) {
+            statusItemText = std::move(display);
+            SwiftFrontend::setStatusItemText(statusItemText);
+        }
+    }
 }
 
 // Runs on the fcitx thread.
@@ -86,6 +93,7 @@ void MacosFrontend::pollPasteboard() {
 }
 
 void MacosFrontend::updateConfig() {
+    SwiftFrontend::setStatusItemMode(int(*config_.statusBar));
     simulateKeyRelease_ = config_.simulateKeyRelease.value();
     simulateKeyReleaseDelay_ =
         static_cast<long>(config_.simulateKeyReleaseDelay.value()) * 1000L;

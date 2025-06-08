@@ -43,14 +43,6 @@ class FcitxInputController: IMKInputController {
     // Do not clear in deinit, otherwise it will crash with
     // "Simultaneous accesses to 0x100e05650, but modification requires exclusive access."
     setController(self)
-    setStatusItemCallback { text in
-      // No concrete evidence that this needs to be on main thread but just to be safe.
-      DispatchQueue.main.async {
-        if let button = AppDelegate.statusItem?.button {
-          button.title = text
-        }
-      }
-    }
   }
 
   deinit {
