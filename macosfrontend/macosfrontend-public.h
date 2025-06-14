@@ -14,5 +14,5 @@ std::string process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
 ICUUID create_input_context(const char *appId, id client,
                             const char *accentColor) noexcept;
 void destroy_input_context(ICUUID uuid) noexcept;
-void focus_in(ICUUID uuid) noexcept;
+void focus_in(ICUUID uuid, bool isPassword) noexcept;
 std::string focus_out(ICUUID uuid) noexcept;

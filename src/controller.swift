@@ -150,7 +150,9 @@ class FcitxInputController: IMKInputController {
     }
     // activateServer is called when app is in foreground but not necessarily a text field is selected.
     hasCursor = false
-    focus_in(uuid)
+    // Make sure status bar is updated on click password input, before first key event.
+    let isPassword = IsSecureEventInputEnabled()
+    focus_in(uuid, isPassword)
   }
 
   override func deactivateServer(_ client: Any!) {
