@@ -82,7 +82,7 @@ public:
     void destroyInputContext(ICUUID);
     std::string keyEvent(ICUUID, const Key &key, bool isRelease,
                          bool isPassword);
-    void focusIn(ICUUID);
+    void focusIn(ICUUID, bool isPassword);
     std::string focusOut(ICUUID);
 
 private:
@@ -145,6 +145,8 @@ public:
     // set them in batch asynchronously.
     bool isSyncEvent = false;
     void commitAndSetPreeditAsync();
+
+    void setPassword(bool isPassword);
 
 private:
     MacosFrontend *frontend_;

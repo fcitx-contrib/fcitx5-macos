@@ -117,11 +117,7 @@ std::string MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease,
     if (!ic) {
         return "{}";
     }
-    CapabilityFlags flags = CapabilityFlag::Preedit;
-    if (isPassword) {
-        flags |= CapabilityFlag::Password;
-    }
-    ic->setCapabilityFlags(flags);
+    ic->setPassword(isPassword);
     ic->focusIn();
     KeyEvent keyEvent(ic, key, isRelease);
     ic->isSyncEvent = true;
@@ -204,11 +200,12 @@ void MacosFrontend::useAppDefaultIM(const std::string &appId) {
     }
 }
 
-void MacosFrontend::focusIn(ICUUID uuid) {
+void MacosFrontend::focusIn(ICUUID uuid, bool isPassword) {
     auto *ic = findIC(uuid);
     if (!ic)
         return;
     webpanel_->applyAppAccentColor(ic->getAccentColor()); // app-specific
+    ic->setPassword(isPassword);
     ic->focusIn();
     auto program = ic->program();
     FCITX_INFO() << "Focus in " << program;
@@ -249,8 +246,6 @@ MacosInputContext::MacosInputContext(MacosFrontend *frontend,
     : InputContext(inputContextManager, program), frontend_(frontend),
       client_(client), accentColor_(accentColor) {
     CFRetain(client_);
-    CapabilityFlags flags = CapabilityFlag::Preedit;
-    setCapabilityFlags(flags);
     created();
 }
 
@@ -308,6 +303,14 @@ MacosInputContext::getCursorCoordinates(bool followCursor) {
     return std::make_tuple(x, y, height);
 }
 
+void MacosInputContext::setPassword(bool isPassword) {
+    CapabilityFlags flags = CapabilityFlag::Preedit;
+    if (isPassword) {
+        flags |= CapabilityFlag::Password;
+    }
+    setCapabilityFlags(flags);
+}
+
 } // namespace fcitx
 
 FCITX_ADDON_FACTORY_V2(macosfrontend, fcitx::MacosFrontendFactory);
@@ -336,8 +339,10 @@ void destroy_input_context(ICUUID uuid) noexcept {
     });
 }
 
-void focus_in(ICUUID uuid) noexcept {
-    with_fcitx([=](Fcitx &fcitx) { return fcitx.frontend()->focusIn(uuid); });
+void focus_in(ICUUID uuid, bool isPassword) noexcept {
+    with_fcitx([=](Fcitx &fcitx) {
+        return fcitx.frontend()->focusIn(uuid, isPassword);
+    });
 }
 
 std::string focus_out(ICUUID uuid) noexcept {
