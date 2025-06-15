@@ -21,6 +21,7 @@ class FcitxInputController: IMKInputController {
   let client: Any!
   var accentColor = ""
   var selection: NSRange? = nil
+  var obeySecureInput = true
 
   // A registry of live FcitxInputController objects.
   // Use NSHashTable to store weak references.
@@ -70,6 +71,33 @@ class FcitxInputController: IMKInputController {
     return response.accepted
   }
 
+  // Normal apps like Chrome calls EnableSecureEventInput when its password input is focused,
+  // and calls DisableSecureEventInput on blur of input or app itself. Abnormal apps call
+  // EnableSecureEventInput but doesn't call DisableSecureEventInput on blur, so we can't
+  // rely on IsSecureEventInputEnabled's true return value, as obeying it will lock keyboard-us.
+  // Users observe https://discussions.apple.com/thread/253793652 but it's also possible that
+  // other apps are abusing, see comments for getSecureInputProcessPID.
+  func getSecureInputInfo(isOnFocus: Bool) -> Bool {
+    if appId == "com.apple.loginwindow" {
+      return true
+    }
+    if !IsSecureEventInputEnabled() {
+      return false
+    }
+    if isOnFocus {
+      let pid = getSecureInputProcessPID()
+      let runningApp = pid == nil ? nil : NSRunningApplication(processIdentifier: pid!)
+      obeySecureInput = runningApp?.bundleIdentifier == appId
+      if !obeySecureInput {
+        FCITX_WARN(
+          "Secure input is abused by (possibly) \(runningApp?.localizedName ?? "?"): \(runningApp?.bundleIdentifier ?? "?") pid=\(pid ?? -1)"
+        )
+      }
+    }
+    // On keyDown, don't call getSecureInputProcessPID for performance.
+    return obeySecureInput
+  }
+
   func processKey(_ unicode: UInt32, _ modsVal: UInt32, _ code: UInt16, _ isRelease: Bool) -> Bool {
     guard let client = client as? IMKTextInput else {
       return false
@@ -83,7 +111,7 @@ class FcitxInputController: IMKInputController {
       process_key(uuid, 0, 0, 0, false, false)
     }
     // It can change within an IMKInputController (e.g. sudo in Terminal), so must reevaluate before each key sent to IM.
-    let isPassword = IsSecureEventInputEnabled()
+    let isPassword = getSecureInputInfo(isOnFocus: false)
     let res = String(process_key(uuid, unicode, modsVal, code, isRelease, isPassword))
     return processRes(client, res)
   }
@@ -151,7 +179,7 @@ class FcitxInputController: IMKInputController {
     // activateServer is called when app is in foreground but not necessarily a text field is selected.
     hasCursor = false
     // Make sure status bar is updated on click password input, before first key event.
-    let isPassword = IsSecureEventInputEnabled()
+    let isPassword = getSecureInputInfo(isOnFocus: true)
     focus_in(uuid, isPassword)
   }
 
