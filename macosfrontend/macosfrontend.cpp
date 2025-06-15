@@ -271,14 +271,14 @@ void MacosInputContext::updatePreeditImpl() {
     auto preedit =
         frontend_->instance()->outputFilter(this, inputPanel().clientPreedit());
     state_.preedit = preedit.toString();
-    state_.cursorPos = preedit.cursor();
+    state_.caretPos = preedit.cursor();
 }
 
 std::string MacosInputContext::getState(bool accepted) {
     nlohmann::json j;
     j["commit"] = state_.commit;
     j["preedit"] = state_.preedit;
-    j["cursorPos"] = state_.cursorPos;
+    j["caretPos"] = state_.caretPos;
     j["dummyPreedit"] = state_.dummyPreedit;
     j["accepted"] = accepted;
     return j.dump();
@@ -288,17 +288,17 @@ void MacosInputContext::commitAndSetPreeditAsync() {
     auto state = state_;
     resetState();
     SwiftFrontend::commitAndSetPreeditAsync(client_, state.commit,
-                                            state.preedit, state.cursorPos,
+                                            state.preedit, state.caretPos,
                                             state.dummyPreedit);
 }
 
 std::tuple<double, double, double>
-MacosInputContext::getCursorCoordinates(bool followCursor) {
+MacosInputContext::getCaretCoordinates(bool followCaret) {
     // Memorize to avoid jumping to origin on failure.
     static double x = 0, y = 0, height = 0;
-    if (!SwiftFrontend::getCursorCoordinates(client_, followCursor, &x, &y,
-                                             &height)) {
-        FCITX_DEBUG() << "Failed to get cursor coordinates";
+    if (!SwiftFrontend::getCaretCoordinates(client_, followCaret, &x, &y,
+                                            &height)) {
+        FCITX_DEBUG() << "Failed to get caret coordinates";
     }
     return std::make_tuple(x, y, height);
 }

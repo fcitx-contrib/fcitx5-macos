@@ -25,8 +25,8 @@ enum class PagingButtonsStyle { None, Arrow, Triangle };
 FCITX_CONFIG_ENUM_NAME_WITH_I18N(PagingButtonsStyle, N_("None"), N_("Arrow"),
                                  N_("Triangle"))
 
-enum class CursorStyle { Blink, Static, Text };
-FCITX_CONFIG_ENUM_NAME_WITH_I18N(CursorStyle, N_("Blink"), N_("Static"),
+enum class CaretStyle { Blink, Static, Text };
+FCITX_CONFIG_ENUM_NAME_WITH_I18N(CaretStyle, N_("Blink"), N_("Static"),
                                  N_("Text"))
 
 enum class HighlightMarkStyle { None, Bar, Text };
@@ -77,7 +77,7 @@ struct PluginAnnotation {
 
 FCITX_CONFIGURATION(
     BasicConfig,
-    Option<bool> followCursor{this, "FollowCursor", _("Follow cursor"), false};
+    Option<bool> followCaret{this, "FollowCaret", _("Follow caret"), false};
     OptionWithAnnotation<candidate_window::theme_t,
                          candidate_window::theme_tI18NAnnotation>
         theme{this, "Theme", _("Theme"), candidate_window::theme_t::system};
@@ -123,10 +123,16 @@ FCITX_CONFIGURATION(
     Option<Color> disabledPagingButtonColor{this, "DisabledPagingButtonColor",
                                             _("Disabled paging button color"),
                                             Color(127, 127, 127, 255)};
-    Option<Color> preeditColor{this, "PreeditColor", _("Preedit color"),
-                               Color(0, 0, 0, 255)};
-    Option<Color> preeditColorPreCursor{this, "PreeditColorPreCursor",
-                                        _("Preedit color pre-cursor"),
+    Option<Color> auxColor{this, "AuxColor", _("Indicator text color"),
+                           Color(0, 0, 0, 255)};
+    Option<Color> preeditColorPreCaret{this, "PreeditColorPreCaret",
+                                       _("Preedit color pre-caret"),
+                                       Color(0, 0, 0, 255)};
+    Option<Color> preeditColorCaret{this, "PreeditColorCaret",
+                                    _("Preedit caret color"),
+                                    Color(0, 0, 0, 255)};
+    Option<Color> preeditColorPostCaret{this, "PreeditColorPostCaret",
+                                        _("Preedit color post-caret"),
                                         Color(0, 0, 0, 255)};
     Option<Color> borderColor{this, "BorderColor", _("Border color"),
                               Color(0, 0, 0, 255)};
@@ -172,10 +178,17 @@ FCITX_CONFIGURATION(
     Option<Color> disabledPagingButtonColor{this, "DisabledPagingButtonColor",
                                             _("Disabled paging button color"),
                                             Color(127, 127, 127, 255)};
-    Option<Color> preeditColor{this, "PreeditColor", _("Preedit color"),
-                               Color(255, 255, 255, 255)};
-    Option<Color> preeditColorPreCursor{this, "PreeditColorPreCursor",
-                                        _("Preedit color pre-cursor"),
+
+    Option<Color> auxColor{this, "AuxColor", _("Indicator text color"),
+                           Color(255, 255, 255, 255)};
+    Option<Color> preeditColorPreCaret{this, "PreeditColorPreCaret",
+                                       _("Preedit color pre-caret"),
+                                       Color(255, 255, 255, 255)};
+    Option<Color> preeditColorCaret{this, "PreeditColorCaret",
+                                    _("Preedit caret color"),
+                                    Color(255, 255, 255, 255)};
+    Option<Color> preeditColorPostCaret{this, "PreeditColorPostCaret",
+                                        _("Preedit color post-caret"),
                                         Color(255, 255, 255, 255)};
     Option<Color> borderColor{this, "BorderColor", _("Border color"),
                               Color(255, 255, 255, 255)};
@@ -267,9 +280,9 @@ FCITX_CONFIGURATION(
     ExternalOption systemFontDir{this, "SystemFontDir", _("System font dir"),
                                  ""};);
 
-FCITX_CONFIGURATION(CursorConfig,
-                    OptionWithAnnotation<CursorStyle, CursorStyleI18NAnnotation>
-                        style{this, "Style", _("Style"), CursorStyle::Blink};
+FCITX_CONFIGURATION(CaretConfig,
+                    OptionWithAnnotation<CaretStyle, CaretStyleI18NAnnotation>
+                        style{this, "Style", _("Style"), CaretStyle::Blink};
                     Option<std::string> text{this, "Text", _("Text"), "‸"};);
 
 FCITX_CONFIGURATION(
@@ -337,7 +350,7 @@ FCITX_CONFIGURATION(
     Option<ScrollConfig> scrollMode{this, "ScrollMode", _("Scroll mode")};
     Option<BackgroundConfig> background{this, "Background", _("Background")};
     Option<FontConfig> font{this, "Font", _("Font")};
-    Option<CursorConfig> cursor{this, "Cursor", _("Cursor")};
+    Option<CaretConfig> caret{this, "Caret", _("Caret")};
     Option<HighlightConfig> highlight{this, "Highlight", _("Highlight")};
     Option<Size> size{this, "Size", _("Size")};
     Option<Advanced> advanced{this, "Advanced", _("Advanced")};);

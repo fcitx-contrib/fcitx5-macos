@@ -8,7 +8,7 @@ import SwiftyJSON
 struct SyncResponse: Codable {
   let commit: String
   let preedit: String
-  let cursorPos: Int
+  let caretPos: Int
   let dummyPreedit: Bool
   let accepted: Bool
 }
@@ -66,7 +66,7 @@ class FcitxInputController: IMKInputController {
       return false
     }
     commitAndSetPreeditSync(
-      client, response.commit, response.preedit, response.cursorPos, response.dummyPreedit,
+      client, response.commit, response.preedit, response.caretPos, response.dummyPreedit,
       focusOut: focusOut)
     return response.accepted
   }
@@ -177,7 +177,7 @@ class FcitxInputController: IMKInputController {
       client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.ABC")
     }
     // activateServer is called when app is in foreground but not necessarily a text field is selected.
-    hasCursor = false
+    hasCaret = false
     // Make sure status bar is updated on click password input, before first key event.
     let isPassword = getSecureInputInfo(isOnFocus: true)
     focus_in(uuid, isPassword)
@@ -190,7 +190,7 @@ class FcitxInputController: IMKInputController {
     let res = String(focus_out(uuid))
     // Maybe commit and clear preedit synchronously if user switches to ABC by Ctrl+Space.
     let _ = processRes(client, res, focusOut: true)
-    hasCursor = false
+    hasCaret = false
   }
 
   override func menu() -> NSMenu! {
