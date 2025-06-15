@@ -109,7 +109,7 @@ private:
 struct InputContextState {
     std::string commit;
     std::string preedit;
-    int cursorPos;
+    int caretPos;
     bool dummyPreedit;
 };
 
@@ -127,7 +127,7 @@ public:
     void forwardKeyImpl(const ForwardKeyEvent &key) override {}
     void updatePreeditImpl() override;
 
-    std::tuple<double, double, double> getCursorCoordinates(bool followCursor);
+    std::tuple<double, double, double> getCaretCoordinates(bool followCaret);
     id client() { return client_; }
     std::string getAccentColor() { return accentColor_; }
 
