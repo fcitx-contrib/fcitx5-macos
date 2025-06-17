@@ -21,6 +21,7 @@ class FcitxInputController: IMKInputController {
   let client: Any!
   var accentColor = ""
   var selection: NSRange? = nil
+  var lastEventIsShiftPress = false
   var obeySecureInput = true
 
   // A registry of live FcitxInputController objects.
@@ -105,11 +106,17 @@ class FcitxInputController: IMKInputController {
     let newSelection = client.selectedRange()
     let selectionChanged: Bool = selection != newSelection
     selection = newSelection
-    // Shift release when text selection is changed.
-    if modsVal == 0 && (code == 56 || code == 60) && selectionChanged {
-      // Send a no-op key event to fcitx so that Shift+Click doesn't trigger im toggle.
-      process_key(uuid, 0, 0, 0, false, false)
+    var isShiftPress = false
+    if code == 56 || code == 60 {
+      if modsVal == 131072 {
+        isShiftPress = true
+      } else if modsVal == 0 && lastEventIsShiftPress && selectionChanged {
+        // Shift release following press when text selection is changed.
+        // Send a no-op key event to fcitx so that Shift+Click doesn't trigger im toggle.
+        process_key(uuid, 0, 0, 0, false, false)
+      }
     }
+    lastEventIsShiftPress = isShiftPress
     // It can change within an IMKInputController (e.g. sudo in Terminal), so must reevaluate before each key sent to IM.
     let isPassword = getSecureInputInfo(isOnFocus: false)
     let res = String(process_key(uuid, unicode, modsVal, code, isRelease, isPassword))
