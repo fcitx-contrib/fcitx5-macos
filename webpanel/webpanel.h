@@ -202,6 +202,8 @@ FCITX_CONFIGURATION(
     Option<bool> animation{this, "Animation", _("Animation"), true};
     Option<int, IntConstrain> maxRowCount{
         this, "MaxRowCount", _("Max row count"), 6, IntConstrain(2, 10)};
+    Option<int, IntConstrain> maxColumnCount{
+        this, "MaxColumnCount", _("Max column count"), 6, IntConstrain(2, 10)};
     Option<KeyList> expand{
         this, "Expand", _("Expand"), {Key(FcitxKey_equal), Key(FcitxKey_Down)}};
     Option<KeyList> collapse{
@@ -220,12 +222,13 @@ FCITX_CONFIGURATION(
     Option<KeyList> pageDown{
         this, "PageDown", _("Page down"), {Key(FcitxKey_Page_Down)}};
     Option<KeyList> commit{this, "Commit", _("Commit"), {Key(FcitxKey_space)}};
-    Option<KeyList> selectCandidate{this,
-                                    "SelectCandidate",
-                                    _("Select candidate"),
-                                    {Key(FcitxKey_1), Key(FcitxKey_2),
-                                     Key(FcitxKey_3), Key(FcitxKey_4),
-                                     Key(FcitxKey_5), Key(FcitxKey_6)}};
+    Option<KeyList> selectCandidate{
+        this,
+        "SelectCandidate",
+        _("Select candidate"),
+        {Key(FcitxKey_1), Key(FcitxKey_2), Key(FcitxKey_3), Key(FcitxKey_4),
+         Key(FcitxKey_5), Key(FcitxKey_6), Key(FcitxKey_7), Key(FcitxKey_8),
+         Key(FcitxKey_9), Key(FcitxKey_0)}};
     Option<bool> optimizeForHyperKey{this, "OptimizeForHyperKey",
                                      _("Optimize for Hyper key"), true};);
 
@@ -321,6 +324,9 @@ FCITX_CONFIGURATION(
     Option<int, IntConstrain> verticalMinWidth{this, "VerticalMinWidth",
                                                _("Vertical minimum width (px)"),
                                                200, IntConstrain(0, 960)};
+    Option<int, IntConstrain> scrollCellWidth{this, "ScrollCellWidth",
+                                              _("Scroll cell width (px)"), 65,
+                                              IntConstrain(40, 100)};
     Option<int, IntConstrain> horizontalDividerWidth{
         this, "HorizontalDividerWidth", _("Horizontal divider width (px)"), 1,
         IntConstrain(0, BORDER_WIDTH_MAX)};);
