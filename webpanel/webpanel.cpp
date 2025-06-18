@@ -171,6 +171,10 @@ WebPanel::WebPanel(Instance *instance)
                         candidate_window::scroll_key_action_t::four,
                         candidate_window::scroll_key_action_t::five,
                         candidate_window::scroll_key_action_t::six,
+                        candidate_window::scroll_key_action_t::seven,
+                        candidate_window::scroll_key_action_t::eight,
+                        candidate_window::scroll_key_action_t::nine,
+                        candidate_window::scroll_key_action_t::zero,
                     };
                 if (int i =
                         key.keyListIndex(*config_.scrollMode->selectCandidate);
@@ -534,8 +538,8 @@ void WebPanel::scroll(int start, int count) {
 }
 
 void WebPanel::expand() {
-    scroll(0, 6 * (*config_.scrollMode->maxRowCount +
-                   1)); // Hard-coded like fcitx5-webview
+    scroll(0, *config_.scrollMode->maxColumnCount *
+                  (*config_.scrollMode->maxRowCount + 1));
 }
 
 void WebPanel::collapse() {
