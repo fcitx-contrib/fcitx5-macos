@@ -389,12 +389,21 @@ struct InputMethod: Codable, Hashable {
   }
 }
 
-private func languageCodeMatch(_ code: String) -> Bool {
+private func normalizeLanguageCode(_ code: String) -> String {
+  // "".split throws
+  if code.isEmpty {
+    return ""
+  }
+  return String(code.split(separator: "_")[0])
+}
+
+// Match both system language and languages of enabled input methods.
+private func languageCodeMatch(_ code: String, _ languagesOfEnabledIMs: Set<String>) -> Bool {
   guard let languageCode = Locale.current.language.languageCode?.identifier else {
     return true
   }
-  // "".split throws
-  return !code.isEmpty && String(code.split(separator: "_")[0]) == languageCode
+  let normalized = normalizeLanguageCode(code)
+  return normalized == languageCode || languagesOfEnabledIMs.contains(normalized)
 }
 
 struct AvailableInputMethodView: View {
@@ -470,7 +479,8 @@ struct AvailableInputMethodView: View {
         updateList()
       }
     }
-    @Published var availableIMsForLanguage: [InputMethod] = []
+    @Published var availableIMsForLanguage = [InputMethod]()
+    var languagesOfEnabledIMs = Set<String>()
 
     var errorMsg: String? {
       didSet {
@@ -490,6 +500,7 @@ struct AvailableInputMethodView: View {
 
     func refresh(_ alreadyEnabled: Set<String>) {
       availableIMs.removeAll()
+      languagesOfEnabledIMs.removeAll()
       let jsonStr = String(Fcitx.imGetAvailableIMs())
       if let jsonData = jsonStr.data(using: .utf8) {
         do {
@@ -500,6 +511,9 @@ struct AvailableInputMethodView: View {
               availableIMs[im.languageCode] = imList
             } else {
               availableIMs[im.languageCode] = [im]
+            }
+            if alreadyEnabled.contains(im.uniqueName) {
+              languagesOfEnabledIMs.update(with: normalizeLanguageCode(im.languageCode))
             }
           }
         } catch {
@@ -541,7 +555,9 @@ struct AvailableInputMethodView: View {
 
     fileprivate func languages() -> [LocalizedLanguageCode] {
       return Array(availableIMs.keys)
-        .filter { !(addIMOnlyShowCurrentLanguage ?? false) || languageCodeMatch($0) }
+        .filter {
+          !(addIMOnlyShowCurrentLanguage ?? false) || languageCodeMatch($0, languagesOfEnabledIMs)
+        }
         .map { LocalizedLanguageCode(code: $0) }
         .sorted()
     }
