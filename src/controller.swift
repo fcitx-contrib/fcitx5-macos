@@ -13,6 +13,9 @@ struct SyncResponse: Codable {
   let accepted: Bool
 }
 
+let capsLock = 65536
+let shift = 131072
+
 class FcitxInputController: IMKInputController {
   var uuid: ICUUID
   var appId: String
@@ -108,9 +111,9 @@ class FcitxInputController: IMKInputController {
     selection = newSelection
     var isShiftPress = false
     if code == 56 || code == 60 {
-      if modsVal == 131072 {
+      if modsVal == shift || modsVal == (shift | capsLock) {
         isShiftPress = true
-      } else if modsVal == 0 && lastEventIsShiftPress && selectionChanged {
+      } else if (modsVal == 0 || modsVal == capsLock) && lastEventIsShiftPress && selectionChanged {
         // Shift release following press when text selection is changed.
         // Send a no-op key event to fcitx so that Shift+Click doesn't trigger im toggle.
         process_key(uuid, 0, 0, 0, false, false)
