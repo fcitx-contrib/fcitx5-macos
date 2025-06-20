@@ -1,3 +1,4 @@
+#include "fcitx-utils/keysym.h"
 #include "fcitx-utils/log.h"
 #include "keycode.h"
 
@@ -8,6 +9,11 @@ void test_osx_to_fcitx() {
     FCITX_ASSERT(osx_unicode_to_fcitx_keysym('a', 0, 0) == FcitxKey_a);
     FCITX_ASSERT(osx_unicode_to_fcitx_keysym('a', OSX_MODIFIER_SHIFT, 0) ==
                  FcitxKey_A);
+    FCITX_ASSERT(osx_unicode_to_fcitx_keysym(161 /* ¡ */, OSX_MODIFIER_OPTION,
+                                             OSX_VK_KEY_1) == FcitxKey_1);
+    FCITX_ASSERT(osx_unicode_to_fcitx_keysym(
+                     8260 /* ⁄ */, OSX_MODIFIER_SHIFT | OSX_MODIFIER_OPTION,
+                     OSX_VK_KEY_1) == FcitxKey_exclam);
 
     FCITX_ASSERT(osx_keycode_to_fcitx_keycode(OSX_VK_KEY_0) == 11 + 8);
     FCITX_ASSERT(osx_keycode_to_fcitx_keycode(OSX_VK_KEYPAD_0) == 82 + 8);
