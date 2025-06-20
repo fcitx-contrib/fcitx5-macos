@@ -197,6 +197,65 @@ static struct {
 };
 
 static struct {
+    uint32_t osxKeycode;
+    char asciiChar;
+    char shiftedAsciiChar;
+} char_mappings[] = {
+    // alphabet
+    {OSX_VK_A, 'a', 'A'},
+    {OSX_VK_B, 'b', 'B'},
+    {OSX_VK_C, 'c', 'C'},
+    {OSX_VK_D, 'd', 'D'},
+    {OSX_VK_E, 'e', 'E'},
+    {OSX_VK_F, 'f', 'F'},
+    {OSX_VK_G, 'g', 'G'},
+    {OSX_VK_H, 'h', 'H'},
+    {OSX_VK_I, 'i', 'I'},
+    {OSX_VK_J, 'j', 'J'},
+    {OSX_VK_K, 'k', 'K'},
+    {OSX_VK_L, 'l', 'L'},
+    {OSX_VK_M, 'm', 'M'},
+    {OSX_VK_N, 'n', 'N'},
+    {OSX_VK_O, 'o', 'O'},
+    {OSX_VK_P, 'p', 'P'},
+    {OSX_VK_Q, 'q', 'Q'},
+    {OSX_VK_R, 'r', 'R'},
+    {OSX_VK_S, 's', 'S'},
+    {OSX_VK_T, 't', 'T'},
+    {OSX_VK_U, 'u', 'U'},
+    {OSX_VK_V, 'v', 'V'},
+    {OSX_VK_W, 'w', 'W'},
+    {OSX_VK_X, 'x', 'X'},
+    {OSX_VK_Y, 'y', 'Y'},
+    {OSX_VK_Z, 'z', 'Z'},
+
+    // number row with shift mappings
+    {OSX_VK_KEY_0, '0', ')'},
+    {OSX_VK_KEY_1, '1', '!'},
+    {OSX_VK_KEY_2, '2', '@'},
+    {OSX_VK_KEY_3, '3', '#'},
+    {OSX_VK_KEY_4, '4', '$'},
+    {OSX_VK_KEY_5, '5', '%'},
+    {OSX_VK_KEY_6, '6', '^'},
+    {OSX_VK_KEY_7, '7', '&'},
+    {OSX_VK_KEY_8, '8', '*'},
+    {OSX_VK_KEY_9, '9', '('},
+
+    // symbols with shift
+    {OSX_VK_BACKQUOTE, '`', '~'},
+    {OSX_VK_BACKSLASH, '\\', '|'},
+    {OSX_VK_BRACKET_LEFT, '[', '{'},
+    {OSX_VK_BRACKET_RIGHT, ']', '}'},
+    {OSX_VK_COMMA, ',', '<'},
+    {OSX_VK_DOT, '.', '>'},
+    {OSX_VK_EQUAL, '=', '+'},
+    {OSX_VK_MINUS, '-', '_'},
+    {OSX_VK_QUOTE, '\'', '"'},
+    {OSX_VK_SEMICOLON, ';', ':'},
+    {OSX_VK_SLASH, '/', '?'},
+};
+
+static struct {
     uint32_t osxModifier;
     fcitx::KeyState fcitxModifier;
 } modifier_mappings[] = {
@@ -215,11 +274,21 @@ fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode,
             return pair.sym;
         }
     }
+    // macOS sends special unicode for Alt+(Shift+) non-whitespace key thus can't match any configured hotkey in fcitx.
+    // So we revert unicode to ascii, which doesn't change the committing special char behavior if rejected by fcitx.
+    if ((osxModifiers & ~OSX_MODIFIER_SHIFT) == OSX_MODIFIER_OPTION) {
+        for (const auto &pair : char_mappings) {
+            if (pair.osxKeycode == osxKeycode) {
+                unicode = (osxModifiers & OSX_MODIFIER_SHIFT) ? pair.shiftedAsciiChar : pair.asciiChar;
+                break;
+            }
+        }
+    }
     // Send capital keysym when shift is pressed (bug #101)
     // This is for Squirrel compatibility:
     // Squirrel recognizes Control+Shift+F and Control+Shift+0
     // but not Control+Shift+f and Control+Shift+parenright
-    if ((unicode >= 'a') && (unicode <= 'z') &&
+    else if ((unicode >= 'a') && (unicode <= 'z') &&
         (osxModifiers & OSX_MODIFIER_SHIFT)) {
         unicode = unicode - 'a' + 'A';
     }
