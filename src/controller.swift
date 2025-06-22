@@ -329,6 +329,7 @@ private func repObjectIMK(_ sender: Any?) -> Any? {
 
 struct FcitxKey: Codable {
   let sym: String
+  let functionKey: UInt16
   let states: UInt
 }
 
@@ -349,10 +350,19 @@ struct FcitxAction: Codable {
       return []
     }
 
+    var keyEquivalent = ""
+    if let key = hotkey?[0] {
+      if !key.sym.isEmpty {
+        keyEquivalent = key.sym
+      } else if key.functionKey != 0 {
+        keyEquivalent = String(
+          utf16CodeUnits: [unichar(key.functionKey)], count: 1)
+      }
+    }
     let item = NSMenuItem(
       title: String(repeating: "　　", count: depth) + desc,
       action: #selector(FcitxInputController.activateFcitxAction),
-      keyEquivalent: hotkey?[0].sym ?? "")
+      keyEquivalent: keyEquivalent)
     item.keyEquivalentModifierMask = NSEvent.ModifierFlags(rawValue: hotkey?[0].states ?? 0)
     item.target = target
     item.representedObject = self

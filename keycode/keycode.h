@@ -243,6 +243,34 @@
 #define OSX_MODIFIER_NUMERICPAD (1 << 21)
 #define OSX_MODIFIER_HELP       (1 << 22)
 #define OSX_MODIFIER_FUNCTION   (1 << 23)
+
+// AppKit/NSEvent.h
+enum {
+    NSUpArrowFunctionKey        = 0xF700,
+    NSDownArrowFunctionKey      = 0xF701,
+    NSLeftArrowFunctionKey      = 0xF702,
+    NSRightArrowFunctionKey     = 0xF703,
+    NSF1FunctionKey             = 0xF704,
+    NSF2FunctionKey             = 0xF705,
+    NSF3FunctionKey             = 0xF706,
+    NSF4FunctionKey             = 0xF707,
+    NSF5FunctionKey             = 0xF708,
+    NSF6FunctionKey             = 0xF709,
+    NSF7FunctionKey             = 0xF70A,
+    NSF8FunctionKey             = 0xF70B,
+    NSF9FunctionKey             = 0xF70C,
+    NSF10FunctionKey            = 0xF70D,
+    NSF11FunctionKey            = 0xF70E,
+    NSF12FunctionKey            = 0xF70F,
+    // Using Insert as keyEquivalent will result in ' wrongly used.
+    // NSInsertFunctionKey      = 0xF727,
+    // fcitx_keysym_to_osx_keysym is responsible for Delete and Backspace.
+    // NSDeleteFunctionKey      = 0xF728,
+    NSHomeFunctionKey           = 0xF729,
+    NSEndFunctionKey            = 0xF72B,
+    NSPageUpFunctionKey         = 0xF72C,
+    NSPageDownFunctionKey       = 0xF72D,
+};
 // clang-format on
 
 fcitx::KeySym osx_unicode_to_fcitx_keysym(uint32_t unicode,
@@ -257,5 +285,7 @@ fcitx::Key osx_key_to_fcitx_key(uint32_t unicode, uint32_t modifiers,
 // Used for showing shortcut configuration and setting shortcut for menu items.
 // No need to be complete and sometimes must be inaccurate (e.g. A -> a).
 std::string fcitx_keysym_to_osx_keysym(fcitx::KeySym);
+uint16_t fcitx_keysym_to_osx_function_key(fcitx::KeySym);
+
 uint16_t fcitx_keysym_to_osx_keycode(fcitx::KeySym);
 uint32_t fcitx_keystates_to_osx_modifiers(fcitx::KeyStates ks);

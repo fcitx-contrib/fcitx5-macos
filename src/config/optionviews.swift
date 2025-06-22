@@ -21,12 +21,21 @@ struct BooleanOptionView: OptionView {
   }
 }
 
+func recordedKeyView(_ pair: (String, String?)) -> some View {
+  let (normalFont, smallerFont) = pair
+  if let smallerFont = smallerFont {
+    return Text(normalFont) + Text(smallerFont).font(.caption)
+  } else {
+    return Text(normalFont)
+  }
+}
+
 struct KeyOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
   @ObservedObject var model: KeyOption
   @State private var showRecorder = false
-  @State private var recordedShortcut = ""
+  @State private var recordedShortcut: (String, String?) = ("", nil)
   @State private var recordedKey = ""
   @State private var recordedModifiers = NSEvent.ModifierFlags()
   @State private var recordedCode: UInt16 = 0
@@ -35,11 +44,12 @@ struct KeyOptionView: OptionView {
     Button {
       showRecorder = true
     } label: {
-      Text(model.value.isEmpty ? "●REC" : fcitxStringToMacShortcut(model.value)).frame(
-        minWidth: 100)
+      recordedKeyView(model.value.isEmpty ? ("●REC", nil) : fcitxStringToMacShortcut(model.value))
+        .frame(
+          minWidth: 100)
     }.sheet(isPresented: $showRecorder) {
       VStack {
-        Text(recordedShortcut)
+        recordedKeyView(recordedShortcut)
           .background(
             RecordingOverlay(
               recordedShortcut: $recordedShortcut, recordedKey: $recordedKey,
