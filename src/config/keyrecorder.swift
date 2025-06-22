@@ -25,7 +25,24 @@ private let codeMap = [
   0x24: "↵",
   0x31: "␣",
   0x30: "⇥",
-  // function
+  // cursor
+  0x7e: "▲",
+  0x7d: "▼",
+  0x7b: "◀",
+  0x7c: "▶",
+  0x74: "↑",
+  0x79: "↓",
+  0x73: "⤒",
+  0x77: "⤓",
+  // pc keyboard
+  0x72: "⎀",
+  0x71: "⎉",
+  0x69: "⎙",
+  0x6b: "⇳",
+]
+
+// Separate them because in the menu their font size is smaller and we want the same behavior in recorder UI as well.
+private let functionCodeMap = [
   0x7a: "F1",
   0x78: "F2",
   0x63: "F3",
@@ -38,23 +55,11 @@ private let codeMap = [
   0x6d: "F10",
   0x67: "F11",
   0x6f: "F12",
-  // cursor
-  0x7e: "▲",
-  0x7d: "▼",
-  0x7b: "◀",
-  0x7c: "▶",
-  0x74: "⭡",
-  0x79: "⭣",
-  0x73: "⇱",
-  0x77: "⇲",
-  // pc keyboard
-  0x72: "⎀",
-  0x71: "⎉",
-  0x69: "⎙",
-  0x6b: "⇳",
 ]
 
-func shortcutRepr(_ key: String, _ modifiers: NSEvent.ModifierFlags, _ code: UInt16) -> String {
+func shortcutRepr(_ key: String, _ modifiers: NSEvent.ModifierFlags, _ code: UInt16) -> (
+  String, String?
+) {
   var desc = ""
   if modifiers.contains(.control) { desc += "⌃" }
   if modifiers.contains(.option) { desc += "⌥" }
@@ -66,12 +71,17 @@ func shortcutRepr(_ key: String, _ modifiers: NSEvent.ModifierFlags, _ code: UIn
     desc += "⇧"  // Shift_L
   }
   if modifiers.contains(.command) { desc += "⌘" }
+  if let normalFont = codeMap[Int(code)] {
+    return (desc + normalFont, nil)
+  } else if let smallerFont = functionCodeMap[Int(code)] {
+    return (desc, smallerFont)
+  }
   // Use uppercase to match menu.
-  return desc + (codeMap[Int(code)] ?? key.uppercased())
+  return (desc + key.uppercased(), nil)
 }
 
 struct RecordingOverlay: NSViewRepresentable {
-  @Binding var recordedShortcut: String
+  @Binding var recordedShortcut: (String, String?)
   @Binding var recordedKey: String
   @Binding var recordedModifiers: NSEvent.ModifierFlags
   @Binding var recordedCode: UInt16

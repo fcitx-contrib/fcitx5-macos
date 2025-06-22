@@ -27,7 +27,11 @@ void test_osx_to_fcitx() {
 }
 
 void test_fcitx_to_osx() {
-    FCITX_ASSERT(fcitx_keysym_to_osx_keysym(FcitxKey_Up) == "\u{1e}");
+    FCITX_ASSERT(fcitx_keysym_to_osx_function_key(FcitxKey_Up) == 0xF700);
+    FCITX_ASSERT(fcitx_keysym_to_osx_function_key(FcitxKey_F12) == 0xF70F);
+
+    FCITX_ASSERT(fcitx_keysym_to_osx_keysym(FcitxKey_Left) == "");
+    FCITX_ASSERT(fcitx_keysym_to_osx_keysym(FcitxKey_F12) == "");
     FCITX_ASSERT(fcitx_keysym_to_osx_keysym(FcitxKey_0) == "0");
     FCITX_ASSERT(fcitx_keysym_to_osx_keysym(FcitxKey_KP_0) == "");
     FCITX_ASSERT(fcitx_keysym_to_osx_keysym(FcitxKey_grave) == "`");
@@ -47,7 +51,8 @@ void test_fcitx_to_osx() {
 }
 
 void test_fcitx_string() {
-    FCITX_ASSERT(fcitx_string_to_osx_keysym("Left") == "\u{1c}");
+    FCITX_ASSERT(fcitx_string_to_osx_keysym("Left") == "");
+    FCITX_ASSERT(fcitx_string_to_osx_keysym("F12") == "");
     FCITX_ASSERT(fcitx_string_to_osx_keysym("Control+0") == "0");
     FCITX_ASSERT(fcitx_string_to_osx_keysym("Control+Shift+KP_0") == "");
     FCITX_ASSERT(fcitx_string_to_osx_keysym("Control+slash") == "/");

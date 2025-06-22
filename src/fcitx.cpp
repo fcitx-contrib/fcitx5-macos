@@ -436,11 +436,13 @@ static nlohmann::json actionToJson(fcitx::Action *action,
     }
     for (const auto &key : action->hotkey()) {
         auto sym = fcitx_keysym_to_osx_keysym(key.sym());
-        if (sym.empty()) {
+        auto functionKey = fcitx_keysym_to_osx_function_key(key.sym());
+        if (sym.empty() && functionKey == 0) {
             continue;
         }
         j["hotkey"].push_back(
             {{"sym", std::move(sym)},
+             {"functionKey", functionKey},
              {"states", fcitx_keystates_to_osx_modifiers(key.states())}});
     }
     return j;

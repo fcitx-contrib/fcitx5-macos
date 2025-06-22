@@ -7,12 +7,15 @@ func testMacToFcitx() {
 }
 
 func testFcitxToMac() {
-  assert(fcitxStringToMacShortcut("0") == "0")
-  assert(fcitxStringToMacShortcut("KP_0") == "🄋")
-  assert(fcitxStringToMacShortcut("Control+A") == "⌃A")
-  assert(fcitxStringToMacShortcut("Control+Shift+A") == "⌃⇧A")
-  assert(fcitxStringToMacShortcut("Shift+Super+Shift_L") == "⇧⌘")
-  assert(fcitxStringToMacShortcut("Alt+Shift+Shift_R") == "⌥⬆")
+  assert(fcitxStringToMacShortcut("0") == ("0", nil))
+  assert(fcitxStringToMacShortcut("KP_0") == ("🄋", nil))
+  assert(fcitxStringToMacShortcut("Control+A") == ("⌃A", nil))
+  assert(fcitxStringToMacShortcut("Control+Shift+A") == ("⌃⇧A", nil))
+  assert(fcitxStringToMacShortcut("Shift+Super+Shift_L") == ("⇧⌘", nil))
+  assert(fcitxStringToMacShortcut("Alt+Shift+Shift_R") == ("⌥⬆", nil))
+  assert(fcitxStringToMacShortcut("F12") == ("", "F12"))
+  assert(fcitxStringToMacShortcut("Shift+F12") == ("⇧", "F12"))
+  assert(fcitxStringToMacShortcut("Super+Home") == ("⌘⤒", nil))
 }
 
 @_cdecl("main")

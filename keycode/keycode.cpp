@@ -2,7 +2,7 @@
 #include <cstring>
 
 static struct {
-    uint32_t osxKeycode;
+    uint16_t osxKeycode;
     fcitx::KeySym sym;
 } sym_mappings[] = {
     // modifiers
@@ -197,7 +197,7 @@ static struct {
 };
 
 static struct {
-    uint32_t osxKeycode;
+    uint16_t osxKeycode;
     char asciiChar;
     char shiftedAsciiChar;
 } char_mappings[] = {
@@ -253,6 +253,32 @@ static struct {
     {OSX_VK_QUOTE, '\'', '"'},
     {OSX_VK_SEMICOLON, ';', ':'},
     {OSX_VK_SLASH, '/', '?'},
+};
+
+static struct {
+    fcitx::KeySym sym;
+    uint16_t osxFunctionKey;
+} function_key_mappings[] = {
+    {FcitxKey_Up, NSUpArrowFunctionKey},
+    {FcitxKey_Down, NSDownArrowFunctionKey},
+    {FcitxKey_Left, NSLeftArrowFunctionKey},
+    {FcitxKey_Right,NSRightArrowFunctionKey},
+    {FcitxKey_F1, NSF1FunctionKey},
+    {FcitxKey_F2, NSF2FunctionKey},
+    {FcitxKey_F3, NSF3FunctionKey},
+    {FcitxKey_F4, NSF4FunctionKey},
+    {FcitxKey_F5, NSF5FunctionKey},
+    {FcitxKey_F6, NSF6FunctionKey},
+    {FcitxKey_F7, NSF7FunctionKey},
+    {FcitxKey_F8, NSF8FunctionKey},
+    {FcitxKey_F9, NSF9FunctionKey},
+    {FcitxKey_F10, NSF10FunctionKey},
+    {FcitxKey_F11, NSF11FunctionKey},
+    {FcitxKey_F12, NSF12FunctionKey},
+    {FcitxKey_Home, NSHomeFunctionKey},
+    {FcitxKey_End, NSEndFunctionKey},
+    {FcitxKey_Page_Up, NSPageUpFunctionKey},
+    {FcitxKey_Page_Down, NSPageDownFunctionKey},
 };
 
 static struct {
@@ -328,21 +354,6 @@ std::string fcitx_keysym_to_osx_keysym(fcitx::KeySym keySym) {
     if (fcitx::Key{keySym}.isKeyPad()) {
         return "";
     }
-    // TODO: VSCode Run has many functional key shortcuts, so we can copy
-    // implementation from electron.
-    switch (keySym) {
-    // Hack for arrow
-    case FcitxKey_Left:
-        return "\u{1c}";
-    case FcitxKey_Right:
-        return "\u{1d}";
-    case FcitxKey_Up:
-        return "\u{1e}";
-    case FcitxKey_Down:
-        return "\u{1f}";
-    default:
-        break;
-    }
     // keySymToString returns grave for `, which will be used as G by macOS.
     auto sym = fcitx::Key::keySymToUTF8(keySym);
     // Normalized fcitx key like Control+D will show and be counted as
@@ -351,6 +362,15 @@ std::string fcitx_keysym_to_osx_keysym(fcitx::KeySym keySym) {
         sym[0] = std::tolower(sym[0]);
     }
     return sym;
+}
+
+uint16_t fcitx_keysym_to_osx_function_key(fcitx::KeySym keySym) {
+    for (const auto &pair : function_key_mappings) {
+        if (pair.sym == keySym) {
+            return pair.osxFunctionKey;
+        }
+    }
+    return 0;
 }
 
 uint32_t fcitx_keystates_to_osx_modifiers(fcitx::KeyStates ks) {

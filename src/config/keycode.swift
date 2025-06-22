@@ -16,12 +16,12 @@ func macKeyToFcitxString(_ key: String, _ modifiers: NSEvent.ModifierFlags, _ co
   return String(osx_key_to_fcitx_string(unicode, UInt32(modifiers.rawValue), code))
 }
 
-func fcitxStringToMacShortcut(_ s: String) -> String {
+func fcitxStringToMacShortcut(_ s: String) -> (String, String?) {
   let key = String(fcitx_string_to_osx_keysym(s))
   let modifiers = NSEvent.ModifierFlags(rawValue: UInt(fcitx_string_to_osx_modifiers(s)))
   let code = fcitx_string_to_osx_keycode(s)
   if key.isEmpty && code == 0 {
-    return s
+    return (s, nil)
   }
   return shortcutRepr(key, modifiers, code)
 }
