@@ -223,12 +223,13 @@ FCITX_CONFIGURATION(
         this, "PageDown", _("Page down"), {Key(FcitxKey_Page_Down)}};
     Option<KeyList> commit{this, "Commit", _("Commit"), {Key(FcitxKey_space)}};
     Option<KeyList> selectCandidate{
-        this,
-        "SelectCandidate",
-        _("Select candidate"),
-        {Key(FcitxKey_1), Key(FcitxKey_2), Key(FcitxKey_3), Key(FcitxKey_4),
-         Key(FcitxKey_5), Key(FcitxKey_6), Key(FcitxKey_7), Key(FcitxKey_8),
-         Key(FcitxKey_9), Key(FcitxKey_0)}};
+        this, "SelectCandidate", _("Select candidate"), {}};
+    Option<bool> useMainKeyboardNumberKeys{
+        this, "UseMainKeyboardNumberKeys",
+        _("Use main keyboard number keys to select candidate"), true};
+    Option<bool> useKeypadNumberKeys{
+        this, "UseKeypadNumberKeys",
+        _("Use keypad number keys to select candidate"), false};
     Option<bool> optimizeForHyperKey{this, "OptimizeForHyperKey",
                                      _("Optimize for Hyper key"), true};);
 
