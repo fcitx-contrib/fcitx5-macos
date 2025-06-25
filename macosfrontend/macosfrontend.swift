@@ -76,7 +76,16 @@ public func commitAndSetPreeditSync(
   // replace selected text will let Esc bypass IM. When using Shift+click to select, if
   // interval is too little, IM switch happens, but dummyPreedit is false in that case.
   if preedit.isEmpty && dummyPreedit {
-    setPreedit(client, zeroWidthSpace, 0)
+    let length = client.length()
+    let selectedRange = client.selectedRange()
+    // For SwiftUI TextField, there is a bug that if caret is at the end of text, zero-width space preedit
+    // spreads from the start to the end, making the whole text underlined. Fortunately, SwiftUI's length
+    // and selectedRange are reliable, so we use a normal space in this case.
+    if length > 0 && length - currentPreedit.count == selectedRange.location + selectedRange.length {
+      setPreedit(client, " ", 0)
+    } else {
+      setPreedit(client, zeroWidthSpace, 0)
+    }
   } else {
     setPreedit(client, preedit, caretPos)
   }
