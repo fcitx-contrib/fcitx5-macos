@@ -176,13 +176,40 @@ WebPanel::WebPanel(Instance *instance)
                         candidate_window::scroll_key_action_t::nine,
                         candidate_window::scroll_key_action_t::zero,
                     };
+                static const KeyList mainKeyboardNumberKeys = {
+                    Key(FcitxKey_1), Key(FcitxKey_2), Key(FcitxKey_3),
+                    Key(FcitxKey_4), Key(FcitxKey_5), Key(FcitxKey_6),
+                    Key(FcitxKey_7), Key(FcitxKey_8), Key(FcitxKey_9),
+                    Key(FcitxKey_0)};
+                static const KeyList keypadNumberKeys = {
+                    Key(FcitxKey_KP_1), Key(FcitxKey_KP_2), Key(FcitxKey_KP_3),
+                    Key(FcitxKey_KP_4), Key(FcitxKey_KP_5), Key(FcitxKey_KP_6),
+                    Key(FcitxKey_KP_7), Key(FcitxKey_KP_8), Key(FcitxKey_KP_9),
+                    Key(FcitxKey_KP_0)};
+                int keyIndex = -1;
                 if (int i =
                         key.keyListIndex(*config_.scrollMode->selectCandidate);
-                    i >= 0 && i < selectActions.size()) {
+                    i >= 0 && i < 10) {
+                    keyIndex = i;
+                }
+                if (keyIndex < 0 &&
+                    *config_.scrollMode->useMainKeyboardNumberKeys) {
+                    int i = key.keyListIndex(mainKeyboardNumberKeys);
+                    if (i >= 0 && i < 10) {
+                        keyIndex = i;
+                    }
+                }
+                if (keyIndex < 0 && *config_.scrollMode->useKeypadNumberKeys) {
+                    int i = key.keyListIndex(keypadNumberKeys);
+                    if (i >= 0 && i < 10) {
+                        keyIndex = i;
+                    }
+                }
+                if (keyIndex >= 0) {
                     if (keyEvent.isRelease()) {
                         return;
                     }
-                    window_->scroll_key_action(selectActions[i]);
+                    window_->scroll_key_action(selectActions[keyIndex]);
                     return keyEvent.filterAndAccept();
                 }
                 const std::vector<std::pair<
