@@ -234,11 +234,6 @@ void stop_fcitx_thread() noexcept {
     fcitx_thread_started = false;
 }
 
-void restart_fcitx_thread() noexcept {
-    stop_fcitx_thread();
-    start_fcitx_thread(current_locale.c_str());
-}
-
 std::string imGetGroupNames() noexcept {
     return with_fcitx([](Fcitx &fcitx) {
         nlohmann::json j;
