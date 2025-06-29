@@ -99,7 +99,9 @@ WebPanel::WebPanel(Instance *instance)
                              actionableList->candidateActions(candidate)) {
                             actions.push_back({action.id(), action.text()});
                         }
-                        window_->answer_actions(actions);
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                          window_->answer_actions(actions);
+                        });
                     }
                 } catch (const std::invalid_argument &e) {
                     FCITX_ERROR() << "action candidate index out of range";
@@ -151,7 +153,9 @@ WebPanel::WebPanel(Instance *instance)
                 if (keyEvent.isRelease()) {
                     return;
                 }
-                window_->copy_html();
+                dispatch_async(dispatch_get_main_queue(), ^{
+                  window_->copy_html();
+                });
                 return keyEvent.filterAndAccept();
             }
             if (scrollState_ == candidate_window::scroll_state_t::ready &&
@@ -209,7 +213,9 @@ WebPanel::WebPanel(Instance *instance)
                     if (keyEvent.isRelease()) {
                         return;
                     }
-                    window_->scroll_key_action(selectActions[keyIndex]);
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                      window_->scroll_key_action(selectActions[keyIndex]);
+                    });
                     return keyEvent.filterAndAccept();
                 }
                 const std::vector<std::pair<
@@ -237,7 +243,10 @@ WebPanel::WebPanel(Instance *instance)
                 for (const auto &pair : actionMap) {
                     if (key.checkKeyList(*pair.first)) {
                         if (!keyEvent.isRelease()) {
-                            window_->scroll_key_action(pair.second);
+                            auto captured = pair.second;
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                              window_->scroll_key_action(captured);
+                            });
                         }
                         // Must not send release event to engine, which resets
                         // scroll mode.
@@ -250,8 +259,10 @@ WebPanel::WebPanel(Instance *instance)
                     }
                     // Instead of directly calling collapse, let webview handle
                     // animation and call it.
-                    window_->scroll_key_action(
-                        candidate_window::scroll_key_action_t::collapse);
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                      window_->scroll_key_action(
+                          candidate_window::scroll_key_action_t::collapse);
+                    });
                     return keyEvent.filterAndAccept();
                 }
                 // Karabiner-Elements defines Hyper as Ctrl+Alt+Shift+Cmd, but
@@ -282,28 +293,30 @@ WebPanel::WebPanel(Instance *instance)
 }
 
 void WebPanel::updateConfig() {
-    window_->set_layout(config_.typography->layout.value());
-    window_->set_theme(config_.basic->theme.value());
-    window_->set_caret_text(config_.caret->style.value() == CaretStyle::Text
-                                ? config_.caret->text.value()
-                                : "");
-    window_->set_highlight_mark_text(config_.highlight->markStyle.value() ==
-                                             HighlightMarkStyle::Text
-                                         ? config_.highlight->markText.value()
-                                         : "");
-    window_->set_native_blur(config_.background->blur.value());
-    // Keep CSS shadow as native may leave a ghost shadow of last frame when
-    // typing fast.
-    // window_->set_native_shadow(config_.background->shadow.value());
-    auto style = configValueToJson(config_).dump();
-    window_->set_style(style.c_str());
-    window_->unload_plugins();
-    using namespace candidate_window;
-    uint64_t apis = (config_.advanced->unsafeAPI->curl.value() ? kCurl : 0);
-    window_->set_api(apis);
-    if (*config_.advanced->pluginNotice) {
-        window_->load_plugins({*config_.advanced->plugins});
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+      window_->set_layout(config_.typography->layout.value());
+      window_->set_theme(config_.basic->theme.value());
+      window_->set_caret_text(config_.caret->style.value() == CaretStyle::Text
+                                  ? config_.caret->text.value()
+                                  : "");
+      window_->set_highlight_mark_text(config_.highlight->markStyle.value() ==
+                                               HighlightMarkStyle::Text
+                                           ? config_.highlight->markText.value()
+                                           : "");
+      window_->set_native_blur(config_.background->blur.value());
+      // Keep CSS shadow as native may leave a ghost shadow of last frame when
+      // typing fast.
+      // window_->set_native_shadow(config_.background->shadow.value());
+      auto style = configValueToJson(config_).dump();
+      window_->set_style(style.c_str());
+      window_->unload_plugins();
+      using namespace candidate_window;
+      uint64_t apis = (config_.advanced->unsafeAPI->curl.value() ? kCurl : 0);
+      window_->set_api(apis);
+      if (*config_.advanced->pluginNotice) {
+          window_->load_plugins({*config_.advanced->plugins});
+      }
+    });
 }
 
 void WebPanel::reloadConfig() {
@@ -578,7 +591,10 @@ void WebPanel::collapse() {
 }
 
 void WebPanel::applyAppAccentColor(const std::string &accentColor) {
-    window_->apply_app_accent_color(accentColor);
+    auto captured = accentColor;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      window_->apply_app_accent_color(captured);
+    });
 }
 
 } // namespace fcitx

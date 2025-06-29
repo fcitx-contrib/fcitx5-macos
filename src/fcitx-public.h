@@ -1,12 +1,9 @@
-#ifndef FCITX5_MACOS_FCITX_H
-#define FCITX5_MACOS_FCITX_H
+#pragma once
 
-#include <cstdint>
 #include <string>
 
 void start_fcitx_thread(const char *locale) noexcept;
 void stop_fcitx_thread() noexcept;
-void restart_fcitx_thread() noexcept;
 
 // NOTE: It's impossible to use std::vector<std::string> directly
 // until Swift fixes C++ interop.
@@ -43,5 +40,3 @@ void activateActionById(int id) noexcept;
 
 // Tunnel variables
 #include "tunnel.h"
-
-#endif
