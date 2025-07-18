@@ -141,9 +141,7 @@ std::string MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease,
         auto timeEventPtr = timeEvent.release();
     }
 
-    auto state = ic->getState(keyEvent.accepted());
-    ic->resetState();
-    return state;
+    return ic->popState(keyEvent.accepted());
 }
 
 MacosInputContext *MacosFrontend::findIC(ICUUID uuid) {
@@ -212,7 +210,7 @@ void MacosFrontend::focusIn(ICUUID uuid, bool isPassword) {
     useAppDefaultIM(program);
 }
 
-std::string MacosFrontend::focusOut(ICUUID uuid) {
+std::string MacosFrontend::commitComposition(ICUUID uuid) {
     auto *ic = findIC(uuid);
     if (!ic)
         return "{}";
@@ -230,13 +228,18 @@ std::string MacosFrontend::focusOut(ICUUID uuid) {
     // At this stage panel is still shown. If removed, a following backspace
     // will commit a BS character in VSCode.
     ic->setDummyPreedit(false);
-    auto state = ic->getState(false);
+    auto state = ic->popState(false);
     ic->isSyncEvent = false;
 
+    return state;
+}
+
+void MacosFrontend::focusOut(ICUUID uuid) {
+    auto *ic = findIC(uuid);
+    if (!ic)
+        return;
     FCITX_INFO() << "Focus out " << ic->program();
     ic->focusOut();
-
-    return state;
 }
 
 MacosInputContext::MacosInputContext(MacosFrontend *frontend,
@@ -274,13 +277,14 @@ void MacosInputContext::updatePreeditImpl() {
     state_.caretPos = preedit.cursor();
 }
 
-std::string MacosInputContext::getState(bool accepted) {
+std::string MacosInputContext::popState(bool accepted) {
     nlohmann::json j;
     j["commit"] = state_.commit;
     j["preedit"] = state_.preedit;
     j["caretPos"] = state_.caretPos;
     j["dummyPreedit"] = state_.dummyPreedit;
     j["accepted"] = accepted;
+    resetState();
     return j.dump();
 }
 
@@ -345,7 +349,12 @@ void focus_in(ICUUID uuid, bool isPassword) noexcept {
     });
 }
 
-std::string focus_out(ICUUID uuid) noexcept {
-    return with_fcitx(
-        [=](Fcitx &fcitx) { return fcitx.frontend()->focusOut(uuid); });
+std::string commit_composition(ICUUID uuid) noexcept {
+    return with_fcitx([=](Fcitx &fcitx) {
+        return fcitx.frontend()->commitComposition(uuid);
+    });
+}
+
+void focus_out(ICUUID uuid) noexcept {
+    with_fcitx([=](Fcitx &fcitx) { return fcitx.frontend()->focusOut(uuid); });
 }

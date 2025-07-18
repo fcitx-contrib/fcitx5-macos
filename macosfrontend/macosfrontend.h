@@ -83,7 +83,8 @@ public:
     std::string keyEvent(ICUUID, const Key &key, bool isRelease,
                          bool isPassword);
     void focusIn(ICUUID, bool isPassword);
-    std::string focusOut(ICUUID);
+    std::string commitComposition(ICUUID uuid);
+    void focusOut(ICUUID);
 
 private:
     Instance *instance_;
@@ -138,7 +139,7 @@ public:
     void setDummyPreedit(bool dummyPreedit) {
         state_.dummyPreedit = dummyPreedit;
     }
-    std::string getState(bool accepted);
+    std::string popState(bool accepted);
     // Shows whether we are processing a sync event (mainly key down) that needs
     // to return a bool to indicate if it's handled. In this case, commit and
     // preedit need to be set in batch synchronously before returning. Otherwise

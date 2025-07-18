@@ -6,8 +6,6 @@ private var currentPreedit = ""
 
 private let zeroWidthSpace = "\u{200B}"
 
-public var hasCaret = false
-
 private var controller: IMKInputController? = nil
 
 public func setController(_ ctrl: Any) {
@@ -60,15 +58,10 @@ private func setPreedit(_ client: IMKTextInput, _ preedit: String, _ caretPosUtf
 
 public func commitAndSetPreeditSync(
   _ client: IMKTextInput, _ commit: String, _ preedit: String, _ caretPos: Int,
-  _ dummyPreedit: Bool, focusOut: Bool = false
+  _ dummyPreedit: Bool
 ) {
   if !commit.isEmpty {
     commitString(client, commit)
-  }
-  // Setting preedit on focus out may cause IMK stall for seconds. High possibility
-  // to reproduce by having no caret on a Safari page and Cmd+T to open a new Tab.
-  if focusOut && !hasCaret {
-    return
   }
   // Without client preedit, Backspace bypasses IM in Terminal, every key
   // is both processed by IM and passed to client in iTerm, so we force a
@@ -135,7 +128,6 @@ public func getCaretCoordinates(
     forCharacterIndex: followCaret ? (isEnd ? u16pos - 1 : u16pos) : 0,
     lineHeightRectangle: &rect)
   if rect.width == 0 && rect.height == 0 {
-    hasCaret = false
     return false
   }
   x.pointee = Double(NSMinX(rect))
@@ -144,6 +136,5 @@ public func getCaretCoordinates(
   if followCaret && isEnd {
     x.pointee += 10
   }
-  hasCaret = true
   return true
 }

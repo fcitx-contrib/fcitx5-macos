@@ -63,15 +63,24 @@ class FcitxInputController: IMKInputController {
     uuid = create_input_context(appId, client, accentColor)
   }
 
-  func processRes(_ client: IMKTextInput, _ res: String, focusOut: Bool = false) -> Bool {
+  override func commitComposition(_ sender: Any!) {
+    guard let client = client as? IMKTextInput else {
+      return
+    }
+    let res = String(commit_composition(uuid))
+    // Maybe commit and clear preedit synchronously if user switches to ABC by Ctrl+Space.
+    // For Rime with CapsLock, the result will depend on ascii_composer/switch_key/Caps_Lock instead of fcitx5-rime config.
+    let _ = processRes(client, res)
+  }
+
+  func processRes(_ client: IMKTextInput, _ res: String) -> Bool {
     guard let data = res.data(using: .utf8),
       let response = try? JSONDecoder().decode(SyncResponse.self, from: data)
     else {
       return false
     }
     commitAndSetPreeditSync(
-      client, response.commit, response.preedit, response.caretPos, response.dummyPreedit,
-      focusOut: focusOut)
+      client, response.commit, response.preedit, response.caretPos, response.dummyPreedit)
     return response.accepted
   }
 
@@ -181,26 +190,19 @@ class FcitxInputController: IMKInputController {
     }
   }
 
+  // activateServer is called when app is in foreground but not necessarily a text field is selected.
   override func activateServer(_ client: Any!) {
     // overrideKeyboard is needed for pressing space to play in Shotcut.
     if let client = client as? IMKTextInput {
       client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.ABC")
     }
-    // activateServer is called when app is in foreground but not necessarily a text field is selected.
-    hasCaret = false
     // Make sure status bar is updated on click password input, before first key event.
     let isPassword = getSecureInputInfo(isOnFocus: true)
     focus_in(uuid, isPassword)
   }
 
   override func deactivateServer(_ client: Any!) {
-    guard let client = client as? IMKTextInput else {
-      return
-    }
-    let res = String(focus_out(uuid))
-    // Maybe commit and clear preedit synchronously if user switches to ABC by Ctrl+Space.
-    let _ = processRes(client, res, focusOut: true)
-    hasCaret = false
+    focus_out(uuid)
   }
 
   override func menu() -> NSMenu! {
