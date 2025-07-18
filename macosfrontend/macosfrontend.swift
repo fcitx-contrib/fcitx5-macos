@@ -30,6 +30,8 @@ public func setStatusItemMode(_ mode: Int32) {
 
 private func commitString(_ client: IMKTextInput, _ string: String) {
   client.insertText(string, replacementRange: NSRange(location: NSNotFound, length: NSNotFound))
+  // Without it currentPreedit.count in commitAndSetPreeditSync will be wrong with pinyin prediction.
+  currentPreedit = ""
 }
 
 private func setPreedit(_ client: IMKTextInput, _ preedit: String, _ caretPosUtf8: Int) {
