@@ -71,6 +71,11 @@ public func commitAndSetPreeditSync(
   // replace selected text will let Esc bypass IM. When using Shift+click to select, if
   // interval is too little, IM switch happens, but dummyPreedit is false in that case.
   if preedit.isEmpty && dummyPreedit {
+    if client.bundleIdentifier() == "com.apple.mail" {
+      // When writing a new email and caret is at the beginning of To or Cc, Mail calls commitComposition
+      // if the preedit is any kind of white space. But hey it doesn't need dummy preedit at all.
+      return
+    }
     let length = client.length()
     let selectedRange = client.selectedRange()
     // For SwiftUI TextField, there is a bug that if caret is at the end of text, zero-width space preedit
