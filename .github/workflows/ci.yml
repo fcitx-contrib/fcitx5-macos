@@ -42,9 +42,9 @@ jobs:
 
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: 16.2
+          xcode-version: 16.4
 
-      - uses: lukka/get-cmake@v4.0.1
+      - uses: lukka/get-cmake@v4.0.3
 
       - uses: actions/setup-node@v4
         with:
