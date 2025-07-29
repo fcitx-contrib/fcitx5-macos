@@ -305,11 +305,22 @@ class FcitxInputController: IMKInputController {
 
 /// Convert a character like ^X to the corresponding lowercase letter x.
 private func removeCtrl(char: UInt32) -> UInt32 {
-  if char >= 0x00 && char <= 0x1F {
-    return char + 0x60
-  } else {
-    return char
+  if char == 0x1b {  // ^[
+    return 0x5b
   }
+  if char == 0x1c {  // ^\
+    return 0x5c
+  }
+  if char == 0x1d {  // ^]
+    return 0x5d
+  }
+  if char == 0x1f {  // ^-
+    return 0x2d
+  }
+  if char <= 0x1F {
+    return char + 0x60
+  }
+  return char
 }
 
 /// Extract the representedObject of the sender of an IMK menu action.
