@@ -103,6 +103,9 @@ private func jsonToOption(_ json: JSON, _ type: String) throws -> any Option {
     if let appIM = json["AppIM"].string, appIM == "True" {
       return try ListOption<AppIMOption>.decode(json: json)
     }
+    if let vim = json["VimMode"].string, vim == "True" {
+      return try ListOption<VimModeOption>.decode(json: json)
+    }
     if let plugin = json["Plugin"].string, plugin == "True" {
       return try ListOption<PluginOption>.decode(json: json)
     }

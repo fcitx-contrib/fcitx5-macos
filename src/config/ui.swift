@@ -148,3 +148,23 @@ struct SelectFileButton<Label>: View where Label: View {
     }
   }
 }
+
+func selectApplication(_ openPanel: NSOpenPanel, onFinish: @escaping (String) -> Void) {
+  openPanel.allowsMultipleSelection = false
+  openPanel.canChooseDirectories = false
+  openPanel.allowedContentTypes = [.application]
+  openPanel.directoryURL = URL(fileURLWithPath: "/Applications")
+  openPanel.begin { response in
+    if response == .OK {
+      let selectedApp = openPanel.urls.first
+      if let appURL = selectedApp {
+        onFinish(appURL.localPath())
+      }
+    }
+  }
+}
+
+func appIconFromPath(_ path: String) -> Image {
+  let icon = NSWorkspace.shared.icon(forFile: path)
+  return Image(nsImage: icon)
+}

@@ -141,6 +141,39 @@ std::string MacosFrontend::keyEvent(ICUUID uuid, const Key &key, bool isRelease,
         auto timeEventPtr = timeEvent.release();
     }
 
+    bool keepVimPreedit = false;
+    if (ic->vimMode() && !keyEvent.accepted() &&
+        imGetCurrentIMName() != "keyboard-us") {
+        if (key.check(FcitxKey_Escape) ||
+            key.check(FcitxKey_bracketleft, KeyState::Ctrl) ||
+            key.check(FcitxKey_c, KeyState::Ctrl)) {
+            // If the dummy preedit hack on Ctrl was needed, it has to be
+            // preserved here, otherwise vim won't enter normal mode. Make this
+            // explicit, as some engines (rime, mozc) will call
+            // updateUserInterface(UserInterfaceComponent::InputPanel) even if
+            // input panel was and keeps empty, which makes webpanel clear the
+            // dummy preedit.
+            keepVimPreedit = true;
+            imSetCurrentIM("keyboard-us");
+        } else if (!ic->inputPanel().transient() && ic->inputPanel().empty()) {
+            // HACK: For Terminal and iTerm, when pressing an handled ctrl, we
+            // force a dummy preedit so that the following c or [ could be
+            // processed by fcitx. It's known that Esc won't work in Terminal,
+            // but we don't want to force dummy preedit unconditionally as it
+            // breaks other keys.
+            if (!isRelease &&
+                (ic->program() == "com.apple.Terminal" ||
+                 ic->program() == "com.googlecode.iterm2") &&
+                (key.check(FcitxKey_Control_L, KeyState::Ctrl) ||
+                 key.check(FcitxKey_Control_R, KeyState::Ctrl))) {
+                keepVimPreedit = true;
+                ic->setVimPreedit(true);
+            }
+        }
+    }
+    if (!keepVimPreedit) {
+        ic->setVimPreedit(false);
+    }
     return ic->popState(keyEvent.accepted());
 }
 
@@ -198,6 +231,12 @@ void MacosFrontend::useAppDefaultIM(const std::string &appId) {
     }
 }
 
+void MacosFrontend::useVimMode(const std::string &appId,
+                               MacosInputContext *ic) {
+    const auto &vimMode = *config_.vimMode;
+    ic->setVimMode(std::ranges::find(vimMode, appId) != vimMode.end());
+}
+
 void MacosFrontend::focusIn(ICUUID uuid, bool isPassword) {
     auto *ic = findIC(uuid);
     if (!ic)
@@ -207,7 +246,10 @@ void MacosFrontend::focusIn(ICUUID uuid, bool isPassword) {
     ic->focusIn();
     auto program = ic->program();
     FCITX_INFO() << "Focus in " << program;
-    useAppDefaultIM(program);
+    if (!program.empty()) {
+        useAppDefaultIM(program);
+        useVimMode(program, ic);
+    }
 }
 
 std::string MacosFrontend::commitComposition(ICUUID uuid) {
@@ -282,7 +324,7 @@ std::string MacosInputContext::popState(bool accepted) {
     j["commit"] = state_.commit;
     j["preedit"] = state_.preedit;
     j["caretPos"] = state_.caretPos;
-    j["dummyPreedit"] = state_.dummyPreedit;
+    j["dummyPreedit"] = state_.dummyPreedit || state_.vimPreedit;
     j["accepted"] = accepted;
     resetState();
     return j.dump();

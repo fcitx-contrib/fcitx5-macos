@@ -27,31 +27,35 @@ msgstr "切换输入法"
 msgid "Menu"
 msgstr "菜单"
 
-#: macosfrontend/macosfrontend.h:45
+#: macosfrontend/macosfrontend.h:53
 msgid "Status bar"
 msgstr "状态栏"
 
-#: macosfrontend/macosfrontend.h:48
+#: macosfrontend/macosfrontend.h:56
 msgid "App default IM"
 msgstr "应用默认输入法"
 
-#: macosfrontend/macosfrontend.h:50
+#: macosfrontend/macosfrontend.h:58
+msgid "Vim mode"
+msgstr "Vim 模式"
+
+#: macosfrontend/macosfrontend.h:60
 msgid "Simulate key release"
 msgstr "模拟按键释放"
 
-#: macosfrontend/macosfrontend.h:53
+#: macosfrontend/macosfrontend.h:63
 msgid "Delay of simulated key release in milliseconds"
 msgstr "模拟按键释放延迟毫秒数"
 
-#: macosfrontend/macosfrontend.h:56
+#: macosfrontend/macosfrontend.h:66
 msgid "Monitor Pasteboard"
 msgstr "监视剪贴板"
 
-#: macosfrontend/macosfrontend.h:58
+#: macosfrontend/macosfrontend.h:68
 msgid "Remove tracking parameters"
 msgstr "清除追踪参数"
 
-#: macosfrontend/macosfrontend.h:61
+#: macosfrontend/macosfrontend.h:71
 msgid "Poll Pasteboard interval (s)"
 msgstr "轮询剪贴板的间隔（秒）"
 

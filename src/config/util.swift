@@ -228,3 +228,26 @@ func getNoCacheSession() -> URLSession {
   config.requestCachePolicy = .reloadIgnoringLocalCacheData
   return URLSession(configuration: config)
 }
+
+func bundleIdentifier(_ appPath: String) -> String {
+  guard let bundle = Bundle(path: appPath) else {
+    return ""
+  }
+  return bundle.bundleIdentifier ?? ""
+}
+
+func appPathFromBundleIdentifier(_ bundleID: String) -> String {
+  // Must check empty, otherwise it uses the last opened app that has no bundleID.
+  if bundleID.isEmpty {
+    return ""
+  }
+  if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
+    return url.localPath()
+  }
+  return ""
+}
+
+func appNameFromPath(_ path: String) -> String {
+  let name = URL(filePath: path).lastPathComponent
+  return name.hasSuffix(".app") ? String(name.dropLast(4)) : ""
+}

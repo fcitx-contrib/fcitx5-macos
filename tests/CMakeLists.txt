@@ -3,6 +3,7 @@ add_executable(ConfigSwift testconfig.swift
     ${PROJECT_SOURCE_DIR}/src/color.swift
     ${PROJECT_SOURCE_DIR}/src/config/optionmodels.swift
     ${PROJECT_SOURCE_DIR}/src/config/config.swift
+    ${PROJECT_SOURCE_DIR}/src/config/util.swift
 )
 target_compile_options(ConfigSwift PUBLIC
     "$<$<COMPILE_LANGUAGE:Swift>:-cxx-interoperability-mode=default>"
