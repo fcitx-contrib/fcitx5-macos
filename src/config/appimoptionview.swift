@@ -8,11 +8,6 @@ private let presetApps: [String] = [
   "/System/Library/Input Methods/CharacterPalette.app",  // emoji picker
 ]
 
-private func image(_ appPath: String) -> Image {
-  let icon = NSWorkspace.shared.icon(forFile: appPath)
-  return Image(nsImage: icon)
-}
-
 struct AppIMOptionView: OptionView {
   let label: String
   let overrideLabel: String? = nil
@@ -31,7 +26,7 @@ struct AppIMOptionView: OptionView {
   var body: some View {
     HStack {
       if !model.appPath.isEmpty {
-        image(model.appPath)
+        appIconFromPath(model.appPath)
       }
       Picker("", selection: $model.appPath) {
         ForEach(selections(), id: \.self) { key in
@@ -40,7 +35,7 @@ struct AppIMOptionView: OptionView {
           } else {
             HStack {
               if model.appPath != key {
-                image(key)
+                appIconFromPath(key)
               }
               Text(appNameFromPath(key)).tag(key)
             }
@@ -48,7 +43,11 @@ struct AppIMOptionView: OptionView {
         }
       }
       Button {
-        openSelector()
+        selectApplication(
+          openPanel,
+          onFinish: { path in
+            model.appPath = path
+          })
       } label: {
         Image(systemName: "folder")
       }
@@ -70,20 +69,5 @@ struct AppIMOptionView: OptionView {
           imNameMap[imName] = nativeName
         }
       }
-  }
-
-  private func openSelector() {
-    openPanel.allowsMultipleSelection = false
-    openPanel.canChooseDirectories = false
-    openPanel.allowedContentTypes = [.application]
-    openPanel.directoryURL = URL(fileURLWithPath: "/Applications")
-    openPanel.begin { response in
-      if response == .OK {
-        let selectedApp = openPanel.urls.first
-        if let appURL = selectedApp {
-          model.appPath = appURL.localPath()
-        }
-      }
-    }
   }
 }

@@ -560,6 +560,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return CssOptionView(label: label, model: option)
   } else if let option = option as? AppIMOption {
     return AppIMOptionView(label: label, model: option)
+  } else if let option = option as? VimModeOption {
+    return VimModeOptionView(label: label, model: option)
   } else if let option = option as? PluginOption {
     return PluginOptionView(label: label, model: option)
   } else if let option = option as? KeyOption {
@@ -580,6 +582,8 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
     return ListOptionView<FontOption>(label: label, model: option)
   } else if let option = option as? ListOption<AppIMOption> {
     return ListOptionView<AppIMOption>(label: label, model: option)
+  } else if let option = option as? ListOption<VimModeOption> {
+    return ListOptionView<VimModeOption>(label: label, model: option)
   } else if let option = option as? ListOption<PluginOption> {
     return ListOptionView<PluginOption>(label: label, model: option)
   } else if let option = option as? ListOption<KeyOption> {

@@ -334,17 +334,7 @@ class CssOption: StringOption {}
 
 class PluginOption: StringOption {}
 
-private func bundleIdentifier(_ appPath: String) -> String {
-  guard let bundle = Bundle(path: appPath) else {
-    return ""
-  }
-  return bundle.bundleIdentifier ?? ""
-}
-
-func appNameFromPath(_ path: String) -> String {
-  let name = URL(filePath: path).lastPathComponent
-  return name.hasSuffix(".app") ? String(name.dropLast(4)) : name
-}
+class VimModeOption: StringOption {}
 
 class AppIMOption: Option, ObservableObject, EmptyConstructible {
   typealias Storage = String

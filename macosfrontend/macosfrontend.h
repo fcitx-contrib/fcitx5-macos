@@ -39,6 +39,14 @@ struct AppIMAnnotation {
     }
 };
 
+struct VimModeAnnotation {
+    bool skipDescription() { return false; }
+    bool skipSave() { return false; }
+    void dumpDescription(RawConfig &config) {
+        config.setValueByPath("VimMode", "True");
+    }
+};
+
 FCITX_CONFIGURATION(
     MacosFrontendConfig,
     OptionWithAnnotation<StatusBar, StatusBarI18NAnnotation> statusBar{
@@ -46,6 +54,8 @@ FCITX_CONFIGURATION(
     OptionWithAnnotation<std::vector<std::string>, AppIMAnnotation>
         appDefaultIM{
             this, "AppDefaultIM", _("App default IM"), {TERMINAL_USE_EN}};
+    OptionWithAnnotation<std::vector<std::string>, VimModeAnnotation> vimMode{
+        this, "VimMode", _("Vim mode"), {"org.vim.MacVim"}};
     Option<bool> simulateKeyRelease{this, "SimulateKeyRelease",
                                     _("Simulate key release")};
     Option<int, IntConstrain> simulateKeyReleaseDelay{
@@ -105,6 +115,7 @@ private:
 
     inline MacosInputContext *findIC(ICUUID);
     void useAppDefaultIM(const std::string &appId);
+    void useVimMode(const std::string &appId, MacosInputContext *ic);
 };
 
 struct InputContextState {
@@ -112,6 +123,7 @@ struct InputContextState {
     std::string preedit;
     int caretPos;
     bool dummyPreedit;
+    bool vimPreedit;
 };
 
 class MacosInputContext : public InputContext {
@@ -139,6 +151,7 @@ public:
     void setDummyPreedit(bool dummyPreedit) {
         state_.dummyPreedit = dummyPreedit;
     }
+    void setVimPreedit(bool vimPreedit) { state_.vimPreedit = vimPreedit; }
     std::string popState(bool accepted);
     // Shows whether we are processing a sync event (mainly key down) that needs
     // to return a bool to indicate if it's handled. In this case, commit and
@@ -148,12 +161,15 @@ public:
     void commitAndSetPreeditAsync();
 
     void setPassword(bool isPassword);
+    void setVimMode(bool vimMode) { vimMode_ = vimMode; }
+    bool vimMode() const { return vimMode_; }
 
 private:
     MacosFrontend *frontend_;
     id client_;
     InputContextState state_;
     std::string accentColor_;
+    bool vimMode_ = false;
 };
 
 class MacosFrontendFactory : public AddonFactory {
