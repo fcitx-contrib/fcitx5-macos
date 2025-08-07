@@ -149,7 +149,7 @@ struct DataView: View {
   }
 
   var body: some View {
-    VStack {
+    VStack(spacing: gapSize) {
       Text("Import data from …")
 
       Button {
@@ -201,8 +201,6 @@ struct DataView: View {
       }.sheet(isPresented: $showImportHamster) {
         ImportDataView().load(hamsterItems)
       }
-
-      Spacer().frame(height: gapSize)
 
       Text("Export data to …")
 

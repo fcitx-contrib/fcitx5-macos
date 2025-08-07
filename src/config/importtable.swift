@@ -45,7 +45,7 @@ struct ImportTableView: View {
   }
 
   var body: some View {
-    VStack {
+    VStack(spacing: gapSize) {
       Button {
         NSWorkspace.shared.open(imLocalDir)
       } label: {
@@ -56,8 +56,6 @@ struct ImportTableView: View {
       } label: {
         Text("Copy \\*.dict/\\*.txt to this directory")
       }
-
-      Spacer().frame(height: gapSize)
 
       HStack {
         Button {
