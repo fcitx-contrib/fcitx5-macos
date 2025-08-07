@@ -6,6 +6,16 @@ private var currentPreedit = ""
 
 private let zeroWidthSpace = "\u{200B}"
 
+// Given issues when no preedit is so widespread regardless of UI framework,
+// any app that is added here must be fully tested with Esc, Backspace, Arrow and normal keys.
+private let appsWithoutDummyPreedit: Set<String> = [
+  // <200b>
+  "org.vim.MacVim",
+  // When writing a new email and caret is at the beginning of To or Cc, Mail calls commitComposition
+  // if the preedit is any kind of white space.
+  "com.apple.mail",
+]
+
 private var controller: IMKInputController? = nil
 
 public func setController(_ ctrl: Any) {
@@ -63,17 +73,16 @@ public func commitAndSetPreeditSync(
   if !commit.isEmpty {
     commitString(client, commit)
   }
-  // Without client preedit, Backspace bypasses IM in Terminal, every key
-  // is both processed by IM and passed to client in iTerm, so we force a
-  // dummy client preedit here.
+  // Without client preedit, Backspace bypasses IM in Terminal, every key is both
+  // processed by IM and passed to client in iTerm and VSCode terminal, Backspace
+  // is double-processed in Chrome address bar/VSCode editor/Bruno URL input, ArrowDown
+  // is swallowed in Spotlight, so we force a dummy client preedit here.
   // Some apps also need it to get accurate caret position to place candidate window.
   // This is fine even when there is selected text. In Word, not using dummy preedit to
   // replace selected text will let Esc bypass IM. When using Shift+click to select, if
   // interval is too little, IM switch happens, but dummyPreedit is false in that case.
   if preedit.isEmpty && dummyPreedit {
-    if client.bundleIdentifier() == "com.apple.mail" {
-      // When writing a new email and caret is at the beginning of To or Cc, Mail calls commitComposition
-      // if the preedit is any kind of white space. But hey it doesn't need dummy preedit at all.
+    if appsWithoutDummyPreedit.contains(client.bundleIdentifier() ?? "") {
       return
     }
     let length = client.length()
