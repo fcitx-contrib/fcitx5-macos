@@ -92,7 +92,7 @@ struct AboutView: View {
       Text(getDate())
 
       HStack {
-        Text("Originally made by")
+        Text("Developed by")
         urlButton("Qijia Liu", "https://github.com/eagleoflqj")
         Text("and")
         urlButton("ksqsf", "https://github.com/ksqsf")

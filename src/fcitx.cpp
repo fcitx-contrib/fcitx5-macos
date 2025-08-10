@@ -82,7 +82,7 @@ void setupI18N() {
     fs::path home{getenv("HOME")};
     fs::path localedir = home / "Library" / "fcitx5" / "share" / "locale";
     for (const auto &domain : getPluginDomains(localedir)) {
-        fcitx::registerDomain(domain.c_str(), localedir.c_str());
+        fcitx::registerDomain(domain.c_str(), localedir);
     }
 }
 
@@ -148,12 +148,14 @@ void Fcitx::setupEnv() {
         val = val.substr(0, dot_pos);
     }
     val += ":C";
+    // For config items.
     setenv("LANGUAGE", val.c_str(), 1);
+    // For addon names.
     setenv("FCITX_LOCALE", val.c_str(), 1);
     FCITX_DEBUG() << "Fcitx LANGUAGE " << val.c_str();
 
     fcitx::registerDomain(FCITX_GETTEXT_DOMAIN,
-                          (app_contents_path / "share" / "locale").c_str());
+                          (app_contents_path / "share" / "locale"));
 }
 
 void Fcitx::setupInstance() {

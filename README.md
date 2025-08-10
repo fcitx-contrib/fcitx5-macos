@@ -98,9 +98,8 @@ cmake --build build/$(uname -m) --target pot
 
 To add a new language, do
 ```sh
-cd assets/po && msginit
+cd assets/po && msginit -l <locale>
 ```
-and then add this locale to assets/CMakeLists.txt.
 
 Then, use a PO file editor to translate strings.
 
