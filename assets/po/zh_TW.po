@@ -1,0 +1,512 @@
+# Chinese translations for fcitx5-macos package
+# fcitx 软件包的繁體中文翻译.
+# Copyright (C) 2024 fcitx5-macos's contributors
+# This file is distributed under the same license as the fcitx5-macos package.
+msgid ""
+msgstr ""
+"Project-Id-Version: fcitx 5\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-31 09:11-0400\n"
+"PO-Revision-Date: 2025-08-10 18:16-0400\n"
+"Last-Translator: Qijia <liumeo@pku.edu.cn>\n"
+"Language-Team: \n"
+"Language: zh_TW\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: macosfrontend/macosfrontend.h:27
+msgid "Hidden"
+msgstr "隱藏"
+
+#: macosfrontend/macosfrontend.h:28
+msgid "Toggle input method"
+msgstr "切換輸入法"
+
+#: macosfrontend/macosfrontend.h:28
+msgid "Menu"
+msgstr "選單"
+
+#: macosfrontend/macosfrontend.h:53
+msgid "Status bar"
+msgstr "狀態列"
+
+#: macosfrontend/macosfrontend.h:56
+msgid "App default IM"
+msgstr "應用程式預設輸入法"
+
+#: macosfrontend/macosfrontend.h:58
+msgid "Vim mode"
+msgstr "Vim 模式"
+
+#: macosfrontend/macosfrontend.h:60
+msgid "Simulate key release"
+msgstr "模擬按鍵釋放"
+
+#: macosfrontend/macosfrontend.h:63
+msgid "Delay of simulated key release in milliseconds"
+msgstr "模擬按鍵釋放延遲毫秒數"
+
+#: macosfrontend/macosfrontend.h:66
+msgid "Monitor Pasteboard"
+msgstr "監視剪貼簿"
+
+#: macosfrontend/macosfrontend.h:68
+msgid "Remove tracking parameters"
+msgstr "清除追蹤參數"
+
+#: macosfrontend/macosfrontend.h:71
+msgid "Poll Pasteboard interval (s)"
+msgstr "輪詢剪貼簿的間隔（秒）"
+
+#: macosnotifications/macosnotifications.h:20
+msgid "Hidden Notifications"
+msgstr "隱藏通知"
+
+#: webpanel/webpanel.h:17
+msgid "System"
+msgstr "系統"
+
+#: webpanel/webpanel.h:17
+msgid "Light"
+msgstr "淺色"
+
+#: webpanel/webpanel.h:17
+msgid "Dark"
+msgstr "深色"
+
+#: webpanel/webpanel.h:18
+msgid "Horizontal"
+msgstr "水平"
+
+#: webpanel/webpanel.h:18
+msgid "Vertical"
+msgstr "垂直"
+
+#: webpanel/webpanel.h:19
+msgid "Horizontal top-bottom"
+msgstr "水平流動，從上到下"
+
+#: webpanel/webpanel.h:20
+msgid "Vertical right-left"
+msgstr "垂直流動，從右到左"
+
+#: webpanel/webpanel.h:21
+msgid "Vertical left-right"
+msgstr "垂直流動，從左到右"
+
+#: webpanel/webpanel.h:25 webpanel/webpanel.h:33 webpanel/webpanel.h:37
+msgid "None"
+msgstr "無"
+
+#: webpanel/webpanel.h:25
+msgid "Arrow"
+msgstr "箭頭"
+
+#: webpanel/webpanel.h:26
+msgid "Triangle"
+msgstr "三角形"
+
+#: webpanel/webpanel.h:29
+msgid "Blink"
+msgstr "閃爍"
+
+#: webpanel/webpanel.h:29
+msgid "Static"
+msgstr "靜止"
+
+#: webpanel/webpanel.h:30 webpanel/webpanel.h:34 webpanel/webpanel.h:290
+msgid "Text"
+msgstr "文字"
+
+#: webpanel/webpanel.h:33
+msgid "Bar"
+msgstr "條形"
+
+#: webpanel/webpanel.h:37
+msgid "Move"
+msgstr "移動"
+
+#: webpanel/webpanel.h:38
+msgid "Add"
+msgstr "新增"
+
+#: webpanel/webpanel.h:80
+msgid "Follow caret"
+msgstr "跟隨游標"
+
+#: webpanel/webpanel.h:83
+msgid "Theme"
+msgstr "主題"
+
+#: webpanel/webpanel.h:85
+msgid "User theme"
+msgstr "使用者主題"
+
+#: webpanel/webpanel.h:87
+msgid "Export current theme"
+msgstr "匯出目前主題"
+
+#: webpanel/webpanel.h:91 webpanel/webpanel.h:144
+msgid "Override default"
+msgstr "覆蓋預設值"
+
+#: webpanel/webpanel.h:92 webpanel/webpanel.h:147
+msgid "Highlight color"
+msgstr "高亮顏色"
+
+#: webpanel/webpanel.h:95 webpanel/webpanel.h:150
+msgid "Highlight color on hover"
+msgstr "游標懸停時高亮顏色"
+
+#: webpanel/webpanel.h:98 webpanel/webpanel.h:153
+msgid "Highlight text color"
+msgstr "高亮文字顏色"
+
+#: webpanel/webpanel.h:101 webpanel/webpanel.h:156
+msgid "Highlight text color on press"
+msgstr "按下時高亮文字顏色"
+
+#: webpanel/webpanel.h:104 webpanel/webpanel.h:159
+msgid "Highlight label color"
+msgstr "高亮標籤顏色"
+
+#: webpanel/webpanel.h:107 webpanel/webpanel.h:162
+msgid "Highlight comment color"
+msgstr "高亮註解顏色"
+
+#: webpanel/webpanel.h:110 webpanel/webpanel.h:165
+msgid "Highlight mark color"
+msgstr "高亮標記顏色"
+
+#: webpanel/webpanel.h:112 webpanel/webpanel.h:167
+msgid "Panel color"
+msgstr "面板顏色"
+
+#: webpanel/webpanel.h:114 webpanel/webpanel.h:169
+msgid "Text color"
+msgstr "文字顏色"
+
+#: webpanel/webpanel.h:116 webpanel/webpanel.h:171
+msgid "Label color"
+msgstr "標籤顏色"
+
+#: webpanel/webpanel.h:118 webpanel/webpanel.h:173
+msgid "Comment color"
+msgstr "註解顏色"
+
+#: webpanel/webpanel.h:121 webpanel/webpanel.h:176
+msgid "Paging button color"
+msgstr "翻頁按鈕顏色"
+
+#: webpanel/webpanel.h:124 webpanel/webpanel.h:179
+msgid "Disabled paging button color"
+msgstr "停用的翻頁按鈕顏色"
+
+#: webpanel/webpanel.h:126 webpanel/webpanel.h:182
+msgid "Indicator text color"
+msgstr "指示文字顏色"
+
+#: webpanel/webpanel.h:129 webpanel/webpanel.h:185
+msgid "Preedit color pre-caret"
+msgstr "游標前的預編輯顏色"
+
+#: webpanel/webpanel.h:132 webpanel/webpanel.h:188
+msgid "Preedit caret color"
+msgstr "預編輯游標顏色"
+
+#: webpanel/webpanel.h:135 webpanel/webpanel.h:191
+msgid "Preedit color post-caret"
+msgstr "游標後的預編輯顏色"
+
+#: webpanel/webpanel.h:137 webpanel/webpanel.h:193
+msgid "Border color"
+msgstr "邊框顏色"
+
+#: webpanel/webpanel.h:139 webpanel/webpanel.h:195
+msgid "Divider color"
+msgstr "分隔線顏色"
+
+#: webpanel/webpanel.h:146
+msgid "Same with light mode"
+msgstr "與淺色模式相同"
+
+#: webpanel/webpanel.h:200
+msgid "Enable scroll"
+msgstr "啟用卷軸"
+
+#: webpanel/webpanel.h:201
+msgid "Auto expand"
+msgstr "自動展開"
+
+#: webpanel/webpanel.h:202
+msgid "Animation"
+msgstr "動畫"
+
+#: webpanel/webpanel.h:204
+msgid "Max row count"
+msgstr "最大行數"
+
+#: webpanel/webpanel.h:206
+msgid "Max column count"
+msgstr "最大欄數"
+
+#: webpanel/webpanel.h:208
+msgid "Expand"
+msgstr "展開"
+
+#: webpanel/webpanel.h:210
+msgid "Collapse"
+msgstr "摺疊"
+
+#: webpanel/webpanel.h:212
+msgid "Up"
+msgstr "上"
+
+#: webpanel/webpanel.h:214
+msgid "Down"
+msgstr "下"
+
+#: webpanel/webpanel.h:215
+msgid "Left"
+msgstr "左"
+
+#: webpanel/webpanel.h:216
+msgid "Right"
+msgstr "右"
+
+#: webpanel/webpanel.h:218
+msgid "Row start"
+msgstr "行首"
+
+#: webpanel/webpanel.h:219
+msgid "Row end"
+msgstr "行尾"
+
+#: webpanel/webpanel.h:221
+msgid "Page up"
+msgstr "上一頁"
+
+#: webpanel/webpanel.h:223
+msgid "Page down"
+msgstr "下一頁"
+
+#: webpanel/webpanel.h:224
+msgid "Commit"
+msgstr "送出"
+
+#: webpanel/webpanel.h:226
+msgid "Select candidate"
+msgstr "選字"
+
+#: webpanel/webpanel.h:229
+msgid "Use main keyboard number keys to select candidate"
+msgstr "用主鍵盤數字鍵選字"
+
+#: webpanel/webpanel.h:232
+msgid "Use keypad number keys to select candidate"
+msgstr "用數字鍵盤數字鍵選字"
+
+#: webpanel/webpanel.h:234
+msgid "Optimize for Hyper key"
+msgstr "針對 Hyper 鍵最佳化"
+
+#: webpanel/webpanel.h:240
+msgid "Layout"
+msgstr "佈局"
+
+#: webpanel/webpanel.h:244
+msgid "Writing mode"
+msgstr "書寫模式"
+
+#: webpanel/webpanel.h:247
+msgid "Typography awareness for IM"
+msgstr "輸入法感知版面"
+
+#: webpanel/webpanel.h:251
+msgid "Paging buttons style"
+msgstr "翻頁按鈕樣式"
+
+#: webpanel/webpanel.h:256
+msgid "Image"
+msgstr "圖片"
+
+#: webpanel/webpanel.h:257
+msgid "Blur"
+msgstr "模糊"
+
+#: webpanel/webpanel.h:258
+msgid "Shadow"
+msgstr "陰影"
+
+#: webpanel/webpanel.h:266
+msgid "Text font family"
+msgstr "文字字型族"
+
+#: webpanel/webpanel.h:268
+msgid "Text font size"
+msgstr "文字字號"
+
+#: webpanel/webpanel.h:270
+msgid "Label font family"
+msgstr "標籤字型族"
+
+#: webpanel/webpanel.h:272
+msgid "Label font size"
+msgstr "標籤字號"
+
+#: webpanel/webpanel.h:274
+msgid "Comment font family"
+msgstr "註解字型族"
+
+#: webpanel/webpanel.h:276
+msgid "Comment font size"
+msgstr "註解字號"
+
+#: webpanel/webpanel.h:279
+msgid "Preedit font family"
+msgstr "預編輯字型族"
+
+#: webpanel/webpanel.h:281
+msgid "Preedit font size"
+msgstr "預編輯字號"
+
+#: webpanel/webpanel.h:283
+msgid "User font dir"
+msgstr "使用者字型目錄"
+
+#: webpanel/webpanel.h:284
+msgid "System font dir"
+msgstr "系統字型目錄"
+
+#: webpanel/webpanel.h:289
+msgid "Style"
+msgstr "樣式"
+
+#: webpanel/webpanel.h:295
+msgid "Mark style"
+msgstr "標記樣式"
+
+#: webpanel/webpanel.h:296
+msgid "Mark text"
+msgstr "標記文字"
+
+#: webpanel/webpanel.h:298
+msgid "Hover behavior"
+msgstr "游標懸停行為"
+
+#: webpanel/webpanel.h:304
+msgid "Border width (px)"
+msgstr "邊框寬度（px）"
+
+#: webpanel/webpanel.h:307
+msgid "Border radius (px)"
+msgstr "邊框半徑（px）"
+
+#: webpanel/webpanel.h:308
+msgid "Margin (px)"
+msgstr "外邊距（px）"
+
+#: webpanel/webpanel.h:311
+msgid "Highlight radius (px)"
+msgstr "高亮半徑（px）"
+
+#: webpanel/webpanel.h:314
+msgid "Top padding (px)"
+msgstr "頂邊內距（px）"
+
+#: webpanel/webpanel.h:316
+msgid "Right padding (px)"
+msgstr "右邊內距（px）"
+
+#: webpanel/webpanel.h:318
+msgid "Bottom padding (px)"
+msgstr "底邊內距（px）"
+
+#: webpanel/webpanel.h:321
+msgid "Left padding (px)"
+msgstr "左邊內距（px）"
+
+#: webpanel/webpanel.h:323
+msgid "Gap between label, text and comment (px)"
+msgstr "標籤、文字、註解間距（px）"
+
+#: webpanel/webpanel.h:326
+msgid "Vertical minimum width (px)"
+msgstr "垂直時最小寬度（px）"
+
+#: webpanel/webpanel.h:329
+msgid "Scroll cell width (px)"
+msgstr "卷軸儲存格寬度（px）"
+
+#: webpanel/webpanel.h:332
+msgid "Horizontal divider width (px)"
+msgstr "水平分隔線寬度（px）"
+
+#: webpanel/webpanel.h:341
+msgid "User CSS"
+msgstr "使用者 CSS"
+
+#: webpanel/webpanel.h:342
+msgid "Copy HTML"
+msgstr "複製 HTML"
+
+#: webpanel/webpanel.h:343
+msgid "Plugin dir"
+msgstr "外掛目錄"
+
+#: webpanel/webpanel.h:345
+msgid "I know there may be risks for using plugins"
+msgstr "我知道使用外掛可能有風險"
+
+#: webpanel/webpanel.h:348
+msgid "Plugins"
+msgstr "外掛"
+
+#: webpanel/webpanel.h:350
+msgid "Dangerous API for JavaScript plugins"
+msgstr "用於 JavaScript 外掛的危險 API"
+
+#: webpanel/webpanel.h:353
+msgid "Basic"
+msgstr "基礎"
+
+#: webpanel/webpanel.h:354
+msgid "Light mode"
+msgstr "淺色模式"
+
+#: webpanel/webpanel.h:355
+msgid "Dark mode"
+msgstr "深色模式"
+
+#: webpanel/webpanel.h:356
+msgid "Typography"
+msgstr "版式"
+
+#: webpanel/webpanel.h:357
+msgid "Scroll mode"
+msgstr "卷軸模式"
+
+#: webpanel/webpanel.h:358
+msgid "Background"
+msgstr "背景"
+
+#: webpanel/webpanel.h:359
+msgid "Font"
+msgstr "字型"
+
+#: webpanel/webpanel.h:360
+msgid "Caret"
+msgstr "游標"
+
+#: webpanel/webpanel.h:361
+msgid "Highlight"
+msgstr "高亮"
+
+#: webpanel/webpanel.h:362
+msgid "Size"
+msgstr "尺寸"
+
+#: webpanel/webpanel.h:363
+msgid "Advanced"
+msgstr "進階"
