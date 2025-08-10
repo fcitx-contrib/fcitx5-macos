@@ -43,15 +43,17 @@ install(DIRECTORY "${PREBUILDER_SHARE_DIR}/xkeyboard-config-2"
 # Swift i18n through Localizable.strings
 # Use 'GenerateStrings' to update .strings files.
 #
+set(LOCALES en zh-Hans)
+
+list(TRANSFORM LOCALES APPEND ".lproj" OUTPUT_VARIABLE LPROJS)
+list(TRANSFORM LPROJS PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/" OUTPUT_VARIABLE LPROJ_DIRS)
+list(TRANSFORM LPROJ_DIRS APPEND "/Localizable.strings" OUTPUT_VARIABLE LOCALIZABLE_STRINGS_FILES)
+
 file(GLOB_RECURSE LOCALIZABLE_SWIFT_SOURCES ${CMAKE_SOURCE_DIR}/src/*.swift)
-set(LOCALIZABLE_STRINGS_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/en.lproj/Localizable.strings
-    ${CMAKE_CURRENT_SOURCE_DIR}/zh-Hans.lproj/Localizable.strings
-)
 add_custom_command(
     OUTPUT ${LOCALIZABLE_STRINGS_FILES}
     COMMAND genstrings ${LOCALIZABLE_SWIFT_SOURCES} -SwiftUI -o ${CMAKE_CURRENT_SOURCE_DIR}/en.lproj
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/update_translations.py ${LOCALIZABLE_STRINGS_FILES}
+    COMMAND ${PROJECT_SOURCE_DIR}/scripts/update_translations.py ${LOCALIZABLE_STRINGS_FILES}
     DEPENDS ${LOCALIZABLE_SWIFT_SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating Localizable.strings..."
@@ -60,15 +62,11 @@ add_custom_target(GenerateStrings
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/en.lproj/Localizable.strings
 )
 
-foreach(LOCALE
-    Base
-    en
-    zh-Hans
-    zh-Hant
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Base.lproj"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${LOCALE}.lproj"
-        DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
-    )
+foreach(LPROJ_DIR IN LISTS LPROJ_DIRS)
+    install(DIRECTORY "${LPROJ_DIR}" DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources")
 endforeach()
 
 add_subdirectory(po)
