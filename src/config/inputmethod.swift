@@ -61,16 +61,6 @@ struct InputMethodConfigView: View {
               Text(group.name)
 
               Button {
-                addToGroup = group
-                addingInputMethod = true
-              } label: {
-                Image(systemName: "plus.circle")
-              }
-              .buttonStyle(BorderlessButtonStyle())
-              .foregroundColor(.secondary)  // As if it's in section header.
-              .help(NSLocalizedString("Add input methods to", comment: "") + " '\(group.name)'")
-
-              Button {
                 renameGroupDialog.show { input in
                   viewModel.renameGroup(group, input)
                 }
@@ -78,7 +68,7 @@ struct InputMethodConfigView: View {
                 Image(systemName: "pencil")
               }
               .buttonStyle(BorderlessButtonStyle())
-              .foregroundColor(.secondary)
+              .foregroundColor(.secondary)  // As if it's in section header.
               .help(NSLocalizedString("Rename", comment: "") + " '\(group.name)'")
             }
             // Make right-click available in the whole line.
@@ -89,6 +79,14 @@ struct InputMethodConfigView: View {
                 viewModel.removeGroup(group.name)
               }
             }
+
+            Button {
+              addToGroup = group
+              addingInputMethod = true
+            } label: {
+              Text("Add input methods")
+            }
+
             ForEach($group.inputMethods) { $inputMethod in
               HStack {
                 Text(inputMethod.displayName)
@@ -118,6 +116,7 @@ struct InputMethodConfigView: View {
           }
         }
       }
+      .frame(minWidth: 168)  // Enough to hold "Add input methods".
       .contextMenu {
         Button(NSLocalizedString("Add group", comment: "")) {
           addGroupDialog.show { input in
