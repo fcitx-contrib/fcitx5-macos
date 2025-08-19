@@ -11,7 +11,7 @@ jobs:
         run: wget -O release.tar.bz2 https://github.com/fcitx-contrib/fcitx5-macos/releases/download/latest/Fcitx5-arm64.tar.bz2
 
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           merge-multiple: true
 
