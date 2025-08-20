@@ -155,7 +155,9 @@ struct DataView: View {
       Button {
         _ = removeFile(extractDir)
         mkdirP(cacheDir.localPath())
-        if copyFile(squirrelDir, extractDir) {
+        // Some users have ~/Library/Rime as a symlink to iCloud. If we simply copy the symlink,
+        // either relative path reference is lost, or contents are moved instead of copied.
+        if exec("/bin/cp", ["-RL", squirrelDir.localPath(), extractDir.localPath()]) {
           showImportSquirrel = true
         } else {
           showSquirrelError = true
