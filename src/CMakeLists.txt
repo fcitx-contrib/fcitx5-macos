@@ -20,6 +20,11 @@ add_library(Fcitx5Objs STATIC
     config/config.cpp
 )
 
+target_include_directories(Fcitx5Objs PRIVATE
+    "${PROJECT_BINARY_DIR}/fcitx5"
+    "${PROJECT_SOURCE_DIR}/fcitx5/src/im/keyboard"
+)
+
 option(VERBOSE_LOGGING "Enable verbose logging" ON)
 if(VERBOSE_LOGGING)
     target_compile_definitions(Fcitx5Objs PRIVATE VERBOSE_LOGGING)

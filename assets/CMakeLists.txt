@@ -39,6 +39,11 @@ install(DIRECTORY "${PREBUILDER_SHARE_DIR}/xkeyboard-config-2"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/share"
 )
 
+# iso_639-3.mo and xkeyboard-config.mo
+install(DIRECTORY "${PREBUILDER_SHARE_DIR}/locale"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share"
+)
+
 #
 # Swift i18n through Localizable.strings
 # Use 'GenerateStrings' to update .strings files.
