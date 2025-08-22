@@ -17,11 +17,14 @@
 #include "../fcitx5-beast/src/beast.h"
 #include "../keycode/keycode.h"
 #include "config/config-public.h"
+#include "isocodes.h"
 #include "nativestreambuf.h"
 
 namespace fs = std::filesystem;
 
 #define APP_CONTENTS_PATH "/Library/Input Methods/Fcitx5.app/Contents"
+
+#define ISO_639_3_DOMAIN "iso_639-3"
 
 FCITX_DEFINE_STATIC_ADDON_REGISTRY(getStaticAddon)
 
@@ -33,6 +36,7 @@ static std::string join_paths(const std::vector<fs::path> &paths,
 static std::thread fcitx_thread;
 static std::atomic<bool> fcitx_thread_started;
 static std::string current_locale;
+static fcitx::IsoCodes isoCodes;
 
 Fcitx &Fcitx::shared() {
     static Fcitx fcitx;
@@ -79,6 +83,7 @@ std::set<std::string> getPluginDomains(const fs::path &localedir) {
 // addons register compile-time domain path, and only 1st call of registerDomain
 // counts. The .mo files must exist.
 void setupI18N() {
+    isoCodes.read(ISOCODES_ISO639_JSON);
     fs::path home{getenv("HOME")};
     fs::path localedir = home / "Library" / "fcitx5" / "share" / "locale";
     for (const auto &domain : getPluginDomains(localedir)) {
@@ -154,8 +159,9 @@ void Fcitx::setupEnv() {
     setenv("FCITX_LOCALE", val.c_str(), 1);
     FCITX_DEBUG() << "Fcitx LANGUAGE " << val.c_str();
 
-    fcitx::registerDomain(FCITX_GETTEXT_DOMAIN,
-                          (app_contents_path / "share" / "locale"));
+    auto locale_path = (app_contents_path / "share" / "locale");
+    fcitx::registerDomain(FCITX_GETTEXT_DOMAIN, locale_path);
+    fcitx::registerDomain(ISO_639_3_DOMAIN, locale_path);
 }
 
 void Fcitx::setupInstance() {
@@ -411,6 +417,14 @@ std::string getAddons() noexcept {
         }
         return j.dump();
     });
+}
+
+std::string isoName(const char *code) noexcept {
+    auto entry = isoCodes.entry(code);
+    if (!entry) {
+        return "";
+    }
+    return D_(ISO_639_3_DOMAIN, entry->name);
 }
 
 static nlohmann::json actionToJson(fcitx::Action *action,

@@ -38,5 +38,7 @@ std::string getAddons() noexcept;
 std::string getActions() noexcept;
 void activateActionById(int id) noexcept;
 
+std::string isoName(const char *code) noexcept;
+
 // Tunnel variables
 #include "tunnel.h"

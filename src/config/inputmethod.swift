@@ -505,14 +505,15 @@ struct AvailableInputMethodView: View {
         do {
           let array = try JSONDecoder().decode([InputMethod].self, from: jsonData)
           for im in array {
-            if var imList = availableIMs[im.languageCode] {
+            let code = im.languageCode.isEmpty ? "und" : im.languageCode
+            if var imList = availableIMs[code] {
               imList.append(im)
-              availableIMs[im.languageCode] = imList
+              availableIMs[code] = imList
             } else {
-              availableIMs[im.languageCode] = [im]
+              availableIMs[code] = [im]
             }
             if alreadyEnabled.contains(im.uniqueName) {
-              languagesOfEnabledIMs.update(with: normalizeLanguageCode(im.languageCode))
+              languagesOfEnabledIMs.update(with: normalizeLanguageCode(code))
             }
           }
         } catch {
@@ -531,13 +532,14 @@ struct AvailableInputMethodView: View {
 
       init(code: String) {
         self.code = code
-        if code == "" {
-          localized = NSLocalizedString("Unknown", comment: "")
-        } else {
-          let locale = Locale.current
-          let s = locale.localizedString(forIdentifier: code) ?? ""
-          localized = s != "" ? s : "Unknown - \(code)"
+        var localized = Locale.current.localizedString(forIdentifier: code) ?? ""
+        if localized.isEmpty {
+          localized = String(isoName(code))  // Fallback to iso_639-3.mo.
         }
+        if localized.isEmpty {
+          localized = String(format: NSLocalizedString("Unknown - %@", comment: ""), code)
+        }
+        self.localized = localized
       }
 
       public static func < (lhs: Self, rhs: Self) -> Bool {
@@ -628,8 +630,4 @@ class InputDialog: ObservableObject {
     }.padding()
       .frame(minWidth: 200)
   }
-}
-
-#Preview {
-  InputMethodConfigView()
 }
