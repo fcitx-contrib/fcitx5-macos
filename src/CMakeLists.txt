@@ -25,9 +25,10 @@ target_include_directories(Fcitx5Objs PRIVATE
     "${PROJECT_SOURCE_DIR}/fcitx5/src/im/keyboard"
 )
 
-option(VERBOSE_LOGGING "Enable verbose logging" ON)
-if(VERBOSE_LOGGING)
-    target_compile_definitions(Fcitx5Objs PRIVATE VERBOSE_LOGGING)
+# This should be disabled in CI even for debug build.
+option(KEY_LOGGING "Enable key logging" ON)
+if(KEY_LOGGING)
+    target_compile_definitions(Fcitx5Objs PRIVATE KEY_LOGGING)
 endif()
 
 target_link_libraries(Fcitx5Objs

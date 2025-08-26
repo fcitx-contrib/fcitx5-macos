@@ -74,7 +74,7 @@ jobs:
           # Don't log key on any CI artifact.
           cmake -B build/${{ matrix.arch }} -G Ninja \
             -DCMAKE_Swift_COMPILER=`which swiftc` \
-            -DVERBOSE_LOGGING=OFF \
+            -DKEY_LOGGING=OFF \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_BUILD_TYPE=${{ matrix.type }}
           cmake --build build/${{ matrix.arch }}
