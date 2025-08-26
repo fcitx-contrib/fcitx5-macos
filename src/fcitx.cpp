@@ -112,11 +112,15 @@ void Fcitx::setupLog() {
     static native_streambuf log_streambuf;
     static std::ostream stream(&log_streambuf);
     fcitx::Log::setLogStream(stream);
-#ifdef VERBOSE_LOGGING
-    fcitx::Log::setLogRule("*=5,notimedate");
+#ifdef NDEBUG
+    std::string logRule = "*=4";
 #else
-    fcitx::Log::setLogRule("*=4,notimedate");
+    std::string logRule = "*=5";
 #endif
+#ifndef KEY_LOGGING
+    logRule += ",key_trace=0";
+#endif
+    fcitx::Log::setLogRule(logRule + ",notimedate");
 }
 
 void Fcitx::setupEnv() {

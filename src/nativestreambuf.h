@@ -5,8 +5,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  * SPDX-FileCopyrightText: Copyright 2023 Qijia Liu
  */
-#ifndef FCITX5_MACOS_NATIVESTREAMBUF_H
-#define FCITX5_MACOS_NATIVESTREAMBUF_H
+#pragma once
 
 #include <array>
 #include <iostream>
@@ -104,16 +103,10 @@ private:
     }
 
     void write_log(const char_type *text) const {
-#ifdef NDEBUG
-        if (prio != OS_LOG_TYPE_DEBUG) {
-            std::cerr << text;
-        }
-#else
+#ifndef NDEBUG
         os_log_with_type(logger, prio, "%{public}s",
                          text + (should_offset ? 1 : 0));
-        std::cerr << text;
 #endif
+        std::cerr << text;
     }
 };
-
-#endif // FCITX5_MACOS_NATIVESTREAMBUF_H
