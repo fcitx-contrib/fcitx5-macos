@@ -2,7 +2,6 @@ import SwiftUI
 
 struct VimModeOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   let openPanel = NSOpenPanel()
   @ObservedObject var model: VimModeOption
 

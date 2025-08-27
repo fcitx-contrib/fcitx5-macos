@@ -9,7 +9,6 @@ private let imageDir = wwwDir.appendingPathComponent("img")
 
 struct ImageOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: ImageOption
 
   var body: some View {

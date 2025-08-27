@@ -6,7 +6,6 @@ private let fcitxPrefix = "fcitx:///file/css/"
 
 struct CssOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: CssOption
 
   var body: some View {

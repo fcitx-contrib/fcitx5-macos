@@ -10,7 +10,6 @@ private let presetApps: [String] = [
 
 struct AppIMOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   let openPanel = NSOpenPanel()
   @ObservedObject var model: AppIMOption
   @State private var appIcon: NSImage? = nil

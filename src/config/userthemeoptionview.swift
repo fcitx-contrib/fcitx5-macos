@@ -5,7 +5,6 @@ private let themeDir = localDir.appendingPathComponent("theme")
 
 struct UserThemeOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: UserThemeOption
 
   var body: some View {

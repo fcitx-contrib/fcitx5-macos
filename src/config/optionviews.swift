@@ -5,14 +5,10 @@ import SwiftyJSON
 
 protocol OptionView: View {
   var label: String { get }
-  var overrideLabel: String? { get }
 }
 
 struct BooleanOptionView: OptionView {
   let label: String
-  var overrideLabel: String? {
-    return label
-  }
   @ObservedObject var model: BooleanOption
   var body: some View {
     Toggle("", isOn: $model.value)
@@ -32,7 +28,6 @@ func recordedKeyView(_ pair: (String, String?)) -> some View {
 
 struct KeyOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: KeyOption
   @State private var showRecorder = false
   @State private var recordedShortcut: (String, String?) = ("", nil)
@@ -76,7 +71,6 @@ struct KeyOptionView: OptionView {
 
 struct StringOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: StringOption
   var body: some View {
     TextField(label, text: $model.value)
@@ -93,7 +87,6 @@ let numberFormatter: NumberFormatter = {
 
 struct IntegerOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: IntegerOption
   @FocusState private var isFocused: Bool
 
@@ -140,7 +133,6 @@ struct IntegerOptionView: OptionView {
 
 struct ColorOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: ColorOption
   var body: some View {
     HStack {
@@ -195,7 +187,6 @@ class ExternalConfigViewModel: ObservableObject {
 struct ExternalOptionView: OptionView {
   let label: String
   let model: ExternalOption
-  let overrideLabel: String? = ""
 
   @StateObject private var viewModel = ExternalConfigViewModel()
   @State private var showExportCurrentTheme = false
@@ -284,7 +275,6 @@ struct ExternalOptionView: OptionView {
 
 struct EnumOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: EnumOption
   var body: some View {
     Picker("", selection: $model.value) {
@@ -297,7 +287,6 @@ struct EnumOptionView: OptionView {
 
 struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: ListOption<T>
 
   var body: some View {
@@ -371,7 +360,6 @@ struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
 
 struct FontOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: FontOption
   @State private var selectorIsOpen = false
   @State var searchInput = ""
@@ -457,7 +445,6 @@ struct FontOptionView: OptionView {
 
 struct PunctuationMapOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: PunctuationMapOption
 
   var body: some View {
@@ -486,14 +473,13 @@ struct PunctuationMapOptionView: OptionView {
 
 struct GroupOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   let children: [Config]
 
   var body: some View {
     Grid(alignment: .topLeading) {
       ForEach(children) { child in
         let subView = buildViewImpl(config: child)
-        let subLabel = Text(subView.overrideLabel ?? subView.label)
+        let subLabel = Text(subView.label)
         if subView is GroupOptionView {
           // If this is a nested group, put it inside a box, and let
           // it span two columns.
@@ -519,16 +505,20 @@ struct GroupOptionView: OptionView {
           // Otherwise, put the label in the left column and the
           // content in the right column.
           GridRow {
-            subLabel
-              .frame(minWidth: 100, maxWidth: 250, alignment: .trailing)
-              .help(NSLocalizedString("Right click to reset this item", comment: ""))
-              .contextMenu {
-                Button {
-                  child.resetToDefault()
-                } label: {
-                  Text("Reset to default")
+            if subView is ExternalOptionView {
+              HStack {}  // Label is baked in button.
+            } else {
+              subLabel
+                .frame(minWidth: 100, maxWidth: 250, alignment: .trailing)
+                .help(NSLocalizedString("Right click to reset this item", comment: ""))
+                .contextMenu {
+                  Button {
+                    child.resetToDefault()
+                  } label: {
+                    Text("Reset to default")
+                  }
                 }
-              }
+            }
             AnyView(subView)
           }
         }
@@ -539,7 +529,6 @@ struct GroupOptionView: OptionView {
 
 struct UnsupportedOptionView: OptionView {
   let label = ""
-  let overrideLabel: String? = nil
   let model: any Option
 
   var body: some View {
@@ -610,43 +599,4 @@ func buildViewImpl(config: Config) -> any OptionView {
 
 func buildView(config: Config) -> AnyView {
   AnyView(buildViewImpl(config: config))
-}
-
-let testConfig = Config(
-  path: "Fuzzy",
-  description: "Fuzzy",
-  kind: .group([
-    Config(
-      path: "AN_ANG", description: "Fuzzy an ang",
-      kind: .option(BooleanOption(defaultValue: false, value: true))),
-    Config(
-      path: "foo", description: "FOOOO!",
-      kind: .option(StringOption(defaultValue: "", value: "semicolon"))),
-    Config(
-      path: "external", description: "External test",
-      kind: .option(ExternalOption(option: "Punctuation", external: "fcitx://addon/punctuation"))),
-    Config(
-      path: "Shuangpin Profile", description: "双拼方案",
-      kind: .option(
-        EnumOption(
-          defaultValue: "Ziranma", value: "MS", enumStrings: ["Ziranma", "MS"],
-          enumStringsI18n: ["自然码", "微软"]))),
-    Config(
-      path: "interval", description: "int test",
-      kind: .option(IntegerOption(defaultValue: 0, value: 10, min: 0, max: 1000))),
-    // Config(
-    //   path: "list", description: "List test",
-    //   kind: .option(
-    //     ListOption(
-    //       defaultValue: ["a", "b", "c"], value: ["c", "d"], elementType: "String"))
-    // ),
-  ]))
-
-#Preview {
-  VStack {
-    buildView(config: testConfig)
-    Button("Print") {
-      print(testConfig.encodeValue())
-    }
-  }
 }

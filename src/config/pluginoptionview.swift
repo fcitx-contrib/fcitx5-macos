@@ -3,7 +3,6 @@ import SwiftUI
 
 struct PluginOptionView: OptionView {
   let label: String
-  let overrideLabel: String? = nil
   @ObservedObject var model: PluginOption
   @State private var availablePlugins = [String]()
 
