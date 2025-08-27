@@ -3,6 +3,9 @@ import Fcitx
 import Logging
 import SwiftUI
 
+let en = "en"
+let popularIMs = ["keyboard-us", "pinyin", "shuangpin", "wbx", "rime", "mozc", "hallelujah"]
+
 class InputMethodConfigController: ConfigWindowController {
   let view = InputMethodConfigView()
   convenience init() {
@@ -396,9 +399,12 @@ private func normalizeLanguageCode(_ code: String) -> String {
   return String(code.split(separator: "_")[0])
 }
 
-// Match both system language and languages of enabled input methods.
+// Match English, system language (or language assigned to Fcitx5) and languages of enabled input methods.
 private func languageCodeMatch(_ code: String, _ languagesOfEnabledIMs: Set<String>) -> Bool {
   guard let languageCode = Locale.current.language.languageCode?.identifier else {
+    return true
+  }
+  if code == en {
     return true
   }
   let normalized = normalizeLanguageCode(code)
@@ -431,7 +437,7 @@ struct AvailableInputMethodView: View {
       if viewModel.selectedLanguageCode != nil {
         List(selection: $selection) {
           ForEach(viewModel.availableIMsForLanguage, id: \.self) { im in
-            Text(im.displayName)
+            Text(im.displayName).fontWeight(popularIMs.contains(im.uniqueName) ? .bold : .regular)
           }
         }.contextMenu(forSelectionType: InputMethod.self) { items in
         } primaryAction: { items in
@@ -488,13 +494,28 @@ struct AvailableInputMethodView: View {
     }
 
     private func updateList() {
-      if let selectedLanguageCode = selectedLanguageCode {
-        if let ims = availableIMs[selectedLanguageCode] {
-          availableIMsForLanguage = ims.filter { !alreadyEnabled.contains($0.uniqueName) }
-          return
-        }
+      guard let selectedLanguageCode = selectedLanguageCode,
+        let ims = availableIMs[selectedLanguageCode]
+      else {
+        availableIMsForLanguage = []
+        return
       }
-      availableIMsForLanguage = []
+      availableIMsForLanguage = ims.filter { !alreadyEnabled.contains($0.uniqueName) }.sorted {
+        a, b in
+        // Pin popular input methods.
+        let ia = popularIMs.firstIndex(of: a.uniqueName)
+        let ib = popularIMs.firstIndex(of: b.uniqueName)
+        if ia == nil && ib != nil {
+          return false
+        }
+        if ia != nil && ib == nil {
+          return true
+        }
+        if let ia = ia, let ib = ib {
+          return ia < ib
+        }
+        return a.displayName.localizedCompare(b.displayName) == .orderedAscending
+      }
     }
 
     func refresh(_ alreadyEnabled: Set<String>) {
@@ -543,14 +564,24 @@ struct AvailableInputMethodView: View {
       }
 
       public static func < (lhs: Self, rhs: Self) -> Bool {
-        let curIdent = Locale.current.identifier.prefix(2)
-        if lhs.code.prefix(2) == curIdent {
+        // Pin English.
+        if lhs.code == en {
           return true
-        } else if rhs.code.prefix(2) == curIdent {
-          return false
-        } else {
-          return lhs.localized.localizedCompare(rhs.localized) == .orderedAscending
         }
+        if rhs.code == en {
+          return false
+        }
+        // Pin system language (or language assigned to Fcitx5).
+        let curIdent = Locale.current.identifier.prefix(2)
+        let le = lhs.code.prefix(2) == curIdent
+        let re = rhs.code.prefix(2) == curIdent
+        if le && !re {
+          return true
+        }
+        if !le && re {
+          return false
+        }
+        return lhs.localized.localizedCompare(rhs.localized) == .orderedAscending
       }
     }
 
