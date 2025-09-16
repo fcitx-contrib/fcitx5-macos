@@ -10,7 +10,6 @@ private let presetApps: [String] = [
 
 struct AppIMOptionView: OptionView {
   let label: String
-  let openPanel = NSOpenPanel()
   @ObservedObject var model: AppIMOption
   @State private var appIcon: NSImage? = nil
   @State private var imNameMap: [String: String] = [:]
@@ -23,6 +22,7 @@ struct AppIMOptionView: OptionView {
   }
 
   var body: some View {
+    let openPanel = NSOpenPanel()  // macOS 26 crashes if put outside of body.
     HStack {
       if !model.appPath.isEmpty {
         appIconFromPath(model.appPath)

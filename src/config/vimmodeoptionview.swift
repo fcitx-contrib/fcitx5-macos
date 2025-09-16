@@ -2,10 +2,10 @@ import SwiftUI
 
 struct VimModeOptionView: OptionView {
   let label: String
-  let openPanel = NSOpenPanel()
   @ObservedObject var model: VimModeOption
 
   var body: some View {
+    let openPanel = NSOpenPanel()  // macOS 26 crashes if put outside of body.
     HStack {
       let appPath = appPathFromBundleIdentifier(model.value)
       let appName = appNameFromPath(appPath)
