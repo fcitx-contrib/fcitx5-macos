@@ -5,9 +5,9 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/fcitx.icns"
 )
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/menu_icon.pdf
-    COMMAND SOURCE_DATE_EPOCH=0 rsvg-convert -f pdf -o ${CMAKE_CURRENT_BINARY_DIR}/menu_icon.pdf ${CMAKE_CURRENT_SOURCE_DIR}/penguin.svg
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/penguin.svg
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/menu_icon_26.pdf
+    COMMAND SOURCE_DATE_EPOCH=0 rsvg-convert -f pdf -o ${CMAKE_CURRENT_BINARY_DIR}/menu_icon_26.pdf ${CMAKE_CURRENT_SOURCE_DIR}/penguin-26.svg
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/penguin-26.svg
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/menu_icon_15.pdf
@@ -15,12 +15,18 @@ add_custom_command(
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/penguin-15.svg
 )
 add_custom_target(GeneratePDF ALL
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/menu_icon.pdf ${CMAKE_CURRENT_BINARY_DIR}/menu_icon_15.pdf
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/menu_icon_26.pdf ${CMAKE_CURRENT_BINARY_DIR}/menu_icon_15.pdf
 )
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/menu_icon.pdf"
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/menu_icon_26.pdf"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/menu_icon_15.pdf"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
+)
+# When upgrade from old version, menu_icon.pdf will be used, so we have to make it the old version.
+# Afterwards, script will copy the correct one to overwrite it.
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/menu_icon_15.pdf"
+    RENAME menu_icon.pdf
     DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
 )
 
