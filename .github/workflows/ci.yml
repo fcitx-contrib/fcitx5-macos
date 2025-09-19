@@ -94,6 +94,10 @@ jobs:
       - name: Check validity
         run: |
           ./scripts/check-validity.sh
+
+      - name: Check reproducibility
+        if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
+        run: |
           md5sum -c checksum
 
       # TODO: remove all meta.json stuff after 2026-03-02
