@@ -91,7 +91,7 @@ struct IntegerOptionView: OptionView {
   @FocusState private var isFocused: Bool
 
   var body: some View {
-    ZStack(alignment: .trailing) {
+    HStack {
       TextField(label, value: $model.value, formatter: numberFormatter)
         .focused($isFocused)
         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -100,19 +100,30 @@ struct IntegerOptionView: OptionView {
             validate()
           }
         }
-        .padding(.trailing, 60)
-      HStack(spacing: 0) {
-        Button {
-          model.value -= 1
-          validate()
-        } label: {
-          Image(systemName: "minus")
-        }
-        Button {
+      if #available(macOS 26.0, *) {
+        Stepper {
+        } onIncrement: {
           model.value += 1
           validate()
-        } label: {
-          Image(systemName: "plus")
+        } onDecrement: {
+          model.value -= 1
+          validate()
+        }
+      } else {
+        // Stepper is too narrow.
+        HStack(spacing: 0) {
+          Button {
+            model.value -= 1
+            validate()
+          } label: {
+            Image(systemName: "minus")
+          }
+          Button {
+            model.value += 1
+            validate()
+          } label: {
+            Image(systemName: "plus")
+          }
         }
       }
     }
@@ -241,8 +252,8 @@ struct ExternalOptionView: OptionView {
     .sheet(isPresented: $viewModel.hasConfig) {
       VStack {
         ScrollView([.vertical]) {
-          buildView(config: viewModel.externalConfig!).padding([.leading, .trailing])
-        }.padding([.top])
+          buildView(config: viewModel.externalConfig!).padding()
+        }
         footer(
           reset: {
             viewModel.externalConfig?.resetToDefault()
@@ -297,28 +308,34 @@ struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
           AnyView(buildViewImpl(label: "", option: element.value))
 
           let index = findElementIndex(element)
-          Button(action: { moveUp(index: index) }) {
-            Image(systemName: "arrow.up")
+          Button {
+            moveUp(index: index)
+          } label: {
+            Image(systemName: "arrow.up").square()
           }
           .disabled(index == 0)
           .buttonStyle(BorderlessButtonStyle())
 
-          Button(action: { remove(at: index) }) {
-            Image(systemName: "minus")
-              .frame(maxHeight: .infinity)
-              .contentShape(Rectangle())
+          Button {
+            remove(at: index)
+          } label: {
+            Image(systemName: "minus").square()
           }
           .buttonStyle(BorderlessButtonStyle())
 
-          Button(action: { add(at: index) }) {
-            Image(systemName: "plus")
+          Button {
+            add(at: index)
+          } label: {
+            Image(systemName: "plus").square()
           }
           .buttonStyle(BorderlessButtonStyle())
         }
       }
 
-      Button(action: { add(at: model.value.count) }) {
-        Image(systemName: "plus")
+      Button {
+        add(at: model.value.count)
+      } label: {
+        Image(systemName: "plus").square()
       }
       .buttonStyle(BorderlessButtonStyle())
       .frame(maxWidth: .infinity, alignment: .trailing)
@@ -476,17 +493,16 @@ struct GroupOptionView: OptionView {
   let children: [Config]
 
   var body: some View {
-    Grid(alignment: .topLeading) {
+    VStack(alignment: .leading, spacing: 8) {
       ForEach(children) { child in
         let subView = buildViewImpl(config: child)
         let subLabel = Text(subView.label)
         if subView is GroupOptionView {
           // If this is a nested group, put it inside a box, and let
           // it span two columns.
-          GridRow {
+          VStack(alignment: .leading, spacing: 4) {
             subLabel
               .font(.title3)
-              .gridCellColumns(2)
               .help(NSLocalizedString("Right click to reset this group", comment: ""))
               .contextMenu {
                 Button {
@@ -495,21 +511,19 @@ struct GroupOptionView: OptionView {
                   Text("Reset to default")
                 }
               }
-          }
-          GridRow {
             GroupBox {
               AnyView(subView)
-            }.gridCellColumns(2)
+            }
           }
         } else {
           // Otherwise, put the label in the left column and the
           // content in the right column.
-          GridRow {
+          HStack(spacing: 16) {
             if subView is ExternalOptionView {
-              HStack {}  // Label is baked in button.
+              Spacer().frame(maxWidth: .infinity)  // Label is baked in button.
             } else {
               subLabel
-                .frame(minWidth: 100, maxWidth: 250, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: .trailing)
                 .help(NSLocalizedString("Right click to reset this item", comment: ""))
                 .contextMenu {
                   Button {
@@ -520,6 +534,7 @@ struct GroupOptionView: OptionView {
                 }
             }
             AnyView(subView)
+              .frame(maxWidth: .infinity, alignment: .leading)
           }
         }
       }

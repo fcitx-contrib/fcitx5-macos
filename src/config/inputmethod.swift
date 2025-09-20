@@ -135,7 +135,7 @@ struct InputMethodConfigView: View {
         if let configModel = viewModel.configModel {
           VStack {
             let scrollView = ScrollView([.vertical]) {
-              buildView(config: configModel).padding([.leading, .trailing])
+              buildView(config: configModel).padding()
             }
             if #available(macOS 14.0, *) {
               scrollView.defaultScrollAnchor(.topTrailing)

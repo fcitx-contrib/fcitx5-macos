@@ -12,7 +12,7 @@ struct ImageOptionView: OptionView {
   @ObservedObject var model: ImageOption
 
   var body: some View {
-    VStack {
+    VStack(alignment: .leading) {  // Avoid layout shift of Picker when switching modes.
       Picker("", selection: $model.mode) {
         ForEach(Array(modes.enumerated()), id: \.0) { idx, mode in
           Text(mode)

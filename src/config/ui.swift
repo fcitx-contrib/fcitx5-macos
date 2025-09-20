@@ -18,6 +18,11 @@ extension View {
       Image(systemName: "questionmark.circle.fill").help(text)
     }
   }
+
+  // Enlarge clickable area for border-less icon button, especially minus.
+  func square() -> some View {
+    self.frame(width: 20, height: 20).background(Color.black.opacity(0.001))
+  }
 }
 
 func footer(reset: @escaping () -> Void, apply: @escaping () -> Void, close: @escaping () -> Void)

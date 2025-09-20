@@ -28,13 +28,13 @@ struct ListConfigView: View {
     } detail: {
       if key == "theme" {
         TextField(NSLocalizedString("Type here to preview style", comment: ""), text: $dummyText)
-          .padding()
+          .padding([.top, .leading, .trailing])
       }
       ScrollView {
         if let config = viewModel.selectedConfig {
-          buildView(config: config).padding([.leading, .trailing])
+          buildView(config: config).padding()
         }
-      }.padding([.top], 1)
+      }.padding([.top], 1)  // Cannot be 0 otherwise content overlaps with title bar.
       footer(
         reset: {
           // Reset only current page.
