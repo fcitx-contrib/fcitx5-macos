@@ -518,7 +518,7 @@ struct GroupOptionView: OptionView {
         } else {
           // Otherwise, put the label in the left column and the
           // content in the right column.
-          HStack(spacing: 16) {
+          HStack(alignment: .firstTextBaseline, spacing: 16) {
             if subView is ExternalOptionView {
               Spacer().frame(maxWidth: .infinity)  // Label is baked in button.
             } else {
