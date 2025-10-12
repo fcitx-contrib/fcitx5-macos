@@ -21,6 +21,10 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(writing_mode_t, N_("Horizontal top-bottom"),
                                  N_("Vertical left-right"))
 } // namespace candidate_window
 
+enum class DefaultTheme { System, MacOS26, MacOS15 };
+FCITX_CONFIG_ENUM_NAME_WITH_I18N(DefaultTheme, N_("System"), N_("macOS 26"),
+                                 N_("macOS 15"))
+
 enum class PagingButtonsStyle { None, Arrow, Triangle };
 FCITX_CONFIG_ENUM_NAME_WITH_I18N(PagingButtonsStyle, N_("None"), N_("Arrow"),
                                  N_("Triangle"))
@@ -81,6 +85,8 @@ FCITX_CONFIGURATION(
     OptionWithAnnotation<candidate_window::theme_t,
                          candidate_window::theme_tI18NAnnotation>
         theme{this, "Theme", _("Theme"), candidate_window::theme_t::system};
+    OptionWithAnnotation<DefaultTheme, DefaultThemeI18NAnnotation> defaultTheme{
+        this, "DefaultTheme", _("Default theme"), DefaultTheme::System};
     OptionWithAnnotation<std::string, UserThemeAnnotation> userTheme{
         this, "UserTheme", _("User theme"), ""};
     ExternalOption exportCurrentTheme{this, "ExportCurrentTheme",
@@ -299,7 +305,9 @@ FCITX_CONFIGURATION(
                       HoverBehavior::None};);
 
 FCITX_CONFIGURATION(
-    Size,
+    // TODO: Change to false after 0.2.8.
+    Size, Option<bool> overrideDefault{this, "OverrideDefault",
+                                       _("Override default"), true};
     Option<int, IntConstrain> borderWidth{this, "BorderWidth",
                                           _("Border width (px)"), 1,
                                           IntConstrain(0, BORDER_WIDTH_MAX)};
