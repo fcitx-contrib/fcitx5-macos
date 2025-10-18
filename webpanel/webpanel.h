@@ -257,11 +257,15 @@ FCITX_CONFIGURATION(
                            _("Paging buttons style"),
                            PagingButtonsStyle::Arrow};);
 
-FCITX_CONFIGURATION(BackgroundConfig,
-                    OptionWithAnnotation<std::string, ImageAnnotation> imageUrl{
-                        this, "ImageUrl", _("Image"), ""};
-                    Option<bool> blur{this, "Blur", _("Blur"), true};
-                    Option<bool> shadow{this, "Shadow", _("Shadow"), true};);
+FCITX_CONFIGURATION(
+    BackgroundConfig,
+    OptionWithAnnotation<std::string, ImageAnnotation> imageUrl{
+        this, "ImageUrl", _("Image"), ""};
+    Option<bool> keepPanelColorWhenHasImage{
+        this, "KeepPanelColorWhenHasImage",
+        _("Keep panel color when has image"), false};
+    Option<bool> blur{this, "Blur", _("Blur"), true};
+    Option<bool> shadow{this, "Shadow", _("Shadow"), true};);
 
 using FontFamilyOption =
     OptionWithAnnotation<std::vector<std::string>, FontAnnotation>;
