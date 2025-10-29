@@ -2,5 +2,8 @@
     "clangd.arguments": [
         "-background-index",
         "-compile-commands-dir=build/arm64"
+    ],
+    "swift.sourcekit-lsp.supported-languages": [
+        "swift"
     ]
 }

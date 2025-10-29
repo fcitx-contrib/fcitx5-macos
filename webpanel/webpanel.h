@@ -309,9 +309,8 @@ FCITX_CONFIGURATION(
                       HoverBehavior::None};);
 
 FCITX_CONFIGURATION(
-    // TODO: Change to false after 0.2.8.
     Size, Option<bool> overrideDefault{this, "OverrideDefault",
-                                       _("Override default"), true};
+                                       _("Override default"), false};
     Option<int, IntConstrain> borderWidth{this, "BorderWidth",
                                           _("Border width (px)"), 1,
                                           IntConstrain(0, BORDER_WIDTH_MAX)};
