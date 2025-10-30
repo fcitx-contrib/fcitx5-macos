@@ -8,19 +8,15 @@ let pinyinPath = pinyinLocalDir.localPath()
 let customphrase = pinyinLocalDir.appendingPathComponent("customphrase")
 let nativeCustomPhrase = cacheDir.appendingPathComponent("customphrase.plist")
 
-struct CustomPhrase: Identifiable, Hashable {
-  var id: Int {
-    var hasher = Hasher()
-    hasher.combine(keyword)
-    hasher.combine(phrase)
-    return hasher.finalize()
-  }
+struct CustomPhrase: Identifiable {
+  let id = UUID()  // To support uninterrupted in-place edit, id can't be hash of content.
   var keyword: String
   var phrase: String
   var order: Int
+  var enabled: Bool
 }
 
-private func parseLine(_ s: String) -> (CustomPhrase, Bool)? {
+private func parseLine(_ s: String) -> CustomPhrase? {
   let regex = try! NSRegularExpression(pattern: "(\\S+),(-?\\d+)=(.+)", options: [])
   let matches = regex.matches(
     in: s, options: [], range: NSRange(location: 0, length: s.utf16.count))
@@ -29,12 +25,12 @@ private func parseLine(_ s: String) -> (CustomPhrase, Bool)? {
     let keyword = String(s[Range(match.range(at: 1), in: s)!])
     let order = Int(String(s[Range(match.range(at: 2), in: s)!])) ?? 0
     let phrase = String(s[Range(match.range(at: 3), in: s)!])
-    return (CustomPhrase(keyword: keyword, phrase: phrase, order: abs(order)), order > 0)
+    return CustomPhrase(keyword: keyword, phrase: phrase, order: abs(order), enabled: order > 0)
   }
   return nil
 }
 
-private func stringToCustomPhrases(_ s: String) -> [(CustomPhrase, Bool)] {
+private func stringToCustomPhrases(_ s: String) -> [CustomPhrase] {
   return s.split(separator: "\n").compactMap { line in
     parseLine(String(line))
   }
@@ -42,28 +38,22 @@ private func stringToCustomPhrases(_ s: String) -> [(CustomPhrase, Bool)] {
 
 private func customPhrasesToString(_ customphraseVM: CustomPhraseVM) -> String {
   return customphraseVM.customPhrases.map { customPhrase in
-    "\(customPhrase.keyword),\(customphraseVM.isEnabled[customPhrase.id] ?? true ? "" : "-")\(customPhrase.order)=\(customPhrase.phrase)"
+    "\(customPhrase.keyword),\(customPhrase.enabled ? "" : "-")\(customPhrase.order)=\(customPhrase.phrase)"
   }.joined(separator: "\n")
 }
 
 class CustomPhraseVM: ObservableObject {
-  @Published var customPhrases: [CustomPhrase] = []
-  @Published var isEnabled: [Int: Bool] = [:]
+  @Published var customPhrases = [CustomPhrase]()
 
   func refreshItems() {
-    customPhrases = []
-    isEnabled = [:]
-    for (customPhrase, enabled) in stringToCustomPhrases(readUTF8(customphrase) ?? "") {
-      customPhrases.append(customPhrase)
-      isEnabled[customPhrase.id] = enabled
-    }
+    customPhrases = stringToCustomPhrases(readUTF8(customphrase) ?? "")
   }
 }
 
 struct CustomPhraseView: View {
   @Environment(\.presentationMode) var presentationMode
 
-  @State private var selectedRows = Set<Int>()
+  @State private var selectedRows = Set<UUID>()
   @ObservedObject private var customphraseVM = CustomPhraseVM()
   @State private var showReloaded = false
   @State private var importedPhrases = 0
@@ -108,15 +98,7 @@ struct CustomPhraseView: View {
         .font(.headline)
         ForEach($customphraseVM.customPhrases) { $customPhrase in
           HStack(alignment: .center) {
-            Toggle(
-              "",
-              isOn: Binding(
-                get: { customphraseVM.isEnabled[customPhrase.id] ?? true },
-                set: {
-                  customphraseVM.isEnabled[customPhrase.id] = $0
-                }
-              )
-            ).frame(width: checkboxColumnWidth)
+            Toggle("", isOn: $customPhrase.enabled).frame(width: checkboxColumnWidth)
             TextField("Keyword", text: $customPhrase.keyword).frame(
               minWidth: minKeywordColumnWidth, maxWidth: .infinity, alignment: .leading)
             TextField("Phrase", text: $customPhrase.phrase).frame(
@@ -141,15 +123,18 @@ struct CustomPhraseView: View {
             "/bin/zsh",
             ["-c", "/usr/bin/defaults export -g - > \(quote(nativeCustomPhrase.localPath()))"])
           {
-            let phrases = Set(customphraseVM.customPhrases)
+            let phrasesMap = customphraseVM.customPhrases.reduce(into: [String: [CustomPhrase]]()) {
+              result, customPhrase in
+              result[customPhrase.keyword, default: []].append(customPhrase)
+            }
             importedPhrases = 0
             for (shortcut, phrase) in parseCustomPhraseXML(nativeCustomPhrase) {
-              let newItem = CustomPhrase(keyword: shortcut, phrase: phrase, order: 1)
-              if !phrases.contains(newItem) {
-                customphraseVM.isEnabled[newItem.id] = true
-                customphraseVM.customPhrases.append(newItem)
-                importedPhrases += 1
+              if let array = phrasesMap[shortcut], array.contains(where: { $0.phrase == phrase }) {
+                continue
               }
+              let newItem = CustomPhrase(keyword: shortcut, phrase: phrase, order: 1, enabled: true)
+              customphraseVM.customPhrases.append(newItem)
+              importedPhrases += 1
             }
             if save() {
               showImportedPhrases = true
@@ -163,8 +148,7 @@ struct CustomPhraseView: View {
         }
 
         Button {
-          let newItem = CustomPhrase(keyword: "", phrase: "", order: 1)
-          customphraseVM.isEnabled[newItem.id] = true
+          let newItem = CustomPhrase(keyword: "", phrase: "", order: 1, enabled: true)
           customphraseVM.customPhrases.append(newItem)
           selectedRows = [newItem.id]
         } label: {
@@ -174,9 +158,6 @@ struct CustomPhraseView: View {
         Button {
           customphraseVM.customPhrases.removeAll {
             selectedRows.contains($0.id)
-          }
-          customphraseVM.isEnabled = customphraseVM.isEnabled.filter { id, _ in
-            !selectedRows.contains(id)
           }
           selectedRows.removeAll()
         } label: {
