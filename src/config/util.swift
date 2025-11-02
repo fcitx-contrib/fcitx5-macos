@@ -19,7 +19,7 @@ let squirrelDir = homeDir.appendingPathComponent("Library/Rime")
 
 let sourceRepo = "https://github.com/fcitx-contrib/fcitx5-macos"
 
-private let osVersion = ProcessInfo.processInfo.operatingSystemVersion
+let osVersion = ProcessInfo.processInfo.operatingSystemVersion
 private let macOSVersion =
   "\(osVersion.majorVersion).\(osVersion.minorVersion).\(osVersion.patchVersion)"
 
