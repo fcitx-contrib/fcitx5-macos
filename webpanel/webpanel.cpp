@@ -303,7 +303,18 @@ void WebPanel::updateConfig() {
                                                HighlightMarkStyle::Text
                                            ? config_.highlight->markText.value()
                                            : "");
-      window_->set_native_blur(config_.background->blur.value());
+      auto blur = candidate_window::blur_t::system;
+      if (*config_.background->blur ==
+          candidate_window::blur_extended_t::none) {
+          blur = candidate_window::blur_t::none;
+      } else if (*config_.background->blur ==
+                 candidate_window::blur_extended_t::blur) {
+          blur = candidate_window::blur_t::blur;
+      } else if (*config_.background->blur ==
+                 candidate_window::blur_extended_t::liquid_glass) {
+          blur = candidate_window::blur_t::liquid_glass;
+      }
+      window_->set_native_blur(blur);
       // Keep CSS shadow as native may leave a ghost shadow of last frame when
       // typing fast.
       // window_->set_native_shadow(config_.background->shadow.value());
@@ -321,6 +332,19 @@ void WebPanel::updateConfig() {
 
 void WebPanel::reloadConfig() {
     readAsIni(config_, ConfPath);
+    // TODO: remove this migration after 0.2.9.
+    if (*config_.background->blur == candidate_window::blur_extended_t::t) {
+        RawConfig raw;
+        raw.setValueByPath("Background/Blur", "System");
+        config_.load(raw, true);
+        safeSaveAsIni(config_, ConfPath);
+    } else if (*config_.background->blur ==
+               candidate_window::blur_extended_t::f) {
+        RawConfig raw;
+        raw.setValueByPath("Background/Blur", "None");
+        config_.load(raw, true);
+        safeSaveAsIni(config_, ConfPath);
+    }
     updateConfig();
 }
 
