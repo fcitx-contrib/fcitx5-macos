@@ -447,8 +447,8 @@ void WebPanel::update(UserInterfaceComponent component,
                     scrollState_ = candidate_window::scroll_state_t::scrolling;
                     return expand();
                 }
-                // Disable scroll mode if all candidates are shown.
-                if (pageableList != nullptr && pageableList->hasNext()) {
+                // Disable scroll mode if all candidates are on the same page.
+                if (pageableList != nullptr && (hasPrev || hasNext)) {
                     scrollState_ = candidate_window::scroll_state_t::ready;
                 } else {
                     pageable = false;
