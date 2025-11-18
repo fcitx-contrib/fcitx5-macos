@@ -2,3 +2,4 @@ CFBundleName = "小企鹅";
 CFBundleDisplayName = "小企鹅";
 org.fcitx.inputmethod.fcitx5 = "小企鹅";
 org.fcitx.inputmethod.zhHans = "小企鹅";
+org.fcitx.inputmethod.zhHant = "小企鹅";

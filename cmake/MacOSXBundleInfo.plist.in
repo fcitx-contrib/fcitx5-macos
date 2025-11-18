@@ -53,6 +53,18 @@
         <key>tsInputModePaletteIconFileKey</key>
         <string>menu_icon.pdf</string>
       </dict>
+      <key>org.fcitx.inputmethod.zhHant</key>
+      <dict>
+        <!-- provide options of Traditional Chinese and so on, so that dictation and MS Word can have correct default language -->
+        <key>TISIntendedLanguage</key>
+        <string>zh-Hant</string>
+        <key>tsInputModeMenuIconFileKey</key>
+        <string>menu_icon.pdf</string>
+        <key>tsInputModeAlternateMenuIconFileKey</key>
+        <string>menu_icon.pdf</string>
+        <key>tsInputModePaletteIconFileKey</key>
+        <string>menu_icon.pdf</string>
+      </dict>
     </dict>
   </dict>
   <key>NSUserNotificationAlertStyle</key>
