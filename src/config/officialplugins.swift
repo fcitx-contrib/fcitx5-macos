@@ -26,6 +26,7 @@ let officialPlugins = [
   Plugin(id: "cantonese", category: Chinese, native: false, github: tableExtra, dependencies: ["chinese-addons"]),
   Plugin(id: "chinese-addons", category: Chinese, native: true, github: "fcitx/fcitx5-chinese-addons"),
   Plugin(id: "hallelujah", category: English, native: true, github: "fcitx-contrib/fcitx5-hallelujah"),
+  Plugin(id: "jyutping", category: Chinese, native: true, github: "fcitx/libime-jyutping", dependencies: ["chinese-addons"]),
   Plugin(id: "lua", category: Other, native: true, github: "fcitx/fcitx5-lua"),
   Plugin(id: "quick", category: Chinese, native: false, github: tableExtra, dependencies: ["chinese-addons"]),
   Plugin(id: "m17n", category: Generic, native: true, github: "fcitx/fcitx5-m17n"),
