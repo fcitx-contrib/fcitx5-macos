@@ -26,6 +26,7 @@ xattr -dr com.apple.quarantine "$APP_DIR"
 codesign --force --sign - --deep "$APP_DIR"
 
 cd "$RESOURCES_DIR"
+im=$(su -m "$user" -c "./get_im")
 # Switching out is necessary, otherwise it doesn't show menu
 # Not sure which one so try both.
 su -m "$user" -c "./switch_im com.apple.keylayout.ABC"
@@ -53,6 +54,5 @@ killall Fcitx5
 # org.fcitx.inputmethod.Fcitx5 is our CFBundleIdentifier;
 # The rest is the keys under tsInputModeListKey trimming the org.fcitx.inputmethod.
 
-# Not sure which one so try both.
-su -m "$user" -c "./switch_im org.fcitx.inputmethod.Fcitx5.fcitx5"
-su -m "$user" -c "./switch_im org.fcitx.inputmethod.Fcitx5.zhHans"
+# Switch back.
+su -m "$user" -c "./switch_im $im"
