@@ -2,3 +2,4 @@ CFBundleName = "Fcitx5";
 CFBundleDisplayName = "Fcitx5";
 org.fcitx.inputmethod.fcitx5 = "Fcitx5";
 org.fcitx.inputmethod.zhHans = "Fcitx5";
+org.fcitx.inputmethod.zhHant = "Fcitx5";
