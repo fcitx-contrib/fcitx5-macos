@@ -13,7 +13,7 @@ jobs:
   lint:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: true # needs fcitx5/.clang-format
 
@@ -36,11 +36,11 @@ jobs:
           - { arch: x86_64, type: Debug, postfix: -debug }
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: 24.x
 

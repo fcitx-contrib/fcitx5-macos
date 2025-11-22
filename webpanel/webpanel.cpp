@@ -426,10 +426,9 @@ void WebPanel::update(UserInterfaceComponent component,
             }
             // Paging
             auto *pageableList = list->toPageable();
-            pageable =
-                pageableList && *config_.typography->pagingButtonsStyle !=
-                                    PagingButtonsStyle::None;
-            if (pageable) {
+            if (pageableList) {
+                pageable = *config_.typography->pagingButtonsStyle !=
+                           PagingButtonsStyle::None;
                 hasPrev = pageableList->hasPrev();
                 hasNext = pageableList->hasNext();
             }
@@ -448,7 +447,7 @@ void WebPanel::update(UserInterfaceComponent component,
                     return expand();
                 }
                 // Disable scroll mode if all candidates are on the same page.
-                if (pageableList != nullptr && (hasPrev || hasNext)) {
+                if (hasPrev || hasNext) {
                     scrollState_ = candidate_window::scroll_state_t::ready;
                 } else {
                     pageable = false;
