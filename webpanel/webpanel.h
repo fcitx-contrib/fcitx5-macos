@@ -20,18 +20,8 @@ FCITX_CONFIG_ENUM_NAME_WITH_I18N(writing_mode_t, N_("Horizontal top-bottom"),
                                  N_("Vertical right-left"),
                                  N_("Vertical left-right"))
 
-// TODO: remove after 0.2.9.
-enum class blur_extended_t {
-    none = (int)blur_t::none,
-    system = (int)blur_t::system,
-    blur = (int)blur_t::blur,
-    liquid_glass = (int)blur_t::liquid_glass,
-    f = 4,
-    t = 5
-};
-FCITX_CONFIG_ENUM_NAME_WITH_I18N(blur_extended_t, N_("None"), N_("System"),
-                                 N_("Blur"), N_("Liquid Glass"), N_("False"),
-                                 N_("True"))
+FCITX_CONFIG_ENUM_NAME_WITH_I18N(blur_t, N_("None"), N_("System"), N_("Blur"),
+                                 N_("Liquid Glass"))
 } // namespace candidate_window
 
 enum class DefaultTheme { System, MacOS26, MacOS15 };
@@ -277,10 +267,9 @@ FCITX_CONFIGURATION(
     Option<bool> keepPanelColorWhenHasImage{
         this, "KeepPanelColorWhenHasImage",
         _("Keep panel color when has image"), false};
-    OptionWithAnnotation<candidate_window::blur_extended_t,
-                         candidate_window::blur_extended_tI18NAnnotation>
-        blur{this, "Blur", _("Blur"),
-             candidate_window::blur_extended_t::system};
+    OptionWithAnnotation<candidate_window::blur_t,
+                         candidate_window::blur_tI18NAnnotation>
+        blur{this, "Blur", _("Blur"), candidate_window::blur_t::system};
     Option<bool> shadow{this, "Shadow", _("Shadow"), true};);
 
 using FontFamilyOption =
