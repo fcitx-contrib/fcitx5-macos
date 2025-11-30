@@ -14,6 +14,10 @@ private let appsWithoutDummyPreedit: Set<String> = [
   // When writing a new email and caret is at the beginning of To or Cc, Mail calls commitComposition
   // if the preedit is any kind of white space.
   "com.apple.mail",
+  // Space (both commit and preedit) is not allowed immediately after ordered list (1.), which is the
+  // dummy preedit we use for the SwiftUI TextField workaround. While we can change that normal space
+  // to full-width space, it seems DingTalk doesn't need dummy preedit at all.
+  "com.alibaba.DingTalkMac",
 ]
 
 private var controller: IMKInputController? = nil
