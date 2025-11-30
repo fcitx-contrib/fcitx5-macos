@@ -281,20 +281,32 @@ FCITX_CONFIGURATION(
         this, "TextFontFamily", _("Text font family"), {""}};
     Option<int, IntConstrain> textFontSize{
         this, "TextFontSize", _("Text font size"), 16, IntConstrain(4, 100)};
+    Option<int, IntConstrain> textFontWeight{this, "TextFontWeight",
+                                             _("Text font weight"), 400,
+                                             IntConstrain(1, 1000)};
     FontFamilyOption labelFontFamily{
         this, "LabelFontFamily", _("Label font family"), {""}};
     Option<int, IntConstrain> labelFontSize{
         this, "LabelFontSize", _("Label font size"), 12, IntConstrain(4, 100)};
+    Option<int, IntConstrain> labelFontWeight{this, "LabelFontWeight",
+                                              _("Label font weight"), 400,
+                                              IntConstrain(1, 1000)};
     FontFamilyOption commentFontFamily{
         this, "CommentFontFamily", _("Comment font family"), {""}};
     Option<int, IntConstrain> commentFontSize{this, "CommentFontSize",
                                               _("Comment font size"), 12,
                                               IntConstrain(4, 100)};
+    Option<int, IntConstrain> commentFontWeight{this, "CommentFontWeight",
+                                                _("Comment font weight"), 400,
+                                                IntConstrain(1, 1000)};
     FontFamilyOption preeditFontFamily{
         this, "PreeditFontFamily", _("Preedit font family"), {""}};
     Option<int, IntConstrain> preeditFontSize{this, "PreeditFontSize",
                                               _("Preedit font size"), 16,
                                               IntConstrain(4, 100)};
+    Option<int, IntConstrain> preeditFontWeight{this, "PreeditFontWeight",
+                                                _("Preedit font weight"), 400,
+                                                IntConstrain(1, 1000)};
     ExternalOption userFontDir{this, "UserFontDir", _("User font dir"), ""};
     ExternalOption systemFontDir{this, "SystemFontDir", _("System font dir"),
                                  ""};);
