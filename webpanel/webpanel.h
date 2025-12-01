@@ -255,6 +255,9 @@ FCITX_CONFIGURATION(
     Option<bool> typographyAwarenessForIM{this, "TypographyAwarenessForIM",
                                           _("Typography awareness for IM"),
                                           true};
+    Option<bool> verticalCommentsAlignRight{this, "VerticalCommentsAlignRight",
+                                            _("Vertical comments align right"),
+                                            false};
     OptionWithAnnotation<PagingButtonsStyle, PagingButtonsStyleI18NAnnotation>
         pagingButtonsStyle{this, "PagingButtonsStyle",
                            _("Paging buttons style"),
