@@ -15,7 +15,6 @@ deps=(
   libexpat
   libintl
   json
-  json-c
   libuv
   libxkbcommon
   iso-codes
