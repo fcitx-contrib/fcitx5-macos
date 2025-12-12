@@ -84,7 +84,7 @@ jobs:
         run: ctest --test-dir build/${{ matrix.arch }} --output-on-failure
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Fcitx5-${{ matrix.arch }}${{ matrix.postfix }}
           path: |
@@ -107,7 +107,7 @@ jobs:
 
       - name: Upload meta.json
         if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: meta.json
           path: |
@@ -119,7 +119,7 @@ jobs:
 
       - name: Upload version.json
         if: ${{ matrix.arch == 'arm64' && matrix.type == 'Release' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: version.json
           path: |
@@ -140,7 +140,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           merge-multiple: true
 

@@ -20,6 +20,10 @@ private let appsWithoutDummyPreedit: Set<String> = [
   "com.alibaba.DingTalkMac",
 ]
 
+private func isJetBrains(_ app: String) -> Bool {
+  return app == "com.google.android.studio" || app.starts(with: "com.jetbrains.")
+}
+
 private var controller: IMKInputController? = nil
 
 public func setController(_ ctrl: Any) {
@@ -77,24 +81,29 @@ public func commitAndSetPreeditSync(
   if !commit.isEmpty {
     commitString(client, commit)
   }
+  let app = client.bundleIdentifier() ?? ""
   // Without client preedit, Backspace bypasses IM in Terminal, every key is both
-  // processed by IM and passed to client in iTerm and VSCode terminal, Backspace
-  // is double-processed in Chrome address bar/VSCode editor/Bruno URL input, ArrowDown
-  // is swallowed in Spotlight, so we force a dummy client preedit here.
+  // processed by IM and passed to client in iTerm, JetBrains and VSCode terminal,
+  // Backspace is double-processed in Chrome address bar/VSCode editor/Bruno URL input,
+  // ArrowDown is swallowed in Spotlight, so we force a dummy client preedit here.
   // Some apps also need it to get accurate caret position to place candidate window.
   // This is fine even when there is selected text. In Word, not using dummy preedit to
   // replace selected text will let Esc bypass IM. When using Shift+click to select, if
   // interval is too little, IM switch happens, but dummyPreedit is false in that case.
   if preedit.isEmpty && dummyPreedit {
-    if appsWithoutDummyPreedit.contains(client.bundleIdentifier() ?? "") {
+    if appsWithoutDummyPreedit.contains(app) {
       return
     }
     let length = client.length()
     let selectedRange = client.selectedRange()
+    // We prefer ZWS to avoid text layout shift after caret, e.g. VSCode.
     // For SwiftUI TextField, there is a bug that if caret is at the end of text, zero-width space preedit
     // spreads from the start to the end, making the whole text underlined. Fortunately, SwiftUI's length
     // and selectedRange are reliable, so we use a normal space in this case.
-    if length > 0 && length - currentPreedit.count == NSMaxRange(selectedRange) {
+    // JetBrains-based IDEs displays zero-width space as "ZWSP" so we'd rather use a normal space.
+    if (length > 0 && length - currentPreedit.count == NSMaxRange(selectedRange))
+      || isJetBrains(app)
+    {
       setPreedit(client, " ", 0)
     } else {
       setPreedit(client, zeroWidthSpace, 0)
