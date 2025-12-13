@@ -342,8 +342,12 @@ std::tuple<double, double, double>
 MacosInputContext::getCaretCoordinates(bool followCaret) {
     // Memorize to avoid jumping to origin on failure.
     static double x = 0, y = 0, height = 0;
-    if (!SwiftFrontend::getCaretCoordinates(client_, followCaret, &x, &y,
-                                            &height)) {
+    auto res = SwiftFrontend::getCaretCoordinates(client_, followCaret);
+    if (res.getCount() == 3) {
+        x = res[0];
+        y = res[1];
+        height = res[2];
+    } else {
         FCITX_DEBUG() << "Failed to get caret coordinates";
     }
     return std::make_tuple(x, y, height);

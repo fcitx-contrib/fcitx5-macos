@@ -139,13 +139,10 @@ public func commitAsync(_ clientPtr: UnsafeMutableRawPointer, _ commit: String) 
 public func getCaretCoordinates(
   _ clientPtr: UnsafeMutableRawPointer,
   _ followCaret: Bool,
-  _ x: UnsafeMutablePointer<Double>,
-  _ y: UnsafeMutablePointer<Double>,
-  _ height: UnsafeMutablePointer<Double>
-) -> Bool {
+) -> [Double] {
   let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
   guard let client = client as? IMKTextInput else {
-    return false
+    return []
   }
   var rect = NSRect(x: 0, y: 0, width: 0, height: 0)
   // n characters have n+1 caret positions, but character index only accepts 0 to n-1,
@@ -155,13 +152,13 @@ public func getCaretCoordinates(
     forCharacterIndex: followCaret ? (isEnd ? u16pos - 1 : u16pos) : 0,
     lineHeightRectangle: &rect)
   if rect.width == 0 && rect.height == 0 {
-    return false
+    return []
   }
-  x.pointee = Double(NSMinX(rect))
-  y.pointee = Double(NSMinY(rect))
-  height.pointee = Double(rect.height)
+  var x = Double(NSMinX(rect))
+  let y = Double(NSMinY(rect))
+  let height = Double(rect.height)
   if followCaret && isEnd {
-    x.pointee += 10
+    x += 10
   }
-  return true
+  return [x, y, height]
 }
