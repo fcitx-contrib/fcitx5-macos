@@ -293,6 +293,7 @@ WebPanel::WebPanel(Instance *instance)
 }
 
 void WebPanel::updateConfig() {
+    setenv("BLUR", std::to_string(int(*config_.background->blur)).c_str(), 1);
     dispatch_async(dispatch_get_main_queue(), ^{
       window_->set_layout(config_.typography->layout.value());
       window_->set_theme(config_.basic->theme.value());

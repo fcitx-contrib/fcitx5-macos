@@ -284,30 +284,6 @@ struct ExternalOptionView: OptionView {
   }
 }
 
-struct EnumOptionView: OptionView {
-  let label: String
-  @ObservedObject var model: EnumOption
-
-  private func getCount() -> Int {
-    // Hack: on macOS < 26 disable Liquid Glass of Background/Blur in webpanel.
-    if model.enumStrings.prefix(4) == ["None", "System", "Blur", "Liquid Glass"] {
-      if osVersion.majorVersion >= 26 {
-        return 4
-      }
-      return 3
-    }
-    return model.enumStrings.count
-  }
-
-  var body: some View {
-    Picker("", selection: $model.value) {
-      ForEach(0..<getCount(), id: \.self) { i in
-        Text(model.enumStringsI18n[i]).tag(model.enumStrings[i])
-      }
-    }
-  }
-}
-
 struct ListOptionView<T: Option & EmptyConstructible>: OptionView {
   let label: String
   @ObservedObject var model: ListOption<T>
