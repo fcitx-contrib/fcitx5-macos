@@ -50,23 +50,22 @@ uint32_t Notifications::sendNotification(
 
     // Record a notification item to store callbacks.
     auto internalId = ++internalId_;
-    std::string externalId = appName + "-" + std::to_string(internalId_);
+    auto externalId = std::format("{}-{}", appName, internalId_);
     NotificationItem item{externalId, internalId, actionCallback,
                           closedCallback};
     itemTable_.insert(item);
 
     // Find appIcon file.
-    static const std::vector<std::string> iconExtensions{".png"};
-    auto iconPath = iconTheme_->findIconPath(appIcon, 48, 1, iconExtensions);
+    auto iconPath = iconTheme_->findIconPath(appIcon, 48, 1, {".png"});
 
     // Send the notification.
-    std::vector<const char *> cActionStrings;
+    auto actionsArray = swift::Array<swift::String>::init();
     for (const auto &action : actions) {
-        cActionStrings.push_back(action.c_str());
+        actionsArray.append(action);
     }
-    SwiftNotify::sendNotificationProxy(
-        externalId.c_str(), iconPath.c_str(), summary.c_str(), body.c_str(),
-        cActionStrings.data(), cActionStrings.size(), timeout);
+    SwiftNotify::sendNotification(externalId.c_str(), iconPath.c_str(),
+                                  summary.c_str(), body.c_str(), actionsArray,
+                                  timeout);
 
     return internalId_;
 }
@@ -79,7 +78,8 @@ void Notifications::showTip(const std::string &tipId,
     if (hiddenNotifications_.count(tipId)) {
         return;
     }
-    std::vector<std::string> actions = {"dont-show", "Do not show again"};
+    std::vector<std::string> actions = {
+        "dont-show", translateDomain("fcitx5", "Do not show again")};
     lastTipId_ = sendNotification(
         appName, lastTipId_, appIcon, summary, body, actions, timeout,
         [this, tipId](const std::string &action) {

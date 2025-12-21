@@ -19,6 +19,10 @@ fcitx5_import_addons(config-cpp
 )
 add_test(NAME config-cpp COMMAND config-cpp)
 
+add_executable(icon-cpp testicon.cpp)
+target_link_libraries(icon-cpp Fcitx5Objs SwiftFrontend)
+add_test(NAME icon-cpp COMMAND icon-cpp)
+
 # CustomPhrase .plist parser
 add_executable(XmlParser testxmlparser.swift
     ${PROJECT_SOURCE_DIR}/src/config/xmlparser.swift

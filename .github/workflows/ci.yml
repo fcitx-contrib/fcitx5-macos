@@ -81,7 +81,10 @@ jobs:
           ./scripts/code-sign.sh # after tar to avoid local signature in tarball
 
       - name: Test
-        run: ctest --test-dir build/${{ matrix.arch }} --output-on-failure
+        run: |
+          ICON_DIR=~/Library/fcitx5/share/icons/hicolor/48x48/apps
+          mkdir -p $ICON_DIR && touch $ICON_DIR/fcitx_rime_deploy.png
+          ctest --test-dir build/${{ matrix.arch }} --output-on-failure
 
       - name: Upload artifact
         uses: actions/upload-artifact@v5
