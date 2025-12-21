@@ -41,32 +41,6 @@ public class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
   }
 }
 
-@_cdecl("sendNotificationProxy")
-public func sendNotificationProxy(
-  _ identifier: UnsafePointer<CChar>,
-  _ iconPath: UnsafePointer<CChar>,
-  _ title: UnsafePointer<CChar>,
-  _ body: UnsafePointer<CChar>,
-  _ cActionStrings: UnsafePointer<UnsafePointer<CChar>>?,
-  _ cActionStringCount: Int,
-  _ timeout: Double
-) {
-  var actionStrings: [String] = []
-  if let cActionStrings = cActionStrings {
-    for i in 0..<cActionStringCount {
-      actionStrings.append(String.init(cString: cActionStrings[i]))
-    }
-  }
-  sendNotification(
-    String.init(cString: identifier),
-    String.init(cString: iconPath),
-    String.init(cString: title),
-    String.init(cString: body),
-    actionStrings,
-    timeout
-  )
-}
-
 public func sendNotification(
   _ identifier: String,
   _ iconPath: String,
@@ -74,7 +48,7 @@ public func sendNotification(
   _ actionStrings: [String],
   _ timeout: Double
 ) {
-  DispatchQueue.main.async {
+  Task { @MainActor in
     let categoryIdent = "ACTION_CATEGORY_\(identifier)"
     var actions: [UNNotificationAction] = []
     for i in stride(from: 0, to: actionStrings.count, by: 2) {
@@ -126,13 +100,13 @@ public func sendNotification(
 
     let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
 
-    center.add(request) { error in
-      if let error = error {
-        FCITX_ERROR("Cannot send notification: \(error.localizedDescription)")
-      }
-      DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
-        closeNotification(identifier, NOTIFICATION_CLOSED_REASON_EXPIRY.rawValue)
-      }
+    do {
+      try await center.add(request)
+    } catch {
+      FCITX_ERROR("Cannot send notification: \(error.localizedDescription)")
+    }
+    DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
+      closeNotification(identifier, NOTIFICATION_CLOSED_REASON_EXPIRY.rawValue)
     }
   }
 }
