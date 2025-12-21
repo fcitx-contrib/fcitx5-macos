@@ -56,8 +56,7 @@ uint32_t Notifications::sendNotification(
     itemTable_.insert(item);
 
     // Find appIcon file.
-    static const std::vector<std::string> iconExtensions{".png"};
-    auto iconPath = iconTheme_->findIconPath(appIcon, 48, 1, iconExtensions);
+    auto iconPath = iconTheme_->findIconPath(appIcon, 48, 1, {".png"});
 
     // Send the notification.
     auto actionsArray = swift::Array<swift::String>::init();
@@ -79,7 +78,8 @@ void Notifications::showTip(const std::string &tipId,
     if (hiddenNotifications_.count(tipId)) {
         return;
     }
-    std::vector<std::string> actions = {"dont-show", translateDomain("fcitx5", "Do not show again")};
+    std::vector<std::string> actions = {
+        "dont-show", translateDomain("fcitx5", "Do not show again")};
     lastTipId_ = sendNotification(
         appName, lastTipId_, appIcon, summary, body, actions, timeout,
         [this, tipId](const std::string &action) {

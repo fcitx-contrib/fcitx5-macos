@@ -135,6 +135,8 @@ void Fcitx::setupEnv() {
                     // plugins when Fcitx.app is reinstalled
                     user_prefix / "lib" / "fcitx5"});
     std::string xdg_data_dirs = join_paths({
+        app_contents_path /
+            "share", // /Library/Input Methods/Fcitx5.app/Contents/share
         user_prefix / "share" // ~/Library/fcitx5/share
     });
     std::string libime_model_dirs = join_paths({
