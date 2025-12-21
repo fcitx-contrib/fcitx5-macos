@@ -182,10 +182,10 @@ MacosInputContext *MacosFrontend::findIC(ICUUID uuid) {
         instance_->inputContextManager().findByUUID(uuid));
 }
 
-ICUUID MacosFrontend::createInputContext(const std::string &appId, id client,
+ICUUID MacosFrontend::createInputContext(const std::string &appId,
                                          const std::string &accentColor) {
     auto ic = new MacosInputContext(this, instance_->inputContextManager(),
-                                    appId, client, accentColor);
+                                    appId, accentColor);
     ic->setFocusGroup(&focusGroup_);
     FCITX_INFO() << "Create IC for " << appId;
     return ic->uuid();
@@ -286,18 +286,14 @@ void MacosFrontend::focusOut(ICUUID uuid) {
 
 MacosInputContext::MacosInputContext(MacosFrontend *frontend,
                                      InputContextManager &inputContextManager,
-                                     const std::string &program, id client,
+                                     const std::string &program,
                                      const std::string &accentColor)
     : InputContext(inputContextManager, program), frontend_(frontend),
-      client_(client), accentColor_(accentColor) {
-    CFRetain(client_);
+      accentColor_(accentColor) {
     created();
 }
 
-MacosInputContext::~MacosInputContext() {
-    CFRelease(client_);
-    destroy();
-}
+MacosInputContext::~MacosInputContext() { destroy(); }
 
 void MacosInputContext::commitStringImpl(const std::string &text) {
     state_.commit += text;
@@ -307,7 +303,7 @@ void MacosInputContext::commitStringImpl(const std::string &text) {
     if (!isSyncEvent) {
         // When changing this, test Messages.app by clicking a candidate.
         // Previously buggy behavior is that preedit is appended after commit.
-        SwiftFrontend::commitAsync(client_, state_.commit);
+        SwiftFrontend::commitAsync(state_.commit);
         resetState();
     }
 }
@@ -333,16 +329,15 @@ std::string MacosInputContext::popState(bool accepted) {
 void MacosInputContext::commitAndSetPreeditAsync() {
     auto state = state_;
     resetState();
-    SwiftFrontend::commitAndSetPreeditAsync(client_, state.commit,
-                                            state.preedit, state.caretPos,
-                                            state.dummyPreedit);
+    SwiftFrontend::commitAndSetPreeditAsync(state.commit, state.preedit,
+                                            state.caretPos, state.dummyPreedit);
 }
 
 std::tuple<double, double, double>
 MacosInputContext::getCaretCoordinates(bool followCaret) {
     // Memorize to avoid jumping to origin on failure.
     static double x = 0, y = 0, height = 0;
-    auto res = SwiftFrontend::getCaretCoordinates(client_, followCaret);
+    auto res = SwiftFrontend::getCaretCoordinates(followCaret);
     if (res.getCount() == 3) {
         x = res[0];
         y = res[1];
@@ -376,10 +371,10 @@ std::string process_key(ICUUID uuid, uint32_t unicode, uint32_t osxModifiers,
     });
 }
 
-ICUUID create_input_context(const char *appId, id client,
+ICUUID create_input_context(const char *appId,
                             const char *accentColor) noexcept {
     return with_fcitx([=](Fcitx &fcitx) {
-        return fcitx.frontend()->createInputContext(appId, client, accentColor);
+        return fcitx.frontend()->createInputContext(appId, accentColor);
     });
 }
 

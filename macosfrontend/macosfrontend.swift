@@ -114,34 +114,27 @@ public func commitAndSetPreeditSync(
 }
 
 public func commitAndSetPreeditAsync(
-  _ clientPtr: UnsafeMutableRawPointer, _ commit: String, _ preedit: String, _ caretPos: Int,
-  _ dummyPreedit: Bool
+  _ commit: String, _ preedit: String, _ caretPos: Int, _ dummyPreedit: Bool
 ) {
-  let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
-  guard let client = client as? IMKTextInput else {
-    return
-  }
-  DispatchQueue.main.async {
+  Task { @MainActor in
+    guard let client = controller?.client() as? IMKTextInput else {
+      return
+    }
     commitAndSetPreeditSync(client, commit, preedit, caretPos, dummyPreedit)
   }
 }
 
-public func commitAsync(_ clientPtr: UnsafeMutableRawPointer, _ commit: String) {
-  let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
-  guard let client = client as? IMKTextInput else {
-    return
-  }
-  DispatchQueue.main.async {
+public func commitAsync(_ commit: String) {
+  Task { @MainActor in
+    guard let client = controller?.client() as? IMKTextInput else {
+      return
+    }
     commitString(client, commit)
   }
 }
 
-public func getCaretCoordinates(
-  _ clientPtr: UnsafeMutableRawPointer,
-  _ followCaret: Bool,
-) -> [Double] {
-  let client: AnyObject = Unmanaged.fromOpaque(clientPtr).takeUnretainedValue()
-  guard let client = client as? IMKTextInput else {
+public func getCaretCoordinates(_ followCaret: Bool) -> [Double] {
+  guard let client = controller?.client() as? IMKTextInput else {
     return []
   }
   var rect = NSRect(x: 0, y: 0, width: 0, height: 0)
