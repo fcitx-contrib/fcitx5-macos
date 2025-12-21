@@ -87,7 +87,7 @@ public:
         updateConfig();
     }
 
-    ICUUID createInputContext(const std::string &appId, id client,
+    ICUUID createInputContext(const std::string &appId,
                               const std::string &accentColor);
     void destroyInputContext(ICUUID);
     std::string keyEvent(ICUUID, const Key &key, bool isRelease,
@@ -130,7 +130,7 @@ class MacosInputContext : public InputContext {
 public:
     MacosInputContext(MacosFrontend *frontend,
                       InputContextManager &inputContextManager,
-                      const std::string &program, id client,
+                      const std::string &program,
                       const std::string &accentColor);
     ~MacosInputContext();
 
@@ -141,7 +141,6 @@ public:
     void updatePreeditImpl() override;
 
     std::tuple<double, double, double> getCaretCoordinates(bool followCaret);
-    id client() { return client_; }
     std::string getAccentColor() { return accentColor_; }
 
     void resetState() {
@@ -166,7 +165,6 @@ public:
 
 private:
     MacosFrontend *frontend_;
-    id client_;
     InputContextState state_;
     std::string accentColor_;
     bool vimMode_ = false;

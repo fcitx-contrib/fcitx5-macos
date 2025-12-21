@@ -43,12 +43,9 @@ class FcitxInputController: IMKInputController {
       appId = ""
     }
     self.client = client
-    self.uuid = create_input_context(appId, client, accentColor)
+    self.uuid = create_input_context(appId, accentColor)
     super.init(server: server, delegate: delegate, client: client)
     FcitxInputController.registry.add(self)
-    // Do not clear in deinit, otherwise it will crash with
-    // "Simultaneous accesses to 0x100e05650, but modification requires exclusive access."
-    setController(self)
   }
 
   deinit {
@@ -60,7 +57,7 @@ class FcitxInputController: IMKInputController {
     // The old fcitx input context was automatically destroyed when
     // restarting fcitx thread. So just start a new one here.
     FCITX_DEBUG("Reconnecting to \(appId), client = \(String(describing: client))")
-    uuid = create_input_context(appId, client, accentColor)
+    uuid = create_input_context(appId, accentColor)
   }
 
   override func commitComposition(_ sender: Any!) {
@@ -196,6 +193,7 @@ class FcitxInputController: IMKInputController {
     if let client = client as? IMKTextInput {
       client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.ABC")
     }
+    setController(self)
     // Make sure status bar is updated on click password input, before first key event.
     let isPassword = getSecureInputInfo(isOnFocus: true)
     focus_in(uuid, isPassword)
