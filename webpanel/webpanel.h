@@ -208,6 +208,8 @@ FCITX_CONFIGURATION(
     ScrollConfig,
     Option<bool> enableScroll{this, "EnableScroll", _("Enable scroll"), true};
     Option<bool> autoExpand{this, "AutoExpand", _("Auto expand"), false};
+    Option<bool> showScrollBar{this, "ShowScrollBar", _("Show scroll bar"),
+                               true};
     Option<bool> animation{this, "Animation", _("Animation"), true};
     Option<int, IntConstrain> maxRowCount{
         this, "MaxRowCount", _("Max row count"), 6, IntConstrain(2, 10)};
