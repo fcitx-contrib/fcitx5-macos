@@ -82,9 +82,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
           }
         }
         if let text = text {
-          AppDelegate.statusItemText = text
+          AppDelegate.statusItemText = prefixForStatusItem(text)
           if let button = AppDelegate.statusItem?.button {
-            button.title = text
+            button.title = AppDelegate.statusItemText
           }
         }
       }

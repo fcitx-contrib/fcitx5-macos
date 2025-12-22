@@ -52,3 +52,8 @@ add_executable(ColorSwift testcolor.swift
     ${PROJECT_SOURCE_DIR}/src/color.swift
 )
 add_test(NAME ColorSwift COMMAND ColorSwift)
+
+add_executable(StatusSwift teststatus.swift
+    ${PROJECT_SOURCE_DIR}/src/status.swift
+)
+add_test(NAME StatusSwift COMMAND StatusSwift)
