@@ -106,6 +106,7 @@ add_subdirectory(fcitx5-beast/src)
 
 add_subdirectory(src)
 add_subdirectory(assets)
+add_subdirectory(po)
 
 enable_testing()
 add_subdirectory(tests)

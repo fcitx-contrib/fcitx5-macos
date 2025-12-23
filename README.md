@@ -6,13 +6,13 @@ English
 
 [Fcitx5](https://github.com/fcitx/fcitx5) input method framework ported to macOS.
 
-Please download [installer](https://github.com/fcitx-contrib/fcitx5-macos-installer).
+Please download [installer](https://github.com/fcitx-contrib/fcitx5-macos-installer) and read [documentation](https://fcitx-contrib.github.io/docs/).
 
 ## Build
 Native build on Intel and Apple Silicon is supported.
 
 This is NOT an Xcode project,
-but Xcode is needed for Swift compiler.
+but Xcode >= 26 is needed for Swift compiler.
 
 ### Install dependencies
 You may use [nvm](https://github.com/nvm-sh/nvm)
@@ -98,14 +98,14 @@ cmake --build build/$(uname -m) --target pot
 
 To add a new language, do
 ```sh
-cd assets/po && msginit -l <locale>
+cd po && msginit -l <locale>
 ```
 
 Then, use a PO file editor to translate strings.
 
 Finally, to merge new strings into PO files, do
 ```sh
-cd assets/po && msgmerge -U <locale>.po base.pot
+cd po && msgmerge -U <locale>.po base.pot
 ```
 
 ## Credits
