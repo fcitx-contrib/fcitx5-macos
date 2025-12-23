@@ -555,3 +555,11 @@ msgstr "尺寸"
 #: webpanel/webpanel.h:396
 msgid "Advanced"
 msgstr "進階"
+
+#: macosfrontend/macosfrontend.conf.in.in:2
+msgid "macOS Frontend"
+msgstr "macOS 前端"
+
+#: macosnotifications/notifications.conf.in.in:2
+msgid "macOS Notification"
+msgstr "macOS 通知"

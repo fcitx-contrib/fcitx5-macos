@@ -89,5 +89,3 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Base.lproj"
 foreach(LPROJ_DIR IN LISTS LPROJ_DIRS)
     install(DIRECTORY "${LPROJ_DIR}" DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources")
 endforeach()
-
-add_subdirectory(po)
