@@ -25,9 +25,11 @@ private func isJetBrains(_ app: String) -> Bool {
 }
 
 private var controller: IMKInputController? = nil
+private var client: IMKTextInput? = nil
 
-public func setController(_ ctrl: Any) {
+public func setController(_ ctrl: Any, _ cli: Any?) {
   controller = ctrl as? IMKInputController
+  client = cli as? IMKTextInput
 }
 
 private var statusItemCallback: ((Int32?, String?) -> Void)? = nil
@@ -117,7 +119,7 @@ public func commitAndSetPreeditAsync(
   _ commit: String, _ preedit: String, _ caretPos: Int, _ dummyPreedit: Bool
 ) {
   Task { @MainActor in
-    guard let client = controller?.client() as? IMKTextInput else {
+    guard let client = client else {
       return
     }
     commitAndSetPreeditSync(client, commit, preedit, caretPos, dummyPreedit)
@@ -126,7 +128,7 @@ public func commitAndSetPreeditAsync(
 
 public func commitAsync(_ commit: String) {
   Task { @MainActor in
-    guard let client = controller?.client() as? IMKTextInput else {
+    guard let client = client else {
       return
     }
     commitString(client, commit)
@@ -134,7 +136,7 @@ public func commitAsync(_ commit: String) {
 }
 
 public func getCaretCoordinates(_ followCaret: Bool) -> [Double] {
-  guard let client = controller?.client() as? IMKTextInput else {
+  guard let client = client else {
     return []
   }
   var rect = NSRect(x: 0, y: 0, width: 0, height: 0)

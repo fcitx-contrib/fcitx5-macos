@@ -520,15 +520,12 @@ void WebPanel::showAsync(bool show) {
     dispatch_async(dispatch_get_main_queue(), ^void() {
       if (auto window = weakWindow.lock()) {
           if (show) {
-              if (auto ic = dynamic_cast<MacosInputContext *>(
-                      instance_->mostRecentInputContext())) {
-                  // MacosInputContext::updatePreeditImpl is executed before
-                  // WebPanel::update, so in main thread preedit UI update
-                  // happens before here.
-                  auto [x, y, height] = ic->getCaretCoordinates(
-                      config_.basic->followCaret.value());
-                  window->show(x, y, height);
-              }
+              // MacosInputContext::updatePreeditImpl is executed before
+              // WebPanel::update, so in main thread preedit UI update
+              // happens before here.
+              auto [x, y, height] = MacosInputContext::getCaretCoordinates(
+                  config_.basic->followCaret.value());
+              window->show(x, y, height);
           } else {
               window->hide();
           }

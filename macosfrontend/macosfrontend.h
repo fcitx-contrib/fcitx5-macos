@@ -140,7 +140,8 @@ public:
     void forwardKeyImpl(const ForwardKeyEvent &key) override {}
     void updatePreeditImpl() override;
 
-    std::tuple<double, double, double> getCaretCoordinates(bool followCaret);
+    static std::tuple<double, double, double>
+    getCaretCoordinates(bool followCaret);
     std::string getAccentColor() { return accentColor_; }
 
     void resetState() {

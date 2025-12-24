@@ -46,6 +46,7 @@ class FcitxInputController: IMKInputController {
     self.uuid = create_input_context(appId, accentColor)
     super.init(server: server, delegate: delegate, client: client)
     FcitxInputController.registry.add(self)
+    setController(self, self.client)
   }
 
   deinit {
@@ -193,7 +194,7 @@ class FcitxInputController: IMKInputController {
     if let client = client as? IMKTextInput {
       client.overrideKeyboard(withKeyboardNamed: "com.apple.keylayout.ABC")
     }
-    setController(self)
+    setController(self, self.client)
     // Make sure status bar is updated on click password input, before first key event.
     let isPassword = getSecureInputInfo(isOnFocus: true)
     focus_in(uuid, isPassword)
