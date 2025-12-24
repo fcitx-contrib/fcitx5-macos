@@ -17,11 +17,13 @@ func testGrayScale() {
   assert(nsColorToString(grayColor) == "#808080FF")
 }
 
+@MainActor
 func testGetAccentColor() {
   let accentColor = getAccentColor("com.apple.Notes")
   assert(accentColor == "#FCB827FF")
 }
 
+@MainActor
 @_cdecl("main")
 func main() -> Int {
   testGrayScale()

@@ -1,6 +1,7 @@
 import Cocoa
 import Fcitx
 
+@MainActor
 func restartAndReconnect(_ actionBetween: (() -> Void)? = nil) {
   stop_fcitx_thread()
   actionBetween?()

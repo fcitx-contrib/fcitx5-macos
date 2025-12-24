@@ -11,8 +11,10 @@ public func nsColorToString(_ color: NSColor) -> String? {
   return String(format: "#%02X%02X%02X%02X", red, green, blue, alpha)
 }
 
+@MainActor
 private var colorMap = [String: String]()
 
+@MainActor
 func getAccentColor(_ id: String) -> String {
   if let cachedColor = colorMap[id] {
     return cachedColor
