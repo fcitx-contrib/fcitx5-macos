@@ -143,6 +143,15 @@ class FcitxInputController: IMKInputController {
     guard let event = event, sender as? IMKTextInput != nil else {
       return false
     }
+    // There is no guarantee that an app calls activateServer for a visually focused client.
+    // e.g. after accessing a website in Safari address bar, type something, Esc several times
+    // to blur, drag the browser to somewhere else, click the address bar and type, the candidate
+    // window is placed in wrong position (actually the most recent call is deactivateServer wtf).
+    // Fortunately handle is called regardless of activateServer call. IMK being IMK.
+    // Before 7244f30 the client is stored in C++ side, thus calling ic->focusIn inside
+    // MacosFrontend::keyEvent lets the correct client be used by getCaretCoordinates, which serves
+    // the same purpose here.
+    setController(self, self.client)
 
     let code = event.keyCode
     let mods = event.modifierFlags
