@@ -1,8 +1,8 @@
 import AppKit
 import InputMethodKit
 
-private var u16pos = 0
-private var currentPreedit = ""
+nonisolated(unsafe) private var u16pos = 0
+nonisolated(unsafe) private var currentPreedit = ""
 
 private let zeroWidthSpace = "\u{200B}"
 
@@ -24,8 +24,9 @@ private func isJetBrains(_ app: String) -> Bool {
   return app == "com.google.android.studio" || app.starts(with: "com.jetbrains.")
 }
 
-private var controller: IMKInputController? = nil
-private var client: IMKTextInput? = nil
+nonisolated(unsafe) private var controller: IMKInputController? = nil
+
+nonisolated(unsafe) private var client: IMKTextInput? = nil
 
 public func setController(_ ctrl: Any, _ cli: Any?) {
   controller = ctrl as? IMKInputController
@@ -141,6 +142,8 @@ public func commitAsync(_ commit: String) {
   }
 }
 
+// It's called from C++ within dispatch_async(dispatch_get_main_queue())
+// so we can mark corresponding variables as nonisolated(unsafe).
 public func getCaretCoordinates(_ followCaret: Bool) -> [Double] {
   guard let client = client else {
     return []

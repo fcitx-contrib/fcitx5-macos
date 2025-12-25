@@ -16,7 +16,6 @@ struct SyncResponse: Codable {
 let capsLock = 65536
 let shift = 131072
 
-@MainActor
 class FcitxInputController: IMKInputController {
   var uuid: ICUUID
   var appId: String
@@ -36,7 +35,6 @@ class FcitxInputController: IMKInputController {
   // connection. We use the finest granularity here (one InputContext
   // for one IMKTextInput), and pass the bundle identifier to let
   // libfcitx handle the heavylifting.
-  @MainActor
   override init(server: IMKServer!, delegate: Any!, client: Any!) {
     if let client = client as? IMKTextInput {
       appId = client.bundleIdentifier() ?? ""

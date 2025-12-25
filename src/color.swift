@@ -11,10 +11,9 @@ public func nsColorToString(_ color: NSColor) -> String? {
   return String(format: "#%02X%02X%02X%02X", red, green, blue, alpha)
 }
 
-@MainActor
-private var colorMap = [String: String]()
+nonisolated(unsafe) private var colorMap = [String: String]()
 
-@MainActor
+// The caller is actually @MainActor but can't be marked that way given it's an override of non-@MainActor method.
 func getAccentColor(_ id: String) -> String {
   if let cachedColor = colorMap[id] {
     return cachedColor
