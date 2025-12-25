@@ -3,14 +3,17 @@ import Logging
 import UserNotifications
 
 /// The notification center of the current app.
+@MainActor
 let center = UNUserNotificationCenter.current()
 
 public class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
+  @MainActor
   public override init() {
     super.init()
     center.delegate = self
   }
 
+  @MainActor
   public func requestAuthorization() {
     center.requestAuthorization(options: [.alert, .sound]) { (granted, error) in
       if let error = error {

@@ -38,8 +38,8 @@ private func signalHandler(signal: Int32) {
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
-  static var server = IMKServer()
-  static var notificationDelegate = NotificationDelegate()
+  static var server: IMKServer!
+  static var notificationDelegate: NotificationDelegate!
   static var statusItem: NSStatusItem?
   static var statusItemText: String = "🐧"
 
@@ -92,6 +92,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       bundleIdentifier: Bundle.main.bundleIdentifier)
 
     // Initialize notifications.
+    AppDelegate.notificationDelegate = NotificationDelegate()
     AppDelegate.notificationDelegate.requestAuthorization()
 
     let locale = getLocale()
