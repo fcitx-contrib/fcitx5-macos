@@ -32,18 +32,24 @@ public func setController(_ ctrl: Any, _ cli: Any?) {
   client = cli as? IMKTextInput
 }
 
+@MainActor
 private var statusItemCallback: ((Int32?, String?) -> Void)? = nil
 
+@MainActor
 public func setStatusItemCallback(_ callback: @escaping (Int32?, String?) -> Void) {
   statusItemCallback = callback
 }
 
 public func setStatusItemText(_ text: String) {
-  statusItemCallback?(nil, text)
+  Task { @MainActor in
+    statusItemCallback?(nil, text)
+  }
 }
 
 public func setStatusItemMode(_ mode: Int32) {
-  statusItemCallback?(mode, nil)
+  Task { @MainActor in
+    statusItemCallback?(mode, nil)
+  }
 }
 
 private func commitString(_ client: IMKTextInput, _ string: String) {

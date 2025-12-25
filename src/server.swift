@@ -49,43 +49,40 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     signal(SIGTERM, signalHandler)
 
     setStatusItemCallback { mode, text in
-      // Main thread could call fcitx thread which then calls this, so must be async.
-      DispatchQueue.main.async { [self] in
-        if let mode = mode {
-          if mode == 0 {  // Hidden
-            AppDelegate.statusItem = nil
-          } else {
-            // NSStatusItem.variableLength causes layout shift of icons on the left when switching between en and 拼.
-            let statusItem: NSStatusItem = NSStatusBar.system.statusItem(
-              withLength: NSStatusItem.squareLength)
-            AppDelegate.statusItem = statusItem
-            if let button = statusItem.button {
-              button.title = AppDelegate.statusItemText
-              button.target = self
-              if mode == 1 {  // Toggle input method
-                button.action = #selector(toggle)
-              } else  // Menu
-              {
-                let menu = NSMenu()
-                menu.addItem(
-                  NSMenuItem(
-                    title: NSLocalizedString("Toggle input method", comment: ""),
-                    action: #selector(toggle), keyEquivalent: ""))
-                menu.addItem(NSMenuItem.separator())
-                menu.addItem(
-                  NSMenuItem(
-                    title: NSLocalizedString("Hide", comment: ""),
-                    action: #selector(hide), keyEquivalent: ""))
-                statusItem.menu = menu
-              }
+      if let mode = mode {
+        if mode == 0 {  // Hidden
+          AppDelegate.statusItem = nil
+        } else {
+          // NSStatusItem.variableLength causes layout shift of icons on the left when switching between en and 拼.
+          let statusItem: NSStatusItem = NSStatusBar.system.statusItem(
+            withLength: NSStatusItem.squareLength)
+          AppDelegate.statusItem = statusItem
+          if let button = statusItem.button {
+            button.title = AppDelegate.statusItemText
+            button.target = self
+            if mode == 1 {  // Toggle input method
+              button.action = #selector(self.toggle)
+            } else  // Menu
+            {
+              let menu = NSMenu()
+              menu.addItem(
+                NSMenuItem(
+                  title: NSLocalizedString("Toggle input method", comment: ""),
+                  action: #selector(self.toggle), keyEquivalent: ""))
+              menu.addItem(NSMenuItem.separator())
+              menu.addItem(
+                NSMenuItem(
+                  title: NSLocalizedString("Hide", comment: ""),
+                  action: #selector(self.hide), keyEquivalent: ""))
+              statusItem.menu = menu
             }
           }
         }
-        if let text = text {
-          AppDelegate.statusItemText = prefixForStatusItem(text)
-          if let button = AppDelegate.statusItem?.button {
-            button.title = AppDelegate.statusItemText
-          }
+      }
+      if let text = text {
+        AppDelegate.statusItemText = prefixForStatusItem(text)
+        if let button = AppDelegate.statusItem?.button {
+          button.title = AppDelegate.statusItemText
         }
       }
     }
