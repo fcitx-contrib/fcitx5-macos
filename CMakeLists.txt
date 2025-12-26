@@ -22,6 +22,7 @@ set(F5M_TARGET "${CMAKE_OSX_ARCHITECTURES}-apple-macos${CMAKE_OSX_DEPLOYMENT_TAR
 add_compile_options(-target "${F5M_TARGET}")
 add_link_options(-target "${F5M_TARGET}")
 
+set(CMAKE_Swift_LANGUAGE_VERSION 6)
 # Disallow InitializeSwift to execute link_directories which adds Xcode paths to rpath.
 set(SWIFT_LIBRARY_SEARCH_PATHS "")
 include(InitializeSwift)

@@ -5,6 +5,7 @@ import SwiftUI
 import SwiftyJSON
 import UniformTypeIdentifiers
 
+@MainActor
 struct Plugin: Identifiable, Hashable {
   let id: String
   let category: String
@@ -13,12 +14,14 @@ struct Plugin: Identifiable, Hashable {
   var dependencies: [String] = []
 }
 
-private var pluginMap = officialPlugins.reduce(into: [String: Plugin]()) { result, plugin in
+private let pluginMap = officialPlugins.reduce(into: [String: Plugin]()) { result, plugin in
   result[plugin.id] = plugin
 }
 
 // fcitx5 doesn't unload addons from memory, so once loaded, we have to restart process to use an updated version.
+@MainActor
 private var inMemoryPlugins = [String]()
+@MainActor
 private var needsRestart = false
 
 private func getInstalledPlugins() -> [Plugin] {
@@ -46,6 +49,7 @@ private func getAutoAddIms(_ plugin: String) -> [String] {
   return json["input_methods"].arrayValue.map { $0.stringValue }
 }
 
+@MainActor
 class PluginVM: ObservableObject {
   @Published private(set) var installedPlugins = [Plugin]()
   @Published private(set) var availablePlugins = [Plugin]()
@@ -233,6 +237,8 @@ struct PluginView: View {
         pluginVM.dataAvailable.removeAll()
 
         var countedPlugins = Set<String>()
+
+        @MainActor
         func helper(_ plugin: String) {
           if countedPlugins.contains(plugin) {
             return

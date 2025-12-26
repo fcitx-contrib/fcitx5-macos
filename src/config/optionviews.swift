@@ -454,6 +454,7 @@ struct UnsupportedOptionView: OptionView {
   }
 }
 
+@MainActor
 func buildViewImpl(label: String, option: any Option) -> any OptionView {
   if let option = option as? BooleanOption {
     return BooleanOptionView(label: label, model: option)
@@ -506,6 +507,7 @@ func buildViewImpl(label: String, option: any Option) -> any OptionView {
   }
 }
 
+@MainActor
 func buildViewImpl(config: Config) -> any OptionView {
   switch config.kind {
   case .group(let children):
@@ -515,6 +517,7 @@ func buildViewImpl(config: Config) -> any OptionView {
   }
 }
 
+@MainActor
 func buildView(config: Config) -> AnyView {
   AnyView(buildViewImpl(config: config))
 }

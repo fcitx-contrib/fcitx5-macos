@@ -12,6 +12,7 @@ func restartAndReconnect(_ actionBetween: (() -> Void)? = nil) {
 }
 
 // Don't call it synchronously in SwiftUI as it will make IM temporarily unavailable in focused client.
+@MainActor
 func restartProcess() {
   NSApp.terminate(nil)
 }
@@ -41,6 +42,7 @@ extension FcitxInputController {
     openWindow("plugin", PluginManager.self)
   }
 
+  @MainActor
   @objc func restart(_: Any? = nil) {
     restartProcess()
   }
