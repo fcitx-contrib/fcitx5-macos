@@ -294,8 +294,9 @@ struct AboutView: View {
     // It's necessary to disable not only for cleaning up.
     // Without this, if user cancels sudo prompt and try again, UI will hang.
     disableInputMethod()
+    let userDataParam = removeUserData ? "true" : "false"
     DispatchQueue.global().async {
-      if !sudo("uninstall", removeUserData ? "true" : "false", uninstallLog) {
+      if !sudo("uninstall", userDataParam, uninstallLog) {
         DispatchQueue.main.async {
           uninstalling = false
           uninstallFailed = true

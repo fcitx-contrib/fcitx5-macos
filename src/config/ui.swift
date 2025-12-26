@@ -25,6 +25,7 @@ extension View {
   }
 }
 
+@MainActor
 func footer(reset: @escaping () -> Void, apply: @escaping () -> Void, close: @escaping () -> Void)
   -> some View
 {
@@ -143,6 +144,7 @@ struct SelectFileButton<Label>: View where Label: View {
   }
 }
 
+@MainActor
 func selectApplication(_ openPanel: NSOpenPanel, onFinish: @escaping (String) -> Void) {
   openPanel.allowsMultipleSelection = false
   openPanel.canChooseDirectories = false
