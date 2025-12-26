@@ -8,12 +8,13 @@ private let tableDir = dataDir.appendingPathComponent("data/table")
 private let f5aRimeDir = dataDir.appendingPathComponent("data/rime")
 let hamsterRimeDir = extractDir.appendingPathComponent("HamsterBackup/RIME/Rime")
 
+@MainActor
 struct ImportableItem: Identifiable {
   let id = UUID()
-  var name: String
+  let name: String
   var enabled: Bool
-  var exists: () -> Bool
-  var doImport: () -> Bool
+  let exists: () -> Bool
+  let doImport: () -> Bool
 }
 
 private func rimeExcluded(_ rimeDir: URL) -> [String] {
@@ -51,6 +52,7 @@ private func importRime(_ getter: (URL) -> [String], _ rimeDir: URL) -> Bool {
   }.allSatisfy { $0 }
 }
 
+@MainActor
 private func importableRimeConfig(_ rimeDir: URL) -> ImportableItem {
   return ImportableItem(
     name: NSLocalizedString("Rime config", comment: ""), enabled: true,
@@ -62,6 +64,7 @@ private func importableRimeConfig(_ rimeDir: URL) -> ImportableItem {
     })
 }
 
+@MainActor
 private func importableRimeBin(_ rimeDir: URL) -> ImportableItem {
   return ImportableItem(
     name: NSLocalizedString("Rime binaries", comment: ""), enabled: false,
@@ -73,6 +76,7 @@ private func importableRimeBin(_ rimeDir: URL) -> ImportableItem {
     })
 }
 
+@MainActor
 private func importableRimeUser(_ rimeDir: URL) -> ImportableItem {
   return ImportableItem(
     name: NSLocalizedString("Rime user data", comment: ""), enabled: false,
@@ -84,18 +88,21 @@ private func importableRimeUser(_ rimeDir: URL) -> ImportableItem {
     })
 }
 
+@MainActor
 let squirrelItems = [
   importableRimeConfig(extractDir),
   importableRimeBin(extractDir),
   importableRimeUser(extractDir),
 ]
 
+@MainActor
 let hamsterItems = [
   importableRimeConfig(hamsterRimeDir),
   importableRimeBin(hamsterRimeDir),
   importableRimeUser(hamsterRimeDir),
 ]
 
+@MainActor
 let f5aItems = [
   ImportableItem(
     name: NSLocalizedString("Global Config", comment: ""), enabled: false,
@@ -199,6 +206,7 @@ let f5aItems = [
   importableRimeUser(f5aRimeDir),
 ]
 
+@MainActor
 let f5mItems = [
   ImportableItem(
     name: NSLocalizedString("Config", comment: ""), enabled: true,
@@ -225,6 +233,7 @@ class ImportDataVM: ObservableObject {
   @Published var importableItems = [ImportableItem]()
   @Published var items = [ImportableItem]()
 
+  @MainActor
   func refresh(_ importableItems: [ImportableItem]) {
     self.importableItems = importableItems
     self.items = importableItems.filter { $0.exists() }
