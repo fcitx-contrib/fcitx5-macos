@@ -634,6 +634,7 @@ class InputDialog: ObservableObject {
     presented = true
   }
 
+  @MainActor
   @ViewBuilder
   func view() -> some View {
     let myBinding = Binding(

@@ -17,8 +17,9 @@ func restartProcess() {
 }
 
 extension FcitxInputController {
-  static var controllers = [String: ConfigWindowController]()
+  @MainActor static var controllers = [String: ConfigWindowController]()
 
+  @MainActor
   func openWindow(_ key: String, _ type: ConfigWindowController.Type) {
     var controller = FcitxInputController.controllers[key]
     if controller == nil {
@@ -30,10 +31,12 @@ extension FcitxInputController {
     controller?.showWindow(nil)
   }
 
+  @MainActor
   static func closeWindow(_ key: String) {
     FcitxInputController.controllers[key]?.window?.performClose(nil)
   }
 
+  @MainActor
   @objc func plugin(_: Any? = nil) {
     openWindow("plugin", PluginManager.self)
   }
@@ -42,22 +45,27 @@ extension FcitxInputController {
     restartProcess()
   }
 
+  @MainActor
   @objc func about(_: Any? = nil) {
     openWindow("about", FcitxAboutController.self)
   }
 
+  @MainActor
   @objc func globalConfig(_: Any? = nil) {
     openWindow("global", GlobalConfigController.self)
   }
 
+  @MainActor
   @objc func inputMethod(_: Any? = nil) {
     openWindow("im", InputMethodConfigController.self)
   }
 
+  @MainActor
   @objc func themeEditor(_: Any? = nil) {
     openWindow("theme", ThemeEditorController.self)
   }
 
+  @MainActor
   @objc func advanced(_: Any? = nil) {
     openWindow("advanced", AdvancedController.self)
   }

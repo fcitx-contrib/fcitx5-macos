@@ -38,10 +38,10 @@ private func signalHandler(signal: Int32) {
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
-  static var server: IMKServer!
-  static var notificationDelegate: NotificationDelegate!
-  static var statusItem: NSStatusItem?
-  static var statusItemText: String = "🐧"
+  nonisolated(unsafe) static var server: IMKServer!
+  nonisolated(unsafe) static var notificationDelegate: NotificationDelegate!
+  nonisolated(unsafe) static var statusItem: NSStatusItem?
+  nonisolated(unsafe) static var statusItemText: String = "🐧"
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     redirectStderr()
