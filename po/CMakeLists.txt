@@ -27,5 +27,4 @@ add_custom_target(pot
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/base.pot
 )
 
-set(FCITX_INSTALL_LOCALEDIR "${CMAKE_INSTALL_PREFIX}/share/locale")
 fcitx5_install_translation(fcitx5-macos)
