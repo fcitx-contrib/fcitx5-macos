@@ -5,6 +5,9 @@ using json = nlohmann::json;
 std::pair<bool, std::string> remoteHandler(const std::string_view command,
                                            const char *body) {
     return with_fcitx([&](Fcitx &fcitx) -> std::pair<bool, std::string> {
+        if (command == "") {
+            return {true, std::format("{}\n", fcitx.instance()->state())};
+        }
         if (command == "c") {
             fcitx.instance()->deactivate();
             return {true, ""};

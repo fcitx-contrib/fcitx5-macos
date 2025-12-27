@@ -1,7 +1,9 @@
 #!/bin/zsh
 set -eu
 
-fcitx5_curl="/Library/Input Methods/Fcitx5.app/Contents/bin/fcitx5-curl"
+CONTENTS="/Library/Input Methods/Fcitx5.app/Contents"
+fcitx5_curl="${CONTENTS}/bin/fcitx5-curl"
+get_im="${CONTENTS}/Resources/get_im"
 
 print_help() {
   echo "Usage: fcitx5-remote [OPTION]"
@@ -10,11 +12,16 @@ print_help() {
   echo -e "-t,-T\t\tSwitch Active/Inactive"
   echo -e "-n\t\tGet current input method name"
   echo -e "-s <imname>\tSwitch to input method uniquely identified by <imname>"
+  echo -e "[no option]\tDisplay fcitx state, 0 for close, 1 for inactive, 2 for active"
   echo -e "-h\t\tDisplay this help and exit"
 }
 
 if [[ $# -eq 0 ]]; then
-  print_help
+  if [[ $($get_im) == org.fcitx.inputmethod.Fcitx5.* ]]; then
+    $fcitx5_curl "/remote/" -X POST
+  else
+    echo 0
+  fi
   exit 0
 fi
 
