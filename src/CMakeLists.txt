@@ -16,6 +16,7 @@ file(GLOB CONFIG_UI_FILES CONFIGURE_DEPENDS config/*.swift)
 
 add_library(Fcitx5Objs STATIC
     fcitx.cpp
+    remote.cpp
     tunnel.cpp
     config/config.cpp
 )

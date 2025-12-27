@@ -68,6 +68,7 @@ endif()
 
 set(APP_INSTALL_PATH "/Library/Input Methods")
 set(CMAKE_INSTALL_PREFIX "${APP_INSTALL_PATH}/Fcitx5.app/Contents")
+set(FCITX_INSTALL_LOCALEDIR "${CMAKE_INSTALL_PREFIX}/share/locale")
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # Reproducible
 set(CMAKE_INSTALL_LIBDATADIR "${CMAKE_INSTALL_PREFIX}/lib")
@@ -91,8 +92,6 @@ include_directories(
     "${PREBUILDER_INCLUDE_DIR}" # nlohmann-json
 )
 
-add_compile_definitions($<$<COMPILE_LANGUAGE:C,CXX>:-DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\">)
-
 add_subdirectory(keycode)
 add_subdirectory(macosfrontend)
 add_subdirectory(macosnotifications)
@@ -103,9 +102,19 @@ add_subdirectory(webpanel)
 
 set(BUILD_SHARED_FCITX_ADDON OFF)
 include(fcitx5/src/lib/fcitx-utils/Fcitx5Macros.cmake)
-add_subdirectory(fcitx5-beast/src)
+add_subdirectory(fcitx5-beast)
 
 add_subdirectory(src)
+
+set(FCITX5_AID_TARGETS macosfrontend notifications webpanel notifications Fcitx5Objs)
+fcitx5_add_i18n_definition(
+    LOCALE_INSTALL_DIR "${FCITX_INSTALL_LOCALEDIR}"
+    TARGETS "${FCITX5_AID_TARGETS}"
+)
+foreach(AID_TARGET IN LISTS FCITX5_AID_TARGETS)
+    target_compile_definitions(${AID_TARGET} PUBLIC -DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\")
+endforeach()
+
 add_subdirectory(assets)
 add_subdirectory(po)
 

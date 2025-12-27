@@ -73,3 +73,6 @@ inline T with_fcitx(F func) {
     fut.wait();
     return fut.get();
 }
+
+std::pair<bool, std::string> remoteHandler(const std::string_view command,
+                                           const char *body);

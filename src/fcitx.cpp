@@ -100,6 +100,7 @@ void Fcitx::setup() {
     auto beast_ = dynamic_cast<fcitx::Beast *>(addonMgr().addon("beast"));
     beast_->setConfigGetter(getConfig);
     beast_->setConfigSetter(setConfig);
+    beast_->setRemoteHandler(remoteHandler);
 }
 
 void Fcitx::teardown() {
@@ -169,9 +170,8 @@ void Fcitx::setupEnv() {
     setenv("FCITX_LOCALE", val.c_str(), 1);
     FCITX_DEBUG() << "Fcitx LANGUAGE " << val.c_str();
 
-    auto locale_path = (app_contents_path / "share" / "locale");
-    fcitx::registerDomain(FCITX_GETTEXT_DOMAIN, locale_path);
-    fcitx::registerDomain(ISO_639_3_DOMAIN, locale_path);
+    fcitx::registerDomain(FCITX_GETTEXT_DOMAIN, FCITX_INSTALL_LOCALEDIR);
+    fcitx::registerDomain(ISO_639_3_DOMAIN, FCITX_INSTALL_LOCALEDIR);
 }
 
 void Fcitx::setupInstance() {

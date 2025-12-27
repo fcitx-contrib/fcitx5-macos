@@ -40,6 +40,7 @@ install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/uninstall.sh"
 )
 
 install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/fcitx5-curl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/fcitx5-remote"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
 )
 

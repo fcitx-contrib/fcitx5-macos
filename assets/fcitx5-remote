@@ -1,0 +1,45 @@
+#!/bin/zsh
+set -eu
+
+fcitx5_curl="/Library/Input Methods/Fcitx5.app/Contents/bin/fcitx5-curl"
+
+print_help() {
+  echo "Usage: fcitx5-remote [OPTION]"
+  echo -e "-c\t\tDeactivate input method"
+  echo -e "-o\t\tActivate input method"
+  echo -e "-t,-T\t\tSwitch Active/Inactive"
+  echo -e "-n\t\tGet current input method name"
+  echo -e "-s <imname>\tSwitch to input method uniquely identified by <imname>"
+  echo -e "-h\t\tDisplay this help and exit"
+}
+
+if [[ $# -eq 0 ]]; then
+  print_help
+  exit 0
+fi
+
+while getopts ":cotTns:h" opt; do
+  case $opt in
+    c|o|t|T|n)
+      $fcitx5_curl "/remote/$opt" -X POST
+      ;;
+    s)
+      $fcitx5_curl "/remote/s" -X POST -d "[\"$OPTARG\"]"
+      ;;
+    h)
+      print_help
+      ;;
+    \?)
+      echo "Unknown option: -$OPTARG"
+      echo ""
+      print_help
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument."
+      echo ""
+      print_help
+      exit 1
+      ;;
+  esac
+done
