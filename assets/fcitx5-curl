@@ -22,7 +22,8 @@ COMMUNICATION="${COMMUNICATION:-UDS}"
 UDS_PATH="${UDS_PATH:-/tmp/fcitx5.sock}"
 TCP_PORT="${TCP_PORT:-32489}"
 
-CURL_FLAGS=()
+# When called by fcitx.vim, the output may contain progress info which breaks.
+CURL_FLAGS=(-s)
 
 if [[ "$COMMUNICATION" == 'TCP' ]]; then
   FCITX_BEAST_URL="http://127.0.0.1:$TCP_PORT$1"
