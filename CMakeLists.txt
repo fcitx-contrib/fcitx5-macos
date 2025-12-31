@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.0.1)
 
-project(fcitx5-macos VERSION 0.2.11 LANGUAGES CXX Swift)
+project(fcitx5-macos VERSION 0.2.12 LANGUAGES CXX Swift)
 
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
