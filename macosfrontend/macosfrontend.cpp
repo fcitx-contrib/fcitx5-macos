@@ -61,6 +61,12 @@ void MacosFrontend::updateStatusItemText() {
     }
 }
 
+bool skipPassword(const Configuration *config) {
+    RawConfig raw;
+    config->save(raw);
+    return *raw.valueByPath("IgnorePasswordFromPasswordManager") == "True";
+}
+
 // Runs on the fcitx thread.
 void MacosFrontend::pollPasteboard() {
     monitorPasteboardEvent_ = instance_->eventLoop().addTimeEvent(
@@ -79,10 +85,12 @@ void MacosFrontend::pollPasteboard() {
                     && *config_.removeTrackingParameters) {
                     str = url_filter::filterTrackingParameters(str);
                 }
-                if (!str.empty()) {
+                if (!str.empty() &&
+                    !(isPassword && skipPassword(clipboard->getConfig()))) {
                     clipboard->call<IClipboard::setClipboardV2>("", str,
                                                                 isPassword);
-                    FCITX_DEBUG() << "Add to clipboard: " << str;
+                    FCITX_DEBUG() << "Add to clipboard: "
+                                  << (isPassword ? "[concealed]" : str);
                 }
             }
             time->setNextInterval(*config_.pollPasteboardInterval * 1000000);
