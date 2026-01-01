@@ -140,53 +140,49 @@ struct PluginView: View {
   }
 
   // Avoid downloading plugins that are incompatible with current main.
-  private func ensureMainCompatible(_ callback: @escaping () -> Void) {
+  private func checkMainCompatible() async -> Bool {
     // Either a stable release ...
     if releaseTag != "latest" {
-      return callback()
+      return true
     }
     // ... or a latest release.
-    Task {
-      let (success, latestCompatible, latest, stable) = await checkMainUpdate()
-      if !success {
-        processing = false
-        showCheckFailed = true
-        return
-      }
-      if latest != nil || stable != nil {
-        // latest > current or stable > current
-        processing = false
-        showMainOutdated = true
-        return
-      }
-      if !latestCompatible {
-        processing = false
-        showSystemNotSupported = true
-        return
-      }
-      // latest == current > stable
-      callback()
+    let (success, latestCompatible, latest, stable) = await checkMainUpdate()
+    if !success {
+      showCheckFailed = true
+      return false
     }
+    if latest != nil || stable != nil {
+      // latest > current or stable > current
+      showMainOutdated = true
+      return false
+    }
+    if !latestCompatible {
+      showSystemNotSupported = true
+      return false
+    }
+    // latest == current > stable
+    return true
   }
 
   private func checkUpdate() {
     processing = true
-    ensureMainCompatible {
-      Task {
-        let (success, nativePlugins, dataPlugins) = await checkPluginUpdate("latest")
-        processing = false
-        if !success {
-          showCheckFailed = true
-          return
-        }
-        pluginVM.nativeAvailable = nativePlugins
-        pluginVM.dataAvailable = dataPlugins
-        if nativePlugins.isEmpty && dataPlugins.isEmpty {
-          pluginVM.upToDate = true
-          showUpToDate = true
-        } else {
-          showUpdateAvailable = true
-        }
+    Task {
+      defer { processing = false }
+      guard await checkMainCompatible() else {
+        return
+      }
+      let (success, nativePlugins, dataPlugins) = await checkPluginUpdate("latest")
+      guard success else {
+        showCheckFailed = true
+        return
+      }
+      pluginVM.nativeAvailable = nativePlugins
+      pluginVM.dataAvailable = dataPlugins
+      if nativePlugins.isEmpty && dataPlugins.isEmpty {
+        pluginVM.upToDate = true
+        showUpToDate = true
+      } else {
+        showUpdateAvailable = true
       }
     }
   }
@@ -235,7 +231,11 @@ struct PluginView: View {
 
   private func install(_ autoRestart: Bool, isUpdate: Bool = false) {
     processing = true
-    ensureMainCompatible {
+    Task {
+      defer { processing = false }
+      guard await checkMainCompatible() else {
+        return
+      }
       if !isUpdate {
         pluginVM.nativeAvailable.removeAll()
         pluginVM.dataAvailable.removeAll()
@@ -299,7 +299,6 @@ struct PluginView: View {
               Fcitx.imAddToCurrentGroup(im)
             }
           }
-          processing = false
           if needsRestart {
             if autoRestart {
               restart()
