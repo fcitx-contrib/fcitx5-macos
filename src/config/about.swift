@@ -295,12 +295,13 @@ struct AboutView: View {
     // Without this, if user cancels sudo prompt and try again, UI will hang.
     disableInputMethod()
     let userDataParam = removeUserData ? "true" : "false"
-    DispatchQueue.global().async {
-      if !sudo("uninstall", userDataParam, uninstallLog) {
-        DispatchQueue.main.async {
-          uninstalling = false
-          uninstallFailed = true
-        }
+    Task {
+      let success = await Task.detached {
+        sudo("uninstall", userDataParam, uninstallLog)
+      }.value
+      if !success {
+        uninstalling = false
+        uninstallFailed = true
       }
     }
   }
@@ -378,12 +379,13 @@ struct AboutView: View {
     }
     let path = cacheDir.appendingPathComponent(debug ? mainDebugFileName : mainFileName).localPath()
     // Necessary to put it in background, otherwise sudo UI will hang if it has been canceled once.
-    DispatchQueue.global().async {
-      if !sudo("update", path, updateLog) {
-        DispatchQueue.main.async {
-          viewModel.state = .available
-          showInstallFailed = true
-        }
+    Task {
+      let success = await Task.detached {
+        sudo("update", path, updateLog)
+      }.value
+      if !success {
+        viewModel.state = .available
+        showInstallFailed = true
       }
     }
   }

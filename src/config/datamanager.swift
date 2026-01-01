@@ -19,6 +19,59 @@ private func getTimeString() -> String {
   return dateFormatter.string(from: Date())
 }
 
+private func exportZip(_ name: String, withRime: Bool) -> Bool {
+  _ = removeFile(composeDir)
+  // Fake f5a structure.
+  for name in ["databases", "external", "recently_used", "shared_prefs"] {
+    mkdirP(composeDir.appendingPathComponent(name).localPath())
+  }
+  let externalDir = composeDir.appendingPathComponent("external")
+  for operation in [
+    { copyFile(configDir, externalDir.appendingPathComponent("config")) },
+    {
+      let dst = externalDir.appendingPathComponent("data")
+      mkdirP(dst.localPath())
+      let fileNames =
+        (try? FileManager.default.contentsOfDirectory(atPath: localDir.localPath())) ?? []
+      for fileName in fileNames {
+        if withRime || fileName != "rime" {
+          if !copyFile(
+            localDir.appendingPathComponent(fileName), dst.appendingPathComponent(fileName))
+          {
+            return false
+          }
+        }
+      }
+      return true
+    },
+    {
+      writeUTF8(
+        composeDir.appendingPathComponent("metadata.json"),
+        """
+        {
+            "packageName": "org.fcitx.fcitx5.android",
+            "versionCode": 0,
+            "versionName": "",
+            "exportTime": \(Int(Date().timeIntervalSince1970 * 1000))
+        }\n
+        """)
+    },
+    {
+      exec(
+        "/bin/zsh",
+        [
+          "-c",
+          "cd \(quote(composeDir.localPath())) && /usr/bin/zip -r \(name) * -x \"*.DS_Store\"",
+        ])
+    },
+  ] {
+    if !operation() {
+      return false
+    }
+  }
+  return true
+}
+
 struct DataView: View {
   @State private var openPanel = NSOpenPanel()
   @AppStorage("ImportDataSelectedDirectory") var importDataSelectedDirectory: String?
@@ -60,90 +113,38 @@ struct DataView: View {
     }
   }
 
-  private func exportZip(_ name: String, withRime: Bool) -> Bool {
-    _ = removeFile(composeDir)
-    // Fake f5a structure.
-    for name in ["databases", "external", "recently_used", "shared_prefs"] {
-      mkdirP(composeDir.appendingPathComponent(name).localPath())
-    }
-    let externalDir = composeDir.appendingPathComponent("external")
-    for operation in [
-      { copyFile(configDir, externalDir.appendingPathComponent("config")) },
-      {
-        let dst = externalDir.appendingPathComponent("data")
-        mkdirP(dst.localPath())
-        let fileNames =
-          (try? FileManager.default.contentsOfDirectory(atPath: localDir.localPath())) ?? []
-        for fileName in fileNames {
-          if withRime || fileName != "rime" {
-            if !copyFile(
-              localDir.appendingPathComponent(fileName), dst.appendingPathComponent(fileName))
-            {
-              return false
-            }
-          }
-        }
-        return true
-      },
-      {
-        writeUTF8(
-          composeDir.appendingPathComponent("metadata.json"),
-          """
-          {
-              "packageName": "org.fcitx.fcitx5.android",
-              "versionCode": 0,
-              "versionName": "",
-              "exportTime": \(Int(Date().timeIntervalSince1970 * 1000))
-          }\n
-          """)
-      },
-      {
-        exec(
-          "/bin/zsh",
-          [
-            "-c",
-            "cd \(quote(composeDir.localPath())) && /usr/bin/zip -r \(name) * -x \"*.DS_Store\"",
-          ])
-      },
-    ] {
-      if !operation() {
-        return false
-      }
-    }
-    return true
-  }
-
   private func onExport(withRime: Bool) {
     showAskExportRime = false
     showRunning = true
     let name = "fcitx5-macos_\(getTimeString()).zip"
-    DispatchQueue.global().async {
-      let res = exportZip(name, withRime: withRime)
-      DispatchQueue.main.async {
-        showRunning = false
-        if res {
-          if openPanel.isVisible {
-            openPanel.cancel(nil)
-            openPanel = NSOpenPanel()
-          }
-          openPanel.allowsMultipleSelection = false
-          openPanel.canChooseDirectories = true
-          openPanel.canChooseFiles = false
-          if openPanel.runModal() == .OK {
-            if let url = openPanel.url {
-              if moveFile(
-                composeDir.appendingPathComponent(name), url.appendingPathComponent(name))
-              {
-                showExportSuccess = true
-              } else {
-                showExportFailure = true
-              }
-              exportDataSelectedDirectory = url.localPath()
-            }
-          }
-        } else {
-          showExportFailure = true
+    Task {
+      let res = await Task.detached {
+        exportZip(name, withRime: withRime)
+      }.value
+      showRunning = false
+      if res {
+        if openPanel.isVisible {
+          openPanel.cancel(nil)
+          openPanel = NSOpenPanel()
         }
+        openPanel.allowsMultipleSelection = false
+        openPanel.canChooseDirectories = true
+        openPanel.canChooseFiles = false
+        if openPanel.runModal() == .OK {
+          if let url = openPanel.url {
+            if moveFile(
+              composeDir.appendingPathComponent(name),
+              url.appendingPathComponent(name)
+            ) {
+              showExportSuccess = true
+            } else {
+              showExportFailure = true
+            }
+            exportDataSelectedDirectory = url.localPath()
+          }
+        }
+      } else {
+        showExportFailure = true
       }
     }
   }
