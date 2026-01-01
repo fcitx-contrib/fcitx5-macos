@@ -125,7 +125,7 @@ class Updater {
 
   func update(
     onFinish: @escaping (Bool, [String: Bool], [String: Bool]) -> Void,
-    onProgress: ((Double) -> Void)? = nil
+    onProgress: (@Sendable (Double) -> Void)? = nil
   ) {
     let mainAddress =
       "\(sourceRepo)/releases/download/\(self.tag)/\(self.debug ? mainDebugFileName : mainFileName)"

@@ -9,15 +9,12 @@ class Downloader {
   private var totalBytes = [String: Int64]()
 
   init(_ addresses: [String]) {
-    for address in addresses {
-      if let url = URL(string: address) {
-        self.urls.append(url)
-      }
-    }
+    self.urls = addresses.compactMap { URL(string: $0) }
   }
 
-  func download(onFinish: @escaping ([String: Bool]) -> Void, onProgress: ((Double) -> Void)? = nil)
-  {
+  func download(
+    onFinish: @escaping ([String: Bool]) -> Void, onProgress: (@Sendable (Double) -> Void)? = nil
+  ) {
     mkdirP(cacheDir.localPath())
     let downloadGroup = DispatchGroup()
     for url in urls {

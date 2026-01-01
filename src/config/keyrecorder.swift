@@ -103,6 +103,7 @@ struct RecordingOverlay: NSViewRepresentable {
     Coordinator(self)
   }
 
+  @MainActor
   class Coordinator: NSObject {
     private var parent: RecordingOverlay
     private var key = ""

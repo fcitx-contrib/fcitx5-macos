@@ -106,13 +106,13 @@ add_subdirectory(fcitx5-beast)
 
 add_subdirectory(src)
 
-set(FCITX5_AID_TARGETS macosfrontend notifications webpanel notifications Fcitx5Objs)
+set(FCITX5_AID_TARGETS macosfrontend notifications webpanel Fcitx5Objs)
 fcitx5_add_i18n_definition(
     LOCALE_INSTALL_DIR "${FCITX_INSTALL_LOCALEDIR}"
     TARGETS "${FCITX5_AID_TARGETS}"
 )
 foreach(AID_TARGET IN LISTS FCITX5_AID_TARGETS)
-    target_compile_definitions(${AID_TARGET} PUBLIC -DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\")
+    target_compile_definitions(${AID_TARGET} PRIVATE -DFCITX_GETTEXT_DOMAIN=\"fcitx5-macos\")
 endforeach()
 
 add_subdirectory(assets)
