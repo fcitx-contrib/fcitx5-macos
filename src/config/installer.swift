@@ -120,9 +120,8 @@ class Updater {
     }
   }
 
-  func update(
-    onFinish: @escaping (Bool, [String: Bool], [String: Bool]) -> Void,
-    onProgress: (@Sendable (Double) -> Void)? = nil
+  func update(onProgress: (@Sendable (Double) -> Void)? = nil) async -> (
+    mainSuccess: Bool, nativeResults: [String: Bool], dataResults: [String: Bool]
   ) {
     let mainAddress =
       "\(sourceRepo)/releases/download/\(self.tag)/\(self.debug ? mainDebugFileName : mainFileName)"
@@ -130,41 +129,39 @@ class Updater {
       nativePlugins.map({ getAddress(self.tag, $0, native: true) })
         + dataPlugins.map({ getAddress(self.tag, $0, native: false) }) + (main ? [mainAddress] : [])
     )
-    downloader.download(
-      onFinish: { [self] results in
-        var nativeResults = nativePlugins.reduce(into: [String: Bool](), { $0[$1] = false })
-        for plugin in nativePlugins {
-          let result = results[getAddress(self.tag, plugin, native: true)]!
-          let fileName = getPluginFileName(plugin, native: true)
-          if result {
-            if extractPlugin(plugin, native: true) {
-              nativeResults[plugin] = true
-              FCITX_INFO("Successfully installed \(fileName)")
-            } else {
-              FCITX_ERROR("Failed to extract \(fileName)")
-            }
-          } else {
-            FCITX_ERROR("Failed to download \(fileName)")
-          }
+    let results = await downloader.download(onProgress: onProgress)
+    var nativeResults = nativePlugins.reduce(into: [String: Bool](), { $0[$1] = false })
+    for plugin in nativePlugins {
+      let result = results[getAddress(self.tag, plugin, native: true)]!
+      let fileName = getPluginFileName(plugin, native: true)
+      if result {
+        if extractPlugin(plugin, native: true) {
+          nativeResults[plugin] = true
+          FCITX_INFO("Successfully installed \(fileName)")
+        } else {
+          FCITX_ERROR("Failed to extract \(fileName)")
         }
+      } else {
+        FCITX_ERROR("Failed to download \(fileName)")
+      }
+    }
 
-        var dataResults: [String: Bool] = dataPlugins.reduce(
-          into: [String: Bool](), { $0[$1] = false })
-        for plugin in dataPlugins {
-          let result = results[getAddress(self.tag, plugin, native: false)]!
-          let fileName = getPluginFileName(plugin, native: false)
-          if result {
-            if extractPlugin(plugin, native: false) {
-              dataResults[plugin] = true
-              FCITX_INFO("Successfully installed \(fileName)")
-            } else {
-              FCITX_ERROR("Failed to extract \(fileName)")
-            }
-          } else {
-            FCITX_ERROR("Failed to download \(fileName)")
-          }
+    var dataResults: [String: Bool] = dataPlugins.reduce(
+      into: [String: Bool](), { $0[$1] = false })
+    for plugin in dataPlugins {
+      let result = results[getAddress(self.tag, plugin, native: false)]!
+      let fileName = getPluginFileName(plugin, native: false)
+      if result {
+        if extractPlugin(plugin, native: false) {
+          dataResults[plugin] = true
+          FCITX_INFO("Successfully installed \(fileName)")
+        } else {
+          FCITX_ERROR("Failed to extract \(fileName)")
         }
-        onFinish(results[mainAddress] ?? false, nativeResults, dataResults)
-      }, onProgress: onProgress)
+      } else {
+        FCITX_ERROR("Failed to download \(fileName)")
+      }
+    }
+    return (results[mainAddress] ?? false, nativeResults, dataResults)
   }
 }

@@ -12,9 +12,7 @@ class Downloader {
     self.urls = addresses.compactMap { URL(string: $0) }
   }
 
-  func download(
-    onFinish: @escaping ([String: Bool]) -> Void, onProgress: (@Sendable (Double) -> Void)? = nil
-  ) {
+  func download(onProgress: (@Sendable (Double) -> Void)? = nil) async -> [String: Bool] {
     mkdirP(cacheDir.localPath())
     let downloadGroup = DispatchGroup()
     for url in urls {
@@ -52,7 +50,7 @@ class Downloader {
           downloadedBytes[address] = task.countOfBytesReceived
           totalBytes[address] = task.countOfBytesExpectedToReceive
           let sum = totalBytes.values.reduce(0, +)
-          onProgress(Double(downloadedBytes.values.reduce(0, +)) / (sum == 0 ? 1.0 : Double(sum)))
+          onProgress(Double(downloadedBytes.values.reduce(0, +)) / (sum == 0 ? 0.0 : Double(sum)))
         }
         observers[address] = observer
         downloadedBytes[address] = 0
@@ -61,9 +59,10 @@ class Downloader {
 
       task.resume()
     }
-
-    downloadGroup.notify(queue: .main) { [self] in
-      onFinish(results)
+    return await withCheckedContinuation { continuation in
+      downloadGroup.notify(queue: .main) { [self] in
+        continuation.resume(returning: results)
+      }
     }
   }
 }

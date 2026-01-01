@@ -270,46 +270,44 @@ struct PluginView: View {
       let updater = Updater(
         tag: releaseTag, main: false, debug: false, nativePlugins: pluginVM.nativeAvailable,
         dataPlugins: pluginVM.dataAvailable)
-      updater.update(
-        onFinish: { _, nativeResults, dataResults in
-          processing = false
-          var inputMethods = [String]()
-          if !isUpdate {
-            let downloadedPlugins = selectedPlugins.filter {
-              (nativeResults[$0] ?? true) && (dataResults[$0] ?? true)
-            }
-            if downloadedPlugins.isEmpty {
-              showDownloadFailed = true
-              return
-            }
-            // Don't add IMs for dependencies.
-            inputMethods = downloadedPlugins.flatMap { getAutoAddIms($0) }
-          }
-          if !Set(nativeResults.filter({ _, success in success }).keys).intersection(
-            inMemoryPlugins
-          )
-          .isEmpty {
-            needsRestart = true
-          }
-          refreshPlugins()
-          restartAndReconnect()
-          if Fcitx.imGroupCount() == 1 {
-            // Otherwise user knows how to play with it, don't mess it up.
-            for im in inputMethods {
-              Fcitx.imAddToCurrentGroup(im)
-            }
-          }
-          if needsRestart {
-            if autoRestart {
-              restart()
-            } else {
-              promptRestart = true
-            }
-          }
-        },
-        onProgress: { progress in
+      let (_, nativeResults, dataResults) = await updater.update(onProgress: { progress in
+        Task { @MainActor in
           downloadProgress = progress
-        })
+        }
+      })
+      var inputMethods = [String]()
+      if !isUpdate {
+        let downloadedPlugins = selectedPlugins.filter {
+          (nativeResults[$0] ?? true) && (dataResults[$0] ?? true)
+        }
+        if downloadedPlugins.isEmpty {
+          showDownloadFailed = true
+          return
+        }
+        // Don't add IMs for dependencies.
+        inputMethods = downloadedPlugins.flatMap { getAutoAddIms($0) }
+      }
+      if !Set(nativeResults.filter({ _, success in success }).keys).intersection(
+        inMemoryPlugins
+      )
+      .isEmpty {
+        needsRestart = true
+      }
+      refreshPlugins()
+      restartAndReconnect()
+      if Fcitx.imGroupCount() == 1 {
+        // Otherwise user knows how to play with it, don't mess it up.
+        for im in inputMethods {
+          Fcitx.imAddToCurrentGroup(im)
+        }
+      }
+      if needsRestart {
+        if autoRestart {
+          restart()
+        } else {
+          promptRestart = true
+        }
+      }
     }
   }
 
