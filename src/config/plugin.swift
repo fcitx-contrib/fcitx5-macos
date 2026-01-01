@@ -78,38 +78,40 @@ private struct Meta: Codable {
   let plugins: [Plugin]
 }
 
-func checkPluginUpdate(_ tag: String, _ callback: @escaping (Bool, [String], [String]) -> Void) {
+func checkPluginUpdate(_ tag: String) async -> (
+  success: Bool, nativePlugins: [String], dataPlugins: [String]
+) {
   guard let url = URL(string: pluginBaseAddress(tag) + "meta-\(arch).json") else {
-    return callback(false, [], [])
+    return (false, [], [])
   }
-  URLSession.shared.dataTask(with: url) { data, response, error in
+
+  do {
+    let (data, _) = try await URLSession.shared.data(from: url)
+    let meta = try JSONDecoder().decode(Meta.self, from: data)
     var nativePlugins = [String]()
     var dataPlugins = [String]()
-    if let data = data,
-      let meta = try? JSONDecoder().decode(Meta.self, from: data)
-    {
-      let nativeVersionMap = meta.plugins.reduce(into: [String: String]()) { result, plugin in
-        result[plugin.name] = plugin.version
-      }
-      let dataVersionMap = meta.plugins.reduce(into: [String: String]()) { result, plugin in
-        result[plugin.name] = plugin.data_version
-      }
-      for plugin in getInstalledPlugins() {
-        if let version = nativeVersionMap[plugin.id], version != getVersion(plugin.id, native: true)
-        {
-          nativePlugins.append(plugin.id)
-        }
-        if let dataVersion = dataVersionMap[plugin.id],
-          dataVersion != getVersion(plugin.id, native: false)
-        {
-          dataPlugins.append(plugin.id)
-        }
-      }
-      callback(true, nativePlugins, dataPlugins)
-    } else {
-      callback(false, [], [])
+    let nativeVersionMap = meta.plugins.reduce(into: [String: String]()) { result, plugin in
+      result[plugin.name] = plugin.version
     }
-  }.resume()
+    let dataVersionMap = meta.plugins.reduce(into: [String: String]()) { result, plugin in
+      result[plugin.name] = plugin.data_version
+    }
+    for plugin in getInstalledPlugins() {
+      if let version = nativeVersionMap[plugin.id],
+        version != getVersion(plugin.id, native: true)
+      {
+        nativePlugins.append(plugin.id)
+      }
+      if let dataVersion = dataVersionMap[plugin.id],
+        dataVersion != getVersion(plugin.id, native: false)
+      {
+        dataPlugins.append(plugin.id)
+      }
+    }
+    return (true, nativePlugins, dataPlugins)
+  } catch {
+    return (false, [], [])
+  }
 }
 
 struct PluginView: View {
@@ -144,7 +146,8 @@ struct PluginView: View {
       return callback()
     }
     // ... or a latest release.
-    checkMainUpdate { success, latestCompatible, latest, stable in
+    Task {
+      let (success, latestCompatible, latest, stable) = await checkMainUpdate()
       if !success {
         processing = false
         showCheckFailed = true
@@ -169,7 +172,8 @@ struct PluginView: View {
   private func checkUpdate() {
     processing = true
     ensureMainCompatible {
-      checkPluginUpdate("latest") { success, nativePlugins, dataPlugins in
+      Task {
+        let (success, nativePlugins, dataPlugins) = await checkPluginUpdate("latest")
         processing = false
         if !success {
           showCheckFailed = true

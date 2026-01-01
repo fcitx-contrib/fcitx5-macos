@@ -66,43 +66,40 @@ private struct Version: Codable {
   let versions: [VersionItem]
 }
 
-func checkMainUpdate(_ callback: @escaping (Bool, Bool, VersionItem?, VersionItem?) -> Void) {
-  guard
-    let url = URL(
-      string: "\(sourceRepo)/releases/download/latest/version.json")
-  else {
-    return
+func checkMainUpdate() async -> (
+  success: Bool, latestCompatible: Bool, latest: VersionItem?, stable: VersionItem?
+) {
+  guard let url = URL(string: "\(sourceRepo)/releases/download/latest/version.json") else {
+    return (false, false, nil, nil)
   }
-  getNoCacheSession().dataTask(with: url) { data, response, error in
-    if let data = data,
-      let version = try? JSONDecoder().decode(Version.self, from: data)
-    {
-      var latestCompatible = false
-      var latest: VersionItem? = nil
-      var stable: VersionItem? = nil
-      for item in version.versions {
+  do {
+    let (data, _) = try await getNoCacheSession().data(from: url)
+    let version = try JSONDecoder().decode(Version.self, from: data)
+    var latestCompatible = false
+    var latest: VersionItem? = nil
+    var stable: VersionItem? = nil
+    for item in version.versions {
+      if item.tag == "latest" {
+        latestCompatible = compatibleWith(item.macos)
+      }
+      // Assume linear history and sorted version.json.
+      // We don't backport by keeping multiple version branches.
+      if item.time <= unixTime {
+        break
+      }
+      if compatibleWith(item.macos) {
         if item.tag == "latest" {
-          latestCompatible = compatibleWith(item.macos)
-        }
-        // Assume linear history and sorted version.json.
-        // We don't backport by keeping multiple version branches.
-        if item.time <= unixTime {
+          latest = item
+        } else {
+          stable = item
           break
         }
-        if compatibleWith(item.macos) {
-          if item.tag == "latest" {
-            latest = item
-          } else {
-            stable = item
-            break
-          }
-        }
       }
-      callback(true, latestCompatible, latest, stable)
-    } else {
-      callback(false, false, nil, nil)
     }
-  }.resume()
+    return (true, latestCompatible, latest, stable)
+  } catch {
+    return (false, false, nil, nil)
+  }
 }
 
 class Updater {

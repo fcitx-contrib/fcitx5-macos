@@ -308,7 +308,8 @@ struct AboutView: View {
 
   func checkUpdate() {
     viewModel.state = .checking
-    checkMainUpdate { success, latestCompatible, latest, stable in
+    Task {
+      let (success, latestCompatible, latest, stable) = await checkMainUpdate()
       if success {
         latestAvailable = latestCompatible
         if let stable = stable {
@@ -347,7 +348,8 @@ struct AboutView: View {
       return
     }
     viewModel.state = .downloading
-    checkPluginUpdate(tag) { success, nativePlugins, dataPlugins in
+    Task {
+      let (_, nativePlugins, dataPlugins) = await checkPluginUpdate(tag)
       let updater = Updater(
         tag: tag, main: true, debug: debug, nativePlugins: nativePlugins, dataPlugins: dataPlugins)
       updater.update(
