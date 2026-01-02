@@ -1,9 +1,8 @@
 import Foundation
 import Logging
 
-class Downloader {
+actor Downloader {
   private var urls = [URL]()
-  private var results = [String: Bool]()
   private var observers = [String: NSKeyValueObservation]()
   private var downloadedBytes = [String: Int64]()
   private var totalBytes = [String: Int64]()
@@ -12,57 +11,66 @@ class Downloader {
     self.urls = addresses.compactMap { URL(string: $0) }
   }
 
+  private func updateProgress(
+    address: String, downloaded: Int64, total: Int64, observer: NSKeyValueObservation? = nil
+  ) -> Double {
+    downloadedBytes[address] = downloaded
+    totalBytes[address] = total
+    if let observer = observer {
+      observers[address] = observer
+    }
+    let sum = self.totalBytes.values.reduce(0, +)
+    return Double(self.downloadedBytes.values.reduce(0, +)) / (sum == 0 ? 0.0 : Double(sum))
+  }
+
   func download(onProgress: (@Sendable (Double) -> Void)? = nil) async -> [String: Bool] {
     mkdirP(cacheDir.localPath())
-    let downloadGroup = DispatchGroup()
-    for url in urls {
-      let address = url.absoluteString
-      let fileName = url.lastPathComponent
-      let destinationURL = cacheDir.appendingPathComponent(fileName)
-      if destinationURL.exists() {
-        FCITX_INFO("Using cached \(fileName)")
-        results[address] = true
-        continue
-      }
+    return await withTaskGroup(of: (String, Bool).self, returning: [String: Bool].self) { group in
+      for url in urls {
+        let address = url.absoluteString
+        let fileName = url.lastPathComponent
+        let destinationURL = cacheDir.appendingPathComponent(fileName)
+        group.addTask {
+          if destinationURL.exists() {
+            FCITX_INFO("Using cached \(fileName)")
+            return (address, true)
+          }
+          let (localURL, response, error) = await withCheckedContinuation { continuation in
+            let task = URLSession.shared.downloadTask(with: url) { localURL, response, error in
+              continuation.resume(returning: (localURL, response, error))
+            }
+            if let onProgress = onProgress {
+              let observer = task.progress.observe(\.fractionCompleted) { progress, _ in
+                Task {
+                  let ratio = await self.updateProgress(
+                    address: address, downloaded: task.countOfBytesReceived,
+                    total: task.countOfBytesExpectedToReceive)
+                  onProgress(ratio)
+                }
+              }
+              Task {
+                await self.updateProgress(
+                  address: address, downloaded: 0, total: 0, observer: observer)
+              }
+            }
+            task.resume()
+          }
 
-      downloadGroup.enter()
-      let task = URLSession.shared.downloadTask(with: url) { [self] localURL, response, error in
-        defer { downloadGroup.leave() }
-        if error != nil {
-          results[address] = false
-          return
+          guard error == nil,
+            let httpResponse = response as? HTTPURLResponse,
+            let localURL = localURL,
+            (200..<300).contains(httpResponse.statusCode)
+          else {
+            return (address, false)
+          }
+          return (address, moveFile(localURL, destinationURL))
         }
-        guard let httpResponse = response as? HTTPURLResponse,
-          let localURL = localURL
-        else {
-          results[address] = false
-          return
-        }
-        if !(200..<300).contains(httpResponse.statusCode) {
-          results[address] = false
-          return
-        }
-        results[address] = moveFile(localURL, destinationURL)
       }
-
-      if let onProgress = onProgress {
-        let observer = task.progress.observe(\.fractionCompleted) { [self] progress, _ in
-          downloadedBytes[address] = task.countOfBytesReceived
-          totalBytes[address] = task.countOfBytesExpectedToReceive
-          let sum = totalBytes.values.reduce(0, +)
-          onProgress(Double(downloadedBytes.values.reduce(0, +)) / (sum == 0 ? 0.0 : Double(sum)))
-        }
-        observers[address] = observer
-        downloadedBytes[address] = 0
-        totalBytes[address] = 0
+      var results = [String: Bool]()
+      for await pair in group {
+        results[pair.0] = pair.1
       }
-
-      task.resume()
-    }
-    return await withCheckedContinuation { continuation in
-      downloadGroup.notify(queue: .main) { [self] in
-        continuation.resume(returning: results)
-      }
+      return results
     }
   }
 }
