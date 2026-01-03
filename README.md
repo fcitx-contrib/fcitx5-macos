@@ -9,7 +9,7 @@ English
 Please download [installer](https://github.com/fcitx-contrib/fcitx5-macos-installer) and read [documentation](https://fcitx-contrib.github.io/docs/).
 
 ## Build
-Native build on Intel and Apple Silicon is supported.
+While the App runs on macOS >= 13.3, native build on macOS >= 15 is supported.
 
 This is NOT an Xcode project,
 but Xcode >= 26 is needed for Swift compiler.
@@ -28,6 +28,7 @@ pnpm --prefix=fcitx5-webview i
 
 ### Build with CMake
 ```sh
+git apply --directory=fcitx5 patches/*
 cmake -B build/$(uname -m) -G Ninja -DCMAKE_BUILD_TYPE=Debug
 cmake --build build/$(uname -m)
 sudo cmake --install build/$(uname -m)
