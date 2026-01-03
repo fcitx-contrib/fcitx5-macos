@@ -1,0 +1,47 @@
+commit 770f02e5df019c81ef36c45ef61abb9aa6db1630
+Author: Qijia Liu <liumeo@pku.edu.cn>
+Date:   Tue Aug 19 17:34:19 2025 -0400
+
+    disable osyncstream
+
+diff --git a/src/lib/fcitx-utils/log.cpp b/src/lib/fcitx-utils/log.cpp
+index 56fb7f62..98fa2ae6 100644
+--- a/src/lib/fcitx-utils/log.cpp
++++ b/src/lib/fcitx-utils/log.cpp
+@@ -35,16 +35,20 @@ using LogRule = std::pair<std::string, LogLevel>;
+ 
+ struct LogConfig {
+     static std::ostream *defaultLogStream;
++#if 0
+     static thread_local std::osyncstream localLogStream;
++#endif
+     static bool showTimeDate;
+ };
+ 
+ std::ostream *LogConfig::defaultLogStream = &std::cerr;
++#if 0
+ thread_local std::osyncstream LogConfig::localLogStream = []() {
+     std::osyncstream out(*LogConfig::defaultLogStream);
+     out.rdbuf()->set_emit_on_sync(true);
+     return out;
+ }();
++#endif
+ bool LogConfig::showTimeDate = true;
+ 
+ bool validateLogLevel(std::underlying_type_t<LogLevel> l) {
+@@ -199,12 +203,15 @@ void Log::setLogStream(std::ostream &stream) {
+ }
+ 
+ std::ostream &Log::logStream() {
++#if 0
+     auto *buf = LogConfig::defaultLogStream->rdbuf();
+     if (LogConfig::localLogStream.get_wrapped() != buf) {
+         LogConfig::localLogStream = std::osyncstream(buf);
+         LogConfig::localLogStream.rdbuf()->set_emit_on_sync(true);
+     }
+     return LogConfig::localLogStream;
++#endif
++    return *LogConfig::defaultLogStream;
+ }
+ 
+ LogMessageBuilder::LogMessageBuilder(std::ostream &out, LogLevel l,

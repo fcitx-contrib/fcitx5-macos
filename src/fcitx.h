@@ -58,16 +58,12 @@ inline T with_fcitx(F func) {
     std::promise<T> prom;
     std::future<T> fut = prom.get_future();
     fcitx.schedule([&prom, func = std::move(func), &fcitx]() {
-        try {
-            if constexpr (std::is_void_v<T>) {
-                func(fcitx);
-                prom.set_value();
-            } else {
-                T result = func(fcitx);
-                prom.set_value(std::move(result));
-            }
-        } catch (...) {
-            prom.set_exception(std::current_exception());
+        if constexpr (std::is_void_v<T>) {
+            func(fcitx);
+            prom.set_value();
+        } else {
+            T result = func(fcitx);
+            prom.set_value(std::move(result));
         }
     });
     fut.wait();

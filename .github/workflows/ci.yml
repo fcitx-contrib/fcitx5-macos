@@ -63,6 +63,7 @@ jobs:
       - name: Build
         run: |
           git fetch --tags -f
+          git apply --directory=fcitx5 patches/*
           # Don't log key on any CI artifact.
           cmake -B build/${{ matrix.arch }} -G Ninja \
             -DKEY_LOGGING=OFF \

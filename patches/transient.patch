@@ -1,0 +1,77 @@
+commit b7eaac0eb8d86446c52dbc4a92e5ea9ea0b80fe0
+Author: Qijia Liu <liumeo@pku.edu.cn>
+Date:   Sat Jul 6 00:00:41 2024 -0400
+
+    add API to indicate whether InputPanel is transient
+
+diff --git a/src/lib/fcitx/inputpanel.cpp b/src/lib/fcitx/inputpanel.cpp
+index 7cd8541e..f19e0201 100644
+--- a/src/lib/fcitx/inputpanel.cpp
++++ b/src/lib/fcitx/inputpanel.cpp
+@@ -19,6 +19,7 @@ public:
+     InputContext *ic_;
+     CustomInputPanelCallback customCallback_ = nullptr;
+     CustomInputPanelCallback customVirtualKeyboardCallback_ = nullptr;
++    bool transient_;
+ };
+ 
+ InputPanel::InputPanel(InputContext *ic)
+@@ -102,6 +103,16 @@ void InputPanel::setCustomVirtualKeyboardCallback(
+     d->customVirtualKeyboardCallback_ = std::move(callback);
+ }
+ 
++void InputPanel::setTransient(bool transient) {
++    FCITX_D();
++    d->transient_ = transient;
++}
++
++bool InputPanel::transient() const {
++    FCITX_D();
++    return d->transient_;
++}
++
+ void InputPanel::reset() {
+     FCITX_D();
+     d->preedit_.clear();
+@@ -112,6 +123,7 @@ void InputPanel::reset() {
+     d->auxDown_.clear();
+     d->customCallback_ = nullptr;
+     d->customVirtualKeyboardCallback_ = nullptr;
++    d->transient_ = false;
+ }
+ 
+ bool InputPanel::empty() const {
+diff --git a/src/lib/fcitx/inputpanel.h b/src/lib/fcitx/inputpanel.h
+index ac2681c1..28077b42 100644
+--- a/src/lib/fcitx/inputpanel.h
++++ b/src/lib/fcitx/inputpanel.h
+@@ -100,6 +100,17 @@ public:
+ 
+     void setCustomVirtualKeyboardCallback(CustomInputPanelCallback callback);
+ 
++    /**
++     * Set whether the input panel will automatically disappear.
++     * It doesn't actually hide the input panel.
++     */
++    void setTransient(bool transient);
++
++    /**
++     * Return whether the input panel will automatically disappear.
++     */
++    bool transient() const;
++
+     void reset();
+ 
+     /// Whether input panel is totally empty.
+diff --git a/src/lib/fcitx/instance.cpp b/src/lib/fcitx/instance.cpp
+index 3f2008aa..49c1b33d 100644
+--- a/src/lib/fcitx/instance.cpp
++++ b/src/lib/fcitx/instance.cpp
+@@ -511,6 +511,7 @@ InputState::InputState(InstancePrivate *d, InputContext *ic)
+ 
+ void InputState::showInputMethodInformation(const std::string &name) {
+     ic_->inputPanel().setAuxUp(Text(name));
++    ic_->inputPanel().setTransient(true);
+     ic_->updateUserInterface(UserInterfaceComponent::InputPanel);
+     lastInfo_ = name;
+     imInfoTimer_ = d_ptr->eventLoop_.addTimeEvent(
