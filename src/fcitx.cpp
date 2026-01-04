@@ -143,6 +143,7 @@ void Fcitx::setupEnv() {
     std::string libime_model_dirs = join_paths({
         user_prefix / "lib" / "libime" // ~/Library/fcitx5/lib/libime
     });
+    std::string chewing_path = user_prefix / "share" / "libchewing";
     std::string libkkc_data_path = (user_prefix / "lib" / "libkkc").string() +
                                    ":" +
                                    (user_prefix / "share" / "libkkc").string();
@@ -156,6 +157,7 @@ void Fcitx::setupEnv() {
     setenv("XDG_DATA_DIRS", xdg_data_dirs.c_str(), 1);
     setenv("LIBIME_MODEL_DIRS", libime_model_dirs.c_str(), 1);
     setenv("XKB_CONFIG_ROOT", APP_CONTENTS_PATH "/share/xkeyboard-config-2", 1);
+    setenv("CHEWING_PATH", chewing_path.c_str(), 1);
 
     // Set LANGUAGE for libintl-lite.
     std::string val = current_locale;
