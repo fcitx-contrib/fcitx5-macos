@@ -166,3 +166,22 @@ public func getCaretCoordinates(_ followCaret: Bool) -> [Double] {
   }
   return [x, y, height]
 }
+
+// Called from C++ within dispatch_async(dispatch_get_main_queue())
+public func getSelection() -> String {
+  guard let client = client else {
+    return ""
+  }
+  let range = client.selectedRange()
+  guard range.location != NSNotFound else {
+    return ""
+  }
+  var actualRange = NSRange(location: 0, length: 0)
+  var str = client.string(from: range, actualRange: &actualRange) ?? ""
+  guard !str.isEmpty else {
+    return ""
+  }
+  // TODO: remove it after Swift 6.3, test by copying Chinese: https://github.com/swiftlang/swift/issues/69870
+  str.makeContiguousUTF8()
+  return str
+}

@@ -76,6 +76,23 @@ void MacosFrontend::pollPasteboard() {
             if (!*config_.monitorPasteboard) {
                 return true;
             }
+
+            dispatch_async(dispatch_get_main_queue(), ^{
+              std::string selection = SwiftFrontend::getSelection();
+              if (selection.empty()) {
+                  return;
+              }
+              Fcitx::shared().schedule([selection = std::move(selection),
+                                        this]() {
+                  if (auto clipboard =
+                          Fcitx::shared().addonMgr().addon("clipboard", true)) {
+                      clipboard->call<IClipboard::setPrimaryV2>("", selection,
+                                                                false);
+                      FCITX_DEBUG() << "Add to primary: " << selection;
+                  }
+              });
+            });
+
             if (auto clipboard =
                     instance_->addonManager().addon("clipboard", true)) {
                 bool isPassword = false;
