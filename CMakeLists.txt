@@ -78,6 +78,16 @@ set(ISOCODES_ISO639_JSON "${CMAKE_INSTALL_PREFIX}/share/iso-codes/json/iso_639-3
 set(XKEYBOARDCONFIG_XKBBASE "${CMAKE_INSTALL_PREFIX}/share/xkeyboard-config-2")
 set(XKEYBOARDCONFIG_DATADIR "${CMAKE_INSTALL_PREFIX}/share")
 
+execute_process(COMMAND bash -c "git describe --long | awk -F- '{print $1}'"
+    OUTPUT_VARIABLE RECENT_TAG
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+execute_process(COMMAND bash -c "git describe --long | awk -F- '{print $2}'"
+    OUTPUT_VARIABLE RECENT_COMMITS
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+message(STATUS "Recent tag: ${RECENT_TAG}, commits since tag: ${RECENT_COMMITS}")
+
 add_subdirectory(fcitx5)
 add_subdirectory(deps)
 

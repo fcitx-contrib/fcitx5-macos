@@ -1,4 +1,6 @@
 let commit = "@COMMIT@"
 // swift-format-ignore
 let unixTime = @UNIX_TIME@
-let releaseTag = "@RELEASE_TAG@"
+let recentTag = "@RECENT_TAG@"
+let recentCommits = @RECENT_COMMITS@
+let releaseTag = recentCommits == 0 ? recentTag : "latest"

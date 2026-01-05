@@ -83,8 +83,10 @@ struct AboutView: View {
         }
       }
 
-      if releaseTag == "latest" {
-        urlButton(String(commit.prefix(7)), sourceRepo + "/commit/" + commit)
+      // git describe
+      if recentCommits > 0 {
+        urlButton(
+          "\(recentTag)-\(recentCommits)-\(commit.prefix(7))", sourceRepo + "/commit/" + commit)
       } else {
         urlButton(releaseTag, sourceRepo + "/tree/" + releaseTag)
       }
