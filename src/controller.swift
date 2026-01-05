@@ -20,7 +20,6 @@ class FcitxInputController: IMKInputController {
   var uuid: ICUUID
   var appId: String
   var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
-  var ignoreRelease: Bool = false
   let client: Any!
   var accentColor = ""
   var selection: NSRange? = nil
@@ -159,7 +158,6 @@ class FcitxInputController: IMKInputController {
 
     switch event.type {
     case .keyDown:
-      ignoreRelease = false
       var unicode: UInt32 = 0
       // For Shift+comma, charactersIgnoringModifiers is comma, characters is less.
       // For Control+Shift+comma, both are comma.
@@ -174,19 +172,8 @@ class FcitxInputController: IMKInputController {
     case .flagsChanged:
       let change = NSEvent.ModifierFlags(rawValue: mods.rawValue ^ lastModifiers.rawValue)
       let isRelease: Bool = (lastModifiers.rawValue & change.rawValue) != 0
-      // HACK: binding a shortcut to a menu item will let system intercept the key event, and send leftover key release to fcitx.
-      // e.g. On Pinyin status, Ctrl+Shift+F changes to traditional Chinese, but the release of Ctrl+Shift is sent to fcitx, which triggers English.
-      // We ignore the release of leftover modifiers to prevent this, and reset the flag when all modifiers are released or any key is pressed.
-      if !isRelease {
-        ignoreRelease = false
-      }
       var handled = false
-      if isRelease && ignoreRelease {
-        handled = true
-        if mods.rawValue == 0 {
-          ignoreRelease = false
-        }
-      } else if !change.isDisjoint(with: [.shift, .control, .command, .option, .capsLock]) {
+      if !change.isDisjoint(with: [.shift, .control, .command, .option, .capsLock]) {
         handled = processKey(0, modsVal, code, isRelease)
       }
       lastModifiers = mods
@@ -304,10 +291,11 @@ class FcitxInputController: IMKInputController {
   }
 
   @objc func activateFcitxAction(sender: Any?) {
-    ignoreRelease = true
-    if let action = repObjectIMK(sender) as? FcitxAction {
-      Fcitx.activateActionById(Int32(action.id))
+    guard let action = repObjectIMK(sender) as? FcitxAction else {
+      return
     }
+    let fromHotkey = lastModifiers.rawValue != 0 && action.hotkey?[0] != nil
+    Fcitx.activateActionById(Int32(action.id), fromHotkey)
   }
 }
 

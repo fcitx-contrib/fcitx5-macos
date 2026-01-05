@@ -493,12 +493,25 @@ std::string getActions() noexcept {
     });
 }
 
-void activateActionById(int id) noexcept {
+void activateActionById(int id, bool hotkey) noexcept {
     with_fcitx([=](Fcitx &fcitx) {
         auto *action =
             fcitx.instance()->userInterfaceManager().lookupActionById(id);
         if (auto *ic = fcitx.instance()->mostRecentInputContext()) {
-            action->activate(ic);
+            // Binding a shortcut to a menu item will let system intercept the
+            // key event, and send leftover key release to fcitx. e.g. On
+            // Pinyin, Ctrl+Shift+F switches simplified/traditional Chinese, but
+            // the release of Ctrl+Shift is sent to fcitx, which switches to
+            // English. As a workaround, we detect the source of activation, and
+            // if it's triggered by hotkey we recover a key event. It also
+            // ensures the notification of Ctrl+Shift+F is shown.
+            auto &keyList = action->hotkey();
+            if (!keyList.empty() && hotkey) {
+                auto keyEvent = fcitx::KeyEvent(ic, keyList.front(), false);
+                ic->keyEvent(keyEvent);
+            } else {
+                action->activate(ic);
+            }
         }
     });
 }

@@ -36,7 +36,7 @@ std::string imGetAvailableIMs() noexcept;
 std::string getAddons() noexcept;
 
 std::string getActions() noexcept;
-void activateActionById(int id) noexcept;
+void activateActionById(int id, bool hotkey) noexcept;
 
 std::string isoName(const char *code) noexcept;
 
