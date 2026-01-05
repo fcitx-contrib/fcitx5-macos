@@ -10,6 +10,11 @@
   <string>Fcitx5</string>
   <key>CFBundleIconFile</key>
   <string>fcitx.icns</string>
+  <!-- "CFBundleShortVersionString (CFBundleVersion)" is the Version in crash report -->
+  <key>CFBundleShortVersionString</key>
+  <string>@RECENT_TAG@</string>
+  <key>CFBundleVersion</key>
+  <string>@RECENT_COMMITS@</string>
   <key>NSPrincipalClass</key>
   <string>Fcitx5.NSManualApplication</string>
   <key>InputMethodConnectionName</key>

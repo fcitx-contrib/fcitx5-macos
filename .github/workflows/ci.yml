@@ -38,6 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          fetch-depth: 0 # Need history for commit count since last tag.
           submodules: recursive
 
       - uses: actions/setup-node@v6
@@ -62,7 +63,7 @@ jobs:
 
       - name: Build
         run: |
-          git fetch --tags -f
+          git fetch --tags -f # GitHub's bug that pushing a tag doesn't make it available during actions/checkout, even with fetch-depth: 0.
           git apply --directory=fcitx5 patches/*
           # Don't log key on any CI artifact.
           cmake -B build/${{ matrix.arch }} -G Ninja \
