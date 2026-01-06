@@ -35,6 +35,12 @@ private struct GroupItem: Identifiable, Codable {
   let name: String
   let displayName: String
   let id = UUID()
+
+  // Silence warning: immutable property will not be decoded.
+  enum CodingKeys: String, CodingKey {
+    case name
+    case displayName
+  }
 }
 
 struct InputMethodConfigView: View {
