@@ -155,7 +155,7 @@ struct DictManagerView: View {
 
         Button {
           Fcitx.setConfig("fcitx://config/addon/pinyin/clearuserdict", "{}")
-          restartAndReconnect()
+          Fcitx.reload()
           showCleared = true
         } label: {
           Text("Clear user data")
@@ -163,7 +163,7 @@ struct DictManagerView: View {
 
         Button {
           Fcitx.setConfig("fcitx://config/addon/pinyin/clearalldict", "{}")
-          restartAndReconnect()
+          Fcitx.reload()
           showCleared = true
         } label: {
           Text("Clear all data")

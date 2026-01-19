@@ -1,4 +1,5 @@
 import AlertToast
+import Fcitx
 import SwiftUI
 
 private let dataDir = extractDir.appendingPathComponent("external")
@@ -269,15 +270,14 @@ struct ImportDataView: View {
         }
         Button {
           failedItems = [String]()
-          restartAndReconnect({
-            for item in importDataVM.items {
-              if item.enabled {
-                if !item.doImport() {
-                  failedItems.append(item.name)
-                }
+          for item in importDataVM.items {
+            if item.enabled {
+              if !item.doImport() {
+                failedItems.append(item.name)
               }
             }
-          })
+          }
+          Fcitx.reload()
           importDataVM.refresh(importDataVM.importableItems)
           if failedItems.isEmpty {
             showSuccess = true

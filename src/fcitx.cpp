@@ -254,6 +254,23 @@ void stop_fcitx_thread() noexcept {
     fcitx_thread_started = false;
 }
 
+void reload() {
+    auto instance = Fcitx::shared().instance();
+    instance->reloadConfig();
+    instance->refresh();
+    auto &addonManager = instance->addonManager();
+    for (const auto category :
+         {fcitx::AddonCategory::InputMethod, fcitx::AddonCategory::Frontend,
+          fcitx::AddonCategory::Loader, fcitx::AddonCategory::Module,
+          fcitx::AddonCategory::UI}) {
+        const auto names = addonManager.addonNames(category);
+        for (const auto &name : names) {
+            instance->reloadAddonConfig(name);
+        }
+    }
+    instance->inputMethodManager().load();
+}
+
 std::string imGetGroupNames() noexcept {
     return with_fcitx([](Fcitx &fcitx) {
         nlohmann::json j;

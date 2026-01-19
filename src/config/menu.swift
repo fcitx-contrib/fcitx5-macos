@@ -1,16 +1,6 @@
 import Cocoa
 import Fcitx
 
-@MainActor
-func restartAndReconnect(_ actionBetween: (() -> Void)? = nil) {
-  stop_fcitx_thread()
-  actionBetween?()
-  start_fcitx_thread(nil)
-  for controller in FcitxInputController.registry.allObjects {
-    controller.reconnectToFcitx()
-  }
-}
-
 // Don't call it synchronously in SwiftUI as it will make IM temporarily unavailable in focused client.
 @MainActor
 func restartProcess() {

@@ -69,7 +69,7 @@ struct ImportTableView: View {
           let failures = convertTxt()
           importTableVM.load()
           let newIMs = importTableVM.ims.filter({ im in !existingIMs.contains(im) })
-          restartAndReconnect()
+          Fcitx.reload()
           if Fcitx.imGroupCount() == 1 {
             for im in newIMs {
               Fcitx.imAddToCurrentGroup(im)

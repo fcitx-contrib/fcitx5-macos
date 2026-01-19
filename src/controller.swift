@@ -13,51 +13,35 @@ struct SyncResponse: Codable {
   let accepted: Bool
 }
 
-let capsLock = 65536
-let shift = 131072
+let capsLock = NSEvent.ModifierFlags.capsLock.rawValue
+let shift = NSEvent.ModifierFlags.shift.rawValue
 
 class FcitxInputController: IMKInputController {
-  var uuid: ICUUID
-  var appId: String
-  var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
+  let uuid: ICUUID
+  let appId: String
+  let accentColor: String
   let client: Any!
-  var accentColor = ""
+
+  var lastModifiers = NSEvent.ModifierFlags(rawValue: 0)
   var selection: NSRange? = nil
   var lastEventIsShiftPress = false
   var obeySecureInput = true
-
-  // A registry of live FcitxInputController objects.
-  // Use NSHashTable to store weak references.
-  nonisolated(unsafe) static var registry = NSHashTable<FcitxInputController>.weakObjects()
 
   // A new InputController is created for each server-client
   // connection. We use the finest granularity here (one InputContext
   // for one IMKTextInput), and pass the bundle identifier to let
   // libfcitx handle the heavylifting.
   override init(server: IMKServer!, delegate: Any!, client: Any!) {
-    if let client = client as? IMKTextInput {
-      appId = client.bundleIdentifier() ?? ""
-      accentColor = getAccentColor(appId)
-    } else {
-      appId = ""
-    }
+    self.appId = (client as? IMKTextInput)?.bundleIdentifier() ?? ""
+    self.accentColor = getAccentColor(appId)
     self.client = client
     self.uuid = create_input_context(appId, accentColor)
     super.init(server: server, delegate: delegate, client: client)
-    FcitxInputController.registry.add(self)
     setController(self, self.client)
   }
 
   deinit {
     destroy_input_context(uuid)
-    FcitxInputController.registry.remove(self)
-  }
-
-  func reconnectToFcitx() {
-    // The old fcitx input context was automatically destroyed when
-    // restarting fcitx thread. So just start a new one here.
-    FCITX_DEBUG("Reconnecting to \(appId), client = \(String(describing: client))")
-    uuid = create_input_context(appId, accentColor)
   }
 
   override func commitComposition(_ sender: Any!) {
@@ -116,7 +100,7 @@ class FcitxInputController: IMKInputController {
     let selectionChanged: Bool = selection != newSelection
     selection = newSelection
     var isShiftPress = false
-    if code == 56 || code == 60 {
+    if code == kVK_Shift || code == kVK_RightShift {
       if modsVal == shift || modsVal == (shift | capsLock) {
         isShiftPress = true
       } else if (modsVal == 0 || modsVal == capsLock) && lastEventIsShiftPress && selectionChanged {

@@ -4,6 +4,8 @@
 
 void start_fcitx_thread(const char *locale) noexcept;
 void stop_fcitx_thread() noexcept;
+void reload();
+void setupI18N();
 
 // NOTE: It's impossible to use std::vector<std::string> directly
 // until Swift fixes C++ interop.

@@ -9,7 +9,7 @@ namespace fcitx {
 
 WebPanel::WebPanel(Instance *instance)
     : instance_(instance),
-      window_(std::make_shared<candidate_window::WebviewCandidateWindow>()) {
+      window_(std::make_unique<candidate_window::WebviewCandidateWindow>()) {
     window_->set_select_callback([this](int index) {
         with_fcitx([&](Fcitx &fcitx) {
             auto ic = instance_->mostRecentInputContext();
@@ -515,20 +515,17 @@ void WebPanel::updateClient(InputContext *ic) {
 /// Before calling this, the panel states must already be initialized
 /// synchronously, by using set_candidates, etc.
 void WebPanel::showAsync(bool show) {
-    std::weak_ptr<candidate_window::WebviewCandidateWindow> weakWindow =
-        window_;
+    bool followCaret = *config_.basic->followCaret;
     dispatch_async(dispatch_get_main_queue(), ^void() {
-      if (auto window = weakWindow.lock()) {
-          if (show) {
-              // MacosInputContext::updatePreeditImpl is executed before
-              // WebPanel::update, so in main thread preedit UI update
-              // happens before here.
-              auto [x, y, height] = MacosInputContext::getCaretCoordinates(
-                  config_.basic->followCaret.value());
-              window->show(x, y, height);
-          } else {
-              window->hide();
-          }
+      if (show) {
+          // MacosInputContext::updatePreeditImpl is executed before
+          // WebPanel::update, so in main thread preedit UI update
+          // happens before here.
+          auto [x, y, height] =
+              MacosInputContext::getCaretCoordinates(followCaret);
+          window_->show(x, y, height);
+      } else {
+          window_->hide();
       }
     });
 }

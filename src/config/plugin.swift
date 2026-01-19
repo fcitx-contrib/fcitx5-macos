@@ -201,7 +201,7 @@ struct PluginView: View {
     }
     selectedInstalled.removeAll()
     refreshPlugins()
-    restartAndReconnect()
+    Fcitx.reload()
     processing = false
   }
 
@@ -294,7 +294,8 @@ struct PluginView: View {
         needsRestart = true
       }
       refreshPlugins()
-      restartAndReconnect()
+      Fcitx.setupI18N()  // Register .mo.
+      Fcitx.reload()
       if Fcitx.imGroupCount() == 1 {
         // Otherwise user knows how to play with it, don't mess it up.
         for im in inputMethods {
