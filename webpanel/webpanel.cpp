@@ -467,11 +467,12 @@ void WebPanel::update(UserInterfaceComponent component,
         window_->set_paging_buttons(pageable, hasPrev, hasNext);
         window_->set_layout(layout);
         window_->set_writing_mode(writingMode);
+        bool candidatesEmpty = candidates.empty();
         // Must be called after set_layout and set_writing_mode so that proper
         // states are read after set.
-        window_->set_candidates(candidates, highlighted, scrollState_, false,
-                                false);
-        updatePanelShowFlags(!candidates.empty(), PanelShowFlag::HasCandidates);
+        window_->set_candidates(std::move(candidates), highlighted,
+                                scrollState_, false, false);
+        updatePanelShowFlags(!candidatesEmpty, PanelShowFlag::HasCandidates);
         updateClient(inputContext);
         showAsync(panelShow_);
         break;
@@ -565,7 +566,7 @@ void WebPanel::scroll(int start, int count) {
         }
     }
     scrollState_ = candidate_window::scroll_state_t::scrolling;
-    window_->set_candidates(candidates, -1, scrollState_, start == 0,
+    window_->set_candidates(std::move(candidates), -1, scrollState_, start == 0,
                             endReached);
     updateClient(ic);
     showAsync(true);
