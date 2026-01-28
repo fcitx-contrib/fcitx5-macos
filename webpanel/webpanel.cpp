@@ -9,7 +9,8 @@ namespace fcitx {
 
 WebPanel::WebPanel(Instance *instance)
     : instance_(instance),
-      window_(std::make_unique<candidate_window::WebviewCandidateWindow>()) {
+      window_(std::make_unique<candidate_window::WebviewCandidateWindow>(
+          [this]() { with_fcitx([&](Fcitx &fcitx) { reloadConfig(); }); })) {
     window_->set_select_callback([this](int index) {
         with_fcitx([&](Fcitx &fcitx) {
             auto ic = instance_->mostRecentInputContext();
@@ -143,7 +144,6 @@ WebPanel::WebPanel(Instance *instance)
             }
         });
     });
-    window_->set_init_callback([this]() { reloadConfig(); });
     eventHandler_ = instance_->watchEvent(
         EventType::InputContextKeyEvent, EventWatcherPhase::PreInputMethod,
         [this](Event &event) {
