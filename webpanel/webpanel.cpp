@@ -300,10 +300,6 @@ void WebPanel::updateConfig() {
       window_->set_caret_text(config_.caret->style.value() == CaretStyle::Text
                                   ? config_.caret->text.value()
                                   : "");
-      window_->set_highlight_mark_text(config_.highlight->markStyle.value() ==
-                                               HighlightMarkStyle::Text
-                                           ? config_.highlight->markText.value()
-                                           : "");
       window_->set_native_blur(*config_.background->blur);
       // Keep CSS shadow as native may leave a ghost shadow of last frame when
       // typing fast.
