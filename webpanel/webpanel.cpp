@@ -297,9 +297,6 @@ void WebPanel::updateConfig() {
     dispatch_async(dispatch_get_main_queue(), ^{
       window_->set_layout(config_.typography->layout.value());
       window_->set_theme(config_.basic->theme.value());
-      window_->set_caret_text(config_.caret->style.value() == CaretStyle::Text
-                                  ? config_.caret->text.value()
-                                  : "");
       window_->set_native_blur(*config_.background->blur);
       // Keep CSS shadow as native may leave a ghost shadow of last frame when
       // typing fast.

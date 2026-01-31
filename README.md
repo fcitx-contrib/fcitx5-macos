@@ -116,5 +116,4 @@ cd po && msgmerge -U <locale>.po base.pot
 * [SwiftyJSON](https://github.com/SwiftyJSON/SwiftyJSON): MIT
 * [AlertToast](https://github.com/elai950/AlertToast): MIT
 * [Linux](https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h): GPL-2.0-only WITH Linux-syscall-note
-* [pugixml](https://github.com/zeux/pugixml): MIT
 * [webview](https://github.com/webview/webview): MIT
