@@ -44,6 +44,7 @@ public class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
   }
 }
 
+// Note: notification won't show if Fcitx5 is in foreground. It's inside notification center.
 public func sendNotification(
   _ identifier: String,
   _ iconPath: String,
@@ -73,8 +74,17 @@ public func sendNotification(
     center.setNotificationCategories([category])
 
     let content = UNMutableNotificationContent()
-    content.title = title
-    content.body = body
+    if identifier == "tip-disabled" {
+      // Don't show it immediately after user disables a tip, as macOS won't show it unless user clicks notification center.
+      try await Task.sleep(nanoseconds: 2_000_000_000)
+      content.title = String(
+        format: NSLocalizedString("\"%@\" notification is disabled", comment: ""), title)
+      content.body = NSLocalizedString(
+        "You may re-enable it in Advanced → macOS Notification.", comment: "")
+    } else {
+      content.title = title
+      content.body = body
+    }
     content.categoryIdentifier = categoryIdent
 
     if iconPath != "" {

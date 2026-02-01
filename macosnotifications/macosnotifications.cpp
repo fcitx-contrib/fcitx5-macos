@@ -82,12 +82,15 @@ void Notifications::showTip(const std::string &tipId,
         "dont-show", translateDomain("fcitx5", "Do not show again")};
     lastTipId_ = sendNotification(
         appName, lastTipId_, appIcon, summary, body, actions, timeout,
-        [this, tipId](const std::string &action) {
+        [this, tipId, summary](const std::string &action) {
             if (action == "dont-show") {
                 FCITX_DEBUG() << "Dont show clicked: " << tipId;
                 if (hiddenNotifications_.insert(tipId).second) {
                     save();
                 }
+                SwiftNotify::sendNotification(
+                    "tip-disabled", "", summary.c_str(), "",
+                    swift::Array<swift::String>::init(), 8000);
             }
         },
         {});
