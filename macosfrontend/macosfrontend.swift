@@ -6,9 +6,17 @@ nonisolated(unsafe) private var currentPreedit = ""
 
 private let zeroWidthSpace = "\u{200B}"
 
+private let passwordOnlyApps: Set<String> = [
+  "com.apple.loginwindow",
+  // Below are apps that only have password fields but don't call EnableSecureEventInput.
+  "com.apple.wifi.WiFiAgent",  // join wifi from wifi menu
+  "com.apple.wifi-settings-extension",  // join wifi from System Settings
+]
+
 // Given issues when no preedit is so widespread regardless of UI framework,
 // any app that is added here must be fully tested with Esc, Backspace, Arrow and normal keys.
-private let appsWithoutDummyPreedit: Set<String> = [
+// Union password-only apps so that fcitx clipboard can be used (though you may have to type instead of click to commit).
+private let appsWithoutDummyPreedit: Set<String> = passwordOnlyApps.union([
   // <200b>
   "org.vim.MacVim",
   // When writing a new email and caret is at the beginning of To or Cc, Mail calls commitComposition
@@ -18,7 +26,11 @@ private let appsWithoutDummyPreedit: Set<String> = [
   // dummy preedit we use for the SwiftUI TextField workaround. While we can change that normal space
   // to full-width space, it seems DingTalk doesn't need dummy preedit at all.
   "com.alibaba.DingTalkMac",
-]
+])
+
+public func isPasswordOnly(app: String) -> Bool {
+  return passwordOnlyApps.contains(app)
+}
 
 private func isJetBrains(_ app: String) -> Bool {
   return app == "com.google.android.studio" || app.starts(with: "com.jetbrains.")

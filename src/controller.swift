@@ -19,6 +19,7 @@ let shift = NSEvent.ModifierFlags.shift.rawValue
 class FcitxInputController: IMKInputController {
   let uuid: ICUUID
   let appId: String
+  let isPasswordOnlyApp: Bool
   let accentColor: String
   let client: Any!
 
@@ -33,6 +34,7 @@ class FcitxInputController: IMKInputController {
   // libfcitx handle the heavylifting.
   override init(server: IMKServer!, delegate: Any!, client: Any!) {
     self.appId = (client as? IMKTextInput)?.bundleIdentifier() ?? ""
+    self.isPasswordOnlyApp = isPasswordOnly(app: self.appId)
     self.accentColor = getAccentColor(appId)
     self.client = client
     self.uuid = create_input_context(appId, accentColor)
@@ -72,7 +74,7 @@ class FcitxInputController: IMKInputController {
   // Users observe https://discussions.apple.com/thread/253793652 but it's also possible that
   // other apps are abusing, see comments for getSecureInputProcessPID.
   func getSecureInputInfo(isOnFocus: Bool) -> Bool {
-    if appId == "com.apple.loginwindow" {
+    if isPasswordOnlyApp {
       return true
     }
     if !IsSecureEventInputEnabled() {
