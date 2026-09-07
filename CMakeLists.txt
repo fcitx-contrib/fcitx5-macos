@@ -9,6 +9,23 @@ if(NOT CMAKE_OSX_ARCHITECTURES)
 endif()
 set(CMAKE_Swift_COMPILER_TARGET "${CMAKE_OSX_ARCHITECTURES}-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET}")
 
+# Starting from cmake 4.0, CMAKE_OSX_SYSROOT defaults to empty.
+execute_process(COMMAND xcrun --sdk macosx --show-sdk-path
+    OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# SourceKit-LSP uses the compiler path to locate sourcekitd, but fails when
+# compile_commands.json contains the /usr/bin/swiftc trampoline.
+if(NOT CMAKE_Swift_COMPILER OR CMAKE_Swift_COMPILER STREQUAL "/usr/bin/swiftc")
+    execute_process(COMMAND xcrun -f swiftc
+        OUTPUT_VARIABLE SWIFTC
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        COMMAND_ERROR_IS_FATAL ANY
+    )
+    set(CMAKE_Swift_COMPILER "${SWIFTC}" CACHE FILEPATH "Swift compiler" FORCE)
+endif()
+
 project(fcitx5-macos VERSION 0.4.0 LANGUAGES CXX Swift)
 
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
@@ -25,11 +42,6 @@ execute_process(
 # On x86 /Library/Frameworks/Mono.framework will mess up libintl.
 set(CMAKE_FIND_FRAMEWORK LAST)
 
-# Starting from cmake 4.0, CMAKE_OSX_SYSROOT defaults to empty.
-execute_process(COMMAND xcrun --sdk macosx --show-sdk-path
-    OUTPUT_VARIABLE CMAKE_OSX_SYSROOT
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
 add_compile_options(-target "${CMAKE_Swift_COMPILER_TARGET}")
 add_link_options(-target "${CMAKE_Swift_COMPILER_TARGET}")
 
