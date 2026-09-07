@@ -23,3 +23,5 @@ sudo cmake --install build/$(uname -m)
 ## Translation
 
 Use the `translate` skill (invoke via `/translate` or let the agent auto-load it) for all localization work across Swift `.strings` and C++ gettext `.po` files.
+
+The canonical translation instructions live in `.opencode/skills/translate/SKILL.md`, and the `/translate` workflows are defined in `opencode.jsonc`. OpenCode-compatible frontends should load the skill normally. Other agent frontends that cannot load OpenCode skills directly must read both files, understand the relevant rules and workflow, and carry out the equivalent work instead of treating the skill as unavailable.

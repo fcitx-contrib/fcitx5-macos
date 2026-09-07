@@ -97,15 +97,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       editMenu.addItem(item)
     }
 
+    // macOS automatically apply translation for undo and redo, maybe for the dynamic display of 撤销 and 撤销键入.
     addEditingItem("Undo", Selector(("undo:")), "z")
     addEditingItem(
       "Redo", Selector(("redo:")), "z", modifiers: [.command, .shift])
     editMenu.addItem(.separator())
-    addEditingItem("Cut", #selector(NSText.cut(_:)), "x")
-    addEditingItem("Copy", #selector(NSText.copy(_:)), "c")
-    addEditingItem("Paste", #selector(NSText.paste(_:)), "v")
+    addEditingItem(
+      NSLocalizedString("Cut", comment: "Edit menu item"), #selector(NSText.cut(_:)), "x")
+    addEditingItem(
+      NSLocalizedString("Copy", comment: "Edit menu item"), #selector(NSText.copy(_:)), "c")
+    addEditingItem(
+      NSLocalizedString("Paste", comment: "Edit menu item"), #selector(NSText.paste(_:)), "v")
     editMenu.addItem(.separator())
-    addEditingItem("Select All", #selector(NSText.selectAll(_:)), "a")
+    addEditingItem(
+      NSLocalizedString("Select All", comment: "Edit menu item"), #selector(NSText.selectAll(_:)),
+      "a")
 
     NSApp.mainMenu = mainMenu
   }
