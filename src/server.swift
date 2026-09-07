@@ -56,8 +56,64 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     sigtermSource.resume()
   }
 
+  /// Installs the standard Edit menu so Command-key editing shortcuts are handled by the
+  /// application's responder chain before they reach the input method.
+  ///
+  /// In a regular macOS app, menu key equivalents such as Cmd+A, Cmd+C, and Cmd+V are consumed by
+  /// the Edit menu before the field editor asks the current input method to handle a key event.
+  /// Fcitx5 wires its AppKit lifecycle without a SwiftUI App scene or MainMenu nib, so it does not
+  /// get that menu automatically.
+  /// Without this function, those Command-key events fall through to the SwiftUI field editor and
+  /// then enter Fcitx5 itself as input-method events, but they have no text-key-binding fallback.
+  ///
+  /// Ctrl+A and Ctrl+E work without this menu because they are `NSTextView` key bindings rather than
+  /// menu key equivalents. They reach Fcitx5 first, and after Fcitx5 returns them as unhandled,
+  /// `NSTextView` interprets them as commands to move to the beginning or end of the text.
+  @MainActor
+  private func installMainMenu() {
+    let mainMenu = NSMenu()
+
+    // The first item in a macOS main menu is reserved for the application menu.
+    // Fcitx5 does not need any application-level commands here, but keeping the
+    // placeholder ensures that Edit is presented as a normal top-level menu.
+    let applicationName =
+      Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "Fcitx5"
+    let applicationItem = NSMenuItem(title: applicationName, action: nil, keyEquivalent: "")
+    applicationItem.submenu = NSMenu(title: applicationName)
+    mainMenu.addItem(applicationItem)
+
+    let editTitle = NSLocalizedString("Edit", comment: "menu title")
+    let editMenu = NSMenu(title: editTitle)
+    let editItem = NSMenuItem(title: editTitle, action: nil, keyEquivalent: "")
+    editItem.submenu = editMenu
+    mainMenu.addItem(editItem)
+
+    func addEditingItem(
+      _ title: String, _ action: Selector, _ keyEquivalent: String,
+      modifiers: NSEvent.ModifierFlags = .command
+    ) {
+      let item = NSMenuItem(title: title, action: action, keyEquivalent: keyEquivalent)
+      item.keyEquivalentModifierMask = modifiers
+      editMenu.addItem(item)
+    }
+
+    addEditingItem("Undo", Selector(("undo:")), "z")
+    addEditingItem(
+      "Redo", Selector(("redo:")), "z", modifiers: [.command, .shift])
+    editMenu.addItem(.separator())
+    addEditingItem("Cut", #selector(NSText.cut(_:)), "x")
+    addEditingItem("Copy", #selector(NSText.copy(_:)), "c")
+    addEditingItem("Paste", #selector(NSText.paste(_:)), "v")
+    editMenu.addItem(.separator())
+    addEditingItem("Select All", #selector(NSText.selectAll(_:)), "a")
+
+    NSApp.mainMenu = mainMenu
+  }
+
   func applicationDidFinishLaunching(_ notification: Notification) {
     redirectStderr()
+
+    installMainMenu()
 
     // Once process started, WKWebView doesn't accept new font files. Record and prompt user restart if needed.
     initUserFontFamiliesOnStart()
