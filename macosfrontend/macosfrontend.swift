@@ -199,10 +199,8 @@ public func getCaretCoordinates(_ followCaret: Bool) -> [Double] {
   // For dummy preedit, index is 0. For no preedit at all, don't apply it.
   let shouldGoBack = followCaret && currentPreedit.count > 0 && u16pos == currentPreedit.utf16.count
   let lastCharacter = currentPreedit.last.map(String.init) ?? ""
-  client.attributes(
-    forCharacterIndex: followCaret
-      ? (shouldGoBack ? u16pos - lastCharacter.utf16.count : u16pos) : 0,
-    lineHeightRectangle: &rect)
+  let index = followCaret ? (shouldGoBack ? u16pos - lastCharacter.utf16.count : u16pos) : 0
+  let attributes = client.attributes(forCharacterIndex: index, lineHeightRectangle: &rect)
   if rect.width == 0 && rect.height == 0 {
     return []
   }
@@ -210,11 +208,19 @@ public func getCaretCoordinates(_ followCaret: Bool) -> [Double] {
   let y = Double(NSMinY(rect))
   let height = Double(rect.height)
   if shouldGoBack {
-    let fontSize = ceil(height / 1.2)
-    let rect = (lastCharacter as NSString).size(withAttributes: [
-      .font: NSFont.systemFont(ofSize: fontSize)
-    ])
-    x += height / rect.height * rect.width
+    let lineHeight = Double(max(abs(rect.width), abs(rect.height)))
+    let reportedFont = attributes?[NSAttributedString.Key.font] as? NSFont
+    let font: NSFont
+    // Terminal reports correct font with size (Menlo-Regular 14.00 pt), but others just give Helvetica 12.00 pt.
+    // If line height is 1-1.5x font size, we treat font size as exact, otherwise font size = line height / 1.2 .
+    if let reportedFont, reportedFont.pointSize <= lineHeight,
+      lineHeight <= reportedFont.pointSize * 1.5
+    {
+      font = reportedFont
+    } else {
+      font = NSFont.systemFont(ofSize: lineHeight / 1.2)
+    }
+    x += (lastCharacter as NSString).size(withAttributes: [.font: font]).width
   }
   return [x, y, height]
 }
