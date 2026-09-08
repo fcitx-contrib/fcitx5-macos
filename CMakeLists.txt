@@ -45,6 +45,15 @@ set(CMAKE_FIND_FRAMEWORK LAST)
 add_compile_options(-target "${CMAKE_Swift_COMPILER_TARGET}")
 add_link_options(-target "${CMAKE_Swift_COMPILER_TARGET}")
 
+# When swiftc is invoked directly instead of through the /usr/bin trampoline,
+# it does not inherit SDKROOT. Xcode 26.6 then forwards the SDK to Clang as
+# --sysroot, which does not preserve the SDK version in LC_BUILD_VERSION.
+# Pass -isysroot to the Clang link job so macOS recognizes this as an app built
+# with the current SDK and enables the corresponding system UI appearance.
+add_link_options(
+    "$<$<LINK_LANGUAGE:Swift>:SHELL:-Xclang-linker -isysroot -Xclang-linker ${CMAKE_OSX_SYSROOT}>"
+)
+
 set(CMAKE_Swift_LANGUAGE_VERSION 6)
 # Disallow InitializeSwift to execute link_directories which adds Xcode paths to rpath.
 set(SWIFT_LIBRARY_SEARCH_PATHS "")
