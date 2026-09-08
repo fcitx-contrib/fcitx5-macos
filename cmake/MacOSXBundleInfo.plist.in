@@ -74,5 +74,7 @@
   </dict>
   <key>NSUserNotificationAlertStyle</key>
   <string>alert</string>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Voice input plugin needs microphone access.</string>
 </dict>
 </plist>
